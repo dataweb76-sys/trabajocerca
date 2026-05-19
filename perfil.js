@@ -96,7 +96,7 @@ async function init(){
 
     <h3 style="margin:0 0 16px;font-size:17px;">Mis datos</h3>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="grid-2col">
       <div><label>Nombre *</label><input id="editNombre" value="${esc(data.nombre)}"></div>
       <div><label>Apellido *</label><input id="editApellido" value="${esc(data.apellido)}"></div>
     </div>

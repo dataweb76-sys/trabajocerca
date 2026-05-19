@@ -780,14 +780,106 @@ a:hover { text-decoration: underline; }
   transition: width 0.5s ease;
 }
 
-/* RESPONSIVE */
+/* ── GRID 2 COLUMNAS (responsive) ── */
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── RESPONSIVE ── */
 
 @media (max-width: 640px) {
-  .topbar { padding: 12px 16px; }
+
+  /* Header */
+  .topbar { padding: 10px 14px; min-height: 54px; }
+  .logo img { height: 36px; }
+  nav a { padding: 8px 10px; }
   nav a span { display: none; }
-  .container { margin: 16px; padding: 22px 18px; }
-  .tipo-cards { grid-template-columns: 1fr 1fr; }
+  nav a i { font-size: 17px; }
+
+  /* Hero */
+  .hero { min-height: 60vh; padding: 30px 16px; }
+  .hero p { font-size: 15px; }
+
+  /* Search box hero: stack inputs vertically, full width */
+  .search-box { flex-direction: column; align-items: stretch; width: 100%; max-width: 380px; margin: 0 auto; }
+  .search-box input { width: 100%; }
+  .search-box button { width: 100%; }
+
+  /* Secciones */
+  section { padding: 36px 16px; }
+  section h2 { font-size: 22px; margin-bottom: 24px; }
+
+  /* Grilla categorías: 3 columnas en mobile */
+  .grid-cats { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .cat-card { padding: 16px 8px; }
+  .cat-card .ico { font-size: 26px; }
+  .cat-card span { font-size: 11px; }
+
+  /* Container formularios */
+  .container {
+    margin: 0;
+    padding: 20px 16px;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: calc(100vh - 54px);
+  }
+
+  /* Grid 2 columnas → 1 columna en mobile */
+  .grid-2col { grid-template-columns: 1fr; }
+  .tipo-cards { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tipo-card { padding: 16px 10px; }
+  .tipo-card .tipo-ico { font-size: 26px; }
+
+  /* Filtros buscador */
   .filtros { grid-template-columns: 1fr; }
-  section { padding: 40px 16px; }
+
+  /* Dash header */
   .dash-header { flex-direction: column; align-items: center; text-align: center; }
+  .dash-actions { gap: 8px; }
+
+  /* Checks grid → 1 columna en pantallas chicas */
+  .checks-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Estrellas más chicas */
+  .stars-input i { font-size: 28px; }
+
+  /* Modal full screen en mobile */
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal-box {
+    border-radius: 20px 20px 0 0;
+    max-height: 92dvh;
+    width: 100%;
+    animation: slideUpMobile 0.25s ease;
+  }
+
+  @keyframes slideUpMobile {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  /* CV sections */
+  .cv-section { padding: 18px 14px; }
+
+  /* Botones: mínimo 48px de alto para touch */
+  .btn { min-height: 48px; display: flex; align-items: center; justify-content: center; }
+  .btn-sm { min-height: 36px; }
+
+  /* WhatsApp button */
+  .btn-whatsapp { width: 100%; justify-content: center; }
+
+  /* Fotos grid → 2 columnas */
+  .fotos-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Mapa altura reducida */
+  #mapa, #mapPerfil, #mapServicio, #mapaPub { height: 220px; }
+}
+
+/* ── Safe area iOS (notch / home indicator) ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .topbar { padding-top: max(10px, env(safe-area-inset-top)); }
+  .modal-box { padding-bottom: env(safe-area-inset-bottom); }
+  footer { padding-bottom: max(28px, env(safe-area-inset-bottom)); }
 }
