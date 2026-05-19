@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi servicio — Trabajos Cerca</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/perfil.html"><i class="fa-solid fa-arrow-left"></i> <span>Mi perfil</span></a>
+  </nav>
+</header>
+
+<div class="container" style="max-width:700px;">
+
+  <h2><i class="fa-solid fa-tools" style="color:#f97316"></i> Mi servicio / Oficio</h2>
+
+  <div id="msgNuevo" style="display:none" class="alerta alerta-ok">
+    <i class="fa-solid fa-check-circle"></i> ¡Cuenta creada! Completá tu perfil para que los clientes te encuentren.
+  </div>
+
+  <!-- FOTO DE PERFIL -->
+  <div class="cv-section">
+    <h3><i class="fa-solid fa-camera"></i> Foto de perfil</h3>
+    <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+      <div id="fotoPreview" style="width:90px;height:90px;border-radius:50%;background:#dbeafe;
+        display:flex;align-items:center;justify-content:center;font-size:36px;color:#2563eb;
+        overflow:hidden;flex-shrink:0;border:3px solid #e2e8f0;">
+        <i class="fa-solid fa-user"></i>
+      </div>
+      <div>
+        <p style="margin:0 0 10px; font-size:14px; color:#64748b;">
+          Tu foto aparece en los resultados de búsqueda. Usá una foto clara y profesional.
+        </p>
+        <label for="inputFoto" class="btn btn-outline btn-sm" style="cursor:pointer; display:inline-flex;">
+          <i class="fa-solid fa-upload"></i> Subir foto
+        </label>
+        <input type="file" id="inputFoto" accept="image/*" style="display:none" onchange="subirFoto(this)">
+        <div id="msgFoto" style="margin-top:8px; font-size:13px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORÍA Y SERVICIOS -->
+  <div class="cv-section">
+    <h3><i class="fa-solid fa-briefcase"></i> Categoría y servicios</h3>
+
+    <label>Categoría principal *</label>
+    <select id="categoria" onchange="actualizarCheckboxes()">
+      <option value="">Seleccioná una categoría</option>
+      <optgroup label="── Oficios y construcción ──">
+        <option>Albañilería</option>
+        <option>Plomería</option>
+        <option>Gasista</option>
+        <option>Electricista</option>
+        <option>Carpintería</option>
+        <option>Pintura</option>
+        <option>Jardinería</option>
+        <option>Herrería</option>
+        <option>Cerrajería</option>
+        <option>Limpieza</option>
+        <option>Mudanzas / Fletes</option>
+        <option>Refrigeración / Aire acondicionado</option>
+        <option>Informática / Reparaciones</option>
+        <option>Gastronomía</option>
+        <option>Mecánico Automotriz</option>
+        <option>Tapicería</option>
+      </optgroup>
+      <optgroup label="── Profesionales ──">
+        <option>Médico / Clínica</option>
+        <option>Odontólogo</option>
+        <option>Psicólogo / Terapia</option>
+        <option>Kinesiólogo</option>
+        <option>Nutricionista</option>
+        <option>Veterinario</option>
+        <option>Arquitecto</option>
+        <option>Abogado</option>
+        <option>Contador / Impositivo</option>
+        <option>Diseñador Gráfico</option>
+        <option>Fotógrafo</option>
+        <option>Profesor Particular</option>
+        <option>Peluquería / Estética</option>
+      </optgroup>
+      <optgroup label="──────────────────────">
+        <option>Otro</option>
+      </optgroup>
+    </select>
+
+    <label>¿Qué servicios ofrecés? <span style="color:#94a3b8; font-weight:400;">(marcá todos los que aplican)</span></label>
+    <div id="checksServicios">
+      <p style="color:#94a3b8; font-size:14px; margin:6px 0;">Seleccioná primero la categoría</p>
+    </div>
+
+    <label style="margin-top:14px;">Título de tu anuncio *</label>
+    <input id="titulo" placeholder="Ej: Plomero matriculado con 10 años de experiencia">
+
+    <label>Descripción / Información adicional</label>
+    <textarea id="descripcion" rows="4"
+      placeholder="Contá más sobre tu trabajo: garantías, materiales, zona de cobertura, formas de pago..."></textarea>
+  </div>
+
+  <!-- HORARIOS -->
+  <div class="cv-section">
+    <h3><i class="fa-solid fa-clock"></i> Horarios de disponibilidad</h3>
+    <label>¿Cuándo estás disponible?</label>
+    <input id="horarios" placeholder="Ej: Lunes a Viernes de 8 a 18hs · Sábados de 9 a 13hs">
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:2px;">
+      <button type="button" class="btn btn-outline btn-sm" onclick="setHorario('Lunes a Viernes de 8 a 18hs')">Lun–Vie 8–18</button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="setHorario('Lunes a Sábado de 8 a 18hs')">Lun–Sáb 8–18</button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="setHorario('Lunes a Domingo, las 24hs')">24/7</button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="setHorario('A acordar con el cliente')">A acordar</button>
+    </div>
+  </div>
+
+  <!-- UBICACIÓN -->
+  <div class="cv-section">
+    <h3><i class="fa-solid fa-location-dot"></i> Ubicación</h3>
+    <p style="color:#64748b; font-size:13px; margin:-4px 0 14px;">
+      La ciudad se muestra públicamente. La dirección exacta es privada y solo se usa para el mapa.
+    </p>
+
+    <label>Código Postal</label>
+    <input id="cp_servicio" placeholder="Ej: 1900" oninput="autocompletarCP(this.value)">
+
+    <label>Localidad / Ciudad *</label>
+    <select id="localidad_servicio" onchange="actualizarMapaDesdeSelect()">
+      <option value="">Ingresá el código postal primero</option>
+    </select>
+
+    <label>Provincia</label>
+    <input id="provincia_servicio" readonly placeholder="Se completa automático">
+
+    <label>Dirección exacta <span style="color:#94a3b8; font-weight:400;">(privada, mejora la ubicación en el mapa)</span></label>
+    <input id="direccion_exacta" placeholder="Ej: Av. San Martín 1234, piso 2">
+
+    <div id="mapServicio"></div>
+    <p style="font-size:12px; color:#94a3b8; margin-top:6px;">
+      <i class="fa-solid fa-info-circle"></i> También podés hacer clic en el mapa para ajustar la posición.
+    </p>
+  </div>
+
+  <div id="msg"></div>
+
+  <button class="btn btn-orange" onclick="guardarServicio()">
+    <i class="fa-solid fa-save"></i> Guardar y publicar
+  </button>
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="module" src="/perfil_servicio.js"></script>
+
+</body>
+</html>

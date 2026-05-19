@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro — Trabajos Cerca</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/login.html"><i class="fa-solid fa-right-to-bracket"></i> <span>Ya tengo cuenta</span></a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <h2><i class="fa-solid fa-user-plus" style="color:#2563eb"></i> Crear cuenta</h2>
+
+  <p style="text-align:center; color:#64748b; margin:-8px 0 16px; font-size:14px;">¿Qué querés hacer?</p>
+
+  <div class="tipo-cards">
+    <div class="tipo-card active" id="card-pro" onclick="elegirTipo('profesional')">
+      <div class="tipo-ico">🔨</div>
+      <h3>Ofrezco servicios</h3>
+      <p>Publicá tu oficio y conseguí clientes en tu zona</p>
+    </div>
+    <div class="tipo-card" id="card-work" onclick="elegirTipo('trabajador')">
+      <div class="tipo-ico">📄</div>
+      <h3>Busco trabajo</h3>
+      <p>Subí tu CV y que las empresas te encuentren</p>
+    </div>
+  </div>
+
+  <input type="hidden" id="tipo" value="profesional">
+
+  <form id="registroForm">
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div>
+        <label>Nombre *</label>
+        <input id="nombre" placeholder="Juan" required>
+      </div>
+      <div>
+        <label>Apellido *</label>
+        <input id="apellido" placeholder="García" required>
+      </div>
+    </div>
+
+    <label>Email *</label>
+    <input id="email" type="email" placeholder="juan@email.com" required>
+
+    <label>Contraseña *</label>
+    <input id="password" type="password" placeholder="Mínimo 6 caracteres" required minlength="6">
+
+    <label>Móvil / WhatsApp</label>
+    <input id="movil" placeholder="Ej: 1123456789" type="tel">
+
+    <label>Código Postal *</label>
+    <input id="codigo_postal" placeholder="Ej: 1900" required>
+
+    <label>Localidad *</label>
+    <select id="localidad" required>
+      <option value="">Ingresá el código postal primero</option>
+    </select>
+
+    <label>Provincia</label>
+    <input id="provincia" readonly placeholder="Se completa automático">
+
+    <div id="msg"></div>
+
+    <button type="submit" class="btn btn-primary">
+      Continuar <i class="fa-solid fa-arrow-right"></i>
+    </button>
+
+  </form>
+
+  <div class="sep">o</div>
+  <p class="text-center" style="margin:0;">
+    <a href="/login.html">¿Ya tenés cuenta? Iniciá sesión</a>
+  </p>
+
+</div>
+
+<script>
+function elegirTipo(tipo){
+  document.getElementById("tipo").value = tipo
+  document.getElementById("card-pro").classList.toggle("active", tipo === "profesional")
+  document.getElementById("card-work").classList.toggle("active", tipo === "trabajador")
+}
+
+const params = new URLSearchParams(location.search)
+if(params.get("tipo")) elegirTipo(params.get("tipo"))
+</script>
+
+<script type="module" src="/app.js"></script>
+
+</body>
+</html>

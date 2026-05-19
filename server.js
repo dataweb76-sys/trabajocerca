@@ -1,38 +1,38 @@
-const http = require('http')
-const fs = require('fs')
-const path = require('path')
+const http = require("http")
+const fs = require("fs")
+const path = require("path")
 
 const port = 7000
 
-const server = http.createServer((req,res)=>{
+http.createServer((req, res) => {
 
-let filePath = '.' + req.url
+let url = req.url.split("?")[0]
 
-if(filePath == './'){
-filePath = './index.html'
-}
+let file = url === "/" ? "index.html" : url.substring(1)
 
-const ext = path.extname(filePath)
+let filePath = path.join(__dirname, file)
 
-let contentType = 'text/html'
+let ext = path.extname(filePath)
 
-if(ext == '.js') contentType = 'text/javascript'
-if(ext == '.css') contentType = 'text/css'
+let contentType = "text/html"
 
-fs.readFile(filePath,(err,content)=>{
+if(ext === ".js") contentType = "text/javascript"
+if(ext === ".css") contentType = "text/css"
+if(ext === ".json") contentType = "application/json"
+
+fs.readFile(filePath, (err, data) => {
 
 if(err){
 res.writeHead(404)
 res.end("Not found")
-}else{
-res.writeHead(200,{'Content-Type':contentType})
-res.end(content)
+return
 }
 
-})
+res.writeHead(200, {"Content-Type": contentType})
+res.end(data)
 
 })
 
-server.listen(port,()=>{
-console.log("Servidor en http://localhost:7000")
-})
+}).listen(port)
+
+console.log("Servidor corriendo en http://localhost:7000")

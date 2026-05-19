@@ -1,6 +1,7 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+import { createClient } from "https://esm.sh/@supabase/supabase-js"
 
-const supabaseUrl = "TU_URL"
-const supabaseKey = "TU_API_KEY"
+const supabaseUrl = "https://iqeiszkoifxgygoqvbem.supabase.co"
+
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs"
 
 export const supabase = createClient(supabaseUrl, supabaseKey)

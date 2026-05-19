@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa de profesionales — Trabajos Cerca</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<style>
+  #map { height: calc(100vh - 56px); width: 100%; }
+
+  .mapa-barra {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    gap: 8px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    padding: 10px 14px;
+    width: calc(100% - 32px);
+    max-width: 520px;
+    box-sizing: border-box;
+  }
+
+  .mapa-barra input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: #1e293b;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mapa-barra button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .mapa-barra button:hover { background: #1d4ed8; }
+
+  .mapa-contador {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: rgba(30,41,59,0.85);
+    color: white;
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 13px;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+  }
+
+  /* popup del mapa */
+  .leaflet-popup-content { margin: 12px 14px; min-width: 200px; }
+  .popup-foto { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #2563eb; vertical-align: middle; margin-right: 10px; }
+  .popup-foto-placeholder { width: 48px; height: 48px; border-radius: 50%; background: #dbeafe; display: inline-flex; align-items: center; justify-content: center; color: #2563eb; font-size: 20px; vertical-align: middle; margin-right: 10px; }
+  .popup-nombre { font-weight: 700; font-size: 15px; margin: 0 0 2px; }
+  .popup-cat { color: #f97316; font-weight: 600; font-size: 13px; margin: 0 0 6px; }
+  .popup-ubic { color: #64748b; font-size: 12px; margin: 0 0 10px; }
+  .popup-acciones { display: flex; gap: 8px; flex-wrap: wrap; }
+  .popup-btn { font-size: 12px; padding: 5px 10px; border-radius: 6px; text-decoration: none; display: inline-block; }
+  .popup-btn-wa { background: #25D366; color: white; }
+  .popup-btn-perfil { background: #2563eb; color: white; }
+</style>
+</head>
+<body style="margin:0;padding:0;overflow:hidden;">
+
+<header class="topbar" style="position:relative;z-index:1001;">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/index.html"><i class="fa-solid fa-house"></i> <span>Inicio</span></a>
+    <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
+    <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
+  </nav>
+</header>
+
+<div class="mapa-barra">
+  <i class="fa-solid fa-magnifying-glass" style="color:#94a3b8;align-self:center;"></i>
+  <input id="inputCiudad" placeholder="Buscá una ciudad..." onkeydown="if(event.key==='Enter') irACiudad()">
+  <button onclick="irACiudad()">Ir</button>
+  <button onclick="miUbicacion()" title="Mi ubicación" style="background:#f1f5f9;color:#475569;padding:6px 10px;">
+    <i class="fa-solid fa-location-crosshairs"></i>
+  </button>
+</div>
+
+<div id="map"></div>
+
+<div class="mapa-contador" id="contador" style="display:none;"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="module" src="/mapa.js"></script>
+
+</body>
+</html>

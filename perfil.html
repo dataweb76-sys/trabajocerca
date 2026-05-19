@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi perfil — Trabajos Cerca</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
+    <a href="/mapa.html"><i class="fa-solid fa-map"></i> <span>Mapa</span></a>
+    <a href="#" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i> <span>Salir</span></a>
+  </nav>
+</header>
+
+<div class="container" style="max-width:680px;">
+  <div id="dash">
+    <p style="text-align:center; color:#64748b; padding:40px;">
+      <i class="fa-solid fa-spinner fa-spin"></i> Cargando...
+    </p>
+  </div>
+</div>
+
+<script type="module" src="/perfil.js"></script>
+
+</body>
+</html>

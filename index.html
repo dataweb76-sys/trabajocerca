@@ -2,114 +2,190 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Trabajos Cerca</title>
-
-<style>
-
-body{
-font-family: Arial;
-margin:0;
-background:#f4f4f4;
-}
-
-header{
-background:#1e88e5;
-color:white;
-padding:20px;
-text-align:center;
-}
-
-.search{
-background:white;
-padding:20px;
-text-align:center;
-}
-
-input{
-padding:10px;
-margin:5px;
-width:200px;
-}
-
-button{
-padding:10px 20px;
-background:#1e88e5;
-color:white;
-border:none;
-cursor:pointer;
-}
-
-.categorias{
-text-align:center;
-padding:20px;
-}
-
-.categorias button{
-margin:5px;
-}
-
-.resultados{
-padding:20px;
-}
-
-.card{
-background:white;
-padding:15px;
-margin:10px;
-border-radius:8px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-}
-
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trabajos Cerca — Encontrá profesionales en tu zona</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
 
-<header>
-<h1>🔎 Trabajos Cerca</h1>
-<p>Encuentra profesionales y negocios cerca de ti</p>
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav id="menu"></nav>
 </header>
 
-<div class="search">
+<section class="hero">
+  <div>
+    <h1>Encontrá profesionales cerca tuyo</h1>
+    <p>Albañiles, plomeros, electricistas y más — en tu ciudad</p>
+    <div class="search-box">
+      <input id="buscarHero" placeholder="¿Qué servicio buscás?">
+      <input id="ciudadHero" placeholder="Ciudad">
+      <button onclick="buscarDesdeHero()">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      </button>
+    </div>
+  </div>
+</section>
 
-<input type="text" placeholder="¿Qué servicio buscas?">
-<input type="text" placeholder="Ciudad">
+<section>
+  <h2>¿Qué servicio necesitás?</h2>
 
-<button>Buscar</button>
+  <p style="font-size:13px;color:#64748b;margin:-10px 0 14px;font-weight:600;letter-spacing:.5px;">OFICIOS</p>
+  <div class="grid-cats">
+    <a class="cat-card" href="/buscador.html?cat=Albañilería">
+      <i class="ico">🔨</i><span>Albañilería</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Plomería">
+      <i class="ico">💧</i><span>Plomería</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Gasista">
+      <i class="ico">🔥</i><span>Gasista</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Electricista">
+      <i class="ico">⚡</i><span>Electricista</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Carpintería">
+      <i class="ico">🪟</i><span>Carpintería</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Pintura">
+      <i class="ico">🎨</i><span>Pintura</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Jardinería">
+      <i class="ico">🌿</i><span>Jardinería</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Limpieza">
+      <i class="ico">🏠</i><span>Limpieza</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Mecánico">
+      <i class="ico">🚗</i><span>Mecánico</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Mudanzas">
+      <i class="ico">📦</i><span>Mudanzas / Fletes</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Refrigeración">
+      <i class="ico">❄️</i><span>Refrigeración</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Peluquería">
+      <i class="ico">✂️</i><span>Peluquería</span>
+    </a>
+  </div>
 
-</div>
+  <p style="font-size:13px;color:#64748b;margin:28px 0 14px;font-weight:600;letter-spacing:.5px;">PROFESIONALES</p>
+  <div class="grid-cats">
+    <a class="cat-card" href="/buscador.html?cat=Médico">
+      <i class="ico">🩺</i><span>Médico</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Odontólogo">
+      <i class="ico">🦷</i><span>Odontólogo</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Psicólogo">
+      <i class="ico">🧠</i><span>Psicólogo</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Veterinario">
+      <i class="ico">🐾</i><span>Veterinario</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Arquitecto">
+      <i class="ico">📐</i><span>Arquitecto</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Abogado">
+      <i class="ico">⚖️</i><span>Abogado</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Contador">
+      <i class="ico">📊</i><span>Contador</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Diseñador">
+      <i class="ico">🖥️</i><span>Diseñador</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Fotógrafo">
+      <i class="ico">📷</i><span>Fotógrafo</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Profesor">
+      <i class="ico">📚</i><span>Profesor Particular</span>
+    </a>
+    <a class="cat-card" href="/buscador.html?cat=Nutricionista">
+      <i class="ico">🥗</i><span>Nutricionista</span>
+    </a>
+    <a class="cat-card" href="/buscador.html">
+      <i class="ico">🔍</i><span>Ver todos</span>
+    </a>
+  </div>
+</section>
 
-<div class="categorias">
+<section class="como-funciona">
+  <h2>¿Cómo funciona?</h2>
+  <div class="pasos">
+    <div class="paso">
+      <div class="num">1</div>
+      <h3>Buscá por zona</h3>
+      <p>Ingresá el servicio que necesitás y tu ciudad</p>
+    </div>
+    <div class="paso">
+      <div class="num">2</div>
+      <h3>Elegí un profesional</h3>
+      <p>Mirá perfiles, calificaciones y la ubicación en el mapa</p>
+    </div>
+    <div class="paso">
+      <div class="num">3</div>
+      <h3>Contactá por WhatsApp</h3>
+      <p>Comunicación directa, sin intermediarios ni comisiones</p>
+    </div>
+  </div>
+</section>
 
-<h3>Categorías populares</h3>
+<section style="background:#1e293b; color:white; text-align:center;">
+  <h2 style="color:white;">¿Tenés un oficio o buscás trabajo?</h2>
+  <p style="opacity:0.8; max-width:500px; margin:0 auto 30px; font-size:16px;">
+    Publicá tu perfil gratis y empezá a recibir clientes o empleadores en tu zona
+  </p>
+  <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+    <a href="/registro.html?tipo=profesional" class="btn btn-orange" style="width:auto; padding:14px 30px;">
+      <i class="fa-solid fa-tools"></i> Publicar mi oficio
+    </a>
+    <a href="/registro.html?tipo=trabajador" class="btn btn-outline" style="width:auto; padding:14px 30px; color:white; border-color:rgba(255,255,255,0.5);">
+      <i class="fa-solid fa-file-lines"></i> Subir mi CV
+    </a>
+  </div>
+</section>
 
-<button>Plomero</button>
-<button>Electricista</button>
-<button>Albañil</button>
-<button>Médico</button>
-<button>Mecánico</button>
+<footer>
+  <p>© 2025 Trabajos Cerca · Conectamos profesionales con clientes en toda Argentina</p>
+</footer>
 
-</div>
+<script type="module">
+import { supabase } from "./supabase.js"
 
-<div class="resultados">
+async function cargarMenu(){
+  const { data } = await supabase.auth.getUser()
+  const menu = document.getElementById("menu")
+  if(data.user){
+    menu.innerHTML = `
+      <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
+      <a href="/mapa.html"><i class="fa-solid fa-map"></i> <span>Mapa</span></a>
+      <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Mi perfil</span></a>
+    `
+  } else {
+    menu.innerHTML = `
+      <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
+      <a href="/login.html"><i class="fa-solid fa-right-to-bracket"></i> <span>Entrar</span></a>
+      <a href="/registro.html"><i class="fa-solid fa-user-plus"></i> <span>Registrarse</span></a>
+    `
+  }
+}
 
-<h3>Resultados</h3>
+window.buscarDesdeHero = function(){
+  const q = document.getElementById("buscarHero").value.trim()
+  const c = document.getElementById("ciudadHero").value.trim()
+  const params = new URLSearchParams()
+  if(q) params.set("q", q)
+  if(c) params.set("ciudad", c)
+  window.location.href = `/buscador.html?${params.toString()}`
+}
 
-<div class="card">
-<h4>Juan Pérez - Plomero</h4>
-<p>📍 Santa Rosa</p>
-<p>⭐ 4.7</p>
-<p>📞 2954-123456</p>
-</div>
-
-<div class="card">
-<h4>Electricista Gómez</h4>
-<p>📍 Santa Rosa</p>
-<p>⭐ 4.5</p>
-<p>📞 2954-654321</p>
-</div>
-
-</div>
+cargarMenu()
+</script>
 
 </body>
 </html>

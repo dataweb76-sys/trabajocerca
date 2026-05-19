@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi CV — Trabajos Cerca</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/perfil.html"><i class="fa-solid fa-arrow-left"></i> <span>Mi perfil</span></a>
+  </nav>
+</header>
+
+<div class="container" style="max-width:700px;">
+
+  <h2><i class="fa-solid fa-file-lines" style="color:#16a34a"></i> Mi Currículum</h2>
+
+  <div id="msgNuevo" style="display:none" class="alerta alerta-ok">
+    <i class="fa-solid fa-check-circle"></i> ¡Cuenta creada! Completá tu CV para que las empresas y empleadores te encuentren.
+  </div>
+
+  <!-- PRESENTACIÓN -->
+  <div class="cv-section">
+    <h3><i class="fa-solid fa-user"></i> Presentación</h3>
+
+    <label>Título profesional *</label>
+    <input id="titulo" placeholder="Ej: Contador Público, Técnico electricista, Auxiliar administrativo...">
+
+    <label>Resumen / Carta de presentación</label>
+    <textarea id="resumen" rows="5"
+      placeholder="Contá quién sos, cuántos años de experiencia tenés, qué tipo de trabajo buscás y qué te diferencia. Sé directo y concreto."></textarea>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div>
+        <label>Disponibilidad</label>
+        <select id="disponibilidad">
+          <option value="inmediata">Inmediata</option>
+          <option value="15_dias">En 15 días</option>
+          <option value="30_dias">En 30 días</option>
+          <option value="a_consultar">A consultar</option>
+        </select>
+      </div>
+      <div>
+        <label>Modalidad</label>
+        <select id="modalidad">
+          <option value="presencial">Presencial</option>
+          <option value="remoto">Remoto</option>
+          <option value="hibrido">Híbrido</option>
+          <option value="indiferente">Indiferente</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- HABILIDADES -->
+  <div class="cv-section">
+    <h3><i class="fa-solid fa-star"></i> Habilidades y conocimientos</h3>
+    <p style="font-size:13px; color:#64748b; margin:-4px 0 10px;">
+      Escribí una habilidad y presioná <kbd style="background:#f1f5f9; padding:1px 5px; border-radius:4px; font-size:11px;">Enter</kbd> para agregarla
+    </p>
+    <div class="tags-input" id="tagsContainer" onclick="document.getElementById('tagInput').focus()">
+      <input id="tagInput" placeholder="Ej: Excel, Atención al cliente, Soldadura..." onkeydown="agregarTag(event)">
+    </div>
+  </div>
+
+  <!-- EXPERIENCIA -->
+  <div class="cv-section">
+    <h3><i class="fa-solid fa-building"></i> Experiencia laboral</h3>
+    <div id="listaExp"></div>
+    <button class="btn btn-outline btn-sm" onclick="agregarExp()">
+      <i class="fa-solid fa-plus"></i> Agregar experiencia
+    </button>
+  </div>
+
+  <!-- EDUCACIÓN -->
+  <div class="cv-section">
+    <h3><i class="fa-solid fa-graduation-cap"></i> Educación y formación</h3>
+    <div id="listaEdu"></div>
+    <button class="btn btn-outline btn-sm" onclick="agregarEdu()">
+      <i class="fa-solid fa-plus"></i> Agregar formación
+    </button>
+  </div>
+
+  <div id="msg"></div>
+
+  <button class="btn btn-success" onclick="guardarCV()">
+    <i class="fa-solid fa-save"></i> Guardar CV
+  </button>
+
+</div>
+
+<script type="module" src="/perfil_cv.js"></script>
+
+</body>
+</html>

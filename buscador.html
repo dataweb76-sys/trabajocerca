@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buscar profesionales — Trabajos Cerca</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/index.html"><i class="fa-solid fa-house"></i> <span>Inicio</span></a>
+    <a href="/mapa.html"><i class="fa-solid fa-map"></i> <span>Mapa</span></a>
+    <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
+  </nav>
+</header>
+
+<div class="container" style="max-width:860px;">
+
+  <h2><i class="fa-solid fa-magnifying-glass" style="color:#2563eb"></i> Buscar profesionales</h2>
+
+  <div class="filtros">
+    <div>
+      <label>Servicio o categoría</label>
+      <input id="buscar" placeholder="Ej: plomero, electricista...">
+    </div>
+    <div>
+      <label>Ciudad</label>
+      <input id="ciudad" placeholder="Ej: La Plata">
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <button class="btn btn-primary" onclick="buscar()" style="white-space:nowrap;">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Albañilería')">🔨 Albañilería</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Plomería')">💧 Plomería</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Gasista')">🔥 Gasista</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Electricista')">⚡ Electricista</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Pintura')">🎨 Pintura</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Limpieza')">🏠 Limpieza</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Jardinería')">🌿 Jardinería</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Mudanzas')">📦 Mudanzas</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Mecánico')">🚗 Mecánico</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Peluquería')">✂️ Peluquería</button>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px;">
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Médico')">🩺 Médico</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Odontólogo')">🦷 Odontólogo</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Psicólogo')">🧠 Psicólogo</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Veterinario')">🐾 Veterinario</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Arquitecto')">📐 Arquitecto</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Abogado')">⚖️ Abogado</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Contador')">📊 Contador</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Diseñador')">🖥️ Diseñador</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Fotógrafo')">📷 Fotógrafo</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Profesor')">📚 Profesor</button>
+    <button class="btn btn-outline btn-sm" onclick="filtrarCategoria('Nutricionista')">🥗 Nutricionista</button>
+  </div>
+
+  <div id="resultados">
+    <div style="text-align:center; padding:50px 20px; color:#94a3b8;">
+      <i class="fa-solid fa-magnifying-glass" style="font-size:48px; margin-bottom:14px; display:block; opacity:0.3;"></i>
+      <p>Buscá un servicio o seleccioná una categoría</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL TÉRMINOS Y CONDICIONES -->
+<div class="modal-overlay activo" id="modalTerminos">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-content" style="padding:32px;">
+      <div style="text-align:center; margin-bottom:20px;">
+        <i class="fa-solid fa-handshake" style="font-size:44px; color:#2563eb;"></i>
+        <h2 style="margin:12px 0 6px;">Antes de continuar</h2>
+        <p style="color:#64748b; font-size:14px; margin:0;">Por favor leé y aceptá nuestros términos de uso</p>
+      </div>
+
+      <div style="background:#f8fafc; border-radius:10px; padding:18px; font-size:14px; line-height:1.7; color:#475569; margin-bottom:22px; max-height:220px; overflow-y:auto; border:1px solid #e2e8f0;">
+        <p><strong>Aviso importante</strong></p>
+        <p>
+          <strong>Trabajos Cerca</strong> es únicamente una plataforma de contacto que conecta a personas que ofrecen servicios o buscan trabajo con personas que los necesitan. <strong>No somos parte de ningún acuerdo, contrato ni transacción</strong> que se realice entre los usuarios.
+        </p>
+        <p>
+          Al utilizar este sitio reconocés que:
+        </p>
+        <ul style="margin:8px 0; padding-left:18px;">
+          <li>Los acuerdos de precio, condiciones y plazos son responsabilidad exclusiva de las partes.</li>
+          <li>Trabajos Cerca no garantiza la calidad, idoneidad ni veracidad de la información publicada por los usuarios.</li>
+          <li>Cualquier disputa entre usuario y proveedor debe resolverse entre ellos directamente.</li>
+          <li>El uso de este sitio implica la aceptación de estos términos.</li>
+        </ul>
+        <p style="margin-bottom:0;">
+          Te pedimos que uses la plataforma de manera responsable y honesta, y que una vez finalizado un acuerdo, <strong>dejes tu puntuación</strong> para ayudar a la comunidad.
+        </p>
+      </div>
+
+      <button class="btn btn-primary" onclick="aceptarTerminos()">
+        <i class="fa-solid fa-check"></i> Acepto y continúo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERFIL PROFESIONAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="cerrarModalClick(event)">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close" onclick="cerrarModal()">×</button>
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script type="module" src="/buscador.js"></script>
+
+</body>
+</html>
