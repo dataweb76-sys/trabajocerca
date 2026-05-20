@@ -4,7 +4,7 @@ const SB_URL = "https://iqeiszkoifxgygoqvbem.supabase.co"
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs"
 const SB_HEADERS = { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
 
-let mapModal = null
+let mapModal      = null
 let estrellaReview = 0
 
 /* ── AUTH HELPERS ── */
@@ -24,25 +24,24 @@ function getCurrentUserId(){
   catch(e){ return null }
 }
 
-/* ── STARS HELPERS ── */
+/* ── STARS HTML ── */
 
 function starsHTML(avg, count, size=14){
   const r = Math.round(avg || 0)
   const s = [1,2,3,4,5].map(i =>
     `<i class="fa-solid fa-star" style="color:${i<=r?"#f59e0b":"#d1d5db"};font-size:${size}px;"></i>`
   ).join("")
-  const countTxt = count !== undefined
+  const txt = count !== undefined
     ? `<span style="font-size:12px;color:#64748b;margin-left:4px;">${avg>0?avg.toFixed(1)+" ":""}<span style="opacity:.7;">(${count})</span></span>`
     : ""
-  return `<span style="display:inline-flex;align-items:center;gap:2px;">${s}</span>${countTxt}`
+  return `<span style="display:inline-flex;align-items:center;gap:2px;">${s}</span>${txt}`
 }
 
 /* ── TÉRMINOS ── */
 
 function verificarTerminos(){
-  if(localStorage.getItem("tc_aceptados")){
+  if(localStorage.getItem("tc_aceptados"))
     document.getElementById("modalTerminos").classList.remove("activo")
-  }
 }
 window.aceptarTerminos = function(){
   localStorage.setItem("tc_aceptados","1")
@@ -51,29 +50,14 @@ window.aceptarTerminos = function(){
 }
 verificarTerminos()
 
-/* ── PARÁMETROS DE URL ── */
+/* ── PRE-CARGAR DESDE URL ── */
 
-const params  = new URLSearchParams(location.search)
-const SECCION = params.get("seccion")
-
-const CATS_OFICIOS = new Set(["Albañilería","Plomería","Gasista","Electricista","Carpintería","Pintura","Jardinería","Herrería","Cerrajería","Limpieza","Mudanzas / Fletes","Refrigeración / Aire acondicionado","Informática / Reparaciones","Gastronomía","Mecánico Automotriz","Tapicería","Personal Trainer","Enfermero/a","Niñera / Cuidadora","Delivery / Mensajería","Planchado / Laundry"])
-const CATS_PROF    = new Set(["Médico / Clínica","Odontólogo","Psicólogo / Terapia","Kinesiólogo","Nutricionista","Veterinario","Arquitecto","Abogado","Contador / Impositivo","Diseñador Gráfico","Fotógrafo","Profesor Particular","Peluquería / Estética"])
-
-if(SECCION === "oficios"){
-  document.title = "Buscador de Oficios — Trabajos Cerca"
-  const t = document.getElementById("tituloSeccion")
-  if(t) t.innerHTML = '<i class="fa-solid fa-hammer" style="color:#2563eb"></i> Buscador de Oficios'
-} else if(SECCION === "profesionales"){
-  document.title = "Buscador de Profesionales — Trabajos Cerca"
-  const t = document.getElementById("tituloSeccion")
-  if(t) t.innerHTML = '<i class="fa-solid fa-user-tie" style="color:#2563eb"></i> Buscador de Profesionales'
-}
-
+const params = new URLSearchParams(location.search)
 if(params.get("q"))      document.getElementById("buscar").value = params.get("q")
 if(params.get("ciudad")) document.getElementById("ciudad").value = params.get("ciudad")
 if(params.get("cat"))    document.getElementById("buscar").value = params.get("cat")
 
-/* ── FILTROS RÁPIDOS ── */
+/* ── FILTRO RÁPIDO ── */
 
 window.filtrarCategoria = function(cat){
   document.getElementById("buscar").value = cat
@@ -82,7 +66,9 @@ window.filtrarCategoria = function(cat){
   document.getElementById("resultados").scrollIntoView({ behavior:"smooth", block:"start" })
 }
 
-/* ── BUSCAR ── */
+/* ═══════════════════════════════════════════
+   BUSCAR
+═══════════════════════════════════════════ */
 
 window.buscar = async function(){
   const palabra = document.getElementById("buscar").value.trim()
@@ -93,11 +79,11 @@ window.buscar = async function(){
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
   const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,perfiles(id,nombre,apellido,movil,foto,localidad,provincia,instagram,destacado)"
-  let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc`
+  let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=200`
 
   if(palabra){
     const p = encodeURIComponent(`*${palabra}*`)
-    url += `&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p})`
+    url += `&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p},servicios_lista.ilike.${p})`
   }
   if(ciudad) url += `&localidad=ilike.*${encodeURIComponent(ciudad)}*`
 
@@ -111,18 +97,16 @@ window.buscar = async function(){
     return
   }
 
-  if(SECCION === "oficios")       data = data.filter(d => CATS_OFICIOS.has(d.categoria))
-  if(SECCION === "profesionales") data = data.filter(d => CATS_PROF.has(d.categoria))
-
   if(!data?.length){
     cont.innerHTML = `<div style="text-align:center;padding:50px 20px;color:#64748b;">
       <i class="fa-solid fa-face-sad-tear" style="font-size:44px;opacity:.3;display:block;margin-bottom:14px;"></i>
-      <p style="font-size:16px;margin-bottom:8px;">No encontramos resultados.</p>
-      <p><a href="/registro.html?tipo=profesional">¿Sos profesional? Publicá tu servicio gratis</a></p></div>`
+      <p style="font-size:16px;margin-bottom:8px;">No encontramos resultados${palabra?" para <strong>"+palabra+"</strong>":""}.</p>
+      <p><a href="/registro.html?tipo=profesional">¿Sos profesional? Publicá tu servicio gratis</a></p>
+    </div>`
     return
   }
 
-  // ── Cargar ratings en paralelo y merge ──
+  /* ── Ratings en paralelo ── */
   const profileIds = data.map(d => d.perfiles?.id).filter(Boolean)
   let ratingsMap = {}
   if(profileIds.length){
@@ -141,15 +125,13 @@ window.buscar = async function(){
     } catch(e){}
   }
 
-  // Adjuntar avg_rating a cada item
+  /* ── Merge y ordenar: destacado > rating > nombre ── */
   data.forEach(item => {
-    const pid = item.perfiles?.id
+    const pid     = item.perfiles?.id
     const ratings = pid ? (ratingsMap[pid] || []) : []
-    item._avgRating = ratings.length ? ratings.reduce((a,b)=>a+b,0)/ratings.length : 0
+    item._avgRating   = ratings.length ? ratings.reduce((a,b)=>a+b,0)/ratings.length : 0
     item._ratingCount = ratings.length
   })
-
-  // ── Ordenar: destacado > avg_rating > nombre ──
   data.sort((a, b) => {
     const da = a.perfiles?.destacado ? 1 : 0
     const db = b.perfiles?.destacado ? 1 : 0
@@ -157,36 +139,37 @@ window.buscar = async function(){
     return b._avgRating - a._avgRating
   })
 
-  // ── Banner calificaciones ──
+  /* ── Banner calificaciones ── */
   const bannerCal = `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
     <i class="fa-solid fa-star" style="color:#f59e0b;font-size:20px;flex-shrink:0;"></i>
     <p style="margin:0;font-size:13px;color:#92400e;">
-      <strong>¿Trabajaste con alguien?</strong> Dejá tu calificación — ayuda a otros usuarios a elegir mejor y a los profesionales a conseguir más clientes.
+      <strong>¿Trabajaste con alguien?</strong> Dejá tu calificación — ayudás a otros a elegir mejor y al profesional a conseguir más clientes.
     </p>
   </div>`
 
-  cont.innerHTML = bannerCal + `<p style="color:#64748b;margin-bottom:16px;font-size:14px;">${data.length} resultado${data.length!==1?"s":""} encontrado${data.length!==1?"s":""} · ordenados por calificación</p>`
+  cont.innerHTML = bannerCal + `<p style="color:#64748b;margin-bottom:16px;font-size:14px;">
+    ${data.length} resultado${data.length!==1?"s":""} encontrado${data.length!==1?"s":""}
+    · ordenados por calificación
+  </p>`
 
+  /* ── Renderizar cards ── */
   data.forEach(item => {
     const p   = item.perfiles || {}
-    const wa  = `https://wa.me/${(p.movil||"").replace(/\D/g,"")}`
     const pid = p.id || ""
+    const wa  = p.movil ? `https://wa.me/${p.movil.replace(/\D/g,"")}` : null
 
     const foto = p.foto
       ? `<img src="${p.foto}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #2563eb;flex-shrink:0;">`
       : `<div style="width:70px;height:70px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:26px;color:#2563eb;flex-shrink:0;"><i class="fa-solid fa-user"></i></div>`
 
-    const badgeDestacado = p.destacado
-      ? `<span style="display:inline-flex;align-items:center;gap:4px;background:#f59e0b;color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px;">
-          <i class="fa-solid fa-crown"></i> DESTACADO
-        </span><br>`
-      : ""
-
-    // Stars para la card
     const r = Math.round(item._avgRating)
     const starsCard = item._ratingCount > 0
-      ? `${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=r?" lit":""}"></i>`).join("")}<span>${item._avgRating.toFixed(1)} (${item._ratingCount})</span>`
-      : `<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><span style="color:#94a3b8;font-size:12px;">Sin calificaciones aún</span>`
+      ? [1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=r?" lit":""}"></i>`).join("") + `<span>${item._avgRating.toFixed(1)} (${item._ratingCount})</span>`
+      : `<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><span style="color:#94a3b8;font-size:12px;"> Sin calificaciones</span>`
+
+    const badgeDest = p.destacado
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#f59e0b;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:3px;"><i class="fa-solid fa-crown" style="font-size:9px;"></i> DESTACADO</span><br>`
+      : ""
 
     const card = document.createElement("div")
     card.className = "card"
@@ -197,29 +180,27 @@ window.buscar = async function(){
 
     card.innerHTML = `
       <div style="display:flex;gap:14px;align-items:flex-start;">
-        <div style="position:relative;">
+        <div style="position:relative;flex-shrink:0;">
           ${foto}
-          ${p.destacado?`<span style="position:absolute;bottom:-4px;right:-4px;background:#f59e0b;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;">
-            <i class="fa-solid fa-crown" style="font-size:10px;color:white;"></i>
-          </span>`:""}
+          ${p.destacado?`<span style="position:absolute;bottom:-3px;right:-3px;background:#f59e0b;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-crown" style="font-size:9px;color:white;"></i></span>`:""}
         </div>
         <div style="flex:1;min-width:0;">
-          ${badgeDestacado}
-          <h3 style="margin:0 0 3px;font-size:17px;">${p.nombre||""} ${p.apellido||""}</h3>
-          <p style="margin:0 0 2px;color:#f97316;font-weight:700;font-size:14px;">${item.categoria}</p>
+          ${badgeDest}
+          <h3 style="margin:0 0 2px;font-size:17px;">${p.nombre||""} ${p.apellido||""}</h3>
+          <p style="margin:0 0 3px;color:#f97316;font-weight:700;font-size:14px;">${item.categoria}</p>
           <div class="card-stars">${starsCard}</div>
           <p style="margin:4px 0 0;font-size:13px;color:#64748b;">
             <i class="fa-solid fa-location-dot"></i>
             ${item.localidad||p.localidad||""}${item.provincia?", "+item.provincia:""}
           </p>
-          ${item.horarios?`<p style="margin:4px 0 0;font-size:13px;color:#64748b;"><i class="fa-solid fa-clock"></i> ${item.horarios}</p>`:""}
+          ${item.horarios?`<p style="margin:3px 0 0;font-size:13px;color:#64748b;"><i class="fa-solid fa-clock"></i> ${item.horarios}</p>`:""}
         </div>
       </div>
       <div class="card-actions" style="margin-top:14px;">
         <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();abrirModal(${JSON.stringify(item).replace(/"/g,"&quot;")})">
           <i class="fa-solid fa-eye"></i> Ver perfil
         </button>
-        ${p.movil?`<a href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+        ${wa?`<a href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
           class="btn btn-sm" style="background:#25D366;color:white;display:inline-flex;align-items:center;gap:6px;">
           <i class="fa-brands fa-whatsapp"></i> WhatsApp</a>`:""}
       </div>`
@@ -228,7 +209,9 @@ window.buscar = async function(){
   })
 }
 
-/* ── MODAL PERFIL ── */
+/* ═══════════════════════════════════════════
+   MODAL PERFIL
+═══════════════════════════════════════════ */
 
 window.abrirModal = function(item){
   if(typeof item === "string") item = JSON.parse(item.replace(/&quot;/g,'"'))
@@ -239,22 +222,16 @@ window.abrirModal = function(item){
     ? `<img src="${p.foto}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #2563eb;">`
     : `<div style="width:90px;height:90px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:36px;color:#2563eb;"><i class="fa-solid fa-user"></i></div>`
 
-  const wa   = `https://wa.me/${(p.movil||"").replace(/\D/g,"")}`
+  const wa   = p.movil ? `https://wa.me/${p.movil.replace(/\D/g,"")}` : null
   const ubic = `${item.localidad||p.localidad||""}${item.provincia?", "+item.provincia:""}`
   const tags = item.servicios_lista
     ? item.servicios_lista.split(",").map(s=>`<span class="servicio-tag">${s.trim()}</span>`).join("")
     : ""
 
-  const badgeDestacado = p.destacado
-    ? `<div style="display:inline-flex;align-items:center;gap:5px;background:#f59e0b;color:white;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:8px;">
-        <i class="fa-solid fa-crown"></i> PERFIL DESTACADO
-      </div><br>`
-    : ""
-
   document.getElementById("modalContent").innerHTML = `
     <div style="text-align:center;margin-bottom:20px;">
       ${foto}
-      ${badgeDestacado}
+      ${p.destacado?`<div style="display:inline-flex;align-items:center;gap:5px;background:#f59e0b;color:white;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;margin:8px 0 4px;"><i class="fa-solid fa-crown"></i> PERFIL DESTACADO</div><br>`:""}
       <h2 style="margin:10px 0 4px;font-size:22px;">${p.nombre||""} ${p.apellido||""}</h2>
       <p style="margin:0;color:#f97316;font-weight:700;font-size:16px;"><i class="fa-solid fa-tools"></i> ${item.categoria}</p>
       <p style="margin:4px 0 0;color:#64748b;font-size:14px;"><i class="fa-solid fa-location-dot"></i> ${ubic}</p>
@@ -280,7 +257,7 @@ window.abrirModal = function(item){
 
     <div id="portfolioModal" style="margin-bottom:4px;"></div>
 
-    ${p.movil?`<a href="${wa}" target="_blank" rel="noopener" class="btn-whatsapp"
+    ${wa?`<a href="${wa}" target="_blank" rel="noopener" class="btn-whatsapp"
       style="display:flex;justify-content:center;margin-bottom:12px;">
       <i class="fa-brands fa-whatsapp"></i> Consultar por WhatsApp
     </a>`:""}
@@ -345,26 +322,26 @@ async function cargarPortfolioModal(uid){
       <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 10px;">
         <i class="fa-solid fa-images" style="color:#f97316;"></i> Trabajos realizados
       </p>`
-
     items.forEach(item => {
       const fotos = [item.foto1, item.foto2, item.foto3].filter(Boolean)
       html += `<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:10px;background:white;">
-        ${fotos.length ? `<div style="display:flex;gap:2px;height:130px;background:#f1f5f9;">
-          ${fotos.map(f => `<img src="${f}" style="flex:1;object-fit:cover;cursor:pointer;" onclick="window.open('${f}','_blank')">`).join("")}
-        </div>` : ""}
+        ${fotos.length?`<div style="display:flex;gap:2px;height:130px;background:#f1f5f9;">
+          ${fotos.map(f=>`<img src="${f}" style="flex:1;object-fit:cover;cursor:pointer;" onclick="window.open('${f}','_blank')">`).join("")}
+        </div>`:""}
         <div style="padding:10px 12px;">
           <strong style="font-size:14px;display:block;margin-bottom:2px;">${item.titulo}</strong>
-          ${item.descripcion ? `<p style="font-size:12px;color:#64748b;margin:0;line-height:1.4;">${item.descripcion}</p>` : ""}
+          ${item.descripcion?`<p style="font-size:12px;color:#64748b;margin:0;line-height:1.4;">${item.descripcion}</p>`:""}
         </div>
       </div>`
     })
-
     html += `</div>`
     sec.innerHTML = html
   } catch(e){}
 }
 
-/* ── SISTEMA DE RESEÑAS ── */
+/* ═══════════════════════════════════════════
+   SISTEMA DE RESEÑAS
+═══════════════════════════════════════════ */
 
 async function cargarReviews(profileId, nombre){
   const sec = document.getElementById("reviewsSection")
@@ -372,8 +349,10 @@ async function cargarReviews(profileId, nombre){
 
   let reviews = []
   try {
-    const url = `${SB_URL}/rest/v1/reviews?trabajador_id=eq.${profileId}&tipo=neq.cliente&select=id,rating,comentario,created_at,autor_id&order=created_at.desc`
-    const res = await fetch(url, { headers: SB_HEADERS })
+    const res = await fetch(
+      `${SB_URL}/rest/v1/reviews?trabajador_id=eq.${profileId}&tipo=neq.cliente&select=id,rating,comentario,created_at,autor_id&order=created_at.desc`,
+      { headers: SB_HEADERS }
+    )
     if(res.ok) reviews = await res.json()
   } catch(e){}
 
@@ -390,11 +369,10 @@ async function cargarReviews(profileId, nombre){
     <i class="fa-solid fa-star" style="color:#f59e0b;"></i> Calificaciones
   </h3>`
 
-  // CTA de calificación destacado
   if(uid && !esSí && !yaCal){
-    html += `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#92400e;">
+    html += `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#92400e;">
       <i class="fa-solid fa-star" style="color:#f59e0b;"></i>
-      <strong> ¿Ya trabajaste con ${nombre}?</strong> Tu calificación ayuda a otros y al profesional a conseguir más clientes. ¡Tomá 30 segundos y calificalo!
+      <strong> ¿Ya trabajaste con ${nombre}?</strong> Tu calificación ayuda a otros y al profesional a conseguir más clientes.
     </div>`
   }
 
@@ -403,42 +381,33 @@ async function cargarReviews(profileId, nombre){
     html += `<div class="rating-avg-box">
       <div class="avg-num">${avg.toFixed(1)}</div>
       <div>
-        <div class="avg-stars">
-          ${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=r?" lit":""}"></i>`).join("")}
-        </div>
+        <div class="avg-stars">${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=r?" lit":""}"></i>`).join("")}</div>
         <div class="avg-count">${count} reseña${count!==1?"s":""}</div>
       </div>
     </div>`
-
     reviews.slice(0,5).forEach(rev => {
-      const r2 = rev.rating
       html += `<div class="review-item">
-        <div class="rev-stars">
-          ${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=r2?" lit":""}"></i>`).join("")}
-        </div>
-        ${rev.comentario ? `<p>"${rev.comentario}"</p>` : ""}
+        <div class="rev-stars">${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=rev.rating?" lit":""}"></i>`).join("")}</div>
+        ${rev.comentario?`<p>"${rev.comentario}"</p>`:""}
       </div>`
     })
   } else {
     html += `<p style="font-size:13px;color:#94a3b8;text-align:center;margin:0 0 14px;">
-      Todavía no tiene calificaciones. ¡Sé el primero en calificar!
+      Todavía no tiene calificaciones. ¡Sé el primero!
     </p>`
   }
 
-  // Formulario
   if(uid && !esSí && !yaCal){
     estrellaReview = 0
     html += `<div class="form-review">
-      <h4 style="margin:0 0 10px;"><i class="fa-solid fa-pen"></i> Calificá a ${nombre}</h4>
-      <p style="font-size:13px;color:#64748b;margin:0 0 10px;">Tu opinión importa. Ayudás a la comunidad y al profesional.</p>
+      <h4 style="margin:0 0 8px;"><i class="fa-solid fa-pen"></i> Calificá a ${nombre}</h4>
+      <p style="font-size:13px;color:#64748b;margin:0 0 10px;">Tu opinión importa. Ayudás a toda la comunidad.</p>
       <div class="stars-input" id="starsRevModal">
         ${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star"
-          onclick="setRevStar(${i})"
-          onmouseover="hovRevStar(${i})"
-          onmouseout="resRevStar()"></i>`).join("")}
+          onclick="setRevStar(${i})" onmouseover="hovRevStar(${i})" onmouseout="resRevStar()"></i>`).join("")}
       </div>
       <textarea id="comentarioRev" rows="3"
-        placeholder="Contá tu experiencia: ¿fue puntual? ¿el trabajo quedó bien? ¿lo recomendarías? (opcional)"
+        placeholder="Contá tu experiencia (opcional)"
         style="width:100%;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px;font-family:inherit;"></textarea>
       <div id="msgRev"></div>
       <button class="btn btn-primary btn-sm" onclick="enviarReview('${profileId}','${nombre}')">
@@ -448,10 +417,9 @@ async function cargarReviews(profileId, nombre){
   } else if(!uid){
     html += `<div style="background:#eff6ff;border-radius:8px;padding:12px 16px;text-align:center;margin-top:10px;">
       <p style="margin:0 0 8px;font-size:14px;color:#1e40af;">
-        <i class="fa-solid fa-star" style="color:#f59e0b;"></i>
-        <strong> ¿Trabajaste con esta persona?</strong>
+        <i class="fa-solid fa-star" style="color:#f59e0b;"></i> <strong>¿Trabajaste con esta persona?</strong>
       </p>
-      <p style="margin:0 0 10px;font-size:13px;color:#475569;">Iniciá sesión y dejá tu calificación — ayuda a toda la comunidad.</p>
+      <p style="margin:0 0 10px;font-size:13px;color:#475569;">Iniciá sesión y dejá tu calificación.</p>
       <a href="/login.html" class="btn btn-primary btn-sm" style="text-decoration:none;">
         <i class="fa-solid fa-right-to-bracket"></i> Iniciá sesión para calificar
       </a>
@@ -482,15 +450,13 @@ window.enviarReview = async function(profileId, nombre){
     msg.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px 12px;">Elegí una puntuación antes de enviar</div>`
     return
   }
-  const token  = getAccessToken()
+  const token   = getAccessToken()
   const autorId = getCurrentUserId()
   if(!token || !autorId){
     msg.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px 12px;">Necesitás iniciar sesión</div>`
     return
   }
-
   msg.innerHTML = `<div style="font-size:13px;color:#64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Enviando...</div>`
-
   try {
     const res = await fetch(`${SB_URL}/rest/v1/reviews`, {
       method: "POST",
@@ -504,10 +470,8 @@ window.enviarReview = async function(profileId, nombre){
       })
     })
     if(!res.ok){ const err = await res.json(); throw new Error(err.message || "Error al enviar") }
-
     document.querySelector(".form-review").innerHTML =
-      `<div class="alerta alerta-ok"><i class="fa-solid fa-check-circle"></i> ¡Gracias! Tu calificación fue enviada. Ayudás a toda la comunidad.</div>`
-
+      `<div class="alerta alerta-ok"><i class="fa-solid fa-check-circle"></i> ¡Gracias! Tu calificación fue enviada.</div>`
     setTimeout(() => cargarReviews(profileId, nombre), 900)
   } catch(e){
     msg.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px 12px;">${e.message}</div>`
@@ -525,3 +489,6 @@ window.cerrarModalClick = function(e){
   if(e.target === document.getElementById("modalOverlay")) cerrarModal()
 }
 document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarModal() })
+
+/* ── AUTO-CARGAR al entrar ── */
+buscar()
