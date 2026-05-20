@@ -144,11 +144,51 @@
     <a href="/registro.html?tipo=profesional" class="btn btn-orange" style="width:auto; padding:14px 30px;">
       <i class="fa-solid fa-tools"></i> Publicar mi oficio
     </a>
-    <a href="/registro.html?tipo=trabajador" class="btn btn-outline" style="width:auto; padding:14px 30px; color:white; border-color:rgba(255,255,255,0.5);">
-      <i class="fa-solid fa-file-lines"></i> Subir mi CV
+    <a href="#" onclick="abrirModalCV(event)" class="btn btn-success" style="width:auto; padding:14px 30px;">
+      <i class="fa-solid fa-briefcase"></i> Busco trabajo / CV
+    </a>
+    <a href="/registro.html?tipo=empleador" class="btn btn-outline" style="width:auto; padding:14px 30px; color:white; border-color:rgba(255,255,255,0.5);">
+      <i class="fa-solid fa-building"></i> Busco personal
     </a>
   </div>
 </section>
+
+<!-- MODAL REGISTRO RÁPIDO CV -->
+<div class="modal-overlay" id="modalCV" onclick="cerrarModalCVClick(event)">
+  <div class="modal-box" style="max-width:480px;">
+    <button class="modal-close" onclick="cerrarModalCV()">×</button>
+    <div class="modal-content" style="padding:28px;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:44px;margin-bottom:10px;">💼</div>
+        <h2 style="margin:0 0 6px;font-size:22px;font-weight:800;color:#1e293b;">Subí tu CV</h2>
+        <p style="margin:0;color:#64748b;font-size:14px;">Creá tu perfil gratis y que los empleadores te encuentren en tu zona</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label>Nombre *</label>
+          <input id="cvNombre" placeholder="Juan">
+        </div>
+        <div>
+          <label>Apellido *</label>
+          <input id="cvApellido" placeholder="García">
+        </div>
+      </div>
+      <label>Email *</label>
+      <input id="cvEmail" type="email" placeholder="juan@email.com">
+      <label>Contraseña *</label>
+      <input id="cvPassword" type="password" placeholder="Mínimo 6 caracteres">
+      <label>Teléfono / WhatsApp</label>
+      <input id="cvTel" type="tel" placeholder="Ej: 1123456789">
+      <div id="msgCV" style="margin-top:10px;"></div>
+      <button class="btn btn-success" id="btnCV" onclick="registrarCV()" style="margin-top:12px;font-size:16px;">
+        <i class="fa-solid fa-arrow-right"></i> Crear cuenta y subir mi CV
+      </button>
+      <p style="text-align:center;font-size:13px;color:#94a3b8;margin:12px 0 0;">
+        ¿Ya tenés cuenta? <a href="/login.html">Iniciá sesión</a>
+      </p>
+    </div>
+  </div>
+</div>
 
 <footer>
   <p>© 2025 Trabajos Cerca · Conectamos profesionales con clientes en toda Argentina</p>
@@ -185,6 +225,64 @@ window.buscarDesdeHero = function(){
 }
 
 cargarMenu()
+
+/* ── MODAL CV ── */
+window.abrirModalCV = function(e){
+  e.preventDefault()
+  document.getElementById("modalCV").classList.add("activo")
+  document.body.style.overflow = "hidden"
+}
+window.cerrarModalCV = function(){
+  document.getElementById("modalCV").classList.remove("activo")
+  document.body.style.overflow = ""
+}
+window.cerrarModalCVClick = function(e){
+  if(e.target === document.getElementById("modalCV")) cerrarModalCV()
+}
+window.registrarCV = async function(){
+  const nombre   = document.getElementById("cvNombre").value.trim()
+  const apellido = document.getElementById("cvApellido").value.trim()
+  const email    = document.getElementById("cvEmail").value.trim()
+  const password = document.getElementById("cvPassword").value
+  const movil    = document.getElementById("cvTel").value.trim()
+  const msg      = document.getElementById("msgCV")
+  const btn      = document.getElementById("btnCV")
+
+  if(!nombre || !apellido || !email || password.length < 6){
+    msg.innerHTML = '<div class="alerta alerta-err">Completá nombre, apellido, email y contraseña (mín. 6 caracteres)</div>'
+    return
+  }
+
+  btn.disabled = true
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...'
+
+  const { data, error } = await supabase.auth.signUp({ email, password })
+  if(error){
+    msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-arrow-right"></i> Crear cuenta y subir mi CV'
+    return
+  }
+
+  const perfilData = { nombre, apellido, email, movil, tipo: "trabajador" }
+  localStorage.setItem("pendingPerfil", JSON.stringify(perfilData))
+
+  if(!data.user){
+    msg.innerHTML = `<div class="alerta alerta-ok">
+      <i class="fa-solid fa-envelope"></i>
+      Te enviamos un email a <strong>${email}</strong>. Hacé clic en el enlace para activar tu cuenta y completar tu CV.
+    </div>`
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-arrow-right"></i> Crear cuenta y subir mi CV'
+    return
+  }
+
+  await supabase.from("perfiles").insert({ id: data.user.id, ...perfilData })
+  localStorage.removeItem("pendingPerfil")
+  window.location.href = "/perfil_cv.html?nuevo=1"
+}
+
+document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarModalCV() })
 </script>
 
 </body>

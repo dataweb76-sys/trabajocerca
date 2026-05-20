@@ -116,6 +116,8 @@ async function registrarUsuario(e){
 
   if(tipo === "profesional"){
     window.location.href = "/perfil_servicio.html?nuevo=1"
+  } else if(tipo === "empleador"){
+    window.location.href = "/perfil.html?nuevo=1"
   } else {
     window.location.href = "/perfil_cv.html?nuevo=1"
   }

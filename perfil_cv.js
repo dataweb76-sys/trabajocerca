@@ -20,7 +20,25 @@ async function init(){
     .eq("usuario_id", userId)
     .single()
 
-  if(!cv) return
+  if(!cv){
+    document.getElementById("archivoActual").innerHTML = ""
+    return
+  }
+
+  if(cv.cv_archivo){
+    const nombre = cv.cv_archivo.split("/").pop().split("?")[0]
+    document.getElementById("archivoActual").innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;">
+        <i class="fa-solid fa-file-lines" style="color:#16a34a;font-size:20px;"></i>
+        <div style="flex:1;min-width:0;">
+          <p style="margin:0;font-size:13px;font-weight:600;color:#166534;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${nombre}</p>
+          <p style="margin:2px 0 0;font-size:12px;color:#64748b;">Archivo subido</p>
+        </div>
+        <a href="${cv.cv_archivo}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">
+          <i class="fa-solid fa-download"></i> Ver
+        </a>
+      </div>`
+  }
 
   document.getElementById("titulo").value        = cv.titulo_profesional || ""
   document.getElementById("resumen").value       = cv.resumen            || ""
@@ -205,6 +223,56 @@ window.guardarCV = async function(){
 
   msg.innerHTML = '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> CV guardado correctamente</div>'
   setTimeout(() => window.location.href = "/perfil.html", 1800)
+}
+
+/* ── SUBIR ARCHIVO CV ── */
+
+window.subirArchivoCV = async function(input){
+  const file = input.files[0]
+  if(!file) return
+
+  if(file.size > 5 * 1024 * 1024){
+    document.getElementById("msgArchivoCV").innerHTML = '<div class="alerta alerta-err">El archivo no puede superar 5 MB</div>'
+    return
+  }
+
+  const { data: ud } = await supabase.auth.getUser()
+  const uid = ud.user.id
+  const ext = file.name.split(".").pop().toLowerCase()
+  const nombre = `cv_${uid}_${Date.now()}.${ext}`
+  const msgEl = document.getElementById("msgArchivoCV")
+
+  msgEl.innerHTML = '<div style="color:#64748b;font-size:13px;"><i class="fa-solid fa-spinner fa-spin"></i> Subiendo archivo...</div>'
+
+  const { error } = await supabase.storage.from("trabajos").upload(nombre, file, { upsert: true })
+  if(error){
+    msgEl.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+    return
+  }
+
+  const { data } = supabase.storage.from("trabajos").getPublicUrl(nombre)
+  const url = data.publicUrl
+
+  const { data: existing } = await supabase.from("curriculum").select("id").eq("usuario_id", uid).single()
+  if(existing){
+    await supabase.from("curriculum").update({ cv_archivo: url }).eq("id", existing.id)
+  } else {
+    await supabase.from("curriculum").insert({ usuario_id: uid, cv_archivo: url })
+  }
+
+  msgEl.innerHTML = '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> Archivo subido correctamente</div>'
+  document.getElementById("archivoActual").innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;">
+      <i class="fa-solid fa-file-lines" style="color:#16a34a;font-size:20px;"></i>
+      <div style="flex:1;min-width:0;">
+        <p style="margin:0;font-size:13px;font-weight:600;color:#166534;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${file.name}</p>
+        <p style="margin:2px 0 0;font-size:12px;color:#64748b;">Archivo subido</p>
+      </div>
+      <a href="${url}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">
+        <i class="fa-solid fa-download"></i> Ver
+      </a>
+    </div>`
+  setTimeout(() => { msgEl.innerHTML = "" }, 3000)
 }
 
 /* ── UTILIDAD ── */

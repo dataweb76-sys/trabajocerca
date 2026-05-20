@@ -24,7 +24,7 @@
 
   <p style="text-align:center; color:#64748b; margin:-8px 0 16px; font-size:14px;">¿Qué querés hacer?</p>
 
-  <div class="tipo-cards">
+  <div class="tipo-cards" style="grid-template-columns:repeat(3,1fr);">
     <div class="tipo-card active" id="card-pro" onclick="elegirTipo('profesional')">
       <div class="tipo-ico">🔨</div>
       <h3>Ofrezco servicios</h3>
@@ -34,6 +34,11 @@
       <div class="tipo-ico">📄</div>
       <h3>Busco trabajo</h3>
       <p>Subí tu CV y que las empresas te encuentren</p>
+    </div>
+    <div class="tipo-card" id="card-emp" onclick="elegirTipo('empleador')">
+      <div class="tipo-ico">🏢</div>
+      <h3>Busco personal</h3>
+      <p>Publicá búsquedas y encontrá trabajadores en tu zona</p>
     </div>
   </div>
 
@@ -92,6 +97,7 @@ function elegirTipo(tipo){
   document.getElementById("tipo").value = tipo
   document.getElementById("card-pro").classList.toggle("active", tipo === "profesional")
   document.getElementById("card-work").classList.toggle("active", tipo === "trabajador")
+  document.getElementById("card-emp").classList.toggle("active", tipo === "empleador")
 }
 
 const params = new URLSearchParams(location.search)
