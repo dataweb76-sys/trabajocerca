@@ -7,7 +7,8 @@ const SB_HEADERS = { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
 const DISP = { inmediata:"Disponibilidad inmediata", "15_dias":"En 15 días", "30_dias":"En 30 días", a_consultar:"A consultar" }
 const MOD  = { presencial:"Presencial", remoto:"Remoto", hibrido:"Híbrido", indiferente:"Indiferente" }
 
-let estrellaCV = 0
+let estrellaCV  = 0
+let _miNombreCV = null
 
 /* ── AUTH ── */
 function getAccessToken(){
@@ -16,6 +17,26 @@ function getAccessToken(){
 function getCurrentUserId(){
   const t = getAccessToken(); if(!t) return null
   try { return JSON.parse(atob(t.split(".")[1])).sub || null } catch(e){ return null }
+}
+
+async function getMiNombreCV(){
+  if(_miNombreCV !== null) return _miNombreCV
+  const uid = getCurrentUserId(); if(!uid){ _miNombreCV=""; return "" }
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/perfiles?id=eq.${uid}&select=nombre`,{ headers: SB_HEADERS })
+    if(res.ok){ const d=await res.json(); _miNombreCV=d?.[0]?.nombre||"" }
+  } catch(e){ _miNombreCV="" }
+  return _miNombreCV
+}
+
+function waLinkCV(movil, destNombre){
+  const num=(movil||"").replace(/\D/g,""); if(!num) return null
+  let msg="Hola"
+  if(_miNombreCV) msg+=`, me llamo ${_miNombreCV}`
+  msg+=`! Me comunico con vos porque vi tu perfil`
+  if(destNombre) msg+=` de ${destNombre}`
+  msg+=` en Trabajos Cerca. 👋`
+  return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`
 }
 
 /* ── STARS ── */
@@ -31,7 +52,7 @@ let modalCV = null
 
 function abrirModalCV(item, profileId, nombre){
   const p = item.perfiles || item
-  const wa = p.movil ? `https://wa.me/${p.movil.replace(/\D/g,"")}` : null
+  const wa = waLinkCV(p.movil, `${p.nombre||""} ${p.apellido||""}`.trim())
   const habs = item.habilidades
     ? item.habilidades.split(",").map(h=>`<span class="servicio-tag">${h.trim()}</span>`).join("")
     : ""
@@ -225,6 +246,8 @@ window.buscar = async function(){
     return
   }
 
+  await getMiNombreCV()
+
   // Ratings en paralelo
   const pids = data.map(d=>d.perfiles?.id).filter(Boolean)
   let ratingsMap = {}
@@ -258,7 +281,7 @@ window.buscar = async function(){
 
   data.forEach(item => {
     const p = item.perfiles||{}, pid = p.id||""
-    const wa = p.movil ? `https://wa.me/${p.movil.replace(/\D/g,"")}` : null
+    const wa = waLinkCV(p.movil, `${p.nombre||""} ${p.apellido||""}`.trim())
     const habs = item.habilidades ? item.habilidades.split(",").slice(0,4).map(h=>`<span style="background:#f1f5f9;border-radius:20px;padding:2px 9px;font-size:11px;color:#475569;display:inline-block;margin:2px;">${h.trim()}</span>`).join("") : ""
 
     const foto = p.foto

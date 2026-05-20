@@ -1,6 +1,29 @@
 import { supabase } from "./supabase.js"
 
 const ARGENTINA = [-38.4, -63.6]
+
+/* ── Mensaje WA personalizado ── */
+let _miNombreMapa = null
+async function getMiNombreMapa(){
+  if(_miNombreMapa !== null) return _miNombreMapa
+  const { data: { user } } = await supabase.auth.getUser()
+  if(!user){ _miNombreMapa = ""; return "" }
+  try {
+    const { data } = await supabase.from("perfiles").select("nombre").eq("id", user.id).single()
+    _miNombreMapa = data?.nombre || ""
+  } catch(e){ _miNombreMapa = "" }
+  return _miNombreMapa
+}
+function waLinkMapa(movil, destNombre, destCategoria){
+  const num = (movil||"").replace(/\D/g,""); if(!num) return null
+  let msg = "Hola"
+  if(_miNombreMapa) msg += `, me llamo ${_miNombreMapa}`
+  msg += `! Me comunico con vos porque vi tu perfil`
+  if(destNombre) msg += ` de ${destNombre}`
+  if(destCategoria) msg += ` (${destCategoria})`
+  msg += ` en Trabajos Cerca. 👋`
+  return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`
+}
 const map = L.map("map").setView(ARGENTINA, 5)
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -21,6 +44,8 @@ const iconoNaranja = L.divIcon({
 })
 
 async function cargarProfesionales(){
+  await getMiNombreMapa()
+
   const { data, error } = await supabase
     .from("servicios")
     .select(`id, categoria, titulo, localidad, provincia, lat, lng,
@@ -37,7 +62,7 @@ async function cargarProfesionales(){
     const p = item.perfiles
     if(!p) return
 
-    const wa = `https://wa.me/${(p.movil || "").replace(/\D/g,"")}`
+    const wa = waLinkMapa(p.movil, `${p.nombre} ${p.apellido}`.trim(), item.categoria)
     const fotoHtml = p.foto
       ? `<img src="${p.foto}" class="popup-foto">`
       : `<span class="popup-foto-placeholder"><i class="fa-solid fa-user"></i></span>`

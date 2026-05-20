@@ -23,6 +23,7 @@ const SERVICIOS = {
   "Niñera / Cuidadora": ["Cuidado de niños en el hogar", "Babysitting", "Apoyo escolar básico", "Cuidado de bebés", "Por horas o días", "Turno noche"],
   "Delivery / Mensajería": ["Envíos locales en moto", "Distribución de volantes", "Mandados y encargos", "Trámites bancarios", "Transporte de documentos"],
   "Planchado / Laundry": ["Planchado a domicilio", "Lavado y planchado", "Planchado de uniformes y camisas"],
+  "Estampería Textil":  ["Estampado en tela", "Serigrafía", "Sublimación", "Remeras personalizadas", "Gorras estampadas", "Uniformes y ropa de trabajo", "Bolsas personalizadas", "Estampados digitales", "Bordado", "Diseño gráfico para estampados"],
   /* ── Profesionales ── */
   "Médico / Clínica":    ["Consulta clínica general", "Pediatría", "Cardiología", "Dermatología", "Traumatología", "Medicina laboral", "Atención a domicilio"],
   "Odontólogo":          ["Odontología general", "Ortodoncia", "Blanqueamiento dental", "Implantes", "Odontología pediátrica", "Cirugía maxilofacial"],

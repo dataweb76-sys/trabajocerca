@@ -4,7 +4,8 @@ const SB_URL = "https://iqeiszkoifxgygoqvbem.supabase.co"
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs"
 const SB_HEADERS = { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
 
-let estrellaEmp = 0
+let estrellaEmp   = 0
+let _miNombreTrab = null
 
 /* ── AUTH ── */
 function getAccessToken(){
@@ -15,9 +16,29 @@ function getCurrentUserId(){
   try { return JSON.parse(atob(t.split(".")[1])).sub||null } catch(e){ return null }
 }
 
+async function getMiNombreTrab(){
+  if(_miNombreTrab!==null) return _miNombreTrab
+  const uid=getCurrentUserId(); if(!uid){ _miNombreTrab=""; return "" }
+  try {
+    const res=await fetch(`${SB_URL}/rest/v1/perfiles?id=eq.${uid}&select=nombre`,{headers:SB_HEADERS})
+    if(res.ok){ const d=await res.json(); _miNombreTrab=d?.[0]?.nombre||"" }
+  } catch(e){ _miNombreTrab="" }
+  return _miNombreTrab
+}
+
+function waLinkTrab(movil, destNombre){
+  const num=(movil||"").replace(/\D/g,""); if(!num) return null
+  let msg="Hola"
+  if(_miNombreTrab) msg+=`, me llamo ${_miNombreTrab}`
+  msg+=`! Me comunico con vos porque vi tu perfil`
+  if(destNombre) msg+=` de ${destNombre}`
+  msg+=` en Trabajos Cerca. 👋`
+  return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`
+}
+
 /* ── MODAL ── */
 function abrirModalEmp(p){
-  const wa = p.movil ? `https://wa.me/${p.movil.replace(/\D/g,"")}` : null
+  const wa = waLinkTrab(p.movil, `${p.nombre||""} ${p.apellido||""}`.trim())
   const foto = p.foto
     ? `<img src="${p.foto}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #2563eb;">`
     : `<div style="width:90px;height:90px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:36px;color:#2563eb;"><i class="fa-solid fa-building"></i></div>`
@@ -192,6 +213,8 @@ window.buscar = async function(){
     return
   }
 
+  await getMiNombreTrab()
+
   // Ratings en paralelo
   const pids = data.map(p=>p.id).filter(Boolean)
   let ratingsMap = {}
@@ -223,7 +246,7 @@ window.buscar = async function(){
   cont.innerHTML = bannerCal + `<p style="color:#64748b;margin-bottom:16px;font-size:14px;">${data.length} empleador${data.length!==1?"es":""} encontrado${data.length!==1?"s":""} · ordenados por calificación</p>`
 
   data.forEach(p => {
-    const wa = p.movil ? `https://wa.me/${p.movil.replace(/\D/g,"")}` : null
+    const wa = waLinkTrab(p.movil, `${p.nombre||""} ${p.apellido||""}`.trim())
     const foto = p.foto
       ? `<img src="${p.foto}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #2563eb;flex-shrink:0;">`
       : `<div style="width:70px;height:70px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:26px;color:#2563eb;flex-shrink:0;"><i class="fa-solid fa-building"></i></div>`

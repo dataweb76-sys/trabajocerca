@@ -4,8 +4,9 @@ const SB_URL = "https://iqeiszkoifxgygoqvbem.supabase.co"
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs"
 const SB_HEADERS = { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
 
-let mapModal       = null
+let mapModal           = null
 let ratingSeleccionado = 0
+let _miNombre          = null   // nombre del usuario logueado (se carga una vez)
 
 /* ── AUTH ── */
 function getAccessToken(){
@@ -14,6 +15,37 @@ function getAccessToken(){
 function getCurrentUserId(){
   const t = getAccessToken(); if(!t) return null
   try { return JSON.parse(atob(t.split(".")[1])).sub || null } catch(e){ return null }
+}
+
+/* ── MI NOMBRE (para el mensaje de WA) ── */
+async function getMiNombre(){
+  if(_miNombre !== null) return _miNombre
+  const uid = getCurrentUserId()
+  if(!uid){ _miNombre = ""; return "" }
+  try {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/perfiles?id=eq.${uid}&select=nombre`,
+      { headers: SB_HEADERS }
+    )
+    if(res.ok){
+      const d = await res.json()
+      _miNombre = d?.[0]?.nombre || ""
+    }
+  } catch(e){ _miNombre = "" }
+  return _miNombre
+}
+
+// Construye la URL de WhatsApp con mensaje personalizado
+function waLink(movil, destNombre, destCategoria){
+  const num = (movil||"").replace(/\D/g,"")
+  if(!num) return null
+  let msg = "Hola"
+  if(_miNombre) msg += `, me llamo ${_miNombre}`
+  msg += "! Me comunico con vos porque vi tu perfil"
+  if(destNombre) msg += ` de ${destNombre}`
+  if(destCategoria) msg += ` (${destCategoria})`
+  msg += " en Trabajos Cerca. 👋"
+  return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`
 }
 
 /* ── PUNTAJE HELPERS ── */
@@ -90,6 +122,9 @@ window.buscar = async function(){
     return
   }
 
+  /* ── Cargar mi nombre para mensaje WA ── */
+  await getMiNombre()
+
   /* ── Puntajes en paralelo ── */
   const profileIds = data.map(d=>d.perfiles?.id).filter(Boolean)
   let puntajesMap = {}   // { uid: { total: N, count: M } }
@@ -139,7 +174,7 @@ window.buscar = async function(){
   /* ── Cards ── */
   data.forEach(item => {
     const p  = item.perfiles || {}
-    const wa = p.movil ? `https://wa.me/${p.movil.replace(/\D/g,"")}` : null
+    const wa = waLink(p.movil, `${p.nombre||""} ${p.apellido||""}`.trim(), item.categoria)
 
     const foto = p.foto
       ? `<img src="${p.foto}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #2563eb;flex-shrink:0;">`
@@ -202,7 +237,7 @@ window.abrirModal = function(item, irCalificar=false){
     ? `<img src="${p.foto}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #2563eb;">`
     : `<div style="width:90px;height:90px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:36px;color:#2563eb;"><i class="fa-solid fa-user"></i></div>`
 
-  const wa   = p.movil ? `https://wa.me/${p.movil.replace(/\D/g,"")}` : null
+  const wa   = waLink(p.movil, `${p.nombre||""} ${p.apellido||""}`.trim(), item.categoria)
   const ubic = `${item.localidad||p.localidad||""}${item.provincia?", "+item.provincia:""}`
   const tags = item.servicios_lista
     ? item.servicios_lista.split(",").map(s=>`<span class="servicio-tag">${s.trim()}</span>`).join("") : ""
