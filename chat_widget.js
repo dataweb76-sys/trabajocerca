@@ -175,7 +175,7 @@
   #lara-msgs {
     flex: 1; overflow-y: auto; padding: 14px 14px 6px;
     display: flex; flex-direction: column; gap: 10px;
-    scroll-behavior: smooth;
+    scroll-behavior: smooth; min-height: 180px;
   }
   #lara-msgs::-webkit-scrollbar { width: 4px; }
   #lara-msgs::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
@@ -202,6 +202,7 @@
     padding: 6px 14px 10px;
     display: flex; flex-wrap: wrap; gap: 6px;
     border-top: 1px solid #f1f5f9;
+    max-height: 160px; overflow-y: auto; flex-shrink: 0;
   }
   #lara-faqs-toggle {
     width: 100%; text-align: left; background: none; border: none;
@@ -310,7 +311,7 @@
         <button id="lara-faqs-toggle" onclick="window._laraToggleFaqs()">
           <span id="lara-faqs-arrow">▸</span> Preguntas frecuentes
         </button>
-        <div id="lara-faqs-list" style="display:flex;flex-wrap:wrap;gap:6px;width:100%;"></div>
+        <div id="lara-faqs-list" style="display:none;flex-wrap:wrap;gap:6px;width:100%;"></div>
       </div>
 
       <div id="lara-input-row">
