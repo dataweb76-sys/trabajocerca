@@ -58,7 +58,7 @@ window.buscar = async function(){
 
   const { data, error } = await query.order("created_at", { ascending: false })
 
-  if(error){ cont.innerHTML = '<div class="alerta alerta-err">Error al buscar. Intentá nuevamente.</div>'; return }
+  if(error){ cont.innerHTML = `<div class="alerta alerta-err">Error: ${error.message} (código: ${error.code})</div>`; return }
 
   if(!data?.length){
     cont.innerHTML = `
