@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compartir — Trabajos Cerca</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: #0f172a;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start;
+    padding: 24px 16px 40px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  /* ── Instrucción arriba ── */
+  .instruccion {
+    color: #94a3b8; font-size: 13px; margin-bottom: 20px;
+    text-align: center; letter-spacing: .03em;
+  }
+  .instruccion strong { color: #e2e8f0; }
+
+  /* ══════════ FLYER ══════════ */
+  .flyer {
+    width: 100%; max-width: 420px;
+    border-radius: 28px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    background: #fff;
+    position: relative;
+  }
+
+  /* Cabecera degradé */
+  .flyer-top {
+    background: linear-gradient(145deg, #7c3aed 0%, #2563eb 60%, #0ea5e9 100%);
+    padding: 36px 28px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .flyer-top::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .flyer-logo {
+    height: 52px; margin-bottom: 14px;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,.2));
+  }
+  .flyer-titulo {
+    color: white; font-size: 26px; font-weight: 900;
+    line-height: 1.15; margin-bottom: 8px;
+    text-shadow: 0 2px 12px rgba(0,0,0,.2);
+  }
+  .flyer-subtitulo {
+    color: rgba(255,255,255,.85); font-size: 14px; font-weight: 500;
+    line-height: 1.5;
+  }
+
+  /* Badges de estadísticas */
+  .flyer-stats {
+    display: flex; justify-content: center; gap: 14px;
+    margin-top: 22px; flex-wrap: wrap;
+  }
+  .stat-badge {
+    background: rgba(255,255,255,.18);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px; padding: 6px 14px;
+    color: white; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .stat-badge i { font-size: 13px; }
+
+  /* Cuerpo del flyer */
+  .flyer-body { padding: 26px 24px; background: white; }
+
+  .flyer-tagline {
+    font-size: 15px; font-weight: 800; color: #1e293b;
+    text-align: center; margin-bottom: 20px;
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .flyer-tagline span { color: #7c3aed; }
+
+  /* Lista de beneficios */
+  .beneficios { display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px; }
+  .ben {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: #f8fafc; border-radius: 14px; padding: 12px 14px;
+    border-left: 4px solid #7c3aed;
+  }
+  .ben-emoji { font-size: 24px; line-height: 1; flex-shrink: 0; }
+  .ben-texto strong { display: block; font-size: 13.5px; font-weight: 800; color: #1e293b; margin-bottom: 2px; }
+  .ben-texto span { font-size: 12px; color: #64748b; line-height: 1.4; }
+
+  /* URL destacada */
+  .flyer-url {
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    border-radius: 16px; padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .flyer-url-texto { color: white; }
+  .flyer-url-texto small { font-size: 10px; opacity: .8; text-transform: uppercase; letter-spacing: .06em; display: block; }
+  .flyer-url-texto strong { font-size: 16px; font-weight: 900; letter-spacing: -.01em; }
+  .flyer-url-icon {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px; flex-shrink: 0;
+  }
+
+  /* Categorías chips */
+  .cats-mini {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    justify-content: center; margin-bottom: 6px;
+  }
+  .cat-chip {
+    background: #eff6ff; color: #2563eb;
+    border: 1px solid #bfdbfe;
+    border-radius: 20px; padding: 3px 10px;
+    font-size: 11px; font-weight: 600;
+  }
+
+  /* Pie del flyer */
+  .flyer-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 14px 24px;
+    text-align: center;
+    font-size: 11px; color: #94a3b8;
+    font-weight: 500;
+  }
+  .flyer-footer strong { color: #64748b; }
+
+  /* ── Botones de acción ── */
+  .acciones {
+    width: 100%; max-width: 420px;
+    display: flex; flex-direction: column; gap: 12px;
+    margin-top: 20px;
+  }
+  .btn-wa {
+    background: #25D366; color: white;
+    border: none; border-radius: 16px;
+    padding: 16px 24px; font-size: 16px; font-weight: 800;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 4px 20px rgba(37,211,102,.4);
+    transition: transform .15s, box-shadow .15s;
+    text-decoration: none;
+  }
+  .btn-wa:hover { transform: translateY(-2px); box-shadow: 0 6px 26px rgba(37,211,102,.5); }
+  .btn-wa i { font-size: 22px; }
+
+  .btn-copy {
+    background: #1e293b; color: white;
+    border: none; border-radius: 16px;
+    padding: 13px 24px; font-size: 14px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .15s;
+  }
+  .btn-copy:hover { background: #334155; }
+
+  .btn-copy.copiado { background: #16a34a; }
+
+  /* Nota de captura */
+  .nota-captura {
+    color: #475569; font-size: 12px; text-align: center;
+    margin-top: 16px; line-height: 1.6;
+  }
+  .nota-captura i { color: #7c3aed; }
+</style>
+</head>
+<body>
+
+<p class="instruccion">
+  <strong>Compartí Trabajos Cerca</strong> — usá el botón de WhatsApp o guardá el flyer como imagen
+</p>
+
+<!-- ══ FLYER ══ -->
+<div class="flyer" id="flyer">
+
+  <div class="flyer-top">
+    <img src="logo.png" alt="Trabajos Cerca" class="flyer-logo">
+    <h1 class="flyer-titulo">Encontrá el profesional<br>que necesitás</h1>
+    <p class="flyer-subtitulo">Plomeros, electricistas, contadores, médicos<br>y mucho más — <strong style="color:white;">en tu ciudad</strong></p>
+    <div class="flyer-stats">
+      <div class="stat-badge"><i class="fa-solid fa-hammer"></i> Oficios</div>
+      <div class="stat-badge"><i class="fa-solid fa-briefcase"></i> Profesionales</div>
+      <div class="stat-badge"><i class="fa-solid fa-map-location-dot"></i> Mapa en vivo</div>
+    </div>
+  </div>
+
+  <div class="flyer-body">
+
+    <p class="flyer-tagline">¿Por qué usar <span>Trabajos Cerca</span>?</p>
+
+    <div class="beneficios">
+      <div class="ben">
+        <div class="ben-emoji">🔍</div>
+        <div class="ben-texto">
+          <strong>Buscá por categoría y ciudad</strong>
+          <span>Filtrá entre más de 30 rubros y encontrá profesionales cerca tuyo</span>
+        </div>
+      </div>
+      <div class="ben">
+        <div class="ben-emoji">⭐</div>
+        <div class="ben-texto">
+          <strong>Perfiles con calificaciones reales</strong>
+          <span>Los mejores profesionales aparecen primero según sus puntos</span>
+        </div>
+      </div>
+      <div class="ben">
+        <div class="ben-emoji">💬</div>
+        <div class="ben-texto">
+          <strong>Contacto directo por WhatsApp</strong>
+          <span>Sin intermediarios. Hablás directo con el profesional</span>
+        </div>
+      </div>
+      <div class="ben">
+        <div class="ben-emoji">🆓</div>
+        <div class="ben-texto">
+          <strong>100% gratuito para buscar</strong>
+          <span>Registrarse y publicar tu perfil también es gratis</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flyer-url">
+      <div class="flyer-url-texto">
+        <small>Entrá ahora en</small>
+        <strong>trabajocerca.vercel.app</strong>
+      </div>
+      <div class="flyer-url-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+    </div>
+
+    <div class="cats-mini">
+      <span class="cat-chip">🔨 Albañilería</span>
+      <span class="cat-chip">💧 Plomería</span>
+      <span class="cat-chip">⚡ Electricista</span>
+      <span class="cat-chip">🎨 Pintura</span>
+      <span class="cat-chip">🚗 Mecánico</span>
+      <span class="cat-chip">📷 Fotógrafo</span>
+      <span class="cat-chip">🩺 Médico</span>
+      <span class="cat-chip">📚 Profesor</span>
+      <span class="cat-chip">+ muchos más</span>
+    </div>
+  </div>
+
+  <div class="flyer-footer">
+    <strong>Trabajos Cerca</strong> · Todo el talento de tu ciudad, en un solo lugar
+  </div>
+
+</div>
+
+<!-- ── Botones ── -->
+<div class="acciones">
+  <a class="btn-wa" id="btnWa"
+     href="https://wa.me/?text=👷%20*Trabajos%20Cerca*%20%E2%80%94%20Encontr%C3%A1%20el%20profesional%20que%20necesit%C3%A1s%20en%20tu%20ciudad%21%0A%0A%F0%9F%94%A8%20Oficios%20%7C%20%F0%9F%92%BC%20Profesionales%20%7C%20%F0%9F%97%BA%EF%B8%8F%20Mapa%20en%20vivo%0A%0A%E2%9C%85%20Plomeros%2C%20electricistas%2C%20contadores%2C%20m%C3%A9dicos%20y%20m%C3%A1s%20cerca%20tuyo%0A%E2%9C%85%20Contacto%20directo%20por%20WhatsApp%0A%E2%9C%85%20100%25%20gratis%0A%0A%F0%9F%91%89%20Entr%C3%A1%20ac%C3%A1%3A%20https%3A%2F%2Ftrabajocerca.vercel.app"
+     target="_blank">
+    <i class="fa-brands fa-whatsapp"></i> Compartir por WhatsApp
+  </a>
+
+  <button class="btn-copy" id="btnCopy" onclick="copiarLink()">
+    <i class="fa-solid fa-link"></i> Copiar link de la página
+  </button>
+</div>
+
+<p class="nota-captura">
+  <i class="fa-solid fa-lightbulb"></i> También podés <strong>hacer una captura de pantalla</strong> del flyer y enviarlo como imagen por WhatsApp
+</p>
+
+<script>
+function copiarLink(){
+  navigator.clipboard.writeText("https://trabajocerca.vercel.app").then(() => {
+    const btn = document.getElementById("btnCopy")
+    btn.classList.add("copiado")
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> ¡Link copiado!'
+    setTimeout(() => {
+      btn.classList.remove("copiado")
+      btn.innerHTML = '<i class="fa-solid fa-link"></i> Copiar link de la página'
+    }, 2500)
+  })
+}
+</script>
+
+</body>
+</html>
