@@ -105,7 +105,14 @@ async function cargarReviewsCV(profileId, nombre){
   const topEl = document.getElementById("cvModalStarsTop")
   if(topEl && count>0) topEl.innerHTML = starsHTML(avg, count, 14)
 
-  let html = `<h3 style="margin:0 0 12px;font-size:16px;color:#1e293b;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Calificaciones</h3>`
+  let html = `<h3 style="margin:0 0 6px;font-size:16px;color:#1e293b;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Calificaciones</h3>`
+
+  if(uid && !esSí && !yaCal){
+    html += `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#92400e;">
+      <i class="fa-solid fa-star" style="color:#f59e0b;"></i>
+      <strong> ¿Ya trabajaste con ${nombre}?</strong> Tu calificación ayuda a otros empleadores y al trabajador a conseguir más oportunidades.
+    </div>`
+  }
 
   if(count>0){
     const r = Math.round(avg)
@@ -118,17 +125,18 @@ async function cargarReviewsCV(profileId, nombre){
         ${rev.comentario?`<p>"${rev.comentario}"</p>`:""}</div>`
     })
   } else {
-    html += `<p style="font-size:13px;color:#94a3b8;text-align:center;margin-bottom:14px;">Sin calificaciones aún</p>`
+    html += `<p style="font-size:13px;color:#94a3b8;text-align:center;margin-bottom:14px;">Sin calificaciones aún — ¡sé el primero!</p>`
   }
 
   if(uid && !esSí && !yaCal){
     estrellaCV = 0
     html += `<div class="form-review">
-      <h4><i class="fa-solid fa-pen"></i> Calificá a ${nombre}</h4>
+      <h4 style="margin:0 0 8px;"><i class="fa-solid fa-pen"></i> Calificá a ${nombre}</h4>
+      <p style="font-size:13px;color:#64748b;margin:0 0 10px;">Tu opinión importa. Ayudás a la comunidad.</p>
       <div class="stars-input" id="starsRevCV">
         ${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star" onclick="setRevCV(${i})" onmouseover="hovRevCV(${i})" onmouseout="resRevCV()"></i>`).join("")}
       </div>
-      <textarea id="comentRevCV" rows="3" placeholder="Tu experiencia (opcional)"
+      <textarea id="comentRevCV" rows="3" placeholder="¿Cómo fue trabajar con esta persona? (opcional)"
         style="width:100%;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px;font-family:inherit;"></textarea>
       <div id="msgRevCV"></div>
       <button class="btn btn-primary btn-sm" onclick="enviarRevCV('${profileId}','${nombre}')">
@@ -136,9 +144,13 @@ async function cargarReviewsCV(profileId, nombre){
       </button>
     </div>`
   } else if(!uid){
-    html += `<p style="font-size:13px;color:#64748b;text-align:center;margin-top:10px;"><a href="/login.html">Iniciá sesión</a> para calificar</p>`
+    html += `<div style="background:#eff6ff;border-radius:8px;padding:12px 16px;text-align:center;margin-top:10px;">
+      <p style="margin:0 0 8px;font-size:14px;color:#1e40af;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> <strong>¿Trabajaste con esta persona?</strong></p>
+      <p style="margin:0 0 10px;font-size:13px;color:#475569;">Iniciá sesión y dejá tu calificación.</p>
+      <a href="/login.html" class="btn btn-primary btn-sm" style="text-decoration:none;"><i class="fa-solid fa-right-to-bracket"></i> Iniciá sesión</a>
+    </div>`
   } else if(yaCal){
-    html += `<p style="font-size:13px;color:#16a34a;text-align:center;margin-top:10px;"><i class="fa-solid fa-check-circle"></i> Ya calificaste a esta persona</p>`
+    html += `<p style="font-size:13px;color:#16a34a;text-align:center;margin-top:10px;"><i class="fa-solid fa-check-circle"></i> Ya calificaste a esta persona — ¡gracias!</p>`
   }
   sec.innerHTML = html
 }
@@ -201,7 +213,36 @@ window.buscar = async function(){
     return
   }
 
-  cont.innerHTML=`<p style="color:#64748b;margin-bottom:16px;font-size:14px;">${data.length} CV${data.length!==1?"s":""} encontrado${data.length!==1?"s":""}</p>`
+  // Ratings en paralelo
+  const pids = data.map(d=>d.perfiles?.id).filter(Boolean)
+  let ratingsMap = {}
+  if(pids.length){
+    try {
+      const rRes = await fetch(`${SB_URL}/rest/v1/reviews?trabajador_id=in.(${pids.join(",")})&tipo=neq.cliente&select=trabajador_id,rating`, { headers: SB_HEADERS })
+      if(rRes.ok){
+        const revs = await rRes.json()
+        revs.forEach(r=>{ if(!ratingsMap[r.trabajador_id]) ratingsMap[r.trabajador_id]=[]; ratingsMap[r.trabajador_id].push(r.rating) })
+      }
+    } catch(e){}
+  }
+
+  // Merge y sort por rating
+  data.forEach(item => {
+    const pid = item.perfiles?.id
+    const ratings = pid ? (ratingsMap[pid]||[]) : []
+    item._avgRating = ratings.length ? ratings.reduce((a,b)=>a+b,0)/ratings.length : 0
+    item._ratingCount = ratings.length
+  })
+  data.sort((a,b) => b._avgRating - a._avgRating)
+
+  const bannerCal = `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+    <i class="fa-solid fa-star" style="color:#f59e0b;font-size:20px;flex-shrink:0;"></i>
+    <p style="margin:0;font-size:13px;color:#92400e;">
+      <strong>¿Contrataste a alguien?</strong> Calificalo — ayudás a otros empleadores a elegir mejor y al trabajador a conseguir más oportunidades.
+    </p>
+  </div>`
+
+  cont.innerHTML = bannerCal + `<p style="color:#64748b;margin-bottom:16px;font-size:14px;">${data.length} CV${data.length!==1?"s":""} encontrado${data.length!==1?"s":""} · ordenados por calificación</p>`
 
   data.forEach(item => {
     const p = item.perfiles||{}, pid = p.id||""
@@ -211,6 +252,11 @@ window.buscar = async function(){
     const foto = p.foto
       ? `<img src="${p.foto}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #16a34a;flex-shrink:0;">`
       : `<div style="width:70px;height:70px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;font-size:26px;color:#16a34a;flex-shrink:0;"><i class="fa-solid fa-user"></i></div>`
+
+    const r = Math.round(item._avgRating)
+    const starsCard = item._ratingCount > 0
+      ? `${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=r?" lit":""}"></i>`).join("")}<span>${item._avgRating.toFixed(1)} (${item._ratingCount})</span>`
+      : `<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><span style="color:#94a3b8;font-size:12px;">Sin calificaciones aún</span>`
 
     const card = document.createElement("div")
     card.className = "card"
@@ -225,18 +271,14 @@ window.buscar = async function(){
         <div style="flex:1;min-width:0;">
           <h3 style="margin:0 0 3px;font-size:17px;">${p.nombre||""} ${p.apellido||""}</h3>
           <p style="margin:0 0 2px;color:#16a34a;font-weight:700;font-size:14px;">${item.titulo_profesional||"Sin título"}</p>
-          <div class="card-stars" id="cvstars-${pid}">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <span>Sin calificaciones</span>
-          </div>
+          <div class="card-stars">${starsCard}</div>
           <p style="margin:4px 0 0;font-size:13px;color:#64748b;"><i class="fa-solid fa-location-dot"></i> ${p.localidad||""}${p.provincia?", "+p.provincia:""}</p>
           ${item.disponibilidad?`<p style="margin:2px 0 0;font-size:12px;color:#2563eb;"><i class="fa-solid fa-clock"></i> ${DISP[item.disponibilidad]||item.disponibilidad}</p>`:""}
           ${habs?`<div style="margin-top:5px;">${habs}</div>`:""}
         </div>
       </div>
       <div class="card-actions" style="margin-top:14px;">
-        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation()">
+        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();this.closest('.card').click()">
           <i class="fa-solid fa-eye"></i> Ver perfil
         </button>
         ${wa?`<a href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
@@ -246,23 +288,6 @@ window.buscar = async function(){
 
     cont.appendChild(card)
   })
-
-  // Ratings en cards
-  const pids = data.map(d=>d.perfiles?.id).filter(Boolean)
-  if(pids.length){
-    try {
-      const res = await fetch(`${SB_URL}/rest/v1/reviews?trabajador_id=in.(${pids.join(",")})&tipo=neq.cliente&select=trabajador_id,rating`, { headers: SB_HEADERS })
-      if(res.ok){
-        const revs = await res.json(), mapa={}
-        revs.forEach(r=>{ if(!mapa[r.trabajador_id]) mapa[r.trabajador_id]=[]; mapa[r.trabajador_id].push(r.rating) })
-        Object.entries(mapa).forEach(([pid,ratings])=>{
-          const el=document.getElementById(`cvstars-${pid}`); if(!el) return
-          const avg=ratings.reduce((a,b)=>a+b,0)/ratings.length, r=Math.round(avg)
-          el.innerHTML=[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=r?" lit":""}"></i>`).join("")+`<span>${avg.toFixed(1)} (${ratings.length})</span>`
-        })
-      }
-    } catch(e){}
-  }
 }
 
 buscar()

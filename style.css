@@ -954,6 +954,39 @@ a:hover { text-decoration: underline; }
   #mapa, #mapPerfil, #mapServicio, #mapaPub { height: 220px; }
 }
 
+/* ── Category chips ── */
+
+.cats-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.cats-chips button {
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 22px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #334155;
+  cursor: pointer;
+  transition: border-color .18s, background .18s, color .18s, transform .1s;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.cats-chips button:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #2563eb;
+  transform: translateY(-1px);
+}
+
+.cats-chips button:active {
+  transform: translateY(0);
+}
+
 /* ── Portfolio ── */
 
 .foto-upload-box {

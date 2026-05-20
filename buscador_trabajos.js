@@ -77,7 +77,14 @@ async function cargarReviewsEmp(profileId, nombre){
       <span style="font-size:12px;color:#64748b;margin-left:5px;">${avg.toFixed(1)} (${count})</span>`
   }
 
-  let html = `<h3 style="margin:0 0 12px;font-size:16px;color:#1e293b;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Calificaciones</h3>`
+  let html = `<h3 style="margin:0 0 6px;font-size:16px;color:#1e293b;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Calificaciones</h3>`
+
+  if(uid&&!esSí&&!yaCal){
+    html += `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#92400e;">
+      <i class="fa-solid fa-star" style="color:#f59e0b;"></i>
+      <strong> ¿Trabajaste para ${nombre}?</strong> Tu calificación ayuda a otros trabajadores a conocer cómo es este empleador.
+    </div>`
+  }
 
   if(count>0){
     const r=Math.round(avg)
@@ -90,17 +97,18 @@ async function cargarReviewsEmp(profileId, nombre){
         ${rev.comentario?`<p>"${rev.comentario}"</p>`:""}</div>`
     })
   } else {
-    html+=`<p style="font-size:13px;color:#94a3b8;text-align:center;margin-bottom:14px;">Sin calificaciones aún</p>`
+    html+=`<p style="font-size:13px;color:#94a3b8;text-align:center;margin-bottom:14px;">Sin calificaciones aún — ¡sé el primero!</p>`
   }
 
   if(uid&&!esSí&&!yaCal){
     estrellaEmp=0
     html+=`<div class="form-review">
-      <h4><i class="fa-solid fa-pen"></i> Calificá a ${nombre}</h4>
+      <h4 style="margin:0 0 8px;"><i class="fa-solid fa-pen"></i> Calificá a ${nombre}</h4>
+      <p style="font-size:13px;color:#64748b;margin:0 0 10px;">Tu opinión ayuda a otros trabajadores a conocer este empleador.</p>
       <div class="stars-input" id="starsRevEmp">
         ${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star" onclick="setRevEmp(${i})" onmouseover="hovRevEmp(${i})" onmouseout="resRevEmp()"></i>`).join("")}
       </div>
-      <textarea id="comentRevEmp" rows="3" placeholder="¿Cómo fue tu experiencia? (opcional)"
+      <textarea id="comentRevEmp" rows="3" placeholder="¿Cómo fue tu experiencia? ¿Buen trato, pago en término, ambiente laboral? (opcional)"
         style="width:100%;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px;font-family:inherit;"></textarea>
       <div id="msgRevEmp"></div>
       <button class="btn btn-primary btn-sm" onclick="enviarRevEmp('${profileId}','${nombre}')">
@@ -108,9 +116,13 @@ async function cargarReviewsEmp(profileId, nombre){
       </button>
     </div>`
   } else if(!uid){
-    html+=`<p style="font-size:13px;color:#64748b;text-align:center;margin-top:10px;"><a href="/login.html">Iniciá sesión</a> para calificar</p>`
+    html+=`<div style="background:#eff6ff;border-radius:8px;padding:12px 16px;text-align:center;margin-top:10px;">
+      <p style="margin:0 0 8px;font-size:14px;color:#1e40af;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> <strong>¿Trabajaste para esta empresa?</strong></p>
+      <p style="margin:0 0 10px;font-size:13px;color:#475569;">Iniciá sesión y dejá tu calificación — ayudás a toda la comunidad.</p>
+      <a href="/login.html" class="btn btn-primary btn-sm" style="text-decoration:none;"><i class="fa-solid fa-right-to-bracket"></i> Iniciá sesión</a>
+    </div>`
   } else if(yaCal){
-    html+=`<p style="font-size:13px;color:#16a34a;text-align:center;margin-top:10px;"><i class="fa-solid fa-check-circle"></i> Ya calificaste a esta persona</p>`
+    html+=`<p style="font-size:13px;color:#16a34a;text-align:center;margin-top:10px;"><i class="fa-solid fa-check-circle"></i> Ya calificaste a esta persona — ¡gracias!</p>`
   }
   sec.innerHTML = html
 }
@@ -164,13 +176,46 @@ window.buscar = async function(){
     return
   }
 
-  cont.innerHTML=`<p style="color:#64748b;margin-bottom:16px;font-size:14px;">${data.length} empleador${data.length!==1?"es":""} encontrado${data.length!==1?"s":""}</p>`
+  // Ratings en paralelo
+  const pids = data.map(p=>p.id).filter(Boolean)
+  let ratingsMap = {}
+  if(pids.length){
+    try {
+      const rRes = await fetch(`${SB_URL}/rest/v1/reviews?trabajador_id=in.(${pids.join(",")})&tipo=neq.cliente&select=trabajador_id,rating`,{headers:SB_HEADERS})
+      if(rRes.ok){
+        const revs = await rRes.json()
+        revs.forEach(r=>{ if(!ratingsMap[r.trabajador_id]) ratingsMap[r.trabajador_id]=[]; ratingsMap[r.trabajador_id].push(r.rating) })
+      }
+    } catch(e){}
+  }
+
+  // Merge y sort por rating
+  data.forEach(p => {
+    const ratings = ratingsMap[p.id] || []
+    p._avgRating = ratings.length ? ratings.reduce((a,b)=>a+b,0)/ratings.length : 0
+    p._ratingCount = ratings.length
+  })
+  data.sort((a,b) => b._avgRating - a._avgRating)
+
+  const bannerCal = `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+    <i class="fa-solid fa-star" style="color:#f59e0b;font-size:20px;flex-shrink:0;"></i>
+    <p style="margin:0;font-size:13px;color:#92400e;">
+      <strong>¿Trabajaste para alguna de estas empresas o personas?</strong> Dejá tu calificación — ayudás a otros trabajadores a elegir dónde postularse.
+    </p>
+  </div>`
+
+  cont.innerHTML = bannerCal + `<p style="color:#64748b;margin-bottom:16px;font-size:14px;">${data.length} empleador${data.length!==1?"es":""} encontrado${data.length!==1?"s":""} · ordenados por calificación</p>`
 
   data.forEach(p => {
     const wa = p.movil ? `https://wa.me/${p.movil.replace(/\D/g,"")}` : null
     const foto = p.foto
       ? `<img src="${p.foto}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #2563eb;flex-shrink:0;">`
       : `<div style="width:70px;height:70px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:26px;color:#2563eb;flex-shrink:0;"><i class="fa-solid fa-building"></i></div>`
+
+    const r = Math.round(p._avgRating)
+    const starsCard = p._ratingCount > 0
+      ? `${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=r?" lit":""}"></i>`).join("")}<span>${p._avgRating.toFixed(1)} (${p._ratingCount})</span>`
+      : `<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><span style="color:#94a3b8;font-size:12px;">Sin calificaciones aún</span>`
 
     const card = document.createElement("div")
     card.className = "card"
@@ -185,11 +230,7 @@ window.buscar = async function(){
         <div style="flex:1;min-width:0;">
           <h3 style="margin:0 0 3px;font-size:17px;">${p.nombre||""} ${p.apellido||""}</h3>
           <p style="margin:0 0 2px;color:#2563eb;font-weight:700;font-size:14px;"><i class="fa-solid fa-building"></i> Busca personal</p>
-          <div class="card-stars" id="empstars-${p.id}">
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-            <span>Sin calificaciones</span>
-          </div>
+          <div class="card-stars">${starsCard}</div>
           <p style="margin:4px 0 0;font-size:13px;color:#64748b;"><i class="fa-solid fa-location-dot"></i> ${p.localidad||""}${p.provincia?", "+p.provincia:""}</p>
         </div>
       </div>
@@ -204,23 +245,6 @@ window.buscar = async function(){
 
     cont.appendChild(card)
   })
-
-  // Ratings en cards
-  const pids = data.map(p=>p.id).filter(Boolean)
-  if(pids.length){
-    try {
-      const res=await fetch(`${SB_URL}/rest/v1/reviews?trabajador_id=in.(${pids.join(",")})&tipo=neq.cliente&select=trabajador_id,rating`,{headers:SB_HEADERS})
-      if(res.ok){
-        const revs=await res.json(), mapa={}
-        revs.forEach(r=>{ if(!mapa[r.trabajador_id]) mapa[r.trabajador_id]=[]; mapa[r.trabajador_id].push(r.rating) })
-        Object.entries(mapa).forEach(([pid,ratings])=>{
-          const el=document.getElementById(`empstars-${pid}`); if(!el) return
-          const avg=ratings.reduce((a,b)=>a+b,0)/ratings.length, r=Math.round(avg)
-          el.innerHTML=[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=r?" lit":""}"></i>`).join("")+`<span>${avg.toFixed(1)} (${ratings.length})</span>`
-        })
-      }
-    } catch(e){}
-  }
 }
 
 buscar()
