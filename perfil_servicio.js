@@ -410,4 +410,14 @@ window.eliminarPortfolio = async function(id){
   cargarPortfolio()
 }
 
+/* ── GUÍA ── */
+window.abrirGuia = function(){
+  document.getElementById("modalGuia").classList.add("activo")
+  document.body.style.overflow = "hidden"
+}
+window.cerrarGuia = function(){
+  document.getElementById("modalGuia").classList.remove("activo")
+  document.body.style.overflow = ""
+}
+
 init()

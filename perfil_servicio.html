@@ -23,6 +23,16 @@
 
   <h2><i class="fa-solid fa-tools" style="color:#f97316"></i> Mi servicio / Oficio</h2>
 
+  <!-- GUÍA DE LA PÁGINA -->
+  <div class="guia-banner" onclick="abrirGuia()">
+    <i class="fa-solid fa-circle-info" style="color:#2563eb;font-size:20px;flex-shrink:0;"></i>
+    <div style="flex:1;">
+      <strong style="color:#1e40af;">Guía: cómo conseguir más clientes</strong>
+      <p style="margin:2px 0 0;font-size:13px;color:#475569;">Conocé el sistema de puntaje y cómo aparecer primero en las búsquedas</p>
+    </div>
+    <i class="fa-solid fa-chevron-right" style="color:#94a3b8;"></i>
+  </div>
+
   <div id="msgNuevo" style="display:none" class="alerta alerta-ok">
     <i class="fa-solid fa-check-circle"></i> ¡Cuenta creada! Completá tu perfil para que los clientes te encuentren.
   </div>
@@ -207,6 +217,74 @@
     </div>
   </div>
 
+</div>
+
+<!-- MODAL GUÍA -->
+<div class="modal-overlay" id="modalGuia" onclick="if(event.target===this){cerrarGuia()}">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="modal-close" onclick="cerrarGuia()">×</button>
+    <div class="modal-content">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:48px;margin-bottom:8px;">🏆</div>
+        <h2 style="margin:0 0 6px;font-size:22px;">Sistema de puntaje</h2>
+        <p style="color:#64748b;font-size:14px;margin:0;">Así funciona el ranking de Trabajos Cerca</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <div style="background:#eff6ff;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
+          <span style="font-size:24px;">⭐</span>
+          <div>
+            <strong style="font-size:14px;color:#1e40af;">Cómo funciona el puntaje</strong>
+            <p style="font-size:13px;color:#475569;margin:4px 0 0;line-height:1.5;">
+              Cada cliente que te califica suma puntos directamente a tu perfil.<br>
+              Si te califican con <strong>1</strong> sumás 1 punto. Con <strong>10</strong> sumás 10 puntos.<br>
+              Tu posición en el buscador depende de tu <strong>puntaje total acumulado</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div style="background:#f0fdf4;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
+          <span style="font-size:24px;">📈</span>
+          <div>
+            <strong style="font-size:14px;color:#166534;">Más puntaje = más visibilidad</strong>
+            <p style="font-size:13px;color:#475569;margin:4px 0 0;line-height:1.5;">
+              Los perfiles con mayor puntaje aparecen <strong>primero en las búsquedas</strong>.<br>
+              Cuanto más arriba aparecés, más personas ven tu perfil y más clientes conseguís.
+            </p>
+          </div>
+        </div>
+
+        <div style="background:#fffbeb;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
+          <span style="font-size:24px;">💬</span>
+          <div>
+            <strong style="font-size:14px;color:#92400e;">Pedile a tus clientes que te califiquen</strong>
+            <p style="font-size:13px;color:#475569;margin:4px 0 0;line-height:1.5;">
+              Después de terminar un trabajo, decile a tu cliente:<br>
+              <em style="color:#1e293b;">"¿Me podés calificar en Trabajos Cerca? Me ayudás a conseguir más clientes."</em><br>
+              Es rápido — solo eligen un número del 1 al 10 y listo.
+            </p>
+          </div>
+        </div>
+
+        <div style="background:#fdf4ff;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
+          <span style="font-size:24px;">👑</span>
+          <div>
+            <strong style="font-size:14px;color:#7e22ce;">Perfiles Destacados</strong>
+            <p style="font-size:13px;color:#475569;margin:4px 0 0;line-height:1.5;">
+              Los perfiles <strong>Destacados</strong> aparecen siempre primero, antes del ranking por puntaje.<br>
+              Para conseguir el badge Destacado, consultá nuestros planes en la sección de trabajos realizados.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <p style="text-align:center;font-size:13px;color:#64748b;margin:16px 0 0;">
+        ¿Dudas? Escribinos a <a href="https://wa.me/542954320639" target="_blank" style="color:#2563eb;">WhatsApp</a>
+      </p>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL PLANES -->

@@ -77,24 +77,25 @@ async function cargarReviewsEmp(profileId, nombre){
       <span style="font-size:12px;color:#64748b;margin-left:5px;">${avg.toFixed(1)} (${count})</span>`
   }
 
-  let html = `<h3 style="margin:0 0 6px;font-size:16px;color:#1e293b;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Calificaciones</h3>`
+  const puntosTotal = reviews.reduce((a,b)=>a+b.rating,0)
 
-  if(uid&&!esSí&&!yaCal){
-    html += `<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#92400e;">
-      <i class="fa-solid fa-star" style="color:#f59e0b;"></i>
-      <strong> ¿Trabajaste para ${nombre}?</strong> Tu calificación ayuda a otros trabajadores a conocer cómo es este empleador.
-    </div>`
-  }
+  const topEl=document.getElementById("empModalStarsTop")
+  if(topEl&&count>0) topEl.innerHTML=`<span class="puntos-badge"><i class="fa-solid fa-trophy" style="font-size:11px;"></i> ${puntosTotal} pts</span>`
+
+  let html=`<h3 style="margin:0 0 10px;font-size:16px;color:#1e293b;"><i class="fa-solid fa-trophy" style="color:#f59e0b;"></i> Puntaje y calificaciones</h3>`
 
   if(count>0){
-    const r=Math.round(avg)
-    html+=`<div class="rating-avg-box">
-      <div class="avg-num">${avg.toFixed(1)}</div>
-      <div><div class="avg-stars">${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=r?" lit":""}"></i>`).join("")}</div>
-      <div class="avg-count">${count} reseña${count!==1?"s":""}</div></div></div>`
+    html+=`<div class="puntos-total-box">
+      <div class="puntos-total-num">${puntosTotal}</div>
+      <div class="puntos-total-label">puntos acumulados · ${count} calificación${count!==1?"es":""}</div>
+    </div>`
     reviews.slice(0,5).forEach(rev=>{
-      html+=`<div class="review-item"><div class="rev-stars">${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star${i<=rev.rating?" lit":""}"></i>`).join("")}</div>
-        ${rev.comentario?`<p>"${rev.comentario}"</p>`:""}</div>`
+      const col=rev.rating<=3?"#dc2626":rev.rating<=6?"#d97706":"#16a34a"
+      html+=`<div class="review-item" style="margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:${col};color:white;font-weight:800;font-size:13px;padding:2px 9px;border-radius:20px;">${rev.rating}/10</span>
+          ${rev.comentario?`<span style="font-size:13px;color:#475569;font-style:italic;">"${rev.comentario}"</span>`:""}
+        </div></div>`
     })
   } else {
     html+=`<p style="font-size:13px;color:#94a3b8;text-align:center;margin-bottom:14px;">Sin calificaciones aún — ¡sé el primero!</p>`
@@ -102,38 +103,53 @@ async function cargarReviewsEmp(profileId, nombre){
 
   if(uid&&!esSí&&!yaCal){
     estrellaEmp=0
-    html+=`<div class="form-review">
-      <h4 style="margin:0 0 8px;"><i class="fa-solid fa-pen"></i> Calificá a ${nombre}</h4>
-      <p style="font-size:13px;color:#64748b;margin:0 0 10px;">Tu opinión ayuda a otros trabajadores a conocer este empleador.</p>
-      <div class="stars-input" id="starsRevEmp">
-        ${[1,2,3,4,5].map(i=>`<i class="fa-solid fa-star" onclick="setRevEmp(${i})" onmouseover="hovRevEmp(${i})" onmouseout="resRevEmp()"></i>`).join("")}
+    html+=`<button class="btn-calificar" id="btnCalEmp" onclick="mostrarFormEmp()">
+      <i class="fa-solid fa-star"></i> Calificar a ${nombre}
+    </button>
+    <div id="formRevEmp" style="display:none;">
+      <div class="form-review" style="margin-top:0;">
+        <h4 style="margin:0 0 6px;"><i class="fa-solid fa-pen"></i> Tu calificación</h4>
+        <p style="font-size:11px;color:#94a3b8;margin:0 0 8px;">1 = Muy malo · 10 = Excelente</p>
+        <div class="rating-10" id="rating10Emp">
+          ${[1,2,3,4,5,6,7,8,9,10].map(i=>`<button class="rating-num ${i<=3?"r-bad":i<=6?"r-ok":"r-good"}" onclick="selRevEmp(${i})">${i}</button>`).join("")}
+        </div>
+        <div id="lblRevEmp" style="font-size:13px;min-height:20px;margin-bottom:8px;"></div>
+        <textarea id="comentRevEmp" rows="3" placeholder="¿Buen trato, pagó en término, buen ambiente? (opcional)"
+          style="width:100%;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px;font-family:inherit;"></textarea>
+        <div id="msgRevEmp"></div>
+        <button class="btn btn-primary btn-sm" onclick="enviarRevEmp('${profileId}','${nombre}')">
+          <i class="fa-solid fa-paper-plane"></i> Enviar calificación
+        </button>
       </div>
-      <textarea id="comentRevEmp" rows="3" placeholder="¿Cómo fue tu experiencia? ¿Buen trato, pago en término, ambiente laboral? (opcional)"
-        style="width:100%;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px;font-family:inherit;"></textarea>
-      <div id="msgRevEmp"></div>
-      <button class="btn btn-primary btn-sm" onclick="enviarRevEmp('${profileId}','${nombre}')">
-        <i class="fa-solid fa-paper-plane"></i> Enviar calificación
-      </button>
     </div>`
   } else if(!uid){
-    html+=`<div style="background:#eff6ff;border-radius:8px;padding:12px 16px;text-align:center;margin-top:10px;">
-      <p style="margin:0 0 8px;font-size:14px;color:#1e40af;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> <strong>¿Trabajaste para esta empresa?</strong></p>
-      <p style="margin:0 0 10px;font-size:13px;color:#475569;">Iniciá sesión y dejá tu calificación — ayudás a toda la comunidad.</p>
+    html+=`<div style="background:#eff6ff;border-radius:10px;padding:14px;text-align:center;">
+      <p style="margin:0 0 8px;font-size:14px;color:#1e40af;"><i class="fa-solid fa-trophy" style="color:#f59e0b;"></i> <strong>¿Trabajaste para esta empresa?</strong></p>
+      <p style="margin:0 0 10px;font-size:13px;color:#475569;">Iniciá sesión y calificala — cada punto suma.</p>
       <a href="/login.html" class="btn btn-primary btn-sm" style="text-decoration:none;"><i class="fa-solid fa-right-to-bracket"></i> Iniciá sesión</a>
     </div>`
   } else if(yaCal){
-    html+=`<p style="font-size:13px;color:#16a34a;text-align:center;margin-top:10px;"><i class="fa-solid fa-check-circle"></i> Ya calificaste a esta persona — ¡gracias!</p>`
+    html+=`<p style="font-size:13px;color:#16a34a;text-align:center;margin-top:10px;"><i class="fa-solid fa-check-circle"></i> Ya calificaste — ¡gracias!</p>`
   }
-  sec.innerHTML = html
+  sec.innerHTML=html
 }
 
-window.setRevEmp = n => { estrellaEmp=n; document.querySelectorAll("#starsRevEmp i").forEach((el,i)=>el.classList.toggle("lit",i<n)) }
-window.hovRevEmp = n => { document.querySelectorAll("#starsRevEmp i").forEach((el,i)=>el.classList.toggle("lit",i<n)) }
-window.resRevEmp = ()  => { document.querySelectorAll("#starsRevEmp i").forEach((el,i)=>el.classList.toggle("lit",i<estrellaEmp)) }
+window.mostrarFormEmp = function(){
+  document.getElementById("btnCalEmp").style.display="none"
+  document.getElementById("formRevEmp").style.display="block"
+}
+
+const LABELS_EMP={1:"Muy malo",2:"Malo",3:"Por debajo de lo esperado",4:"Regular",5:"Puede mejorar",6:"Aceptable",7:"Bueno",8:"Muy bueno",9:"Excelente",10:"¡Perfecto!"}
+window.selRevEmp = function(n){
+  estrellaEmp=n
+  document.querySelectorAll("#rating10Emp .rating-num").forEach((el,i)=>el.classList.toggle("selected",i<n))
+  const col=n<=3?"#dc2626":n<=6?"#d97706":"#16a34a"
+  const lbl=document.getElementById("lblRevEmp"); if(lbl) lbl.innerHTML=`<span style="color:${col};font-weight:700;">${n}/10 — ${LABELS_EMP[n]}</span>`
+}
 
 window.enviarRevEmp = async function(profileId, nombre){
   const msg=document.getElementById("msgRevEmp")
-  if(!estrellaEmp){ msg.innerHTML=`<div class="alerta alerta-err" style="font-size:13px;padding:8px;">Elegí una puntuación</div>`; return }
+  if(!estrellaEmp){ msg.innerHTML=`<div class="alerta alerta-err" style="font-size:13px;padding:8px;">Elegí un puntaje del 1 al 10</div>`; return }
   const token=getAccessToken(), autorId=getCurrentUserId()
   if(!token){ msg.innerHTML=`<div class="alerta alerta-err" style="font-size:13px;padding:8px;">Iniciá sesión primero</div>`; return }
   msg.innerHTML=`<div style="font-size:13px;color:#64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Enviando...</div>`
@@ -144,7 +160,7 @@ window.enviarRevEmp = async function(profileId, nombre){
       body:JSON.stringify({ trabajador_id:profileId, autor_id:autorId, rating:estrellaEmp, comentario:document.getElementById("comentRevEmp").value.trim(), tipo:"servicio" })
     })
     if(!res.ok){ const e=await res.json(); throw new Error(e.message||"Error") }
-    document.querySelector(".form-review").innerHTML=`<div class="alerta alerta-ok"><i class="fa-solid fa-check-circle"></i> ¡Calificación enviada!</div>`
+    document.querySelector(".form-review").innerHTML=`<div class="alerta alerta-ok"><i class="fa-solid fa-check-circle"></i> ¡Gracias! Sumaste <strong>${estrellaEmp} punto${estrellaEmp!==1?"s":""}</strong> al perfil de ${nombre}.</div>`
     setTimeout(()=>cargarReviewsEmp(profileId, nombre), 900)
   } catch(e){ msg.innerHTML=`<div class="alerta alerta-err" style="font-size:13px;padding:8px;">${e.message}</div>` }
 }
