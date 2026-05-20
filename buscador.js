@@ -21,11 +21,12 @@ verificarTerminos()
 /* ── PARÁMETROS DE URL ── */
 
 const params = new URLSearchParams(location.search)
+
+buscar() // cargar TODOS al abrir (sin filtros), luego pre-llenar inputs
+
 if(params.get("q"))      document.getElementById("buscar").value = params.get("q")
 if(params.get("ciudad")) document.getElementById("ciudad").value = params.get("ciudad")
 if(params.get("cat"))    document.getElementById("buscar").value = params.get("cat")
-
-buscar() // cargar todos los resultados al abrir el buscador
 
 /* ── FILTROS RÁPIDOS ── */
 
