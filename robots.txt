@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Páginas de perfil privado — no indexar
+Disallow: /perfil.html
+Disallow: /perfil_servicio.html
+Disallow: /perfil_cv.html
+Disallow: /auth_callback.html
+Disallow: /admin.html
+
+# Páginas públicas indexables
+Allow: /index.html
+Allow: /buscador.html
+Allow: /buscador_cv.html
+Allow: /buscador_trabajos.html
+Allow: /mapa.html
+Allow: /registro.html
+Allow: /perfil_publico.html
+
+Sitemap: https://trabajocerca.vercel.app/sitemap.xml
