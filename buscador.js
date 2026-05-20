@@ -1,4 +1,8 @@
-import { supabase } from "./supabase.js"
+/* buscador.js — usa fetch directo a la REST API de Supabase (sin cliente JS) */
+
+const SB_URL = "https://iqeiszkoifxgygoqvbem.supabase.co"
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs"
+const SB_HEADERS = { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
 
 let mapModal = null
 
@@ -22,7 +26,7 @@ verificarTerminos()
 
 const params = new URLSearchParams(location.search)
 
-buscar() // cargar TODOS al abrir (sin filtros), luego pre-llenar inputs
+buscar() // cargar TODOS al abrir (sin filtros)
 
 if(params.get("q"))      document.getElementById("buscar").value = params.get("q")
 if(params.get("ciudad")) document.getElementById("ciudad").value = params.get("ciudad")
@@ -48,18 +52,27 @@ window.buscar = async function(){
       <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p>
     </div>`
 
-  let query = supabase
-    .from("servicios")
-    .select(`id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,
-      perfiles(id,nombre,apellido,movil,foto,localidad,provincia)`)
-    .eq("activo", true)
+  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,perfiles(id,nombre,apellido,movil,foto,localidad,provincia)"
 
-  if(palabra) query = query.or(`titulo.ilike.%${palabra}%,categoria.ilike.%${palabra}%,descripcion.ilike.%${palabra}%`)
-  if(ciudad)  query = query.ilike("localidad", `%${ciudad}%`)
+  let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc`
 
-  const { data, error } = await query.order("created_at", { ascending: false })
+  if(palabra){
+    const p = encodeURIComponent(`*${palabra}*`)
+    url += `&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p})`
+  }
+  if(ciudad){
+    url += `&localidad=ilike.*${encodeURIComponent(ciudad)}*`
+  }
 
-  if(error){ cont.innerHTML = `<div class="alerta alerta-err">Error: ${error.message} (código: ${error.code})</div>`; return }
+  let data, error
+  try {
+    const res = await fetch(url, { headers: SB_HEADERS })
+    if(!res.ok){ const err = await res.json(); throw new Error(err.message || res.statusText) }
+    data = await res.json()
+  } catch(e){
+    cont.innerHTML = `<div class="alerta alerta-err">Error al buscar: ${e.message}</div>`
+    return
+  }
 
   if(!data?.length){
     cont.innerHTML = `
@@ -93,7 +106,7 @@ window.buscar = async function(){
       <div style="display:flex;gap:14px;align-items:flex-start;">
         ${foto}
         <div style="flex:1;min-width:0;">
-          <h3 style="margin:0 0 3px;font-size:17px;">${p.nombre} ${p.apellido}</h3>
+          <h3 style="margin:0 0 3px;font-size:17px;">${p.nombre||""} ${p.apellido||""}</h3>
           <p style="margin:0 0 3px;color:#f97316;font-weight:700;font-size:14px;">${item.categoria}</p>
           <p style="margin:0;font-size:13px;color:#64748b;">
             <i class="fa-solid fa-location-dot"></i>
@@ -119,7 +132,7 @@ window.buscar = async function(){
 
 window.abrirModal = function(item){
   if(typeof item === "string") item = JSON.parse(item.replace(/&quot;/g,'"'))
-  const p = item.perfiles
+  const p = item.perfiles || {}
   if(mapModal){ mapModal.remove(); mapModal = null }
 
   const foto = p.foto
@@ -136,7 +149,7 @@ window.abrirModal = function(item){
   document.getElementById("modalContent").innerHTML = `
     <div style="text-align:center;margin-bottom:20px;">
       ${foto}
-      <h2 style="margin:10px 0 4px;font-size:22px;">${p.nombre} ${p.apellido}</h2>
+      <h2 style="margin:10px 0 4px;font-size:22px;">${p.nombre||""} ${p.apellido||""}</h2>
       <p style="margin:0;color:#f97316;font-weight:700;font-size:16px;"><i class="fa-solid fa-tools"></i> ${item.categoria}</p>
       <p style="margin:4px 0 0;color:#64748b;font-size:14px;"><i class="fa-solid fa-location-dot"></i> ${ubic}</p>
     </div>
@@ -184,7 +197,7 @@ window.abrirModal = function(item){
       mapModal = L.map("mapaModal").setView([item.lat, item.lng], 14)
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(mapModal)
       L.marker([item.lat, item.lng]).addTo(mapModal)
-        .bindPopup(`<b>${p.nombre} ${p.apellido}</b><br>${item.categoria}`).openPopup()
+        .bindPopup(`<b>${p.nombre||""} ${p.apellido||""}</b><br>${item.categoria}`).openPopup()
     }, 60)
   }
 }
