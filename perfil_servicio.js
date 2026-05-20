@@ -42,6 +42,8 @@ const SERVICIOS = {
 
 let map, marker, provinciaActual = "", serviciosSeleccionados = []
 let userId = null
+let planNivel = 0
+let fotasPortfolio = { 1: null, 2: null, 3: null }
 
 async function init(){
   const { data: userData } = await supabase.auth.getUser()
@@ -89,6 +91,11 @@ async function init(){
     document.getElementById("provincia_servicio").value = servicio.provincia
     provinciaActual = servicio.provincia
   }
+
+  /* ── Cargar plan y portfolio ── */
+  const { data: perfilPlan } = await supabase.from("perfiles").select("plan_nivel").eq("id", userId).single()
+  planNivel = perfilPlan?.plan_nivel || 0
+  cargarPortfolio()
 }
 
 function iniciarMapa(lat, lng, conMarker){
@@ -241,6 +248,166 @@ window.guardarServicio = async function(){
 
   msg.innerHTML = '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> ¡Perfil publicado! Los clientes ya pueden encontrarte.</div>'
   setTimeout(() => location.href = "/perfil.html", 1800)
+}
+
+/* ── PORTFOLIO ── */
+
+async function cargarPortfolio(){
+  const lista = document.getElementById("listaPortfolio")
+  if(!lista || !userId) return
+
+  const { data: items } = await supabase
+    .from("portfolio")
+    .select("*")
+    .eq("usuario_id", userId)
+    .order("created_at", { ascending: false })
+
+  const maxItems = planNivel === 1 ? 2 : planNivel >= 2 ? 5 : 0
+
+  if(!items?.length){
+    lista.innerHTML = `<p style="color:#94a3b8;font-size:13px;text-align:center;padding:8px 0;">
+      No tenés trabajos publicados aún.
+      ${maxItems > 0 ? `Podés agregar hasta <strong>${maxItems}</strong>.` : ""}
+    </p>`
+  } else {
+    lista.innerHTML = items.map(item => {
+      const fotos = [item.foto1, item.foto2, item.foto3].filter(Boolean)
+      return `<div class="portfolio-item" style="margin-bottom:12px;">
+        ${fotos.length ? `<div class="portfolio-fotos" style="height:120px;">
+          ${fotos.map(f => `<img src="${f}" onclick="window.open('${f}','_blank')" alt="">`).join("")}
+        </div>` : ""}
+        <div class="portfolio-info">
+          <strong>${item.titulo}</strong>
+          ${item.descripcion ? `<p>${item.descripcion}</p>` : ""}
+          <button class="btn btn-sm" onclick="eliminarPortfolio('${item.id}')"
+            style="margin-top:8px;background:#fee2e2;color:#dc2626;border:none;padding:4px 10px;font-size:12px;border-radius:6px;cursor:pointer;">
+            <i class="fa-solid fa-trash"></i> Eliminar
+          </button>
+        </div>
+      </div>`
+    }).join("")
+  }
+
+  const btn = document.getElementById("btnAgregarTrabajo")
+  if(btn){
+    const count = items?.length || 0
+    if(planNivel > 0 && count >= maxItems){
+      btn.disabled = true
+      btn.innerHTML = `<i class="fa-solid fa-lock"></i> Límite alcanzado (${count}/${maxItems})`
+    } else {
+      btn.disabled = false
+      btn.innerHTML = `<i class="fa-solid fa-plus"></i> Agregar trabajo realizado`
+    }
+  }
+}
+
+window.clickAgregarTrabajo = async function(){
+  if(planNivel === 0){
+    mostrarPlanes()
+    return
+  }
+  const maxItems = planNivel === 1 ? 2 : 5
+  const { count } = await supabase
+    .from("portfolio")
+    .select("id", { count: "exact", head: true })
+    .eq("usuario_id", userId)
+  if(count >= maxItems){
+    mostrarPlanes()
+    return
+  }
+  abrirFormPortfolio()
+}
+
+function mostrarPlanes(){
+  document.getElementById("modalPlanes").classList.add("activo")
+  document.body.style.overflow = "hidden"
+}
+
+window.cerrarPlanes = function(){
+  document.getElementById("modalPlanes").classList.remove("activo")
+  document.body.style.overflow = ""
+}
+
+window.cerrarPlanesClick = function(e){
+  if(e.target === document.getElementById("modalPlanes")) cerrarPlanes()
+}
+
+function abrirFormPortfolio(){
+  fotasPortfolio = { 1: null, 2: null, 3: null }
+  document.getElementById("ptTitulo").value  = ""
+  document.getElementById("ptDesc").value    = ""
+  document.getElementById("msgPt").innerHTML = ""
+  for(let n = 1; n <= 3; n++){
+    document.getElementById(`prevPt${n}`).innerHTML = `<i class="fa-solid fa-camera"></i>`
+    document.getElementById(`inputPt${n}`).value    = ""
+  }
+  const sec = document.getElementById("formPortfolioSec")
+  sec.style.display = "block"
+  sec.scrollIntoView({ behavior: "smooth", block: "start" })
+}
+
+window.cerrarFormPortfolio = function(){
+  document.getElementById("formPortfolioSec").style.display = "none"
+}
+
+window.prevFotoPt = function(input, n){
+  const file = input.files[0]
+  if(!file) return
+  fotasPortfolio[n] = file
+  const reader = new FileReader()
+  reader.onload = e => {
+    document.getElementById(`prevPt${n}`).innerHTML =
+      `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
+  }
+  reader.readAsDataURL(file)
+}
+
+window.guardarPortfolio = async function(){
+  const titulo = document.getElementById("ptTitulo").value.trim()
+  const desc   = document.getElementById("ptDesc").value.trim()
+  const msg    = document.getElementById("msgPt")
+
+  if(!titulo){
+    msg.innerHTML = `<div class="alerta alerta-err" style="padding:8px 12px;font-size:13px;">El título es obligatorio</div>`
+    return
+  }
+
+  msg.innerHTML = `<div style="color:#64748b;font-size:13px;"><i class="fa-solid fa-spinner fa-spin"></i> Guardando...</div>`
+
+  const fotos = {}
+  for(let n = 1; n <= 3; n++){
+    if(!fotasPortfolio[n]) continue
+    const name = `portfolio_${userId}_${Date.now()}_${n}`
+    const { error: errUp } = await supabase.storage.from("trabajos").upload(name, fotasPortfolio[n], { upsert: true })
+    if(errUp){
+      msg.innerHTML = `<div class="alerta alerta-err" style="padding:8px 12px;font-size:13px;">Error al subir foto ${n}: ${errUp.message}</div>`
+      return
+    }
+    const { data: urlData } = supabase.storage.from("trabajos").getPublicUrl(name)
+    fotos[`foto${n}`] = urlData.publicUrl
+  }
+
+  const { error } = await supabase.from("portfolio").insert({
+    usuario_id:  userId,
+    titulo,
+    descripcion: desc || null,
+    ...fotos
+  })
+
+  if(error){
+    msg.innerHTML = `<div class="alerta alerta-err" style="padding:8px 12px;font-size:13px;">${error.message}</div>`
+    return
+  }
+
+  cerrarFormPortfolio()
+  await cargarPortfolio()
+  document.getElementById("seccionPortfolio").scrollIntoView({ behavior: "smooth" })
+}
+
+window.eliminarPortfolio = async function(id){
+  if(!confirm("¿Eliminar este trabajo?")) return
+  await supabase.from("portfolio").delete().eq("id", id).eq("usuario_id", userId)
+  cargarPortfolio()
 }
 
 init()

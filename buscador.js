@@ -242,6 +242,8 @@ window.abrirModal = function(item){
       <p style="font-size:14px;color:#475569;line-height:1.6;margin:0;">${item.descripcion}</p>
     </div>`:""}
 
+    <div id="portfolioModal" style="margin-bottom:4px;"></div>
+
     ${p.movil?`<a href="${wa}" target="_blank" rel="noopener" class="btn-whatsapp"
       style="display:flex;justify-content:center;margin-bottom:12px;">
       <i class="fa-brands fa-whatsapp"></i> Consultar por WhatsApp
@@ -283,7 +285,44 @@ window.abrirModal = function(item){
     }, 60)
   }
 
-  if(p.id) cargarReviews(p.id, p.nombre || "este profesional")
+  if(p.id){
+    cargarReviews(p.id, p.nombre || "este profesional")
+    cargarPortfolioModal(p.id)
+  }
+}
+
+/* ── PORTFOLIO EN MODAL ── */
+
+async function cargarPortfolioModal(uid){
+  const sec = document.getElementById("portfolioModal")
+  if(!sec) return
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/portfolio?usuario_id=eq.${uid}&select=titulo,descripcion,foto1,foto2,foto3&order=created_at.desc`, { headers: SB_HEADERS })
+    if(!res.ok) return
+    const items = await res.json()
+    if(!items?.length){ sec.innerHTML = ""; return }
+
+    let html = `<div style="margin-bottom:16px;">
+      <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 10px;">
+        <i class="fa-solid fa-images" style="color:#f97316;"></i> Trabajos realizados
+      </p>`
+
+    items.forEach(item => {
+      const fotos = [item.foto1, item.foto2, item.foto3].filter(Boolean)
+      html += `<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:10px;background:white;">
+        ${fotos.length ? `<div style="display:flex;gap:2px;height:130px;background:#f1f5f9;">
+          ${fotos.map(f => `<img src="${f}" style="flex:1;object-fit:cover;cursor:pointer;" onclick="window.open('${f}','_blank')">`).join("")}
+        </div>` : ""}
+        <div style="padding:10px 12px;">
+          <strong style="font-size:14px;display:block;margin-bottom:2px;">${item.titulo}</strong>
+          ${item.descripcion ? `<p style="font-size:12px;color:#64748b;margin:0;line-height:1.4;">${item.descripcion}</p>` : ""}
+        </div>
+      </div>`
+    })
+
+    html += `</div>`
+    sec.innerHTML = html
+  } catch(e){ /* silencioso */ }
 }
 
 /* ── SISTEMA DE RESEÑAS ── */
