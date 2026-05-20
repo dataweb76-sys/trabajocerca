@@ -125,3 +125,22 @@ async function registrarUsuario(e){
 
 document.getElementById("registroForm")
   .addEventListener("submit", registrarUsuario)
+
+async function registroConGoogle(){
+  // Guardamos el tipo elegido para usarlo en el callback
+  const tipo = document.getElementById("tipo").value
+  localStorage.setItem("googleTipo", tipo)
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: "https://trabajocerca.vercel.app/auth_callback.html"
+    }
+  })
+  if(error){
+    const msg = document.getElementById("msg")
+    msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+  }
+}
+
+window.registroConGoogle = registroConGoogle

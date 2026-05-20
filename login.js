@@ -15,4 +15,18 @@ async function login(){
   window.location.href = "/perfil.html"
 }
 
+async function loginConGoogle(){
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: "https://trabajocerca.vercel.app/auth_callback.html"
+    }
+  })
+  if(error){
+    const msg = document.getElementById("msg")
+    msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+  }
+}
+
 window.login = login
+window.loginConGoogle = loginConGoogle
