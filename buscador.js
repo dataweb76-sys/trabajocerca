@@ -25,6 +25,18 @@ verificarTerminos()
 /* ── PARÁMETROS DE URL ── */
 
 const params = new URLSearchParams(location.search)
+const SECCION = params.get("seccion") // "oficios" | "profesionales" | null
+
+const CATS_OFICIOS = new Set(["Albañilería","Plomería","Gasista","Electricista","Carpintería","Pintura","Jardinería","Herrería","Cerrajería","Limpieza","Mudanzas / Fletes","Refrigeración / Aire acondicionado","Informática / Reparaciones","Gastronomía","Mecánico Automotriz","Tapicería","Personal Trainer","Enfermero/a","Niñera / Cuidadora","Delivery / Mensajería","Planchado / Laundry"])
+const CATS_PROF    = new Set(["Médico / Clínica","Odontólogo","Psicólogo / Terapia","Kinesiólogo","Nutricionista","Veterinario","Arquitecto","Abogado","Contador / Impositivo","Diseñador Gráfico","Fotógrafo","Profesor Particular","Peluquería / Estética"])
+
+if(SECCION === "oficios"){
+  document.title = "Buscador de Oficios — Trabajos Cerca"
+  document.querySelector("h2").innerHTML = '<i class="fa-solid fa-hammer" style="color:#2563eb"></i> Buscador de Oficios'
+} else if(SECCION === "profesionales"){
+  document.title = "Buscador de Profesionales — Trabajos Cerca"
+  document.querySelector("h2").innerHTML = '<i class="fa-solid fa-user-tie" style="color:#2563eb"></i> Buscador de Profesionales'
+}
 
 if(params.get("q"))      document.getElementById("buscar").value = params.get("q")
 if(params.get("ciudad")) document.getElementById("ciudad").value = params.get("ciudad")
@@ -71,6 +83,10 @@ window.buscar = async function(){
     cont.innerHTML = `<div class="alerta alerta-err">Error al buscar: ${e.message}</div>`
     return
   }
+
+  // Filtro de sección (oficios / profesionales)
+  if(SECCION === "oficios")       data = data.filter(d => CATS_OFICIOS.has(d.categoria))
+  if(SECCION === "profesionales") data = data.filter(d => CATS_PROF.has(d.categoria))
 
   if(!data?.length){
     cont.innerHTML = `

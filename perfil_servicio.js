@@ -18,6 +18,11 @@ const SERVICIOS = {
   "Gastronomía":   ["Catering para eventos", "Cocina a domicilio", "Parrilladas", "Postres y tortas", "Servicios de mozo"],
   "Mecánico Automotriz": ["Mecánica general", "Service y mantenimiento", "Frenos y suspensión", "Electricidad del auto", "Diagnóstico computarizado", "Gomería"],
   "Tapicería":     ["Tapizado de autos", "Tapizado de muebles", "Reparación de cuero", "Cortinas y persianas", "Capotería"],
+  "Personal Trainer": ["Entrenamiento personalizado", "Entrenamiento funcional", "Pérdida de peso", "Musculación", "Yoga", "Pilates", "Crossfit", "Entrenamiento online", "Preparación física deportiva"],
+  "Enfermero/a":   ["Cuidado de adultos mayores", "Atención post-quirúrgica", "Inyecciones y curaciones", "Control de medicación", "Atención domiciliaria", "Acompañante terapéutico"],
+  "Niñera / Cuidadora": ["Cuidado de niños en el hogar", "Babysitting", "Apoyo escolar básico", "Cuidado de bebés", "Por horas o días", "Turno noche"],
+  "Delivery / Mensajería": ["Envíos locales en moto", "Distribución de volantes", "Mandados y encargos", "Trámites bancarios", "Transporte de documentos"],
+  "Planchado / Laundry": ["Planchado a domicilio", "Lavado y planchado", "Planchado de uniformes y camisas"],
   /* ── Profesionales ── */
   "Médico / Clínica":    ["Consulta clínica general", "Pediatría", "Cardiología", "Dermatología", "Traumatología", "Medicina laboral", "Atención a domicilio"],
   "Odontólogo":          ["Odontología general", "Ortodoncia", "Blanqueamiento dental", "Implantes", "Odontología pediátrica", "Cirugía maxilofacial"],

@@ -18,101 +18,33 @@
 
 <section class="hero">
   <div>
-    <h1>Encontrá profesionales cerca tuyo</h1>
-    <p>Albañiles, plomeros, electricistas y más — en tu ciudad</p>
-    <div class="search-box">
-      <input id="buscarHero" placeholder="¿Qué servicio buscás?">
-      <input id="ciudadHero" placeholder="Ciudad">
-      <button onclick="buscarDesdeHero()">
-        <i class="fa-solid fa-magnifying-glass"></i> Buscar
-      </button>
-    </div>
+    <h1>El trabajo que buscás, en tu ciudad</h1>
+    <p>Conectamos profesionales, trabajadores y empleadores de toda Argentina</p>
   </div>
 </section>
 
-<section>
-  <h2>¿Qué servicio necesitás?</h2>
-
-  <p style="font-size:13px;color:#64748b;margin:-10px 0 14px;font-weight:600;letter-spacing:.5px;">OFICIOS</p>
-  <div class="grid-cats">
-    <a class="cat-card" href="/buscador.html?cat=Albañilería">
-      <i class="ico">🔨</i><span>Albañilería</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Plomería">
-      <i class="ico">💧</i><span>Plomería</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Gasista">
-      <i class="ico">🔥</i><span>Gasista</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Electricista">
-      <i class="ico">⚡</i><span>Electricista</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Carpintería">
-      <i class="ico">🪟</i><span>Carpintería</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Pintura">
-      <i class="ico">🎨</i><span>Pintura</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Jardinería">
-      <i class="ico">🌿</i><span>Jardinería</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Limpieza">
-      <i class="ico">🏠</i><span>Limpieza</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Mecánico">
-      <i class="ico">🚗</i><span>Mecánico</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Mudanzas">
-      <i class="ico">📦</i><span>Mudanzas / Fletes</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Refrigeración">
-      <i class="ico">❄️</i><span>Refrigeración</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Peluquería">
-      <i class="ico">✂️</i><span>Peluquería</span>
-    </a>
+<div class="buscadores-grid">
+  <div class="buscador-card" onclick="irA('/buscador_trabajos.html')">
+    <span class="bc-ico">💼</span>
+    <h3>Buscador de Trabajos</h3>
+    <p>Empresas y personas que buscan empleados en tu zona</p>
   </div>
-
-  <p style="font-size:13px;color:#64748b;margin:28px 0 14px;font-weight:600;letter-spacing:.5px;">PROFESIONALES</p>
-  <div class="grid-cats">
-    <a class="cat-card" href="/buscador.html?cat=Médico">
-      <i class="ico">🩺</i><span>Médico</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Odontólogo">
-      <i class="ico">🦷</i><span>Odontólogo</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Psicólogo">
-      <i class="ico">🧠</i><span>Psicólogo</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Veterinario">
-      <i class="ico">🐾</i><span>Veterinario</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Arquitecto">
-      <i class="ico">📐</i><span>Arquitecto</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Abogado">
-      <i class="ico">⚖️</i><span>Abogado</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Contador">
-      <i class="ico">📊</i><span>Contador</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Diseñador">
-      <i class="ico">🖥️</i><span>Diseñador</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Fotógrafo">
-      <i class="ico">📷</i><span>Fotógrafo</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Profesor">
-      <i class="ico">📚</i><span>Profesor Particular</span>
-    </a>
-    <a class="cat-card" href="/buscador.html?cat=Nutricionista">
-      <i class="ico">🥗</i><span>Nutricionista</span>
-    </a>
-    <a class="cat-card" href="/buscador.html">
-      <i class="ico">🔍</i><span>Ver todos</span>
-    </a>
+  <div class="buscador-card" onclick="irA('/buscador.html?seccion=oficios')">
+    <span class="bc-ico">🔨</span>
+    <h3>Buscador de Oficios</h3>
+    <p>Plomeros, electricistas, albañiles y más</p>
   </div>
-</section>
+  <div class="buscador-card" onclick="irA('/buscador_cv.html')">
+    <span class="bc-ico">📄</span>
+    <h3>Buscador de CV</h3>
+    <p>Trabajadores en búsqueda activa de empleo</p>
+  </div>
+  <div class="buscador-card" onclick="irA('/buscador.html?seccion=profesionales')">
+    <span class="bc-ico">🩺</span>
+    <h3>Buscador de Profesionales</h3>
+    <p>Médicos, abogados, contadores y más</p>
+  </div>
+</div>
 
 <section class="como-funciona">
   <h2>¿Cómo funciona?</h2>
@@ -215,13 +147,9 @@ async function cargarMenu(){
   }
 }
 
-window.buscarDesdeHero = function(){
-  const q = document.getElementById("buscarHero").value.trim()
-  const c = document.getElementById("ciudadHero").value.trim()
-  const params = new URLSearchParams()
-  if(q) params.set("q", q)
-  if(c) params.set("ciudad", c)
-  window.location.href = `/buscador.html?${params.toString()}`
+window.irA = async function(url){
+  const { data } = await supabase.auth.getUser()
+  window.location.href = data.user ? url : '/login.html'
 }
 
 cargarMenu()
