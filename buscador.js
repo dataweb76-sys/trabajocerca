@@ -73,8 +73,7 @@ window.buscar = async function(){
   cont.innerHTML = `<p style="color:#64748b;margin-bottom:16px;font-size:14px;">${data.length} resultado${data.length!==1?"s":""} encontrado${data.length!==1?"s":""}</p>`
 
   data.forEach(item => {
-    const p = item.perfiles
-    if(!p) return
+    const p = item.perfiles || {}
 
     const foto = p.foto
       ? `<img src="${p.foto}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #2563eb;flex-shrink:0;">`
