@@ -101,7 +101,12 @@ async function init(){
       <a href="/perfil_publico.html?id=${userId}" class="btn btn-outline" target="_blank">
         <i class="fa-solid fa-eye"></i> Ver mi perfil público
       </a>
+      <button class="btn" onclick="compartirPagina('${userId}')"
+        style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;border:none;">
+        <i class="fa-brands fa-instagram"></i> Compartí en redes
+      </button>
     </div>
+    <div id="msgCompartir" style="margin-top:8px;"></div>
 
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;">
 
@@ -116,6 +121,9 @@ async function init(){
 
     <label>Móvil / WhatsApp *</label>
     <input id="editMovil" value="${esc(data.movil)}" type="tel" placeholder="Ej: 1123456789">
+
+    <label><i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram</label>
+    <input id="editInstagram" value="${esc(data.instagram)}" placeholder="Ej: @tunombre">
 
     <label>Teléfono fijo</label>
     <input id="editTelefono" value="${esc(data.telefono_fijo)}" type="tel" placeholder="Ej: 02214567890">
@@ -240,6 +248,7 @@ window.guardarDatos = async function(){
     nombre,
     apellido,
     movil:         document.getElementById("editMovil").value.trim(),
+    instagram:     document.getElementById("editInstagram").value.trim(),
     telefono_fijo: document.getElementById("editTelefono").value.trim(),
     direccion:     document.getElementById("editDireccion").value.trim(),
     codigo_postal: document.getElementById("editCP").value.trim(),
@@ -304,6 +313,30 @@ window.enviarRatingCliente = async function(){
   document.getElementById("formClienteRating").innerHTML =
     '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> Puntuación enviada al cliente.</div>'
   clienteIdSel = null; estrellaCliente = 0
+}
+
+/* ── COMPARTIR EN REDES ── */
+window.compartirPagina = async function(userId){
+  const url  = `https://trabajocerca.vercel.app/perfil_publico.html?id=${userId}`
+  const texto = "¡Sumate a Trabajos Cerca! Encontrá trabajo, profesionales y oficios en tu ciudad 👷‍♂️💼\n"
+  const msg  = document.getElementById("msgCompartir")
+
+  try { await navigator.clipboard.writeText(url) } catch(e){}
+
+  if(navigator.share){
+    try {
+      await navigator.share({ title: "Trabajos Cerca", text: texto, url })
+      return
+    } catch(e){}
+  }
+
+  window.open("https://www.instagram.com/", "_blank")
+  msg.innerHTML = `<div class="alerta alerta-ok" style="font-size:14px;">
+    <i class="fa-solid fa-check"></i>
+    <strong>¡Enlace copiado!</strong> Abrimos Instagram — pegalo en tu historia o bio.<br>
+    <small style="color:#64748b;">Cuantos más conozcan la página, más rápido conseguís lo que buscás 🚀</small>
+  </div>`
+  setTimeout(() => { msg.innerHTML = "" }, 6000)
 }
 
 /* ── CERRAR SESIÓN ── */

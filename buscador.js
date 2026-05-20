@@ -62,7 +62,7 @@ window.buscar = async function(){
       <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p>
     </div>`
 
-  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,perfiles(id,nombre,apellido,movil,foto,localidad,provincia)"
+  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,perfiles(id,nombre,apellido,movil,foto,localidad,provincia,instagram)"
 
   let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc`
 
@@ -186,8 +186,13 @@ window.abrirModal = function(item){
     </div>`:""}
 
     ${p.movil?`<a href="${wa}" target="_blank" rel="noopener" class="btn-whatsapp"
-      style="display:flex;justify-content:center;margin-bottom:16px;">
+      style="display:flex;justify-content:center;margin-bottom:12px;">
       <i class="fa-brands fa-whatsapp"></i> Consultar por WhatsApp
+    </a>`:""}
+
+    ${p.instagram?`<a href="https://instagram.com/${(p.instagram||"").replace("@","")}" target="_blank" rel="noopener"
+      style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:16px;padding:12px;border-radius:10px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;font-weight:600;font-size:15px;text-decoration:none;">
+      <i class="fa-brands fa-instagram" style="font-size:18px;"></i> ${p.instagram}
     </a>`:""}
 
     ${(item.lat&&item.lng)?`
