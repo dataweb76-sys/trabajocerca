@@ -94,40 +94,25 @@ async function registrarUsuario(e){
     return
   }
 
+  // Guardar datos del perfil para insertarlos después de confirmar email
+  const perfilData = { nombre, apellido, email, movil, codigo_postal: codigo, localidad, provincia, pais: "Argentina", lat: coords.lat, lng: coords.lng, tipo }
+  localStorage.setItem("pendingPerfil", JSON.stringify(perfilData))
+
   // Supabase puede requerir confirmación de email — data.user puede ser null
   if(!data.user){
     msg.innerHTML = `<div class="alerta alerta-ok">
       <i class="fa-solid fa-envelope"></i>
-      Te enviamos un email de confirmación. Revisá tu bandeja y hacé clic en el enlace para activar la cuenta.
+      Te enviamos un email de confirmación a <strong>${email}</strong>. Hacé clic en el enlace del mail para activar tu cuenta.
     </div>`
     btn.disabled = false
     btn.innerHTML = 'Continuar <i class="fa-solid fa-arrow-right"></i>'
     return
   }
 
+  // Si no hay confirmación de email, insertamos directo
   const userId = data.user.id
-
-  const { error: insertError } = await supabase.from("perfiles").insert({
-    id:            userId,
-    nombre,
-    apellido,
-    email,
-    movil,
-    codigo_postal: codigo,
-    localidad,
-    provincia,
-    pais:          "Argentina",
-    lat:           coords.lat,
-    lng:           coords.lng,
-    tipo
-  })
-
-  if(insertError){
-    msg.innerHTML = `<div class="alerta alerta-err">${insertError.message}</div>`
-    btn.disabled = false
-    btn.innerHTML = 'Continuar <i class="fa-solid fa-arrow-right"></i>'
-    return
-  }
+  await supabase.from("perfiles").insert({ id: userId, ...perfilData })
+  localStorage.removeItem("pendingPerfil")
 
   if(tipo === "profesional"){
     window.location.href = "/perfil_servicio.html?nuevo=1"

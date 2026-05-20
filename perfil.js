@@ -6,6 +6,19 @@ async function init(){
 
   const userId = userData.user.id
 
+  /* ── Guardar perfil pendiente del registro (cuando se confirma email) ── */
+  const pending = localStorage.getItem("pendingPerfil")
+  if(pending){
+    try {
+      const perfilData = JSON.parse(pending)
+      const { data: existing } = await supabase.from("perfiles").select("id").eq("id", userId).single()
+      if(!existing){
+        await supabase.from("perfiles").insert({ id: userId, ...perfilData })
+      }
+    } catch(e){}
+    localStorage.removeItem("pendingPerfil")
+  }
+
   const { data, error } = await supabase
     .from("perfiles").select("*").eq("id", userId).single()
 
