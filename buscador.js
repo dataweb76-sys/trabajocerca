@@ -25,7 +25,7 @@ if(params.get("q"))      document.getElementById("buscar").value = params.get("q
 if(params.get("ciudad")) document.getElementById("ciudad").value = params.get("ciudad")
 if(params.get("cat"))    document.getElementById("buscar").value = params.get("cat")
 
-if(params.get("q") || params.get("cat") || params.get("ciudad")) buscar()
+buscar() // cargar todos los resultados al abrir el buscador
 
 /* ── FILTROS RÁPIDOS ── */
 
