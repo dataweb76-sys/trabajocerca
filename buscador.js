@@ -26,8 +26,6 @@ verificarTerminos()
 
 const params = new URLSearchParams(location.search)
 
-buscar() // cargar TODOS al abrir (sin filtros)
-
 if(params.get("q"))      document.getElementById("buscar").value = params.get("q")
 if(params.get("ciudad")) document.getElementById("ciudad").value = params.get("ciudad")
 if(params.get("cat"))    document.getElementById("buscar").value = params.get("cat")
@@ -213,3 +211,6 @@ window.cerrarModalClick = function(e){
 }
 
 document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarModal() })
+
+// Cargar todos al abrir (window.buscar ya está definido)
+buscar()
