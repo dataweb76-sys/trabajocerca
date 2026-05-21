@@ -21,7 +21,6 @@
 <div class="container">
 
   <h2><i class="fa-solid fa-user-plus" style="color:#2563eb"></i> Crear cuenta</h2>
-
   <p style="text-align:center; color:#64748b; margin:-8px 0 16px; font-size:14px;">¿Qué querés hacer?</p>
 
   <div class="tipo-cards" style="grid-template-columns:repeat(3,1fr);">
@@ -57,6 +56,32 @@
       </div>
     </div>
 
+    <!-- Sección empresa/negocio — visible para profesional y empleador -->
+    <div id="seccion-empresa">
+      <div class="campo-empresa-box">
+        <label>
+          <i class="fa-solid fa-building" style="color:#7c3aed;margin-right:5px;"></i>
+          Nombre de la Empresa o Negocio
+          <span class="label-opcional">(opcional)</span>
+        </label>
+        <input id="nombre_empresa" placeholder="Ej: Plomería García, Estudio López & Asociados, Ferretería El Clavo">
+
+        <label style="margin-top:14px;">Mostrar en el perfil público como</label>
+        <div class="radio-group">
+          <label class="radio-opt">
+            <input type="radio" name="mostrar_como" value="personal" checked>
+            <span class="radio-custom"></span>
+            Mi nombre personal
+          </label>
+          <label class="radio-opt">
+            <input type="radio" name="mostrar_como" value="empresa">
+            <span class="radio-custom"></span>
+            Nombre de empresa / negocio
+          </label>
+        </div>
+      </div>
+    </div>
+
     <label>Email *</label>
     <input id="email" type="email" placeholder="juan@email.com" required>
 
@@ -65,6 +90,15 @@
 
     <label>Móvil / WhatsApp</label>
     <input id="movil" placeholder="Ej: 1123456789" type="tel">
+
+    <!-- Mostrar teléfono -->
+    <div class="check-fila">
+      <label class="check-opt">
+        <input type="checkbox" id="mostrar_telefono" checked>
+        <span class="check-custom"></span>
+        Mostrar mi teléfono/WhatsApp en el perfil público
+      </label>
+    </div>
 
     <label>Código Postal *</label>
     <input id="codigo_postal" placeholder="Ej: 1900" required>
@@ -79,6 +113,18 @@
 
     <div id="msg"></div>
 
+    <!-- Términos y condiciones -->
+    <div class="check-fila check-terminos-fila">
+      <label class="check-opt">
+        <input type="checkbox" id="terminos" required>
+        <span class="check-custom"></span>
+        <span>
+          Leí y acepto los
+          <a href="#" class="link-terminos" onclick="abrirTerminos(event)">Términos y Condiciones de uso</a>
+        </span>
+      </label>
+    </div>
+
     <button type="submit" class="btn btn-primary">
       Continuar <i class="fa-solid fa-arrow-right"></i>
     </button>
@@ -91,7 +137,6 @@
     <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
     Registrarse con Google
   </button>
-
   <p class="text-center" style="margin:4px 0 0; font-size:12px; color:#94a3b8;">
     Con Google completás el perfil en un paso más
   </p>
@@ -103,16 +148,142 @@
 
 </div>
 
+<!-- ══════════ MODAL TÉRMINOS Y CONDICIONES ══════════ -->
+<div class="modal-overlay" id="modalTerminosOverlay" onclick="cerrarTerminosClick(event)">
+  <div class="modal-box" style="max-width:640px;max-height:90vh;display:flex;flex-direction:column;">
+    <button class="modal-close" onclick="cerrarTerminos()">×</button>
+    <div style="padding:28px 28px 0;">
+      <h2 style="font-size:20px;font-weight:900;color:#1e293b;margin-bottom:4px;">
+        <i class="fa-solid fa-file-contract" style="color:#7c3aed;"></i> Términos y Condiciones de Uso
+      </h2>
+      <p style="font-size:12px;color:#94a3b8;margin-bottom:16px;">Trabajos Cerca — Última actualización: Mayo 2026</p>
+    </div>
+    <div class="modal-content" id="contenidoTerminos" style="overflow-y:auto;padding:0 28px 28px;flex:1;">
+
+      <div class="tyc-seccion">
+        <h3>1. Descripción del Servicio</h3>
+        <p>Trabajos Cerca (en adelante "la Plataforma") es un sitio web de carácter informativo y de contacto que permite a personas físicas y jurídicas publicar sus datos de contacto, servicios y disponibilidad laboral. <strong>La Plataforma actúa exclusivamente como intermediario tecnológico</strong> y no forma parte de ningún acuerdo, contrato, prestación de servicios o relación laboral entre sus usuarios.</p>
+      </div>
+
+      <div class="tyc-seccion">
+        <h3>2. Aceptación de los Términos</h3>
+        <p>Al registrarse y utilizar Trabajos Cerca, el usuario declara haber leído, comprendido y aceptado en su totalidad estos Términos y Condiciones. Si no está de acuerdo con alguna cláusula, debe abstenerse de usar la Plataforma.</p>
+      </div>
+
+      <div class="tyc-seccion">
+        <h3>3. Responsabilidad del Usuario sobre sus Datos</h3>
+        <p>El usuario es el <strong>único responsable</strong> de la información que publica en la Plataforma, incluyendo:</p>
+        <ul>
+          <li>Datos personales (nombre, apellido, teléfono, email, ubicación)</li>
+          <li>Fotos, descripciones e información de servicios</li>
+          <li>Datos de empresa o negocio</li>
+        </ul>
+        <p>Al publicar esta información, el usuario otorga su consentimiento expreso para que sea visible de forma pública en la Plataforma. El usuario garantiza que la información publicada es veraz, exacta y no viola derechos de terceros.</p>
+      </div>
+
+      <div class="tyc-seccion">
+        <h3>4. Exención de Responsabilidad de la Plataforma</h3>
+        <p>Trabajos Cerca <strong>no se responsabiliza</strong> bajo ninguna circunstancia por:</p>
+        <ul>
+          <li>Los acuerdos, contratos o negociaciones celebrados entre usuarios</li>
+          <li>La calidad, cumplimiento o resultado de los servicios prestados</li>
+          <li>Pagos, cobros, deudas o disputas económicas entre usuarios</li>
+          <li>Daños directos, indirectos o consecuentes derivados del uso de la Plataforma</li>
+          <li>La veracidad de la información publicada por los usuarios</li>
+          <li>El comportamiento de los usuarios dentro o fuera de la Plataforma</li>
+        </ul>
+        <p>Cada usuario asume plena responsabilidad por sus acciones y acuerdos. Se recomienda verificar la identidad y referencias de cualquier persona antes de contratar sus servicios.</p>
+      </div>
+
+      <div class="tyc-seccion">
+        <h3>5. Datos Personales y Privacidad</h3>
+        <p>Al registrarse, el usuario consiente voluntariamente la publicación de sus datos en la Plataforma. Los datos recopilados son utilizados exclusivamente para:</p>
+        <ul>
+          <li>Mostrar el perfil del usuario en el buscador y el mapa</li>
+          <li>Facilitar el contacto entre usuarios</li>
+          <li>Mejorar el funcionamiento del servicio</li>
+        </ul>
+        <p>La Plataforma no vende ni cede datos personales a terceros con fines comerciales. El usuario puede solicitar la eliminación de sus datos en cualquier momento contactando al equipo de Trabajos Cerca.</p>
+      </div>
+
+      <div class="tyc-seccion">
+        <h3>6. Conducta del Usuario</h3>
+        <p>El usuario se compromete a:</p>
+        <ul>
+          <li>No publicar información falsa, engañosa o fraudulenta</li>
+          <li>No utilizar la Plataforma para actividades ilegales</li>
+          <li>No publicar contenido ofensivo, discriminatorio o contrario a las leyes argentinas</li>
+          <li>Respetar la privacidad y los derechos de otros usuarios</li>
+          <li>No realizar spam ni contactos masivos no solicitados</li>
+        </ul>
+        <p>El incumplimiento de estas normas podrá resultar en la suspensión o eliminación de la cuenta sin previo aviso.</p>
+      </div>
+
+      <div class="tyc-seccion">
+        <h3>7. Calificaciones y Comentarios</h3>
+        <p>Los puntajes y comentarios publicados por los usuarios representan opiniones personales y no reflejan la posición de la Plataforma. Trabajos Cerca no verifica la autenticidad de las calificaciones y no se responsabiliza por su contenido.</p>
+      </div>
+
+      <div class="tyc-seccion">
+        <h3>8. Modificación y Suspensión del Servicio</h3>
+        <p>Trabajos Cerca se reserva el derecho de modificar, suspender o discontinuar el servicio en cualquier momento y sin previo aviso. También puede modificar estos Términos y Condiciones, siendo responsabilidad del usuario revisarlos periódicamente.</p>
+      </div>
+
+      <div class="tyc-seccion">
+        <h3>9. Legislación Aplicable</h3>
+        <p>Estos Términos y Condiciones se rigen por las leyes de la <strong>República Argentina</strong>. Cualquier controversia será sometida a la jurisdicción de los tribunales ordinarios competentes del país.</p>
+      </div>
+
+      <div style="background:#eff6ff;border-radius:12px;padding:16px;margin-top:8px;border-left:4px solid #2563eb;">
+        <p style="font-size:13px;color:#1e40af;font-weight:600;margin:0;">
+          <i class="fa-solid fa-circle-info"></i>
+          Al hacer clic en "Continuar" o "Registrarse con Google", confirmás que leíste y aceptás estos Términos y Condiciones en su totalidad.
+        </p>
+      </div>
+
+    </div>
+    <div style="padding:16px 28px;border-top:1px solid #f1f5f9;">
+      <button class="btn btn-primary" onclick="aceptarYCerrarTerminos()" style="font-size:15px;">
+        <i class="fa-solid fa-check"></i> Entendido, acepto los términos
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 function elegirTipo(tipo){
   document.getElementById("tipo").value = tipo
   document.getElementById("card-pro").classList.toggle("active", tipo === "profesional")
   document.getElementById("card-work").classList.toggle("active", tipo === "trabajador")
   document.getElementById("card-emp").classList.toggle("active", tipo === "empleador")
+  // Mostrar/ocultar sección empresa
+  const secEmp = document.getElementById("seccion-empresa")
+  secEmp.style.display = (tipo === "trabajador") ? "none" : "block"
 }
+
+function abrirTerminos(e){
+  e.preventDefault()
+  document.getElementById("modalTerminosOverlay").classList.add("activo")
+  document.body.style.overflow = "hidden"
+}
+function cerrarTerminos(){
+  document.getElementById("modalTerminosOverlay").classList.remove("activo")
+  document.body.style.overflow = ""
+}
+function cerrarTerminosClick(e){
+  if(e.target === document.getElementById("modalTerminosOverlay")) cerrarTerminos()
+}
+function aceptarYCerrarTerminos(){
+  document.getElementById("terminos").checked = true
+  cerrarTerminos()
+}
+window.abrirTerminos = abrirTerminos
 
 const params = new URLSearchParams(location.search)
 if(params.get("tipo")) elegirTipo(params.get("tipo"))
+else elegirTipo("profesional")
+
+document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarTerminos() })
 </script>
 
 <script type="module" src="/app.js"></script>

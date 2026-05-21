@@ -64,17 +64,28 @@ async function registrarUsuario(e){
   btn.disabled = true
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...'
 
-  const tipo     = document.getElementById("tipo").value
-  const nombre   = document.getElementById("nombre").value.trim()
-  const apellido = document.getElementById("apellido").value.trim()
-  const email    = document.getElementById("email").value.trim()
-  const password = document.getElementById("password").value
-  const movil    = document.getElementById("movil").value.trim()
-  const codigo   = document.getElementById("codigo_postal").value.trim()
-  const localidad= document.getElementById("localidad").value
-  const provincia= document.getElementById("provincia").value
+  const tipo           = document.getElementById("tipo").value
+  const nombre         = document.getElementById("nombre").value.trim()
+  const apellido       = document.getElementById("apellido").value.trim()
+  const email          = document.getElementById("email").value.trim()
+  const password       = document.getElementById("password").value
+  const movil          = document.getElementById("movil").value.trim()
+  const codigo         = document.getElementById("codigo_postal").value.trim()
+  const localidad      = document.getElementById("localidad").value
+  const provincia      = document.getElementById("provincia").value
+  const nombre_empresa = (document.getElementById("nombre_empresa")?.value || "").trim()
+  const mostrar_como   = document.querySelector('input[name="mostrar_como"]:checked')?.value || "personal"
+  const mostrar_tel    = document.getElementById("mostrar_telefono")?.checked ?? true
+  const terminos       = document.getElementById("terminos")?.checked
 
   const msg = document.getElementById("msg")
+
+  if(!terminos){
+    msg.innerHTML = '<div class="alerta alerta-err">Debés aceptar los Términos y Condiciones para continuar</div>'
+    btn.disabled = false
+    btn.innerHTML = 'Continuar <i class="fa-solid fa-arrow-right"></i>'
+    return
+  }
 
   if(!localidad){
     msg.innerHTML = '<div class="alerta alerta-err">Seleccioná una localidad</div>'
@@ -95,7 +106,14 @@ async function registrarUsuario(e){
   }
 
   // Guardar datos del perfil para insertarlos después de confirmar email
-  const perfilData = { nombre, apellido, email, movil, codigo_postal: codigo, localidad, provincia, pais: "Argentina", lat: coords.lat, lng: coords.lng, tipo }
+  const perfilData = {
+    nombre, apellido, email, movil,
+    nombre_empresa: nombre_empresa || null,
+    mostrar_como,
+    mostrar_telefono: mostrar_tel,
+    codigo_postal: codigo, localidad, provincia,
+    pais: "Argentina", lat: coords.lat, lng: coords.lng, tipo
+  }
   localStorage.setItem("pendingPerfil", JSON.stringify(perfilData))
 
   // Supabase puede requerir confirmación de email — data.user puede ser null

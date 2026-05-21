@@ -307,6 +307,81 @@ label {
 }
 .btn-google:hover { border-color: #4285F4; box-shadow: 0 2px 12px rgba(66,133,244,.2); background: #f8faff; }
 
+/* ── Sección empresa ── */
+.campo-empresa-box {
+  background: #faf5ff; border: 1.5px solid #e9d5ff;
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
+}
+.label-opcional {
+  font-size: 11px; color: #94a3b8; font-weight: 400; margin-left: 4px;
+}
+
+/* ── Radio buttons personalizados ── */
+.radio-group { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.radio-opt {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; font-size: 14px; color: #374151; font-weight: 500;
+  padding: 8px 12px; border-radius: 10px; border: 1.5px solid #e2e8f0;
+  transition: border-color .15s, background .15s;
+}
+.radio-opt:hover { border-color: #7c3aed; background: #faf5ff; }
+.radio-opt input[type="radio"] { display: none; }
+.radio-custom {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid #cbd5e1; flex-shrink: 0;
+  transition: border-color .15s, background .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.radio-opt input[type="radio"]:checked ~ * { color: #7c3aed; }
+.radio-opt:has(input:checked) {
+  border-color: #7c3aed; background: #faf5ff; color: #7c3aed;
+}
+.radio-opt:has(input:checked) .radio-custom {
+  border-color: #7c3aed; background: #7c3aed;
+  box-shadow: inset 0 0 0 3px white;
+}
+
+/* ── Checkboxes personalizados ── */
+.check-fila { margin-bottom: 12px; }
+.check-opt {
+  display: flex; align-items: flex-start; gap: 10px;
+  cursor: pointer; font-size: 13.5px; color: #374151; font-weight: 500;
+  line-height: 1.5;
+}
+.check-opt input[type="checkbox"] { display: none; }
+.check-custom {
+  width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+  border: 2px solid #cbd5e1; margin-top: 1px;
+  transition: border-color .15s, background .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.check-opt:has(input:checked) .check-custom {
+  background: #7c3aed; border-color: #7c3aed;
+}
+.check-opt:has(input:checked) .check-custom::after {
+  content: "✓"; color: white; font-size: 12px; font-weight: 900;
+}
+.check-terminos-fila {
+  background: #fffbeb; border: 1.5px solid #fde68a;
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;
+}
+.link-terminos {
+  color: #7c3aed; font-weight: 700; text-decoration: underline;
+}
+
+/* ── Modal Términos ── */
+.tyc-seccion { margin-bottom: 20px; }
+.tyc-seccion h3 {
+  font-size: 14px; font-weight: 800; color: #1e293b;
+  margin-bottom: 8px; padding-bottom: 6px;
+  border-bottom: 2px solid #f1f5f9;
+}
+.tyc-seccion p { font-size: 13px; color: #475569; line-height: 1.7; margin-bottom: 8px; }
+.tyc-seccion ul {
+  margin: 6px 0 8px 18px; display: flex; flex-direction: column; gap: 4px;
+}
+.tyc-seccion ul li { font-size: 13px; color: #475569; line-height: 1.6; }
+
 .btn-success { background: #16a34a; color: white; }
 .btn-success:hover { background: #15803d; }
 
