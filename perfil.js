@@ -145,7 +145,43 @@ async function init(){
     <label>Email</label>
     <input value="${esc(data.email)}" readonly style="color:#94a3b8;">
 
-    <div id="msgPerfil"></div>
+    <!-- ── Visibilidad pública ── -->
+    <div style="background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:14px;padding:18px 18px 14px;margin:20px 0 0;">
+      <h4 style="margin:0 0 14px;font-size:15px;font-weight:800;color:#6d28d9;">
+        <i class="fa-solid fa-eye" style="margin-right:6px;"></i>Visibilidad en el buscador
+      </h4>
+
+      <label>
+        <i class="fa-solid fa-building" style="color:#7c3aed;margin-right:4px;"></i>
+        Nombre de Empresa o Negocio
+        <span style="font-size:11px;color:#94a3b8;font-weight:400;"> (opcional)</span>
+      </label>
+      <input id="editEmpresa" value="${esc(data.nombre_empresa)}" placeholder="Ej: Plomería García, Estudio López & Asoc.">
+
+      <label style="margin-top:12px;">Aparecer en el perfil público como</label>
+      <div class="radio-group" style="margin-bottom:14px;">
+        <label class="radio-opt">
+          <input type="radio" name="editMostrarComo" value="personal" ${(data.mostrar_como||'personal')==='personal'?'checked':''}>
+          <span class="radio-custom"></span>
+          Mi nombre personal (${esc(data.nombre)} ${esc(data.apellido)})
+        </label>
+        <label class="radio-opt">
+          <input type="radio" name="editMostrarComo" value="empresa" ${data.mostrar_como==='empresa'?'checked':''}>
+          <span class="radio-custom"></span>
+          Nombre de empresa / negocio
+        </label>
+      </div>
+
+      <div class="check-fila" style="margin-bottom:0;">
+        <label class="check-opt">
+          <input type="checkbox" id="editMostrarTel" ${data.mostrar_telefono!==false?'checked':''}>
+          <span class="check-custom"></span>
+          Mostrar mi teléfono/WhatsApp en el perfil público
+        </label>
+      </div>
+    </div>
+
+    <div id="msgPerfil" style="margin-top:14px;"></div>
 
     <button class="btn btn-primary" onclick="guardarDatos()">
       <i class="fa-solid fa-save"></i> Guardar cambios
@@ -244,16 +280,23 @@ window.guardarDatos = async function(){
     return
   }
 
+  const mostrarComo = document.querySelector('input[name="editMostrarComo"]:checked')?.value || "personal"
+  const mostrarTel  = document.getElementById("editMostrarTel")?.checked ?? true
+  const empresa     = (document.getElementById("editEmpresa")?.value || "").trim()
+
   const { error } = await supabase.from("perfiles").update({
     nombre,
     apellido,
-    movil:         document.getElementById("editMovil").value.trim(),
-    instagram:     document.getElementById("editInstagram").value.trim(),
-    telefono_fijo: document.getElementById("editTelefono").value.trim(),
-    direccion:     document.getElementById("editDireccion").value.trim(),
-    codigo_postal: document.getElementById("editCP").value.trim(),
-    localidad:     document.getElementById("editLocalidad").value,
-    provincia:     document.getElementById("editProvincia").value
+    movil:            document.getElementById("editMovil").value.trim(),
+    instagram:        document.getElementById("editInstagram").value.trim(),
+    telefono_fijo:    document.getElementById("editTelefono").value.trim(),
+    direccion:        document.getElementById("editDireccion").value.trim(),
+    codigo_postal:    document.getElementById("editCP").value.trim(),
+    localidad:        document.getElementById("editLocalidad").value,
+    provincia:        document.getElementById("editProvincia").value,
+    nombre_empresa:   empresa || null,
+    mostrar_como:     mostrarComo,
+    mostrar_telefono: mostrarTel
   }).eq("id", uid)
 
   if(error){ msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`; return }

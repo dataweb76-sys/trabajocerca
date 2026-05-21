@@ -14,6 +14,18 @@ async function init(){
 
   const userId = userData.user.id
 
+  // Cargar datos de visibilidad desde perfiles
+  const { data: perfilVis } = await supabase
+    .from("perfiles")
+    .select("nombre_empresa, mostrar_como, mostrar_telefono")
+    .eq("id", userId).single()
+
+  if(perfilVis?.nombre_empresa)
+    document.getElementById("cv-empresa").value = perfilVis.nombre_empresa
+  const radioCV = document.querySelector(`input[name="cvMostrarComo"][value="${perfilVis?.mostrar_como||'personal'}"]`)
+  if(radioCV) radioCV.checked = true
+  document.getElementById("cv-mostrar-tel").checked = perfilVis?.mostrar_telefono !== false
+
   const { data: cv } = await supabase
     .from("curriculum")
     .select("*")
@@ -220,6 +232,17 @@ window.guardarCV = async function(){
     msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
     return
   }
+
+  // Guardar visibilidad en perfiles
+  const empresa    = (document.getElementById("cv-empresa")?.value || "").trim()
+  const mostrarC   = document.querySelector('input[name="cvMostrarComo"]:checked')?.value || "personal"
+  const mostrarTel = document.getElementById("cv-mostrar-tel")?.checked ?? true
+
+  await supabase.from("perfiles").update({
+    nombre_empresa:   empresa || null,
+    mostrar_como:     mostrarC,
+    mostrar_telefono: mostrarTel
+  }).eq("id", userId)
 
   msg.innerHTML = '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> CV guardado correctamente</div>'
   setTimeout(() => window.location.href = "/perfil.html", 1800)

@@ -93,9 +93,25 @@ async function init(){
     provinciaActual = servicio.provincia
   }
 
-  /* ── Cargar plan y portfolio ── */
-  const { data: perfilPlan } = await supabase.from("perfiles").select("plan_nivel").eq("id", userId).single()
-  planNivel = perfilPlan?.plan_nivel || 0
+  /* ── Cargar plan, portfolio y visibilidad ── */
+  const { data: perfilData } = await supabase
+    .from("perfiles")
+    .select("plan_nivel, nombre_empresa, mostrar_como, mostrar_telefono")
+    .eq("id", userId).single()
+
+  planNivel = perfilData?.plan_nivel || 0
+
+  // Poblar campos de visibilidad
+  if(perfilData?.nombre_empresa)
+    document.getElementById("srv-empresa").value = perfilData.nombre_empresa
+
+  const mostrarComo = perfilData?.mostrar_como || "personal"
+  const radio = document.querySelector(`input[name="srvMostrarComo"][value="${mostrarComo}"]`)
+  if(radio) radio.checked = true
+
+  const mostrarTel = perfilData?.mostrar_telefono !== false
+  document.getElementById("srv-mostrar-tel").checked = mostrarTel
+
   cargarPortfolio()
 }
 
@@ -246,6 +262,17 @@ window.guardarServicio = async function(){
     : await supabase.from("servicios").insert(payload)
 
   if(error){ msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`; return }
+
+  // Guardar visibilidad en perfiles
+  const empresa    = (document.getElementById("srv-empresa")?.value || "").trim()
+  const mostrarC   = document.querySelector('input[name="srvMostrarComo"]:checked')?.value || "personal"
+  const mostrarTel = document.getElementById("srv-mostrar-tel")?.checked ?? true
+
+  await supabase.from("perfiles").update({
+    nombre_empresa:   empresa || null,
+    mostrar_como:     mostrarC,
+    mostrar_telefono: mostrarTel
+  }).eq("id", userId)
 
   msg.innerHTML = '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> ¡Perfil publicado! Los clientes ya pueden encontrarte.</div>'
   setTimeout(() => location.href = "/perfil.html", 1800)

@@ -128,6 +128,43 @@
     </button>
   </div>
 
+  <!-- VISIBILIDAD EN EL BUSCADOR -->
+  <div class="cv-section" style="background:#faf5ff;border:1.5px solid #e9d5ff;">
+    <h3><i class="fa-solid fa-eye" style="color:#7c3aed;"></i> Visibilidad en el buscador</h3>
+    <p style="color:#64748b;font-size:13px;margin:-4px 0 16px;">
+      Controlá cómo aparecés en el buscador de CVs y qué datos son públicos.
+    </p>
+
+    <label>
+      <i class="fa-solid fa-building" style="color:#7c3aed;margin-right:4px;"></i>
+      Nombre de Empresa o Negocio
+      <span style="font-size:11px;color:#94a3b8;font-weight:400;"> (opcional)</span>
+    </label>
+    <input id="cv-empresa" placeholder="Ej: Contaduría López, Bufete Martínez & Asoc.">
+
+    <label style="margin-top:12px;">Aparecer en el perfil público como</label>
+    <div class="radio-group" style="margin-bottom:14px;">
+      <label class="radio-opt">
+        <input type="radio" name="cvMostrarComo" value="personal" checked>
+        <span class="radio-custom"></span>
+        Mi nombre personal
+      </label>
+      <label class="radio-opt">
+        <input type="radio" name="cvMostrarComo" value="empresa">
+        <span class="radio-custom"></span>
+        Nombre de empresa / negocio
+      </label>
+    </div>
+
+    <div class="check-fila" style="margin-bottom:0;">
+      <label class="check-opt">
+        <input type="checkbox" id="cv-mostrar-tel" checked>
+        <span class="check-custom"></span>
+        Mostrar mi teléfono/WhatsApp en el perfil público
+      </label>
+    </div>
+  </div>
+
   <div id="msg"></div>
 
   <button class="btn btn-success" onclick="guardarCV()">
