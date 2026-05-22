@@ -191,6 +191,7 @@
     const ICONOS = {
       review:  { ico: "⭐", bg: "#fef9c3" },
       pedido:  { ico: "📋", bg: "#eff6ff" },
+      mensaje: { ico: "💬", bg: "#eff6ff" },
       sistema: { ico: "📣", bg: "#f0fdf4" }
     }
 
