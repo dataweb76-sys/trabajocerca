@@ -222,4 +222,35 @@
   cargar(false)
   setInterval(() => cargar(false), 60000)
 
+  /* ── Ícono admin (solo si es admin) ── */
+  async function chequearAdmin(){
+    try {
+      const res = await fetch(
+        `${SB_URL}/rest/v1/perfiles?id=eq.${userId}&select=admin`,
+        { headers: hdrs() }
+      )
+      if(!res.ok) return
+      const data = await res.json()
+      if(!data?.[0]?.admin) return
+
+      // Ya es admin → agregar ícono al nav
+      const adminLink = document.createElement("a")
+      adminLink.href  = "/admin.html"
+      adminLink.title = "Panel admin"
+      adminLink.innerHTML = `<i class="fa-solid fa-shield-halved" style="color:#7c3aed;"></i> <span style="color:#7c3aed;font-weight:700;">Admin</span>`
+      adminLink.style.cssText = "display:inline-flex;align-items:center;gap:5px;"
+
+      // Resaltar si ya estamos en admin.html
+      if(location.pathname === "/admin.html"){
+        adminLink.style.color = "#7c3aed"
+        adminLink.style.fontWeight = "700"
+      }
+
+      // Insertar antes de la campana
+      nav.insertBefore(adminLink, wrap)
+    } catch(e){}
+  }
+
+  chequearAdmin()
+
 })()
