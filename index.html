@@ -802,16 +802,9 @@ window.googleSignInCV     = () => googleSignIn("trabajador")
       const chip = document.querySelector('.prov-chip.active')
       if(chip) chip.scrollIntoView({ block:'nearest', inline:'center' })
     }, 80)
-  } else {
-    /* Sin provincia guardada → detectar por IP y guardar */
-    fetch('https://ipapi.co/json/')
-      .then(r => r.json())
-      .then(data => {
-        const prov = normalizarProv(data.region || '')
-        if(prov) seleccionar(prov)
-      })
-      .catch(() => {})
   }
+  /* Si no hay provincia guardada, el splash picker se encarga de la elección.
+     No llamamos ipapi.co aquí para evitar que sobreescriba la selección del usuario. */
 
   function normalizarProv(raw){
     if(!raw) return ''
