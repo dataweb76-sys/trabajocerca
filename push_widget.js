@@ -7,7 +7,7 @@
   ══════════════════════════════════════════════ */
 
   // ── REEMPLAZÁ ESTO con tu clave pública VAPID ──
-  const VAPID_PUBLIC = '__VAPID_PUBLIC_KEY__'
+  const VAPID_PUBLIC = 'BEgk1g9JbG1eJhxf9qyjOV9QMEVNvpOhCcTBcqvl0SSQ1sFcxj25-sZz85Ktu00igsl-KrWIC7zVp__jWP6UJ6E'
   // ────────────────────────────────────────────────
 
   const SB_URL = "https://iqeiszkoifxgygoqvbem.supabase.co"
