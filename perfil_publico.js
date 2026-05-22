@@ -197,6 +197,16 @@ window.enviarRating = async function(trabajadorId){
 
   if(error){ msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`; return }
 
+  // Notificación para el profesional
+  const comentario = document.getElementById("comentarioRating")?.value?.trim() || ""
+  supabase.from("notificaciones").insert({
+    usuario_id: trabajadorId,
+    tipo: "review",
+    titulo: `Recibiste una calificación de ${estrellaSeleccionada}/10`,
+    cuerpo: comentario ? `"${comentario.substring(0,80)}"` : "¡Alguien valoró tu trabajo!",
+    url: "/perfil.html"
+  }).catch(()=>{})
+
   document.getElementById("formRating").innerHTML =
     '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> ¡Gracias! Tu valoración fue enviada.</div>'
 }

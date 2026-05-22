@@ -468,6 +468,19 @@ window.enviarReview = async function(profileId, nombre){
       body:JSON.stringify({trabajador_id:profileId,autor_id:autorId,rating:ratingSeleccionado,comentario:document.getElementById("comentarioRev").value.trim(),tipo:"servicio"})
     })
     if(!res.ok){ const e=await res.json(); throw new Error(e.message||"Error") }
+    // Crear notificación para el profesional calificado
+    const comentario = document.getElementById("comentarioRev")?.value?.trim() || ""
+    fetch(`${SB_URL}/rest/v1/notificaciones`, {
+      method: "POST",
+      headers: { ...SB_HEADERS, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify({
+        usuario_id: profileId,
+        tipo: "review",
+        titulo: `Recibiste una calificación de ${ratingSeleccionado}/10`,
+        cuerpo: comentario ? `"${comentario.substring(0,80)}"` : `¡Alguien valoró tu trabajo!`,
+        url: "/perfil.html"
+      })
+    }).catch(()=>{})
     document.querySelector(".form-review").innerHTML=
       `<div class="alerta alerta-ok"><i class="fa-solid fa-check-circle"></i> ¡Gracias! Sumaste <strong>${ratingSeleccionado} punto${ratingSeleccionado!==1?"s":""}</strong> al puntaje de ${nombre}.</div>`
     setTimeout(() => cargarReviews(profileId, nombre), 900)
