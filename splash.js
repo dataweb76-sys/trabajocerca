@@ -1,4 +1,13 @@
-/* ── Logo limpio en todas las páginas ── */
+/* ══════════════════════════════════════════════════════════
+   splash.js — Trabajos Cerca
+   ① Logo limpio en TODAS las páginas
+   ② Splash de bienvenida (solo en el home)
+   ③ Modal de registro con 4 tipos
+══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────
+   ① LOGO  (corre en todas las páginas)
+───────────────────────────────────────────────────────── */
 ;(function(){
   function initLogo(){
     const logoDiv = document.querySelector('.logo')
@@ -32,7 +41,15 @@
     initLogo()
 })()
 
+
+/* ─────────────────────────────────────────────────────────
+   ② SPLASH  (solo en la página de inicio)
+───────────────────────────────────────────────────────── */
 ;(function(){
+  /* Solo correr en el home */
+  const path = location.pathname
+  if(path !== '/' && !path.endsWith('/index.html')) return
+
   /* ══════════════════════════════════════════════════════════
      Trabajos Cerca — Splash de bienvenida
      ─ Primera visita: bienvenida + selector de provincia
@@ -268,4 +285,143 @@
     setTimeout(() => { el.remove(); document.body.style.overflow = '' }, 400)
   }
 
+})()
+
+
+/* ─────────────────────────────────────────────────────────
+   ③ MODAL DE REGISTRO  (corre en todas las páginas)
+───────────────────────────────────────────────────────── */
+;(function(){
+  const css = document.createElement('style')
+  css.textContent = `
+  #tc-reg-overlay {
+    display: none; position: fixed; inset: 0; z-index: 99990;
+    background: rgba(15,23,42,.72); backdrop-filter: blur(5px);
+    align-items: center; justify-content: center; padding: 16px;
+    animation: tcRegIn .22s ease;
+  }
+  #tc-reg-overlay.activo { display: flex; }
+  @keyframes tcRegIn { from { opacity:0 } to { opacity:1 } }
+  #tc-reg-box {
+    background: white; border-radius: 22px; width: 100%; max-width: 460px;
+    overflow: hidden; box-shadow: 0 28px 70px rgba(0,0,0,.38);
+    max-height: 92vh; overflow-y: auto;
+    animation: tcRegSlide .28s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes tcRegSlide { from { transform:translateY(24px); opacity:0 } to { transform:translateY(0); opacity:1 } }
+  .tc-reg-card {
+    display: flex; align-items: center; gap: 16px;
+    padding: 17px 20px; cursor: pointer; border: none;
+    width: 100%; text-align: left; font-family: inherit;
+    border-bottom: 1px solid #f1f5f9;
+    background: white; transition: background .15s, transform .12s;
+  }
+  .tc-reg-card:last-of-type { border-bottom: none; }
+  .tc-reg-card:hover { background: #f8fafc; }
+  .tc-reg-card:active { transform: scale(.99); }
+  .tc-reg-icon {
+    width: 54px; height: 54px; border-radius: 16px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+  }
+  `
+  document.head.appendChild(css)
+
+  function montarModal(){
+    if(document.getElementById('tc-reg-overlay')) return
+    const div = document.createElement('div')
+    div.id = 'tc-reg-overlay'
+    div.onclick = e => { if(e.target === div) div.classList.remove('activo') }
+    div.innerHTML = `
+      <div id="tc-reg-box">
+
+        <!-- Header -->
+        <div style="background:linear-gradient(135deg,#1d4ed8 0%,#7c3aed 100%);padding:24px 24px 20px;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:rgba(255,255,255,.07);border-radius:50%;"></div>
+          <button onclick="document.getElementById('tc-reg-overlay').classList.remove('activo')"
+            style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,.18);border:none;
+            color:white;width:32px;height:32px;border-radius:50%;font-size:20px;cursor:pointer;line-height:1;
+            display:flex;align-items:center;justify-content:center;font-family:inherit;transition:background .15s;"
+            onmouseover="this.style.background='rgba(255,255,255,.3)'"
+            onmouseout="this.style.background='rgba(255,255,255,.18)'">×</button>
+          <p style="margin:0 0 5px;font-size:11px;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.12em;">Unite gratis</p>
+          <h2 style="margin:0 0 7px;font-size:21px;font-weight:900;color:white;line-height:1.2;">¿Cómo querés registrarte?</h2>
+          <p style="margin:0;font-size:13px;color:rgba(255,255,255,.82);line-height:1.5;">
+            En menos de 2 minutos ya estás activo y visible para miles de usuarios.
+          </p>
+        </div>
+
+        <!-- Opción 1: Busco Empleo -->
+        <button class="tc-reg-card" onclick="location.href='/registro.html?tipo=trabajador'">
+          <div class="tc-reg-icon" style="background:#eff6ff;">
+            <span>🔍</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0 0 3px;font-size:15px;font-weight:800;color:#1e293b;">Busco Empleo</p>
+            <p style="margin:0;font-size:12px;color:#64748b;line-height:1.4;">Cargá tu CV y que las empresas te encuentren a vos</p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;font-size:12px;flex-shrink:0;"></i>
+        </button>
+
+        <!-- Opción 2: Empleador -->
+        <button class="tc-reg-card" onclick="location.href='/registro.html?tipo=empleador'">
+          <div class="tc-reg-icon" style="background:#faf5ff;">
+            <span>🏢</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0 0 3px;font-size:15px;font-weight:800;color:#1e293b;">Soy Empleador</p>
+            <p style="margin:0;font-size:12px;color:#64748b;line-height:1.4;">Publicá puestos y encontrá el candidato ideal rápido</p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;font-size:12px;flex-shrink:0;"></i>
+        </button>
+
+        <!-- Opción 3: Oficio -->
+        <button class="tc-reg-card" onclick="location.href='/registro_profesional.html?tipo=oficio'">
+          <div class="tc-reg-icon" style="background:#fff7ed;">
+            <span>🔧</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0 0 3px;font-size:15px;font-weight:800;color:#1e293b;">Ofrezco Oficios</p>
+            <p style="margin:0;font-size:12px;color:#64748b;line-height:1.4;">Plomero, electricista, albañil y más — conseguí clientes</p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;font-size:12px;flex-shrink:0;"></i>
+        </button>
+
+        <!-- Opción 4: Profesional -->
+        <button class="tc-reg-card" onclick="location.href='/registro_profesional.html?tipo=profesional'">
+          <div class="tc-reg-icon" style="background:#f0fdf4;">
+            <span>👔</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0 0 3px;font-size:15px;font-weight:800;color:#1e293b;">Soy Profesional</p>
+            <p style="margin:0;font-size:12px;color:#64748b;line-height:1.4;">Contador, diseñador, médico — expandí tu cartera de clientes</p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;font-size:12px;flex-shrink:0;"></i>
+        </button>
+
+        <!-- Footer -->
+        <div style="padding:14px 20px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
+          <p style="margin:0;font-size:13px;color:#64748b;">
+            ¿Ya tenés cuenta? <a href="/login.html" style="color:#2563eb;font-weight:700;text-decoration:none;">Iniciá sesión →</a>
+          </p>
+        </div>
+
+      </div>
+    `
+    document.body.appendChild(div)
+
+    /* Cerrar con Escape */
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape') div.classList.remove('activo')
+    })
+  }
+
+  if(document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', montarModal)
+  else
+    montarModal()
+
+  window._tcAbrirRegistro = function(){
+    const overlay = document.getElementById('tc-reg-overlay')
+    if(overlay) overlay.classList.add('activo')
+  }
 })()

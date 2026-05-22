@@ -535,7 +535,7 @@ async function cargarMenu(){
     menu.innerHTML = `
       <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
       <a href="/login.html"><i class="fa-solid fa-right-to-bracket"></i> <span>Entrar</span></a>
-      <a href="/registro.html"><i class="fa-solid fa-user-plus"></i> <span>Registrarse</span></a>
+      <a href="javascript:void(0)" onclick="window._tcAbrirRegistro?.()"><i class="fa-solid fa-user-plus"></i> <span>Registrarse</span></a>
     `
   }
 }
