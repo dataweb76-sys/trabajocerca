@@ -575,6 +575,51 @@ window.registrarWAClick = async function(profesionalId) {
   } catch(e){}
 }
 
+/* ── INICIAR CONVERSACIÓN ── */
+window.iniciarConversacion = async function(profesionalId){
+  const uid = getCurrentUserId()
+  if(!uid){ window.location.href = "/login.html"; return }
+  if(uid === profesionalId){ return }
+
+  const token = getAccessToken()
+  const authHdrs = { ...SB_HEADERS, "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+
+  // Buscar conversación existente
+  try {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/conversaciones?or=(and(usuario1_id.eq.${uid},usuario2_id.eq.${profesionalId}),and(usuario1_id.eq.${profesionalId},usuario2_id.eq.${uid}))&select=id&limit=1`,
+      { headers: authHdrs }
+    )
+    if(res.ok){
+      const data = await res.json()
+      if(data?.[0]?.id){ window.location.href = `/mensajes.html?conv=${data[0].id}`; return }
+    }
+  } catch(e){}
+
+  // Crear nueva conversación
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/conversaciones`, {
+      method: "POST",
+      headers: { ...authHdrs, "Prefer": "return=representation" },
+      body: JSON.stringify({
+        usuario1_id: uid,
+        usuario2_id: profesionalId,
+        ultimo_mensaje: "",
+        ultimo_mensaje_at: new Date().toISOString(),
+        no_leidos_u1: 0,
+        no_leidos_u2: 0
+      })
+    })
+    if(res.ok){
+      const data = await res.json()
+      const id = Array.isArray(data) ? data[0]?.id : data?.id
+      if(id){ window.location.href = `/mensajes.html?conv=${id}`; return }
+    }
+  } catch(e){}
+
+  alert("No se pudo iniciar la conversación. Intentá de nuevo.")
+}
+
 /* ── CERRAR MODAL ── */
 window.cerrarModal = function(){
   document.getElementById("modalOverlay").classList.remove("activo")
