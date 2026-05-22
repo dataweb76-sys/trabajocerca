@@ -112,6 +112,9 @@ async function init(){
   const mostrarTel = perfilData?.mostrar_telefono !== false
   document.getElementById("srv-mostrar-tel").checked = mostrarTel
 
+  // Mostrar estado de solicitud pendiente si corresponde
+  if(planNivel === 0) await mostrarEstadoSolicitud()
+
   cargarPortfolio()
 }
 
@@ -358,6 +361,93 @@ window.cerrarPlanes = function(){
 
 window.cerrarPlanesClick = function(e){
   if(e.target === document.getElementById("modalPlanes")) cerrarPlanes()
+}
+
+/* ── Verificar solicitud pendiente ── */
+async function mostrarEstadoSolicitud(){
+  const { data } = await supabase
+    .from("solicitudes_portfolio")
+    .select("plan, estado, created_at")
+    .eq("usuario_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if(!data) return
+
+  const seccion = document.getElementById("seccionPortfolio")
+  const btn     = document.getElementById("btnAgregarTrabajo")
+
+  if(data.estado === "pendiente"){
+    const planNombre = data.plan === "basico" ? "Básico ($10.000)" : "Pro ($20.000)"
+    if(seccion){
+      const aviso = document.createElement("div")
+      aviso.style.cssText = "background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#713f12;"
+      aviso.innerHTML = `<i class="fa-solid fa-clock" style="color:#f59e0b;margin-right:6px;"></i>
+        <strong>Solicitud pendiente — Plan ${planNombre}</strong><br>
+        <span style="color:#92400e;">Tu solicitud fue enviada. Te avisamos cuando esté aprobada.</span>`
+      seccion.insertBefore(aviso, seccion.querySelector("#listaPortfolio"))
+    }
+    if(btn) btn.disabled = true
+  }
+}
+
+/* ── Solicitar plan ── */
+window.solicitarPlan = async function(plan){
+  const msgEl = document.getElementById("msgSolicitud")
+  msgEl.innerHTML = `<div style="color:#64748b;font-size:13px;text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Enviando solicitud...</div>`
+
+  // Verificar si ya tiene solicitud pendiente
+  const { data: existente } = await supabase
+    .from("solicitudes_portfolio")
+    .select("id, estado")
+    .eq("usuario_id", userId)
+    .eq("estado", "pendiente")
+    .maybeSingle()
+
+  if(existente){
+    msgEl.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:10px 14px;">Ya tenés una solicitud pendiente. Esperá a que sea procesada.</div>`
+    return
+  }
+
+  // Insertar solicitud
+  const { error } = await supabase.from("solicitudes_portfolio").insert({
+    usuario_id: userId,
+    plan
+  })
+
+  if(error){
+    msgEl.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:10px 14px;">${error.message}</div>`
+    return
+  }
+
+  // Notificar admins
+  const { data: admins } = await supabase
+    .from("perfiles").select("id").eq("admin", true)
+
+  if(admins?.length){
+    const planLabel = plan === "basico" ? "Básico ($10.000/mes)" : "Pro ($20.000/mes)"
+    await supabase.from("notificaciones").insert(
+      admins.map(a => ({
+        usuario_id: a.id,
+        tipo:       "sistema",
+        titulo:     `Nueva solicitud de plan ${planLabel}`,
+        cuerpo:     `Un profesional solicita activar trabajos realizados. Revisá el panel admin.`,
+        url:        "/admin.html"
+      }))
+    ).catch(() => {})
+  }
+
+  msgEl.innerHTML = `
+    <div class="alerta alerta-ok" style="padding:12px 14px;">
+      <i class="fa-solid fa-check-circle"></i>
+      <strong>¡Solicitud enviada!</strong><br>
+      <span style="font-size:13px;">Te avisamos por notificación cuando esté aprobada. Una vez aprobada, vas a poder subir tus fotos desde acá.</span>
+    </div>`
+
+  // Deshabilitar ambos botones
+  document.querySelectorAll("#modalPlanes button[onclick*='solicitarPlan']")
+    .forEach(b => b.disabled = true)
 }
 
 function abrirFormPortfolio(){

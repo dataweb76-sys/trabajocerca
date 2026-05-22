@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos de trabajo — Trabajos Cerca</title>
+<meta name="description" content="Publicá lo que necesitás y encontrá profesionales disponibles. Plomeros, electricistas, albañiles y más en toda Argentina.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  .pedido-card {
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .pedido-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,.1); transform: translateY(-1px); }
+  .pedido-card.urgente { border-color: #fca5a5; background: #fff5f5; }
+  .badge-urgente {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #ef4444; color: white; font-size: 10px; font-weight: 800;
+    padding: 2px 9px; border-radius: 20px; letter-spacing: .04em;
+  }
+  .pedido-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .pedido-chips button {
+    background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0;
+    border-radius: 20px; padding: 5px 13px; font-size: 13px; cursor: pointer;
+    transition: all .15s; white-space: nowrap;
+  }
+  .pedido-chips button:hover, .pedido-chips button.activo {
+    background: #eff6ff; color: #2563eb; border-color: #93c5fd;
+  }
+  .btn-interesa {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: #25D366; color: white; padding: 10px 18px;
+    border-radius: 9px; font-weight: 700; font-size: 14px;
+    text-decoration: none; transition: background .15s;
+  }
+  .btn-interesa:hover { background: #1ebe5a; }
+  .hero-pedidos {
+    background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+    border-radius: 18px; padding: 28px 24px; color: white;
+    margin-bottom: 28px; text-align: center;
+  }
+  .hero-pedidos h1 { margin: 0 0 8px; font-size: 24px; font-weight: 900; }
+  .hero-pedidos p  { margin: 0 0 18px; font-size: 15px; opacity: .9; }
+  .filtros-wrap {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+    background: white; border: 1.5px solid #e2e8f0; border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .filtros-wrap select, .filtros-wrap input {
+    flex: 1; min-width: 140px; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; padding: 8px 12px; font-size: 14px;
+    background: #f8fafc; outline: none;
+  }
+  .filtros-wrap select:focus, .filtros-wrap input:focus { border-color: #2563eb; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/index.html"><i class="fa-solid fa-house"></i> <span>Inicio</span></a>
+    <a href="/buscador_oficios.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
+    <a href="/pedidos.html" style="color:#f97316;font-weight:700;"><i class="fa-solid fa-clipboard-list"></i> <span>Pedidos</span></a>
+    <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
+  </nav>
+</header>
+
+<div class="container" style="max-width:720px;padding-top:24px;">
+
+  <!-- Hero -->
+  <div class="hero-pedidos">
+    <div style="font-size:40px;margin-bottom:10px;">📋</div>
+    <h1>Pedidos de trabajo</h1>
+    <p>¿Necesitás un profesional? Publicá tu pedido y que te contacten.<br>¿Sos profesional? Encontrá clientes que necesitan tu servicio.</p>
+    <button onclick="window.abrirModalPedido()"
+      style="background:white;color:#1d4ed8;border:none;padding:12px 28px;border-radius:10px;font-weight:800;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+      <i class="fa-solid fa-plus"></i> Publicar mi pedido
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-wrap">
+    <select id="filtroCat" onchange="window.buscarPedidos()">
+      <option value="">Todas las categorías</option>
+      <optgroup label="Oficios">
+        <option>Albañilería</option><option>Plomería</option><option>Gasista</option>
+        <option>Electricista</option><option>Pintura</option><option>Carpintería</option>
+        <option>Jardinería</option><option>Herrería</option><option>Cerrajería</option>
+        <option>Limpieza</option><option>Mudanzas</option><option>Refrigeración</option>
+        <option>Informática</option><option>Gastronomía</option><option>Mecánico</option>
+        <option>Tapicería</option><option>Personal Trainer</option><option>Enfermero</option>
+        <option>Niñera</option><option>Delivery</option><option>Planchado</option>
+        <option>Peluquería</option><option>Fotógrafo</option>
+      </optgroup>
+      <optgroup label="Profesionales">
+        <option>Médico</option><option>Odontólogo</option><option>Psicólogo</option>
+        <option>Kinesiólogo</option><option>Nutricionista</option><option>Veterinario</option>
+        <option>Arquitecto</option><option>Abogado</option><option>Contador</option>
+        <option>Ingeniero</option><option>Diseñador</option><option>Profesor</option>
+        <option>Administración</option><option>Comunicación</option><option>Biólogo/Químico</option>
+      </optgroup>
+    </select>
+    <input id="filtroLoc" placeholder="Ciudad o localidad..." onkeydown="if(event.key==='Enter')window.buscarPedidos()">
+    <button onclick="window.buscarPedidos()" class="btn btn-primary" style="white-space:nowrap;padding:8px 16px;">
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
+    <button onclick="window.limpiarFiltros()" class="btn btn-outline" style="white-space:nowrap;padding:8px 12px;font-size:12px;">
+      <i class="fa-solid fa-xmark"></i> Limpiar
+    </button>
+  </div>
+
+  <!-- Lista de pedidos -->
+  <div id="lista-pedidos">
+    <div style="text-align:center;padding:40px;color:#64748b;">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ MODAL PUBLICAR PEDIDO ══ -->
+<div class="modal-overlay" id="modalPedidoOverlay" onclick="window.cerrarModalPedidoClick(event)">
+  <div class="modal-box" style="max-width:520px;" id="modalPedidoBox">
+    <button class="modal-close" onclick="window.cerrarModalPedido()">×</button>
+
+    <div style="background:linear-gradient(135deg,#1d4ed8,#7c3aed);padding:22px 26px 18px;text-align:center;border-radius:16px 16px 0 0;">
+      <div style="font-size:38px;margin-bottom:6px;">📋</div>
+      <h2 style="margin:0 0 4px;font-size:19px;font-weight:900;color:white;">Publicar pedido de trabajo</h2>
+      <p style="margin:0;color:rgba(255,255,255,.85);font-size:13px;">Los profesionales de tu zona te van a contactar</p>
+    </div>
+
+    <div style="padding:22px 24px 26px;">
+
+      <label><i class="fa-solid fa-tools" style="color:#2563eb;"></i> ¿Qué necesitás? *</label>
+      <select id="pCategoria">
+        <option value="">— Seleccioná una categoría —</option>
+        <optgroup label="Oficios">
+          <option>Albañilería</option><option>Plomería</option><option>Gasista</option>
+          <option>Electricista</option><option>Pintura</option><option>Carpintería</option>
+          <option>Jardinería</option><option>Herrería</option><option>Cerrajería</option>
+          <option>Limpieza</option><option>Mudanzas</option><option>Refrigeración</option>
+          <option>Informática</option><option>Gastronomía</option><option>Mecánico</option>
+          <option>Tapicería</option><option>Personal Trainer</option><option>Enfermero</option>
+          <option>Niñera</option><option>Delivery</option><option>Planchado</option>
+          <option>Peluquería</option><option>Fotógrafo</option>
+        </optgroup>
+        <optgroup label="Profesionales">
+          <option>Médico</option><option>Odontólogo</option><option>Psicólogo</option>
+          <option>Kinesiólogo</option><option>Nutricionista</option><option>Veterinario</option>
+          <option>Arquitecto</option><option>Abogado</option><option>Contador</option>
+          <option>Ingeniero</option><option>Diseñador</option><option>Profesor</option>
+          <option>Administración</option><option>Comunicación</option><option>Biólogo/Químico</option>
+        </optgroup>
+      </select>
+
+      <label style="margin-top:12px;"><i class="fa-solid fa-align-left" style="color:#2563eb;"></i> Descripción <span style="font-size:11px;color:#94a3b8;">(opcional)</span></label>
+      <textarea id="pDescripcion" rows="3"
+        placeholder="Describí el trabajo: qué hay que hacer, cuándo, algún detalle importante..."></textarea>
+
+      <label style="margin-top:12px;"><i class="fa-solid fa-location-dot" style="color:#2563eb;"></i> Tu localidad *</label>
+      <input id="pLocalidad" placeholder="Ej: Rosario, CABA, Córdoba...">
+
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0 4px;padding:12px 14px;background:#fff5f5;border:1.5px solid #fca5a5;border-radius:10px;cursor:pointer;" onclick="document.getElementById('pUrgente').click()">
+        <input type="checkbox" id="pUrgente" style="width:18px;height:18px;cursor:pointer;">
+        <label for="pUrgente" style="cursor:pointer;margin:0;font-weight:700;color:#dc2626;font-size:14px;">
+          ⚡ Urgente — necesito alguien hoy o mañana
+        </label>
+      </div>
+
+      <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-top:14px;">
+        <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#475569;">
+          <i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> Tu contacto (para que te encuentren)
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:12px;">Nombre</label>
+            <input id="pNombre" placeholder="Tu nombre">
+          </div>
+          <div>
+            <label style="font-size:12px;">WhatsApp *</label>
+            <input id="pMovil" type="tel" placeholder="Ej: 1123456789">
+          </div>
+        </div>
+        <p style="margin:8px 0 0;font-size:11px;color:#94a3b8;">
+          <i class="fa-solid fa-lock" style="font-size:10px;"></i> Solo los profesionales registrados verán tu número.
+        </p>
+      </div>
+
+      <div id="msgNuevoPedido" style="margin-top:10px;"></div>
+
+      <button onclick="window.publicarNuevoPedido()"
+        class="btn" style="margin-top:16px;width:100%;font-size:16px;font-weight:800;background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:white;border:none;padding:14px;">
+        <i class="fa-solid fa-paper-plane"></i> Publicar pedido
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/pedidos.js"></script>
+<script src="/notif_widget.js"></script>
+<script src="/chat_widget.js"></script>
+</body>
+</html>

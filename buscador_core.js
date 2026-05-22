@@ -125,7 +125,7 @@ window.buscar = async function(){
   cont.innerHTML = `<div style="text-align:center;padding:40px;color:#64748b;">
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
-  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,perfiles(id,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,profesion_universitaria)"
+  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,perfiles(id,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,verificado,profesion_universitaria)"
   let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=500`
 
   if(palabra){ const p=encodeURIComponent(`*${palabra}*`); url+=`&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p},servicios_lista.ilike.${p})` }
@@ -215,8 +215,12 @@ window.buscar = async function(){
       : `<div style="width:70px;height:70px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:26px;color:#2563eb;flex-shrink:0;"><i class="fa-solid fa-user"></i></div>`
 
     const badgeDest = p.destacado
-      ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#f59e0b;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:3px;"><i class="fa-solid fa-crown" style="font-size:9px;"></i> DESTACADO</span><br>`
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#f59e0b;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:3px;"><i class="fa-solid fa-crown" style="font-size:9px;"></i> DESTACADO</span>`
       : ""
+    const badgeVerif = p.verificado
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#0ea5e9;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:3px;"><i class="fa-solid fa-circle-check" style="font-size:9px;"></i> VERIFICADO</span>`
+      : ""
+    const badgesLine = (badgeDest || badgeVerif) ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;">${badgeDest}${badgeVerif}</div>` : ""
 
     const card = document.createElement("div")
     card.className = "card"
@@ -230,9 +234,10 @@ window.buscar = async function(){
         <div style="position:relative;flex-shrink:0;">
           ${foto}
           ${p.destacado?`<span style="position:absolute;bottom:-3px;right:-3px;background:#f59e0b;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-crown" style="font-size:9px;color:white;"></i></span>`:""}
+          ${p.verificado?`<span style="position:absolute;top:-3px;right:-3px;background:#0ea5e9;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;" title="Perfil verificado"><i class="fa-solid fa-circle-check" style="font-size:10px;color:white;"></i></span>`:""}
         </div>
         <div style="flex:1;min-width:0;">
-          ${badgeDest}
+          ${badgesLine}
           <h3 style="margin:0 0 2px;font-size:17px;">${nombre}</h3>
           <p style="margin:0 0 4px;color:#f97316;font-weight:700;font-size:14px;">${item.categoria}</p>
           <div style="margin-bottom:4px;">${puntajeCardHTML(item._puntos, item._count)}</div>
@@ -280,8 +285,11 @@ window.abrirModal = function(item, irCalificar=false){
   document.getElementById("modalContent").innerHTML = `
     <div style="text-align:center;margin-bottom:20px;">
       ${foto}
-      ${p.destacado?`<div style="display:inline-flex;align-items:center;gap:5px;background:#f59e0b;color:white;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;margin:8px 0 4px;"><i class="fa-solid fa-crown"></i> PERFIL DESTACADO</div><br>`:""}
-      <h2 style="margin:10px 0 4px;font-size:22px;">${_dname}</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0 2px;">
+        ${p.destacado?`<div style="display:inline-flex;align-items:center;gap:5px;background:#f59e0b;color:white;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;"><i class="fa-solid fa-crown"></i> PERFIL DESTACADO</div>`:""}
+        ${p.verificado?`<div style="display:inline-flex;align-items:center;gap:5px;background:#0ea5e9;color:white;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;"><i class="fa-solid fa-circle-check"></i> VERIFICADO</div>`:""}
+      </div>
+      <h2 style="margin:8px 0 4px;font-size:22px;">${_dname}</h2>
       <p style="margin:0;color:#f97316;font-weight:700;font-size:16px;"><i class="fa-solid fa-tools"></i> ${item.categoria}</p>
       <p style="margin:4px 0 0;color:#64748b;font-size:14px;"><i class="fa-solid fa-location-dot"></i> ${ubic}</p>
       <div style="margin-top:10px;" id="puntajeBadgeTop"></div>

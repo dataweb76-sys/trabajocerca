@@ -1,63 +1,159 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Panel Admin</title>
-
+<title>Panel Admin — Trabajos Cerca</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .stat-box {
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 16px;
+    text-align: center;
+  }
+  .stat-box.stat-blue  { border-color: #bae6fd; background: #f0f9ff; }
+  .stat-box.stat-yellow{ border-color: #fde68a; background: #fffbeb; }
+  .stat-box.stat-green { border-color: #bbf7d0; background: #f0fdf4; }
+  .stat-num  { font-size: 36px; font-weight: 900; color: #1e293b; line-height: 1; }
+  .stat-label{ font-size: 13px; color: #64748b; margin-top: 4px; }
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  .admin-row {
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    transition: box-shadow .15s;
+  }
+  .admin-row:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+  .admin-info {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .admin-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .badge-on {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  }
+  .badge-off {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; color: #94a3b8; padding: 2px 8px; border-radius: 20px;
+    border: 1px solid #e2e8f0;
+  }
+  .badge-verif { background: #0ea5e9; color: white; }
+  .badge-dest  { background: #f59e0b; color: white; }
+  .badge-admin { background: #7c3aed; color: white; }
+  .admin-acciones {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .buscar-admin {
+    display: flex; gap: 10px; margin-bottom: 16px;
+    background: white; border: 1.5px solid #e2e8f0;
+    border-radius: 10px; padding: 10px 14px;
+  }
+  .buscar-admin input {
+    flex: 1; border: none; outline: none;
+    font-size: 14px; background: transparent;
+  }
+</style>
 </head>
-
 <body>
 
 <header class="topbar">
-
-<div class="logo">
-
-<a href="/index.html">
-<img src="logo.png" height="40">
-</a>
-
-</div>
-
-<nav>
-
-<a href="/index.html">
-<i class="fa-solid fa-house"></i> Inicio
-</a>
-
-<a href="/buscador.html">
-<i class="fa-solid fa-magnifying-glass"></i> Buscar
-</a>
-
-<a href="/mapa.html">
-<i class="fa-solid fa-map"></i> Mapa
-</a>
-
-</nav>
-
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/index.html"><i class="fa-solid fa-house"></i> <span>Inicio</span></a>
+    <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
+    <a href="/pedidos.html"><i class="fa-solid fa-clipboard-list"></i> <span>Pedidos</span></a>
+  </nav>
 </header>
 
+<div class="container" style="max-width:900px;padding-top:24px;">
 
-<div class="container">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;">
+    <div style="font-size:36px;">🛡️</div>
+    <div>
+      <h1 style="margin:0;font-size:22px;font-weight:900;">Panel Administrativo</h1>
+      <p style="margin:0;color:#64748b;font-size:14px;">Gestión de perfiles · Trabajos Cerca</p>
+    </div>
+  </div>
 
-<h1>Panel administrativo</h1>
+  <!-- Stats -->
+  <div id="statsGrid" class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-num"><i class="fa-solid fa-spinner fa-spin" style="font-size:22px;color:#94a3b8;"></i></div>
+      <div class="stat-label">Cargando...</div>
+    </div>
+  </div>
 
-<h3>Contenido pendiente</h3>
+  <!-- Solicitudes de Portfolio -->
+  <div style="background:white;border:1.5px solid #fed7aa;border-radius:14px;padding:20px 22px;margin-bottom:20px;">
 
-<div id="pendientes"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <h2 style="margin:0;font-size:17px;font-weight:800;">
+        <i class="fa-solid fa-images" style="color:#f97316;"></i> Solicitudes de Trabajos Realizados
+        <span id="contadorSolicitudes" style="font-size:13px;font-weight:400;color:#64748b;margin-left:8px;"></span>
+      </h2>
+    </div>
+
+    <div id="listaSolicitudes">
+      <div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;">
+        <i class="fa-solid fa-spinner fa-spin"></i> Cargando...
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Perfiles -->
+  <div style="background:white;border:1.5px solid #e2e8f0;border-radius:14px;padding:20px 22px;">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <h2 style="margin:0;font-size:17px;font-weight:800;">
+        <i class="fa-solid fa-users" style="color:#2563eb;"></i> Perfiles registrados
+        <span id="contadorPerfiles" style="font-size:13px;font-weight:400;color:#64748b;margin-left:8px;"></span>
+      </h2>
+      <button onclick="location.reload()" class="btn btn-outline btn-sm">
+        <i class="fa-solid fa-rotate-right"></i> Actualizar
+      </button>
+    </div>
+
+    <div class="buscar-admin">
+      <i class="fa-solid fa-magnifying-glass" style="color:#94a3b8;align-self:center;"></i>
+      <input placeholder="Buscá por nombre, email o ciudad..."
+        oninput="window.filtrarPerfiles(this.value)">
+    </div>
+
+    <div id="tablaPerfiles"></div>
+
+  </div>
 
 </div>
 
-
-<script type="module" src="admin.js"></script>
-
+<script type="module" src="/admin.js"></script>
 </body>
 </html>

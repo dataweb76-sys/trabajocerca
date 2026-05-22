@@ -327,57 +327,75 @@
 
 <!-- MODAL PLANES -->
 <div class="modal-overlay" id="modalPlanes" onclick="cerrarPlanesClick(event)">
-  <div class="modal-box" style="max-width:500px;">
+  <div class="modal-box" style="max-width:520px;">
     <button class="modal-close" onclick="cerrarPlanes()">×</button>
-    <div class="modal-content">
-      <div style="text-align:center;margin-bottom:20px;">
-        <div style="font-size:48px;margin-bottom:8px;">📸</div>
-        <h2 style="margin:0 0 6px;font-size:22px;">Publicita tus trabajos</h2>
-        <p style="color:#64748b;font-size:14px;margin:0;">Mostrá fotos de tus trabajos y conseguí más clientes</p>
+
+    <!-- Cabecera -->
+    <div style="background:linear-gradient(135deg,#f97316,#ea580c);padding:24px 26px 20px;text-align:center;border-radius:16px 16px 0 0;">
+      <div style="font-size:42px;margin-bottom:8px;">📸</div>
+      <h2 style="margin:0 0 6px;font-size:21px;font-weight:900;color:white;">Trabajos Realizados</h2>
+      <p style="margin:0;color:rgba(255,255,255,.88);font-size:13px;line-height:1.5;">
+        Mostrá fotos de tus trabajos y demostrá tu calidad.<br>
+        Los clientes confían más en profesionales con fotos reales.
+      </p>
+    </div>
+
+    <div style="padding:22px 24px 26px;">
+
+      <!-- Intro -->
+      <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:12px 14px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start;">
+        <i class="fa-solid fa-circle-info" style="color:#f97316;margin-top:2px;flex-shrink:0;"></i>
+        <p style="margin:0;font-size:13px;color:#7c2d12;line-height:1.5;">
+          Elegís un plan, nos lo pedís, <strong>abonás una vez por mes</strong> y nosotros te habilitamos la sección de fotos. Tus trabajos aparecen en tu perfil público para que los clientes los vean antes de contactarte.
+        </p>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <!-- Planes -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
 
-        <!-- Plan 1 -->
-        <div class="plan-card" style="border:2px solid #2563eb;">
-          <span class="plan-badge" style="background:#2563eb;">BÁSICO</span>
-          <p class="plan-price">$10.000</p>
-          <p class="plan-period">por mes</p>
-          <ul class="plan-features">
-            <li>2 trabajos publicados</li>
-            <li>3 fotos por trabajo</li>
-            <li>Visible en búsquedas</li>
+        <!-- Plan Básico -->
+        <div style="border:2px solid #2563eb;border-radius:14px;padding:16px 14px;text-align:center;background:white;">
+          <div style="display:inline-flex;align-items:center;gap:4px;background:#2563eb;color:white;font-size:10px;font-weight:800;padding:2px 10px;border-radius:20px;margin-bottom:10px;">
+            <i class="fa-solid fa-image" style="font-size:9px;"></i> BÁSICO
+          </div>
+          <p style="margin:0 0 2px;font-size:28px;font-weight:900;color:#1e293b;">$10.000</p>
+          <p style="margin:0 0 12px;font-size:12px;color:#64748b;">por mes</p>
+          <ul style="list-style:none;padding:0;margin:0 0 14px;font-size:13px;color:#475569;text-align:left;display:flex;flex-direction:column;gap:5px;">
+            <li><i class="fa-solid fa-check" style="color:#2563eb;margin-right:5px;"></i>2 trabajos publicados</li>
+            <li><i class="fa-solid fa-check" style="color:#2563eb;margin-right:5px;"></i>3 fotos por trabajo</li>
+            <li><i class="fa-solid fa-check" style="color:#2563eb;margin-right:5px;"></i>Visible en tu perfil</li>
           </ul>
-          <a href="https://wa.me/542954320639?text=Hola!+Quiero+contratar+el+Plan+Básico+de+Trabajos+Realizados+%28%2410.000%2Fmes%29+para+mi+perfil+en+Trabajos+Cerca."
-            target="_blank" rel="noopener"
-            class="btn btn-sm"
-            style="background:#25D366;color:white;display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;">
-            <i class="fa-brands fa-whatsapp"></i> Consultar
-          </a>
+          <button onclick="window.solicitarPlan('basico')" class="btn btn-sm"
+            style="background:#2563eb;color:white;width:100%;justify-content:center;">
+            <i class="fa-solid fa-paper-plane"></i> Solicitar
+          </button>
         </div>
 
-        <!-- Plan 2 -->
-        <div class="plan-card" style="border:2px solid #f97316;background:#fff7ed;">
-          <span class="plan-badge" style="background:#f97316;">PRO</span>
-          <p class="plan-price">$180.000</p>
-          <p class="plan-period">por mes</p>
-          <ul class="plan-features">
-            <li>5 trabajos publicados</li>
-            <li>3 fotos por trabajo</li>
-            <li>Destacado en búsquedas</li>
+        <!-- Plan Pro -->
+        <div style="border:2px solid #f97316;border-radius:14px;padding:16px 14px;text-align:center;background:#fff7ed;">
+          <div style="display:inline-flex;align-items:center;gap:4px;background:#f97316;color:white;font-size:10px;font-weight:800;padding:2px 10px;border-radius:20px;margin-bottom:10px;">
+            <i class="fa-solid fa-crown" style="font-size:9px;"></i> PRO
+          </div>
+          <p style="margin:0 0 2px;font-size:28px;font-weight:900;color:#1e293b;">$20.000</p>
+          <p style="margin:0 0 12px;font-size:12px;color:#64748b;">por mes</p>
+          <ul style="list-style:none;padding:0;margin:0 0 14px;font-size:13px;color:#475569;text-align:left;display:flex;flex-direction:column;gap:5px;">
+            <li><i class="fa-solid fa-check" style="color:#f97316;margin-right:5px;"></i>5 trabajos publicados</li>
+            <li><i class="fa-solid fa-check" style="color:#f97316;margin-right:5px;"></i>3 fotos por trabajo</li>
+            <li><i class="fa-solid fa-check" style="color:#f97316;margin-right:5px;"></i>Badge Destacado incluido</li>
           </ul>
-          <a href="https://wa.me/542954320639?text=Hola!+Quiero+contratar+el+Plan+Pro+de+Trabajos+Realizados+%28%24180.000%2Fmes%29+para+mi+perfil+en+Trabajos+Cerca."
-            target="_blank" rel="noopener"
-            class="btn btn-sm"
-            style="background:#f97316;color:white;display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;">
-            <i class="fa-brands fa-whatsapp"></i> Consultar
-          </a>
+          <button onclick="window.solicitarPlan('pro')" class="btn btn-sm"
+            style="background:#f97316;color:white;width:100%;justify-content:center;">
+            <i class="fa-solid fa-paper-plane"></i> Solicitar
+          </button>
         </div>
 
       </div>
 
-      <p style="text-align:center;font-size:12px;color:#94a3b8;margin:16px 0 0;">
-        Escribinos por WhatsApp y te activamos el plan en minutos.
+      <div id="msgSolicitud" style="min-height:10px;"></div>
+
+      <p style="text-align:center;font-size:12px;color:#94a3b8;margin:10px 0 0;">
+        <i class="fa-solid fa-lock" style="font-size:10px;"></i>
+        Al solicitar te contactamos para confirmar el pago y activamos el plan.
       </p>
     </div>
   </div>

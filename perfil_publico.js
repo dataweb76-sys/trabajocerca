@@ -122,9 +122,15 @@ async function cargarPerfil(){
             <a href="/login.html">Iniciá sesión</a> para dejar una valoración
           </p></div>` : ""))
 
+  const badgesHtml = [
+    perfil.destacado ? `<span style="display:inline-flex;align-items:center;gap:5px;background:#f59e0b;color:white;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;"><i class="fa-solid fa-crown"></i> DESTACADO</span>` : "",
+    perfil.verificado ? `<span style="display:inline-flex;align-items:center;gap:5px;background:#0ea5e9;color:white;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;"><i class="fa-solid fa-circle-check"></i> VERIFICADO</span>` : ""
+  ].filter(Boolean).join("")
+
   document.getElementById("contenido").innerHTML = `
     <div class="pub-header">
       ${foto}
+      ${badgesHtml ? `<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:6px 0 4px;">${badgesHtml}</div>` : ""}
       <h2 style="margin:0 0 4px;">${displayNombre}</h2>
       <p style="margin:0 0 2px;color:#64748b;">
         <i class="fa-solid fa-location-dot"></i>
