@@ -429,10 +429,13 @@ window.volverEleccion = function(){
 }
 
 window.pagarMP = function(){
-  const plan = PLANES_CONFIG[_planActual]
-  if(!plan) return
-  // Link de MercadoPago al alias (no muestra el alias en el HTML)
-  window.open("https://link.mercadopago.com.ar/danielmfaggi", "_blank")
+  const links = {
+    p1: "https://mpago.la/2u1DjVA",
+    p2: "https://mpago.la/2Tn1ug3",
+    p3: "https://mpago.la/1tFwTfa"
+  }
+  const url = links[_planActual]
+  if(url) window.open(url, "_blank")
 }
 
 window.contactarWA = async function(){
