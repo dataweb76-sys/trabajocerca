@@ -1,3 +1,37 @@
+/* ── Logo limpio en todas las páginas ── */
+;(function(){
+  function initLogo(){
+    const logoDiv = document.querySelector('.logo')
+    if(!logoDiv) return
+    logoDiv.innerHTML = `
+      <a href="/index.html" style="
+        display:flex; align-items:center; gap:10px; text-decoration:none;
+      ">
+        <img src="/icon-192.png" alt="TC"
+          onerror="this.style.display='none'"
+          style="
+            height:36px; width:36px; border-radius:9px; flex-shrink:0;
+            box-shadow: 0 2px 8px rgba(0,0,0,.28);
+          ">
+        <div style="display:flex; flex-direction:column; line-height:1.15;">
+          <span class="logo-nombre" style="
+            font-size:16px; font-weight:900; color:white;
+            letter-spacing:-.025em; font-family:inherit;
+          ">Trabajos Cerca</span>
+          <span class="logo-sub" style="
+            font-size:9.5px; font-weight:600; color:rgba(255,255,255,.62);
+            letter-spacing:.14em; text-transform:uppercase; font-family:inherit;
+          ">Tu oportunidad, cerca</span>
+        </div>
+      </a>
+    `
+  }
+  if(document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', initLogo)
+  else
+    initLogo()
+})()
+
 ;(function(){
   /* ══════════════════════════════════════════════════════════
      Trabajos Cerca — Splash de bienvenida

@@ -27,6 +27,7 @@ body {
 }
 
 .logo img { height: 44px; object-fit: contain; }
+.logo a   { display: flex; align-items: center; }
 
 nav { display: flex; gap: 4px; align-items: center; }
 
@@ -953,6 +954,8 @@ a:hover { text-decoration: underline; }
   /* Header */
   .topbar { padding: 10px 14px; min-height: 54px; }
   .logo img { height: 36px; }
+  .logo-nombre { font-size: 14px !important; }
+  .logo-sub    { display: none !important; }
   nav a { padding: 8px 10px; }
   nav a span { display: none; }
   nav a i { font-size: 17px; }
