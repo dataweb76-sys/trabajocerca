@@ -28,7 +28,162 @@
   </div>
 </div>
 
-<script type="module" src="/perfil.js"></script>
+<!-- ══════════ MODAL PUBLICAR PUESTO ══════════ -->
+<div class="modal-overlay" id="modalPuestoOverlay" onclick="cerrarModalPuestoClick(event)">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="modal-close" onclick="cerrarModalPuesto()">×</button>
+    <div class="modal-content" style="padding:0;overflow:hidden;">
+
+      <div style="background:linear-gradient(135deg,#1d4ed8,#0ea5e9);padding:24px 28px 20px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:8px;">📢</div>
+        <h2 style="margin:0 0 6px;font-size:20px;font-weight:900;color:white;">Publicar puesto de trabajo</h2>
+        <p style="margin:0;color:rgba(255,255,255,.85);font-size:13px;">Tu oferta aparecerá en el buscador de empleados</p>
+      </div>
+
+      <div style="padding:24px 28px 28px;">
+
+        <!-- Logo empresa -->
+        <label><i class="fa-solid fa-image" style="color:#2563eb;"></i> Logo de la empresa <span style="font-size:11px;color:#94a3b8;">(opcional)</span></label>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+          <div id="puestoLogoPreview" style="width:60px;height:60px;border-radius:10px;background:#f1f5f9;border:2px dashed #cbd5e1;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-building" style="color:#94a3b8;font-size:22px;"></i>
+          </div>
+          <label for="inputPuestoLogo" style="cursor:pointer;background:#eff6ff;border:1.5px dashed #93c5fd;border-radius:8px;padding:8px 14px;font-size:13px;color:#2563eb;font-weight:600;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Subir logo
+            <input type="file" id="inputPuestoLogo" accept="image/*" style="display:none" onchange="previsualizarLogoPuesto(this)">
+          </label>
+        </div>
+
+        <!-- Empresa -->
+        <label>Nombre de la empresa *</label>
+        <input id="puestoEmpresa" placeholder="Ej: Supermercado El Sol">
+
+        <!-- Puesto -->
+        <label>Puesto que necesitás *</label>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;">
+          <select id="puestoSelect" onchange="checkOtroPuesto()">
+            <option value="">— Seleccioná un puesto —</option>
+            <option value="Atención al público">Atención al público</option>
+            <option value="Vendedor/a">Vendedor/a</option>
+            <option value="Administrativo/a">Administrativo/a</option>
+            <option value="Cajero/a">Cajero/a</option>
+            <option value="Repositor/a">Repositor/a</option>
+            <option value="Cocinero/a">Cocinero/a</option>
+            <option value="Mozo/a / Camarero/a">Mozo/a / Camarero/a</option>
+            <option value="Cadete / Repartidor">Cadete / Repartidor</option>
+            <option value="Operario/a de producción">Operario/a de producción</option>
+            <option value="Limpieza y mantenimiento">Limpieza y mantenimiento</option>
+            <option value="Seguridad / Vigilador">Seguridad / Vigilador</option>
+            <option value="Recepcionista">Recepcionista</option>
+            <option value="Enfermero/a">Enfermero/a</option>
+            <option value="Docente / Instructor/a">Docente / Instructor/a</option>
+            <option value="Programador/a">Programador/a</option>
+            <option value="Diseñador/a">Diseñador/a</option>
+            <option value="Mecánico/a">Mecánico/a</option>
+            <option value="Electricista">Electricista</option>
+            <option value="Albañil / Constructor">Albañil / Constructor</option>
+            <option value="Otro">Otro (especificá)</option>
+          </select>
+        </div>
+        <input id="puestoOtro" placeholder="Especificá el puesto..." style="display:none;margin-top:8px;">
+
+        <!-- Descripción -->
+        <label style="margin-top:12px;">Descripción del puesto <span style="font-size:11px;color:#94a3b8;">(opcional)</span></label>
+        <textarea id="puestoDescripcion" rows="3"
+          placeholder="Horarios, requisitos, zona de trabajo, sueldo aproximado..."></textarea>
+
+        <div id="msgPuesto" style="margin-top:8px;"></div>
+
+        <button onclick="publicarPuesto()"
+          class="btn" style="margin-top:14px;width:100%;font-size:16px;font-weight:800;background:linear-gradient(135deg,#1d4ed8,#0ea5e9);color:white;border:none;padding:14px;">
+          <i class="fa-solid fa-bullhorn"></i> Publicar puesto
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from "./supabase.js"
+
+window.previsualizarLogoPuesto = function(input){
+  const file = input.files[0]; if(!file) return
+  const reader = new FileReader()
+  reader.onload = e => {
+    const prev = document.getElementById("puestoLogoPreview")
+    prev.innerHTML = `<img src="${e.target.result}" style="width:60px;height:60px;border-radius:10px;object-fit:cover;">`
+  }
+  reader.readAsDataURL(file)
+}
+
+window.checkOtroPuesto = function(){
+  const sel = document.getElementById("puestoSelect").value
+  document.getElementById("puestoOtro").style.display = sel === "Otro" ? "block" : "none"
+}
+
+window.publicarPuesto = async function(){
+  const msg     = document.getElementById("msgPuesto")
+  const empresa = document.getElementById("puestoEmpresa").value.trim()
+  const selVal  = document.getElementById("puestoSelect").value
+  const puesto  = selVal === "Otro"
+    ? document.getElementById("puestoOtro").value.trim()
+    : selVal
+
+  if(!empresa){ msg.innerHTML = '<div class="alerta alerta-err">Ingresá el nombre de la empresa</div>'; return }
+  if(!puesto) { msg.innerHTML = '<div class="alerta alerta-err">Seleccioná o escribí el puesto</div>'; return }
+
+  const { data: ud } = await supabase.auth.getUser()
+  if(!ud.user){ msg.innerHTML = '<div class="alerta alerta-err">Debés estar logueado</div>'; return }
+
+  msg.innerHTML = '<span style="font-size:13px;color:#64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Publicando...</span>'
+
+  // Subir logo si hay archivo
+  let logoUrl = null
+  const logoInput = document.getElementById("inputPuestoLogo")
+  if(logoInput.files[0]){
+    const file = logoInput.files[0]
+    const name = `puesto_logo_${ud.user.id}_${Date.now()}`
+    const { error: upErr } = await supabase.storage.from("trabajos").upload(name, file, { upsert: true })
+    if(!upErr){
+      const { data: urlData } = supabase.storage.from("trabajos").getPublicUrl(name)
+      logoUrl = urlData.publicUrl
+    }
+  }
+
+  const { error } = await supabase.from("ofertas_trabajo").insert({
+    empleador_id:  ud.user.id,
+    empresa_nombre: empresa,
+    empresa_logo:  logoUrl,
+    puesto,
+    descripcion: document.getElementById("puestoDescripcion").value.trim() || null,
+    activo: true
+  })
+
+  if(error){ msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`; return }
+
+  // Si el puesto es "Otro", sugiere agregarlo a rubros
+  if(selVal === "Otro" && puesto){
+    await supabase.from("rubros_sugeridos").insert({ termino: puesto }).catch(()=>{})
+  }
+
+  document.querySelector("#modalPuestoOverlay .modal-content").innerHTML = `
+    <div style="padding:40px 28px;text-align:center;">
+      <div style="font-size:60px;margin-bottom:16px;">🎉</div>
+      <h2 style="margin:0 0 10px;color:#1e293b;">¡Puesto publicado!</h2>
+      <p style="color:#64748b;font-size:15px;margin-bottom:20px;">
+        Tu oferta para <strong>${empresa}</strong> — <strong>${puesto}</strong><br>
+        ya está visible en el buscador de empleados.
+      </p>
+      <button onclick="cerrarModalPuesto()" class="btn btn-primary">
+        <i class="fa-solid fa-check"></i> Listo
+      </button>
+    </div>`
+}
+
+document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarModalPuesto?.() })
+</script>
+
+<script type="module" src="/perfil.js?v=4"></script>
 <script src="/chat_widget.js"></script>
 </body>
 </html>

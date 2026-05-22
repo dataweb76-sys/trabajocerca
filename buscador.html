@@ -33,8 +33,11 @@
 
 <div class="container" style="max-width:900px;">
 
-  <h2><i class="fa-solid fa-magnifying-glass" style="color:#2563eb"></i> Buscador de Oficios y Profesionales</h2>
-  <p style="color:#64748b;font-size:14px;margin:-10px 0 20px;">Encontrá el profesional u oficio que necesitás en tu ciudad</p>
+  <!-- Cabecera dinámica según tipo -->
+  <div id="cabeceraBuscador">
+    <h2 id="tituloBuscador"><i class="fa-solid fa-magnifying-glass" style="color:#2563eb"></i> Buscador de Oficios y Profesionales</h2>
+    <p id="subtituloBuscador" style="color:#64748b;font-size:14px;margin:-10px 0 20px;">Encontrá el profesional u oficio que necesitás en tu ciudad</p>
+  </div>
 
   <!-- BARRA DE BÚSQUEDA -->
   <div class="filtros" style="align-items:flex-end;">
@@ -54,47 +57,13 @@
     </div>
   </div>
 
-  <!-- CATEGORÍAS RÁPIDAS -->
+  <!-- CATEGORÍAS RÁPIDAS — se reemplaza por JS según tipo -->
   <div style="margin-bottom:24px;">
     <p style="font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:.06em;margin:0 0 10px;text-transform:uppercase;">
       O elegí una categoría
     </p>
-    <div class="cats-chips">
-      <button onclick="filtrarCategoria('Albañilería')">🔨 Albañilería</button>
-      <button onclick="filtrarCategoria('Plomería')">💧 Plomería</button>
-      <button onclick="filtrarCategoria('Gasista')">🔥 Gasista</button>
-      <button onclick="filtrarCategoria('Electricista')">⚡ Electricista</button>
-      <button onclick="filtrarCategoria('Pintura')">🎨 Pintura</button>
-      <button onclick="filtrarCategoria('Carpintería')">🪚 Carpintería</button>
-      <button onclick="filtrarCategoria('Jardinería')">🌿 Jardinería</button>
-      <button onclick="filtrarCategoria('Herrería')">⚙️ Herrería</button>
-      <button onclick="filtrarCategoria('Cerrajería')">🔑 Cerrajería</button>
-      <button onclick="filtrarCategoria('Limpieza')">🧹 Limpieza</button>
-      <button onclick="filtrarCategoria('Mudanzas')">📦 Mudanzas</button>
-      <button onclick="filtrarCategoria('Refrigeración')">❄️ Aire acond.</button>
-      <button onclick="filtrarCategoria('Informática')">💻 Informática</button>
-      <button onclick="filtrarCategoria('Gastronomía')">🍽️ Gastronomía</button>
-      <button onclick="filtrarCategoria('Mecánico')">🚗 Mecánico</button>
-      <button onclick="filtrarCategoria('Tapicería')">🛋️ Tapicería</button>
-      <button onclick="filtrarCategoria('Personal Trainer')">💪 Personal Trainer</button>
-      <button onclick="filtrarCategoria('Enfermero')">💉 Enfermero/a</button>
-      <button onclick="filtrarCategoria('Niñera')">👶 Niñera</button>
-      <button onclick="filtrarCategoria('Delivery')">🛵 Delivery</button>
-      <button onclick="filtrarCategoria('Planchado')">👔 Planchado</button>
-      <button onclick="filtrarCategoria('Estampería')">👕 Estampería</button>
-      <button onclick="filtrarCategoria('Médico')">🩺 Médico</button>
-      <button onclick="filtrarCategoria('Odontólogo')">🦷 Odontólogo</button>
-      <button onclick="filtrarCategoria('Psicólogo')">🧠 Psicólogo</button>
-      <button onclick="filtrarCategoria('Kinesiólogo')">🤸 Kinesiólogo</button>
-      <button onclick="filtrarCategoria('Nutricionista')">🥗 Nutricionista</button>
-      <button onclick="filtrarCategoria('Veterinario')">🐾 Veterinario</button>
-      <button onclick="filtrarCategoria('Arquitecto')">📐 Arquitecto</button>
-      <button onclick="filtrarCategoria('Abogado')">⚖️ Abogado</button>
-      <button onclick="filtrarCategoria('Contador')">📊 Contador</button>
-      <button onclick="filtrarCategoria('Diseñador')">🖥️ Diseñador</button>
-      <button onclick="filtrarCategoria('Fotógrafo')">📷 Fotógrafo</button>
-      <button onclick="filtrarCategoria('Profesor')">📚 Profesor</button>
-      <button onclick="filtrarCategoria('Peluquería')">✂️ Peluquería</button>
+    <div class="cats-chips" id="chipsCategoria">
+      <!-- Las chips se inyectan por JS -->
     </div>
   </div>
 

@@ -115,8 +115,24 @@
 
 <div class="mapa-contador" id="contador" style="display:none;"></div>
 
+<!-- ══ Modal perfil desde mapa ══ -->
+<div id="mapaPerfilModal"
+  onclick="if(event.target===this)cerrarMapaModal()"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;
+         overflow-y:auto;padding:20px 16px;align-items:flex-start;justify-content:center;">
+  <div style="background:white;border-radius:18px;max-width:480px;width:100%;
+              position:relative;margin:0 auto;padding-bottom:12px;
+              box-shadow:0 12px 40px rgba(0,0,0,.25);">
+    <button onclick="cerrarMapaModal()"
+      style="position:absolute;top:12px;right:14px;background:#f1f5f9;border:none;
+             width:32px;height:32px;border-radius:50%;font-size:20px;cursor:pointer;
+             line-height:1;color:#475569;z-index:1;display:flex;align-items:center;justify-content:center;">×</button>
+    <div id="mapaPerfilContent" style="padding:24px 20px 8px;"></div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script type="module" src="/mapa.js"></script>
+<script type="module" src="/mapa.js?v=5"></script>
 <script src="/chat_widget.js"></script>
 </body>
 </html>

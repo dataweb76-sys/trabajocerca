@@ -44,10 +44,14 @@ async function init(){
 
   const badgeHtml = data.tipo === "profesional"
     ? '<span class="badge badge-pro">🔨 Profesional</span>'
+    : data.tipo === "empleador"
+    ? '<span class="badge" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">🏢 Empleador</span>'
     : '<span class="badge badge-work">📄 Busca trabajo</span>'
 
   const accionPrincipal = data.tipo === "profesional"
     ? `<a href="/perfil_servicio.html" class="btn btn-orange"><i class="fa-solid fa-tools"></i> Gestionar mi servicio</a>`
+    : data.tipo === "empleador"
+    ? `<a href="/buscador_trabajos.html" class="btn btn-success"><i class="fa-solid fa-users"></i> Buscar empleados</a>`
     : `<a href="/perfil_cv.html" class="btn btn-success"><i class="fa-solid fa-file-lines"></i> Gestionar mi CV</a>`
 
   /* ── Disponibilidad (solo para profesionales) ── */
@@ -71,8 +75,27 @@ async function init(){
       </div>`
   }
 
-  document.getElementById("dash").innerHTML = `
+  /* ── Banner bienvenida nueva empresa ── */
+  const urlParams = new URLSearchParams(window.location.search)
+  const esNuevaEmpresa = urlParams.get("nueva_empresa") === "1" && data.tipo === "empleador"
+  const bannerEmpresa = esNuevaEmpresa ? `
+    <div style="background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:16px;padding:22px 24px;margin-bottom:24px;color:white;">
+      <div style="font-size:36px;margin-bottom:8px;">🎉</div>
+      <h3 style="margin:0 0 6px;font-size:20px;font-weight:900;">¡Bienvenido a Trabajos Cerca!</h3>
+      <p style="margin:0 0 14px;font-size:14px;opacity:.9;line-height:1.6;">
+        Tu cuenta de empresa está lista. Ya podés explorar candidatos de tu zona, contactarlos por WhatsApp
+        y publicar puestos disponibles. Completá los datos de tu empresa para que los candidatos te reconozcan.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="/buscador_trabajos.html"
+          style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:white;color:#7c3aed;border-radius:10px;font-weight:800;font-size:14px;text-decoration:none;">
+          <i class="fa-solid fa-users"></i> Buscar candidatos ahora
+        </a>
+      </div>
+    </div>` : ""
 
+  document.getElementById("dash").innerHTML = `
+    ${bannerEmpresa}
     <div class="dash-header">
       <div style="text-align:center;">
         ${fotoHtml}
@@ -98,19 +121,64 @@ async function init(){
 
     <div class="dash-actions">
       ${accionPrincipal}
-      <a href="/perfil_publico.html?id=${userId}" class="btn btn-outline" target="_blank">
+      <a href="/perfil_publico.html?id=${userId}" class="btn btn-outline" target="_blank" rel="noopener">
         <i class="fa-solid fa-eye"></i> Ver mi perfil público
       </a>
-      <button class="btn" onclick="compartirPagina('${userId}')"
+      <button class="btn" onclick="togglePanelCompartir()"
         style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;border:none;">
-        <i class="fa-brands fa-instagram"></i> Compartí en redes
+        <i class="fa-solid fa-share-nodes"></i> Compartir en redes
       </button>
     </div>
-    <div id="msgCompartir" style="margin-top:8px;"></div>
+
+    <!-- Panel compartir -->
+    <div id="panelCompartir" style="display:none;margin-top:12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 18px;">
+      <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.04em;">¿Qué querés compartir?</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button onclick="compartirPerfil('${userId}')"
+          style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;font-weight:700;font-size:14px;">
+          <i class="fa-solid fa-user"></i> Mi perfil
+        </button>
+        <button onclick="compartirInicio()"
+          style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:white;font-weight:700;font-size:14px;">
+          <i class="fa-solid fa-globe"></i> La página Trabajos Cerca
+        </button>
+      </div>
+      <div id="msgCompartir" style="margin-top:10px;"></div>
+    </div>
 
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;">
 
     ${disponibleHtml}
+
+    ${data.tipo === "empleador" ? `
+    <!-- ── ACCIONES EMPLEADOR ── -->
+    <div style="margin-bottom:28px;">
+      <h3 style="margin:0 0 14px;font-size:17px;"><i class="fa-solid fa-rocket" style="color:#2563eb;"></i> Acciones rápidas</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <button onclick="abrirModalPuesto()"
+          style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:22px 14px;border-radius:16px;border:2px solid #bfdbfe;background:#eff6ff;cursor:pointer;transition:all .2s;"
+          onmouseover="this.style.background='#dbeafe';this.style.borderColor='#3b82f6'"
+          onmouseout="this.style.background='#eff6ff';this.style.borderColor='#bfdbfe'">
+          <i class="fa-solid fa-bullhorn" style="font-size:32px;color:#2563eb;"></i>
+          <div>
+            <p style="margin:0;font-weight:800;font-size:14px;color:#1e293b;">Publicar puesto</p>
+            <p style="margin:2px 0 0;font-size:12px;color:#64748b;">Promocioná un puesto en tu empresa</p>
+          </div>
+        </button>
+        <a href="/buscador_trabajos.html"
+          style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:22px 14px;border-radius:16px;border:2px solid #bbf7d0;background:#f0fdf4;cursor:pointer;transition:all .2s;text-decoration:none;"
+          onmouseover="this.style.background='#dcfce7';this.style.borderColor='#22c55e'"
+          onmouseout="this.style.background='#f0fdf4';this.style.borderColor='#bbf7d0'">
+          <i class="fa-solid fa-users" style="font-size:32px;color:#059669;"></i>
+          <div>
+            <p style="margin:0;font-weight:800;font-size:14px;color:#1e293b;">Buscar empleados</p>
+            <p style="margin:2px 0 0;font-size:12px;color:#64748b;">Explorá CVs de tu zona</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <hr style="margin:0 0 24px;border:none;border-top:1px solid #e2e8f0;">
+    ` : ""}
 
     <h3 style="margin:0 0 16px;font-size:17px;">Mis datos</h3>
 
@@ -144,6 +212,42 @@ async function init(){
 
     <label>Email</label>
     <input value="${esc(data.email)}" readonly style="color:#94a3b8;">
+
+    ${data.tipo === "empleador" ? `
+    <!-- ── DATOS DE EMPRESA ── -->
+    <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:18px 20px;margin:4px 0 20px;">
+      <h4 style="margin:0 0 14px;font-size:15px;font-weight:800;color:#1d4ed8;">
+        <i class="fa-solid fa-building" style="margin-right:6px;"></i>Datos de la empresa o comercio
+      </h4>
+
+      <div id="logoEmpresaActual" style="margin-bottom:10px;">
+        ${data.empresa_logo ? `<img src="${esc(data.empresa_logo)}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;border:2px solid #bfdbfe;">` : ""}
+      </div>
+      <label><i class="fa-solid fa-image" style="color:#2563eb;"></i> Logo o imagen de la empresa</label>
+      <label for="inputLogoEmpresa" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:white;border:2px dashed #93c5fd;border-radius:10px;padding:10px 16px;font-size:13px;color:#2563eb;font-weight:600;margin-bottom:12px;">
+        <i class="fa-solid fa-cloud-arrow-up"></i> Subir logo
+        <input type="file" id="inputLogoEmpresa" accept="image/*" style="display:none" onchange="subirLogoEmpresa(this)">
+      </label>
+      <div id="msgLogoEmpresa" style="margin-bottom:8px;"></div>
+
+      <label>Nombre de la empresa *</label>
+      <input id="editEmpresaNombre" value="${esc(data.nombre_empresa)}" placeholder="Ej: Supermercado El Sol, Ferretería García">
+
+      <label>Rubro / Sector</label>
+      <select id="editEmpresaSector">
+        <option value="">— Seleccioná un sector —</option>
+        ${["Comercio y retail","Gastronomía y hotelería","Construcción","Industria y producción",
+           "Transporte y logística","Tecnología e informática","Salud y medicina","Educación",
+           "Seguridad","Agropecuario","Servicios profesionales","Limpieza y mantenimiento",
+           "Textil y confección","Medios y comunicación","Otro"].map(s =>
+          `<option value="${s}" ${data.empresa_sector===s?"selected":""}>${s}</option>`
+        ).join("")}
+      </select>
+
+      <label>Descripción de la empresa <span style="font-size:11px;color:#94a3b8;font-weight:400;">(opcional — aparece en tu perfil público)</span></label>
+      <textarea id="editEmpresaDesc" rows="3" placeholder="Contá a qué se dedica tu empresa, cuántos empleados tenés, qué ambiente de trabajo ofrecés...">${esc(data.empresa_descripcion)}</textarea>
+    </div>
+    ` : ""}
 
     <!-- ── Visibilidad pública ── -->
     <div style="background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:14px;padding:18px 18px 14px;margin:20px 0 0;">
@@ -227,6 +331,38 @@ async function init(){
       <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
     </button>
   `
+
+}
+
+/* ── LOGO EMPRESA ── */
+window.subirLogoEmpresa = async function(input){
+  const file = input.files[0]; if(!file) return
+  const { data: ud } = await supabase.auth.getUser()
+  const uid = ud.user.id
+  const name = `logo_empresa_${uid}_${Date.now()}`
+  const msgEl = document.getElementById("msgLogoEmpresa")
+  msgEl.innerHTML = '<span style="font-size:13px;color:#64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Subiendo...</span>'
+  const { error } = await supabase.storage.from("trabajos").upload(name, file, { upsert: true })
+  if(error){ msgEl.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`; return }
+  const { data } = supabase.storage.from("trabajos").getPublicUrl(name)
+  await supabase.from("perfiles").update({ empresa_logo: data.publicUrl }).eq("id", uid)
+  msgEl.innerHTML = '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> Logo guardado</div>'
+  const prev = document.getElementById("logoEmpresaActual")
+  if(prev) prev.innerHTML = `<img src="${data.publicUrl}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;border:2px solid #bfdbfe;">`
+  setTimeout(() => { msgEl.innerHTML = "" }, 3000)
+}
+
+/* ── MODAL PUBLICAR PUESTO ── */
+window.abrirModalPuesto = function(){
+  document.getElementById("modalPuestoOverlay").classList.add("activo")
+  document.body.style.overflow = "hidden"
+}
+window.cerrarModalPuesto = function(){
+  document.getElementById("modalPuestoOverlay").classList.remove("activo")
+  document.body.style.overflow = ""
+}
+window.cerrarModalPuestoClick = function(e){
+  if(e.target === document.getElementById("modalPuestoOverlay")) cerrarModalPuesto()
 }
 
 /* ── DISPONIBILIDAD ── */
@@ -282,9 +418,9 @@ window.guardarDatos = async function(){
 
   const mostrarComo = document.querySelector('input[name="editMostrarComo"]:checked')?.value || "personal"
   const mostrarTel  = document.getElementById("editMostrarTel")?.checked ?? true
-  const empresa     = (document.getElementById("editEmpresa")?.value || "").trim()
+  const empresa     = (document.getElementById("editEmpresa")?.value || document.getElementById("editEmpresaNombre")?.value || "").trim()
 
-  const { error } = await supabase.from("perfiles").update({
+  const payload = {
     nombre,
     apellido,
     movil:            document.getElementById("editMovil").value.trim(),
@@ -297,7 +433,15 @@ window.guardarDatos = async function(){
     nombre_empresa:   empresa || null,
     mostrar_como:     mostrarComo,
     mostrar_telefono: mostrarTel
-  }).eq("id", uid)
+  }
+
+  // Campos exclusivos de empleador
+  const sectorEl = document.getElementById("editEmpresaSector")
+  const descEl   = document.getElementById("editEmpresaDesc")
+  if(sectorEl) payload.empresa_sector      = sectorEl.value || null
+  if(descEl)   payload.empresa_descripcion = descEl.value.trim() || null
+
+  const { error } = await supabase.from("perfiles").update(payload).eq("id", uid)
 
   if(error){ msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`; return }
 
@@ -359,16 +503,18 @@ window.enviarRatingCliente = async function(){
 }
 
 /* ── COMPARTIR EN REDES ── */
-window.compartirPagina = async function(userId){
-  const url  = `https://trabajocerca.vercel.app/perfil_publico.html?id=${userId}`
-  const texto = "¡Sumate a Trabajos Cerca! Encontrá trabajo, profesionales y oficios en tu ciudad 👷‍♂️💼\n"
-  const msg  = document.getElementById("msgCompartir")
+window.togglePanelCompartir = function(){
+  const panel = document.getElementById("panelCompartir")
+  panel.style.display = panel.style.display === "none" ? "block" : "none"
+}
 
+async function compartir(url, titulo, texto){
+  const msg = document.getElementById("msgCompartir")
   try { await navigator.clipboard.writeText(url) } catch(e){}
 
   if(navigator.share){
     try {
-      await navigator.share({ title: "Trabajos Cerca", text: texto, url })
+      await navigator.share({ title: titulo, text: texto, url })
       return
     } catch(e){}
   }
@@ -382,6 +528,18 @@ window.compartirPagina = async function(userId){
   setTimeout(() => { msg.innerHTML = "" }, 6000)
 }
 
+window.compartirPerfil = function(userId){
+  const url   = `https://trabajocerca.vercel.app/perfil_publico?id=${userId}`
+  const texto = "Mirá mi perfil en Trabajos Cerca 👷‍♂️ Encontrá profesionales y oficios cerca tuyo."
+  compartir(url, "Mi perfil — Trabajos Cerca", texto)
+}
+
+window.compartirInicio = function(){
+  const url   = "https://trabajocerca.vercel.app/"
+  const texto = "¡Encontrá profesionales, oficios y trabajo en tu ciudad! 👷‍♂️💼 Trabajos Cerca — 100% gratis."
+  compartir(url, "Trabajos Cerca", texto)
+}
+
 /* ── CERRAR SESIÓN ── */
 window.cerrarSesion = async function(){
   await supabase.auth.signOut()
@@ -389,5 +547,6 @@ window.cerrarSesion = async function(){
 }
 
 function esc(v){ return (v || "").toString().replace(/"/g,"&quot;") }
+
 
 init()

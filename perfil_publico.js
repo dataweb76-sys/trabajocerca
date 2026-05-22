@@ -5,7 +5,16 @@ let estrellaSeleccionada = 0
 async function cargarPerfil(){
   const params = new URLSearchParams(location.search)
   const id = params.get("id")
-  if(!id) return
+  if(!id){
+    document.getElementById("contenido").innerHTML = `
+      <div style="text-align:center;padding:60px 20px;">
+        <i class="fa-solid fa-circle-exclamation" style="font-size:44px;color:#f97316;display:block;margin-bottom:14px;"></i>
+        <p style="font-size:16px;color:#475569;margin-bottom:16px;">No se especificó ningún perfil.</p>
+        <a href="/buscador_oficios.html" class="btn btn-primary">Ir al buscador</a>
+      </div>`
+    return
+  }
+  try {
 
   const { data: authData } = await supabase.auth.getUser()
   const usuarioActual = authData.user?.id || null
@@ -19,12 +28,17 @@ async function cargarPerfil(){
     supabase.from("perfiles").select("*").eq("id", id).single(),
     supabase.from("servicios").select("*").eq("usuario_id", id).single(),
     supabase.from("reviews").select("*").eq("trabajador_id", id).eq("tipo","servicio").order("created_at", { ascending: false }),
-    supabase.from("trabajos_fotos").select("*").eq("usuario_id", id)
+    supabase.from("portfolio").select("*").eq("usuario_id", id)
   ])
 
   if(!perfil){ document.getElementById("contenido").innerHTML = '<div class="alerta alerta-err">Perfil no encontrado.</div>'; return }
 
-  document.title = `${perfil.nombre} ${perfil.apellido} — Trabajos Cerca`
+  // Nombre a mostrar según preferencia del usuario
+  const displayNombre = (perfil.mostrar_como === "empresa" && perfil.nombre_empresa)
+    ? perfil.nombre_empresa
+    : `${perfil.nombre||""} ${perfil.apellido||""}`.trim()
+
+  document.title = `${displayNombre} — Trabajos Cerca`
 
   const foto = perfil.foto
     ? `<img src="${perfil.foto}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #2563eb;margin-bottom:12px;">`
@@ -37,7 +51,9 @@ async function cargarPerfil(){
     ? `<p class="estrellas" style="margin:4px 0;">★ ${promedio} <span style="color:#64748b;font-size:14px;">(${reviews.length} valoración${reviews.length!==1?"es":""})</span></p>`
     : `<p style="color:#94a3b8;font-size:13px;margin:4px 0;">Sin valoraciones aún</p>`
 
-  const wa = `https://wa.me/${(perfil.movil||"").replace(/\D/g,"")}`
+  const wa = perfil.mostrar_telefono !== false && perfil.movil
+    ? `https://wa.me/${perfil.movil.replace(/\D/g,"")}`
+    : null
 
   /* ── Servicio ── */
   let servicioHtml = ""
@@ -88,7 +104,7 @@ async function cargarPerfil(){
   const formRating = puedeVotar ? `
     <div class="card" id="formRating">
       <h3><i class="fa-solid fa-star-half-stroke" style="color:#f59e0b;"></i> Dejar valoración</h3>
-      <p style="font-size:14px;color:#64748b;margin-top:-4px;">¿Trabajaste con ${perfil.nombre}? Contale a otros cómo fue tu experiencia.</p>
+      <p style="font-size:14px;color:#64748b;margin-top:-4px;">¿Trabajaste con ${displayNombre}? Contale a otros cómo fue tu experiencia.</p>
       <label>Puntuación *</label>
       <div class="stars-input" id="starsInput">
         ${[1,2,3,4,5].map(n=>`<i class="fa-solid fa-star" data-v="${n}" onclick="setEstrella(${n})" onmouseover="hoverEstrella(${n})" onmouseout="resetHover()"></i>`).join("")}
@@ -109,13 +125,13 @@ async function cargarPerfil(){
   document.getElementById("contenido").innerHTML = `
     <div class="pub-header">
       ${foto}
-      <h2 style="margin:0 0 4px;">${perfil.nombre} ${perfil.apellido}</h2>
+      <h2 style="margin:0 0 4px;">${displayNombre}</h2>
       <p style="margin:0 0 2px;color:#64748b;">
         <i class="fa-solid fa-location-dot"></i>
         ${perfil.localidad||""}${perfil.provincia?", "+perfil.provincia:""}
       </p>
       ${ratingHtml}
-      ${perfil.movil?`<a class="btn-whatsapp" href="${wa}" target="_blank" rel="noopener">
+      ${wa?`<a class="btn-whatsapp" href="${wa}" target="_blank" rel="noopener">
         <i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</a>`:""}
     </div>
     ${servicioHtml}
@@ -129,8 +145,13 @@ async function cargarPerfil(){
       const map = L.map("mapaPub").setView([servicio.lat, servicio.lng], 13)
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map)
       L.marker([servicio.lat, servicio.lng]).addTo(map)
-        .bindPopup(`<b>${perfil.nombre} ${perfil.apellido}</b><br>${servicio.categoria}`).openPopup()
+        .bindPopup(`<b>${displayNombre}</b><br>${servicio.categoria}`).openPopup()
     }, 60)
+  }
+  } catch(err){
+    console.error("Error en cargarPerfil:", err)
+    const el = document.getElementById("contenido")
+    if(el) el.innerHTML = '<div class="alerta alerta-err">Ocurrió un error al cargar el perfil. Intentá de nuevo.</div>'
   }
 }
 

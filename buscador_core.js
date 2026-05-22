@@ -1,12 +1,18 @@
-/* buscador.js — sistema de puntaje 1-10 */
+/* buscador_core.js
+   Usado por buscador_oficios.html y buscador_profesionales.html
+   El tipo viene FIJO desde window._TC_TIPO definido en el HTML antes de cargar este script.
+*/
 
 const SB_URL = "https://iqeiszkoifxgygoqvbem.supabase.co"
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs"
 const SB_HEADERS = { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
 
+// TIPO FIJO — definido por el HTML que carga este script
+const TIPO = window._TC_TIPO  // "oficio" o "profesional"
+
 let mapModal           = null
 let ratingSeleccionado = 0
-let _miNombre          = null   // nombre del usuario logueado (se carga una vez)
+let _miNombre          = null
 
 /* ── AUTH ── */
 function getAccessToken(){
@@ -17,25 +23,18 @@ function getCurrentUserId(){
   try { return JSON.parse(atob(t.split(".")[1])).sub || null } catch(e){ return null }
 }
 
-/* ── MI NOMBRE (para el mensaje de WA) ── */
+/* ── MI NOMBRE ── */
 async function getMiNombre(){
   if(_miNombre !== null) return _miNombre
   const uid = getCurrentUserId()
   if(!uid){ _miNombre = ""; return "" }
   try {
-    const res = await fetch(
-      `${SB_URL}/rest/v1/perfiles?id=eq.${uid}&select=nombre`,
-      { headers: SB_HEADERS }
-    )
-    if(res.ok){
-      const d = await res.json()
-      _miNombre = d?.[0]?.nombre || ""
-    }
+    const res = await fetch(`${SB_URL}/rest/v1/perfiles?id=eq.${uid}&select=nombre`, { headers: SB_HEADERS })
+    if(res.ok){ const d = await res.json(); _miNombre = d?.[0]?.nombre || "" }
   } catch(e){ _miNombre = "" }
   return _miNombre
 }
 
-// Construye la URL de WhatsApp con mensaje personalizado
 function waLink(movil, destNombre, destCategoria){
   const num = (movil||"").replace(/\D/g,"")
   if(!num) return null
@@ -48,50 +47,24 @@ function waLink(movil, destNombre, destCategoria){
   return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`
 }
 
-/* ── PUNTAJE HELPERS ── */
-
-// Color según valor 1-10
+/* ── PUNTAJE ── */
 function colorPunto(n){ return n <= 3 ? "#dc2626" : n <= 6 ? "#d97706" : "#16a34a" }
 function clasePunto(n){ return n <= 3 ? "r-bad" : n <= 6 ? "r-ok" : "r-good" }
-
-// Badge de puntos para cards
 function puntajeCardHTML(total, count){
   if(!count) return `<span style="color:#94a3b8;font-size:12px;">Sin calificaciones aún</span>`
   return `<span class="puntos-badge"><i class="fa-solid fa-trophy" style="font-size:11px;"></i> ${total} pts</span>
     <span style="font-size:12px;color:#94a3b8;margin-left:4px;">(${count} calif.)</span>`
 }
 
-/* ── VISIBILIDAD DE PERFIL ── */
+/* ── HELPERS ── */
 function displayName(p){
   return (p.mostrar_como === "empresa" && p.nombre_empresa)
     ? p.nombre_empresa
     : `${p.nombre||""} ${p.apellido||""}`.trim()
 }
-function puedeVerTel(p){
-  return p.mostrar_telefono !== false
-}
+function puedeVerTel(p){ return p.mostrar_telefono !== false }
 
-/* ── TÉRMINOS ── */
-function verificarTerminos(){
-  if(localStorage.getItem("tc_aceptados"))
-    document.getElementById("modalTerminos").classList.remove("activo")
-}
-window.aceptarTerminos = function(){
-  localStorage.setItem("tc_aceptados","1")
-  document.getElementById("modalTerminos").classList.remove("activo")
-  document.body.style.overflow = ""
-}
-verificarTerminos()
-
-/* ── PRE-CARGAR DESDE URL ── */
-const params   = new URLSearchParams(location.search)
-const _tipoBuscador = params.get("tipo") || ""   // "oficio" | "profesional" | ""
-
-if(params.get("q"))      document.getElementById("buscar").value = params.get("q")
-if(params.get("ciudad")) document.getElementById("ciudad").value = params.get("ciudad")
-if(params.get("cat"))    document.getElementById("buscar").value = params.get("cat")
-
-/* ── CHIPS Y TÍTULO SEGÚN TIPO ── */
+/* ── CATEGORÍAS POR TIPO ── */
 const CHIPS_OFICIOS = [
   ["🔨","Albañilería"],["💧","Plomería"],["🔥","Gasista"],["⚡","Electricista"],
   ["🎨","Pintura"],["🪚","Carpintería"],["🌿","Jardinería"],["⚙️","Herrería"],
@@ -106,56 +79,31 @@ const CHIPS_PROFESIONALES = [
   ["📊","Contador"],["🏗️","Ingeniero"],["🖥️","Diseñador"],["📚","Profesor"],
   ["💼","Administración"],["📡","Comunicación"],["🔬","Biólogo/Químico"]
 ]
-const CHIPS_TODOS = [...CHIPS_OFICIOS, ...CHIPS_PROFESIONALES]
 
-function renderChips(){
-  const cont  = document.getElementById("chipsCategoria")
-  if(!cont) return
-  const lista = _tipoBuscador === "oficio"      ? CHIPS_OFICIOS
-              : _tipoBuscador === "profesional"  ? CHIPS_PROFESIONALES
-              : CHIPS_TODOS
-  cont.innerHTML = lista.map(([ico, cat]) =>
-    `<button onclick="filtrarCategoria('${cat}')">${ico} ${cat}</button>`
-  ).join("")
-}
+// Chips según página
+const CHIPS = TIPO === "profesional" ? CHIPS_PROFESIONALES : CHIPS_OFICIOS
 
-function configurarTipo(){
-  if(_tipoBuscador === "oficio"){
-    document.getElementById("tituloBuscador").innerHTML =
-      '<i class="fa-solid fa-hammer" style="color:#f97316"></i> Buscador de Oficios'
-    document.getElementById("subtituloBuscador").textContent =
-      "Plomeros, electricistas, albañiles y más oficios cerca tuyo"
-    // Saltar modal de términos si ya está aceptado o viene directo
-    localStorage.setItem("tc_aceptados","1")
-    document.getElementById("modalTerminos")?.classList.remove("activo")
-  } else if(_tipoBuscador === "profesional"){
-    document.getElementById("tituloBuscador").innerHTML =
-      '<i class="fa-solid fa-graduation-cap" style="color:#6366f1"></i> Buscador de Profesionales'
-    document.getElementById("subtituloBuscador").textContent =
-      "Médicos, abogados, arquitectos, contadores e ingenieros cerca tuyo"
-    localStorage.setItem("tc_aceptados","1")
-    document.getElementById("modalTerminos")?.classList.remove("activo")
-  }
-  renderChips()
-}
-
-/* ── DETECTAR SI UN SERVICIO ES PROFESIONAL UNIVERSITARIO ── */
+// Nombres de categorías profesionales normalizados (sin tildes, minúsculas)
 function normStr(s){
   return (s||"").toLowerCase()
     .replace(/á/g,"a").replace(/é/g,"e").replace(/í/g,"i")
-    .replace(/ó/g,"o").replace(/ú/g,"u").replace(/ü/g,"u")
-    .replace(/ñ/g,"n")
+    .replace(/ó/g,"o").replace(/ú/g,"u").replace(/ü/g,"u").replace(/ñ/g,"n")
+}
+const CATS_PROF = CHIPS_PROFESIONALES.map(([,c]) => normStr(c))
+
+// ¿Este item es de un profesional universitario?
+function esProfesionalUni(item){
+  if(item.perfiles?.profesion_universitaria) return true
+  const cat = normStr(item.categoria)
+  return CATS_PROF.some(c => cat.includes(c) || c.includes(cat))
 }
 
-// Categorías que corresponden a profesiones universitarias (normalizadas)
-const _CATS_PROF = CHIPS_PROFESIONALES.map(([,c]) => normStr(c))
-
-function esProfesionalUni(item){
-  // Si tiene el campo explícito, usarlo
-  if(item.perfiles?.profesion_universitaria) return true
-  // Si no, deducir por la categoría del servicio
-  const cat = normStr(item.categoria)
-  return _CATS_PROF.some(c => cat.includes(c) || c.includes(cat))
+/* ── CHIPS ── */
+function renderChips(){
+  const cont = document.getElementById("chipsCategoria"); if(!cont) return
+  cont.innerHTML = CHIPS.map(([ico, cat]) =>
+    `<button onclick="filtrarCategoria('${cat}')">${ico} ${cat}</button>`
+  ).join("")
 }
 
 /* ── FILTRO RÁPIDO ── */
@@ -178,7 +126,7 @@ window.buscar = async function(){
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
   const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,perfiles(id,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,profesion_universitaria)"
-  let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=200`
+  let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=500`
 
   if(palabra){ const p=encodeURIComponent(`*${palabra}*`); url+=`&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p},servicios_lista.ilike.${p})` }
   if(ciudad)  url+=`&localidad=ilike.*${encodeURIComponent(ciudad)}*`
@@ -193,25 +141,29 @@ window.buscar = async function(){
     return
   }
 
-  // Filtrar por tipo si viene desde los botones de inicio
-  if(_tipoBuscador === "profesional" || _tipoBuscador === "oficio"){
-    data = data.filter(d => esProfesionalUni(d) === (_tipoBuscador === "profesional"))
+  // ── FILTRO PRINCIPAL: solo mostrar el tipo de esta página ──
+  if(TIPO === "profesional"){
+    data = data.filter(d => esProfesionalUni(d))
+  } else {
+    data = data.filter(d => !esProfesionalUni(d))
   }
 
   if(!data?.length){
+    const linkReg = TIPO === "profesional"
+      ? `/registro_profesional.html`
+      : `/registro.html?tipo=profesional`
     cont.innerHTML=`<div style="text-align:center;padding:50px 20px;color:#64748b;">
       <i class="fa-solid fa-face-sad-tear" style="font-size:44px;opacity:.3;display:block;margin-bottom:14px;"></i>
       <p style="font-size:16px;margin-bottom:8px;">No encontramos resultados${palabra?` para <strong>${palabra}</strong>`:""}.</p>
-      <p><a href="/registro.html?tipo=profesional">¿Sos profesional? Publicá tu servicio gratis</a></p></div>`
+      <p><a href="${linkReg}">¿Querés aparecer acá? Registrate gratis</a></p></div>`
     return
   }
 
-  /* ── Cargar mi nombre para mensaje WA ── */
   await getMiNombre()
 
-  /* ── Puntajes en paralelo ── */
+  /* ── Puntajes ── */
   const profileIds = data.map(d=>d.perfiles?.id).filter(Boolean)
-  let puntajesMap = {}   // { uid: { total: N, count: M } }
+  let puntajesMap = {}
   if(profileIds.length){
     try {
       const rRes = await fetch(
@@ -229,12 +181,11 @@ window.buscar = async function(){
     } catch(e){}
   }
 
-  /* ── Merge y ordenar: destacado → puntos totales → nombre ── */
   data.forEach(item => {
-    const pid   = item.perfiles?.id
-    const pdata = pid ? (puntajesMap[pid] || { total:0, count:0 }) : { total:0, count:0 }
-    item._puntos = pdata.total
-    item._count  = pdata.count
+    const pid = item.perfiles?.id
+    const pd  = pid ? (puntajesMap[pid] || { total:0, count:0 }) : { total:0, count:0 }
+    item._puntos = pd.total
+    item._count  = pd.count
   })
   data.sort((a,b) => {
     const da = a.perfiles?.destacado ? 1 : 0
@@ -243,23 +194,21 @@ window.buscar = async function(){
     return b._puntos - a._puntos
   })
 
-  /* ── Banner calificaciones ── */
   cont.innerHTML = `
     <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
       <i class="fa-solid fa-trophy" style="color:#f59e0b;font-size:20px;flex-shrink:0;"></i>
       <p style="margin:0;font-size:13px;color:#92400e;">
-        <strong>¿Usaste un servicio?</strong> Calificá del 1 al 10 — cada punto suma al puntaje del profesional y lo ayuda a aparecer primero.
+        <strong>¿Usaste un servicio?</strong> Calificá del 1 al 10 — cada punto suma al puntaje y ayuda a aparecer primero.
       </p>
     </div>
     <p style="color:#64748b;margin-bottom:16px;font-size:14px;">
       ${data.length} resultado${data.length!==1?"s":""} · ordenados por puntaje
     </p>`
 
-  /* ── Cards ── */
   data.forEach(item => {
-    const p       = item.perfiles || {}
-    const nombre  = displayName(p)
-    const wa      = puedeVerTel(p) ? waLink(p.movil, nombre, item.categoria) : null
+    const p      = item.perfiles || {}
+    const nombre = displayName(p)
+    const wa     = puedeVerTel(p) ? waLink(p.movil, nombre, item.categoria) : null
 
     const foto = p.foto
       ? `<img src="${p.foto}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #2563eb;flex-shrink:0;">`
@@ -324,8 +273,8 @@ window.abrirModal = function(item, irCalificar=false){
 
   const _dname = displayName(p)
   const wa     = puedeVerTel(p) ? waLink(p.movil, _dname, item.categoria) : null
-  const ubic = `${item.localidad||p.localidad||""}${item.provincia?", "+item.provincia:""}`
-  const tags = item.servicios_lista
+  const ubic   = `${item.localidad||p.localidad||""}${item.provincia?", "+item.provincia:""}`
+  const tags   = item.servicios_lista
     ? item.servicios_lista.split(",").map(s=>`<span class="servicio-tag">${s.trim()}</span>`).join("") : ""
 
   document.getElementById("modalContent").innerHTML = `
@@ -337,7 +286,6 @@ window.abrirModal = function(item, irCalificar=false){
       <p style="margin:4px 0 0;color:#64748b;font-size:14px;"><i class="fa-solid fa-location-dot"></i> ${ubic}</p>
       <div style="margin-top:10px;" id="puntajeBadgeTop"></div>
     </div>
-
     ${item.titulo?`<p style="font-size:16px;font-weight:600;margin:0 0 14px;text-align:center;">${item.titulo}</p>`:""}
     ${tags?`<div style="margin-bottom:16px;"><p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 8px;">Servicios:</p><div class="servicios-tags">${tags}</div></div>`:""}
     ${item.horarios?`<div style="background:#f8fafc;border-radius:8px;padding:12px 14px;margin-bottom:16px;">
@@ -345,22 +293,18 @@ window.abrirModal = function(item, irCalificar=false){
     ${item.descripcion?`<div style="margin-bottom:16px;">
       <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 6px;">Descripción:</p>
       <p style="font-size:14px;color:#475569;line-height:1.6;margin:0;">${item.descripcion}</p></div>`:""}
-
     <div id="portfolioModal" style="margin-bottom:4px;"></div>
-
     ${wa?`<a href="${wa}" target="_blank" rel="noopener" class="btn-whatsapp" style="display:flex;justify-content:center;margin-bottom:12px;">
       <i class="fa-brands fa-whatsapp"></i> Consultar por WhatsApp</a>`:""}
     ${p.instagram?`<a href="https://instagram.com/${(p.instagram||"").replace("@","")}" target="_blank" rel="noopener"
       style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:16px;padding:12px;border-radius:10px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;font-weight:600;font-size:15px;text-decoration:none;">
       <i class="fa-brands fa-instagram" style="font-size:18px;"></i> ${p.instagram}</a>`:""}
-
     ${(item.lat&&item.lng)?`<div style="margin-bottom:16px;">
       <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 6px;"><i class="fa-solid fa-map-location-dot" style="color:#2563eb;"></i> Zona de trabajo</p>
       <div id="mapaModal" class="modal-map"></div>
       <a href="https://www.google.com/maps?q=${item.lat},${item.lng}" target="_blank" rel="noopener"
         style="display:block;text-align:center;margin-top:8px;font-size:13px;">
         <i class="fa-solid fa-diamond-turn-right"></i> Abrir en Google Maps</a></div>`:""}
-
     <hr style="margin:20px 0;border:none;border-top:1px solid #e2e8f0;">
     <div id="reviewsSection">
       <div style="text-align:center;color:#94a3b8;padding:12px;"><i class="fa-solid fa-spinner fa-spin"></i></div>
@@ -374,7 +318,7 @@ window.abrirModal = function(item, irCalificar=false){
       mapModal = L.map("mapaModal").setView([item.lat, item.lng], 14)
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(mapModal)
       L.marker([item.lat, item.lng]).addTo(mapModal)
-        .bindPopup(`<b>${p.nombre||""} ${p.apellido||""}</b><br>${item.categoria}`).openPopup()
+        .bindPopup(`<b>${_dname}</b><br>${item.categoria}`).openPopup()
     }, 60)
   }
 
@@ -393,22 +337,19 @@ async function cargarPortfolioModal(uid){
     const items = await res.json()
     if(!items?.length){ sec.innerHTML=""; return }
     let html=`<div style="margin-bottom:16px;"><p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 10px;"><i class="fa-solid fa-images" style="color:#f97316;"></i> Trabajos realizados</p>`
-    items.forEach(item=>{
-      const fotos=[item.foto1,item.foto2,item.foto3].filter(Boolean)
+    items.forEach(it=>{
+      const fotos=[it.foto1,it.foto2,it.foto3].filter(Boolean)
       html+=`<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:10px;">
         ${fotos.length?`<div style="display:flex;gap:2px;height:130px;background:#f1f5f9;">${fotos.map(f=>`<img src="${f}" style="flex:1;object-fit:cover;cursor:pointer;" onclick="window.open('${f}','_blank')">`).join("")}</div>`:""}
-        <div style="padding:10px 12px;"><strong style="font-size:14px;">${item.titulo}</strong>${item.descripcion?`<p style="font-size:12px;color:#64748b;margin:2px 0 0;">${item.descripcion}</p>`:""}</div></div>`
+        <div style="padding:10px 12px;"><strong style="font-size:14px;">${it.titulo}</strong>${it.descripcion?`<p style="font-size:12px;color:#64748b;margin:2px 0 0;">${it.descripcion}</p>`:""}</div></div>`
     })
     html+=`</div>`; sec.innerHTML=html
   } catch(e){}
 }
 
-/* ═══════════════════════════════════════════
-   SISTEMA DE RESEÑAS 1-10
-═══════════════════════════════════════════ */
+/* ── REVIEWS ── */
 async function cargarReviews(profileId, nombre, autoAbrirForm=false){
   const sec = document.getElementById("reviewsSection"); if(!sec) return
-
   let reviews = []
   try {
     const res = await fetch(
@@ -422,9 +363,8 @@ async function cargarReviews(profileId, nombre, autoAbrirForm=false){
   const count       = reviews.length
   const uid         = getCurrentUserId()
   const yaCal       = uid && reviews.some(r => r.autor_id === uid)
-  const esSí        = uid === profileId
+  const esSi        = uid === profileId
 
-  // Badge top del modal
   const topEl = document.getElementById("puntajeBadgeTop")
   if(topEl && count > 0){
     topEl.innerHTML = `<span class="puntos-badge" style="font-size:15px;padding:5px 14px;">
@@ -434,16 +374,13 @@ async function cargarReviews(profileId, nombre, autoAbrirForm=false){
   }
 
   let html = `<h3 style="margin:0 0 10px;font-size:16px;color:#1e293b;">
-    <i class="fa-solid fa-trophy" style="color:#f59e0b;"></i> Puntaje y calificaciones
-  </h3>`
+    <i class="fa-solid fa-trophy" style="color:#f59e0b;"></i> Puntaje y calificaciones</h3>`
 
-  // Caja de puntaje total
   if(count > 0){
     html += `<div class="puntos-total-box">
       <div class="puntos-total-num">${puntosTotal}</div>
       <div class="puntos-total-label">puntos acumulados · ${count} calificación${count!==1?"es":""}</div>
     </div>`
-
     reviews.slice(0,5).forEach(rev => {
       const col = colorPunto(rev.rating)
       html += `<div class="review-item" style="margin-bottom:8px;">
@@ -455,34 +392,28 @@ async function cargarReviews(profileId, nombre, autoAbrirForm=false){
     })
   } else {
     html += `<p style="font-size:13px;color:#94a3b8;text-align:center;margin:0 0 14px;">
-      Todavía no tiene calificaciones. ¡Sé el primero!
-    </p>`
+      Todavía no tiene calificaciones. ¡Sé el primero!</p>`
   }
 
-  // Botón calificar o formulario
-  if(uid && !esSí && !yaCal){
-    html += `
-      <button class="btn-calificar" id="btnCalificar" onclick="mostrarFormRating()">
-        <i class="fa-solid fa-star"></i> Calificar a ${nombre}
-      </button>
+  if(uid && !esSi && !yaCal){
+    html += `<button class="btn-calificar" id="btnCalificar" onclick="mostrarFormRating()">
+        <i class="fa-solid fa-star"></i> Calificar a ${nombre}</button>
       <div id="formRating" style="display:${autoAbrirForm?"block":"none"};">`
     html += buildFormRating(profileId, nombre)
     html += `</div>`
   } else if(!uid){
     html += `<div style="background:#eff6ff;border-radius:10px;padding:14px 16px;text-align:center;margin-top:4px;">
-      <p style="margin:0 0 6px;font-size:14px;color:#1e40af;"><i class="fa-solid fa-trophy" style="color:#f59e0b;"></i> <strong>¿Usaste este servicio?</strong></p>
-      <p style="margin:0 0 10px;font-size:13px;color:#475569;">Iniciá sesión y calificalo — cada punto suma a su puntaje.</p>
-      <a href="/login.html" class="btn btn-primary btn-sm" style="text-decoration:none;"><i class="fa-solid fa-right-to-bracket"></i> Iniciá sesión para calificar</a>
+      <p style="margin:0 0 6px;font-size:14px;color:#1e40af;"><strong>¿Usaste este servicio?</strong></p>
+      <p style="margin:0 0 10px;font-size:13px;color:#475569;">Iniciá sesión y calificalo.</p>
+      <a href="/login.html" class="btn btn-primary btn-sm" style="text-decoration:none;"><i class="fa-solid fa-right-to-bracket"></i> Iniciá sesión</a>
     </div>`
   } else if(yaCal){
     html += `<p style="font-size:13px;color:#16a34a;text-align:center;margin-top:10px;">
-      <i class="fa-solid fa-check-circle"></i> Ya calificaste a esta persona — ¡gracias!
-    </p>`
+      <i class="fa-solid fa-check-circle"></i> Ya calificaste — ¡gracias!</p>`
   }
 
   sec.innerHTML = html
-
-  if(autoAbrirForm && uid && !esSí && !yaCal){
+  if(autoAbrirForm && uid && !esSi && !yaCal){
     const btn = document.getElementById("btnCalificar")
     if(btn) btn.style.display = "none"
   }
@@ -490,71 +421,57 @@ async function cargarReviews(profileId, nombre, autoAbrirForm=false){
 
 function buildFormRating(profileId, nombre){
   ratingSeleccionado = 0
-  return `
-    <div class="form-review" style="margin-top:0;">
-      <h4 style="margin:0 0 6px;"><i class="fa-solid fa-pen"></i> Tu calificación para ${nombre}</h4>
-      <p style="font-size:13px;color:#64748b;margin:0 0 4px;">Seleccioná un puntaje del 1 al 10</p>
-      <p style="font-size:11px;color:#94a3b8;margin:0 0 10px;">1 = Muy malo &nbsp;·&nbsp; 5-6 = Regular &nbsp;·&nbsp; 10 = Excelente</p>
-      <div class="rating-10" id="rating10Btns">
-        ${[1,2,3,4,5,6,7,8,9,10].map(i =>
-          `<button class="rating-num ${clasePunto(i)}" onclick="seleccionarRating(${i})">${i}</button>`
-        ).join("")}
-      </div>
-      <div id="ratingLabel" style="font-size:13px;color:#64748b;min-height:20px;margin-bottom:10px;"></div>
-      <textarea id="comentarioRev" rows="3"
-        placeholder="Contá tu experiencia (opcional) — ¿fue puntual, hizo buen trabajo, lo recomendarías?"
-        style="width:100%;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px;font-family:inherit;"></textarea>
-      <div id="msgRev"></div>
-      <button class="btn btn-primary btn-sm" onclick="enviarReview('${profileId}','${nombre}')">
-        <i class="fa-solid fa-paper-plane"></i> Enviar calificación
-      </button>
-    </div>`
+  return `<div class="form-review" style="margin-top:0;">
+    <h4 style="margin:0 0 6px;"><i class="fa-solid fa-pen"></i> Tu calificación para ${nombre}</h4>
+    <p style="font-size:13px;color:#64748b;margin:0 0 4px;">Seleccioná un puntaje del 1 al 10</p>
+    <p style="font-size:11px;color:#94a3b8;margin:0 0 10px;">1 = Muy malo &nbsp;·&nbsp; 5-6 = Regular &nbsp;·&nbsp; 10 = Excelente</p>
+    <div class="rating-10" id="rating10Btns">
+      ${[1,2,3,4,5,6,7,8,9,10].map(i =>
+        `<button class="rating-num ${clasePunto(i)}" onclick="seleccionarRating(${i})">${i}</button>`
+      ).join("")}
+    </div>
+    <div id="ratingLabel" style="font-size:13px;color:#64748b;min-height:20px;margin-bottom:10px;"></div>
+    <textarea id="comentarioRev" rows="3"
+      placeholder="Contá tu experiencia (opcional)"
+      style="width:100%;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px;font-family:inherit;"></textarea>
+    <div id="msgRev"></div>
+    <button class="btn btn-primary btn-sm" onclick="enviarReview('${profileId}','${nombre}')">
+      <i class="fa-solid fa-paper-plane"></i> Enviar calificación
+    </button>
+  </div>`
 }
 
 window.mostrarFormRating = function(){
-  const btn  = document.getElementById("btnCalificar")
-  const form = document.getElementById("formRating")
-  if(btn)  btn.style.display  = "none"
-  if(form) form.style.display = "block"
+  const btn=document.getElementById("btnCalificar"); const form=document.getElementById("formRating")
+  if(btn) btn.style.display="none"; if(form) form.style.display="block"
 }
 
 const LABELS = {1:"Muy malo",2:"Malo",3:"Por debajo de lo esperado",4:"Regular",5:"Puede mejorar",6:"Aceptable",7:"Bueno",8:"Muy bueno",9:"Excelente",10:"¡Perfecto! Lo recomiendo"}
 
 window.seleccionarRating = function(n){
   ratingSeleccionado = n
-  document.querySelectorAll(".rating-num").forEach((el,i) => {
-    el.classList.toggle("selected", i < n)
-  })
+  document.querySelectorAll(".rating-num").forEach((el,i) => el.classList.toggle("selected", i < n))
   const lbl = document.getElementById("ratingLabel")
   if(lbl) lbl.innerHTML = `<span style="color:${colorPunto(n)};font-weight:700;">${n}/10 — ${LABELS[n]}</span>`
 }
 
 window.enviarReview = async function(profileId, nombre){
   const msg = document.getElementById("msgRev")
-  if(!ratingSeleccionado){
-    msg.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px 12px;">Elegí un puntaje del 1 al 10</div>`
-    return
-  }
-  const token   = getAccessToken()
-  const autorId = getCurrentUserId()
-  if(!token||!autorId){
-    msg.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px 12px;">Necesitás iniciar sesión</div>`
-    return
-  }
-  msg.innerHTML = `<div style="font-size:13px;color:#64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Enviando...</div>`
+  if(!ratingSeleccionado){ msg.innerHTML=`<div class="alerta alerta-err" style="font-size:13px;padding:8px 12px;">Elegí un puntaje del 1 al 10</div>`; return }
+  const token=getAccessToken(); const autorId=getCurrentUserId()
+  if(!token||!autorId){ msg.innerHTML=`<div class="alerta alerta-err" style="font-size:13px;padding:8px 12px;">Necesitás iniciar sesión</div>`; return }
+  msg.innerHTML=`<div style="font-size:13px;color:#64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Enviando...</div>`
   try {
-    const res = await fetch(`${SB_URL}/rest/v1/reviews`, {
+    const res = await fetch(`${SB_URL}/rest/v1/reviews`,{
       method:"POST",
       headers:{...SB_HEADERS,"Authorization":`Bearer ${token}`,"Content-Type":"application/json","Prefer":"return=minimal"},
-      body: JSON.stringify({ trabajador_id:profileId, autor_id:autorId, rating:ratingSeleccionado, comentario:document.getElementById("comentarioRev").value.trim(), tipo:"servicio" })
+      body:JSON.stringify({trabajador_id:profileId,autor_id:autorId,rating:ratingSeleccionado,comentario:document.getElementById("comentarioRev").value.trim(),tipo:"servicio"})
     })
     if(!res.ok){ const e=await res.json(); throw new Error(e.message||"Error") }
-    document.querySelector(".form-review").innerHTML =
+    document.querySelector(".form-review").innerHTML=
       `<div class="alerta alerta-ok"><i class="fa-solid fa-check-circle"></i> ¡Gracias! Sumaste <strong>${ratingSeleccionado} punto${ratingSeleccionado!==1?"s":""}</strong> al puntaje de ${nombre}.</div>`
     setTimeout(() => cargarReviews(profileId, nombre), 900)
-  } catch(e){
-    msg.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px 12px;">${e.message}</div>`
-  }
+  } catch(e){ msg.innerHTML=`<div class="alerta alerta-err" style="font-size:13px;padding:8px 12px;">${e.message}</div>` }
 }
 
 /* ── CERRAR MODAL ── */
@@ -569,6 +486,5 @@ window.cerrarModalClick = function(e){
 document.addEventListener("keydown", e => { if(e.key==="Escape") cerrarModal() })
 
 /* ── INICIAR ── */
-// Configurar título, chips y lanzar búsqueda (buscar ya está definida aquí)
-configurarTipo()
-if(!_tipoBuscador) buscar()
+renderChips()
+buscar()

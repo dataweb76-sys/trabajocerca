@@ -83,25 +83,73 @@
 </section>
 
 <div class="buscadores-grid">
-  <div class="buscador-card" onclick="irA('/buscador_trabajos.html')">
+  <div class="buscador-card" onclick="location.href='/buscador_trabajos.html'">
     <span class="bc-ico">💼</span>
-    <h3>Buscador de Trabajos</h3>
+    <h3>Buscador de Empleados</h3>
     <p>Empresas y personas que buscan empleados en tu zona</p>
   </div>
-  <div class="buscador-card" onclick="irA('/buscador.html')">
+  <div class="buscador-card" onclick="abrirModalOficio(event)">
     <span class="bc-ico">🔨</span>
-    <h3>Oficios y Profesionales</h3>
-    <p>Plomeros, médicos, electricistas, abogados y más</p>
+    <h3>Ingresá tu Oficio</h3>
+    <p>Plomeros, electricistas, carpinteros y más oficios</p>
   </div>
-  <div class="buscador-card" onclick="irA('/buscador_cv.html')">
+  <div class="buscador-card" onclick="abrirModalCV(event)">
     <span class="bc-ico">📄</span>
-    <h3>Buscador de CV</h3>
+    <h3>Ingresá tu CV</h3>
     <p>Trabajadores en búsqueda activa de empleo</p>
   </div>
-  <div class="buscador-card" onclick="irA('/buscador.html')">
-    <span class="bc-ico">🩺</span>
-    <h3>Buscador de Profesionales</h3>
-    <p>Médicos, abogados, contadores y más</p>
+  <div class="buscador-card" onclick="abrirModalProfesional(event)">
+    <span class="bc-ico">🎓</span>
+    <h3>Ingresá tu Profesión</h3>
+    <p>Médicos, abogados, arquitectos y más profesionales</p>
+  </div>
+</div>
+
+<!-- ══ BOTONES BUSCADORES DESTACADOS ══ -->
+<div style="max-width:860px;margin:0 auto;padding:0 20px 36px;">
+  <p style="text-align:center;font-size:13px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin:0 0 16px;">
+    <i class="fa-solid fa-magnifying-glass"></i> &nbsp;Encontrá a quien necesitás
+  </p>
+  <div style="display:flex;flex-direction:column;gap:14px;">
+
+    <!-- Buscador de Oficios -->
+    <a href="/buscador_oficios.html"
+      style="display:flex;align-items:center;gap:18px;padding:22px 28px;background:linear-gradient(135deg,#1d4ed8,#0ea5e9);border-radius:18px;text-decoration:none;box-shadow:0 6px 24px rgba(29,78,216,.28);transition:transform .2s,box-shadow .2s;"
+      onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(29,78,216,.38)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(29,78,216,.28)'">
+      <div style="font-size:42px;flex-shrink:0;">🔨</div>
+      <div style="flex:1;">
+        <p style="margin:0 0 4px;font-size:19px;font-weight:900;color:white;letter-spacing:.01em;">
+          Buscador de Oficios
+        </p>
+        <p style="margin:0;font-size:13px;color:rgba(255,255,255,.85);line-height:1.5;">
+          Plomeros · Electricistas · Carpinteros · Pintores · Albañiles y muchos más cerca tuyo
+        </p>
+      </div>
+      <div style="flex-shrink:0;background:rgba(255,255,255,.18);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:800;color:white;white-space:nowrap;">
+        Buscar <i class="fa-solid fa-arrow-right"></i>
+      </div>
+    </a>
+
+    <!-- Buscador de Profesionales -->
+    <a href="/buscador_profesionales.html"
+      style="display:flex;align-items:center;gap:18px;padding:22px 28px;background:linear-gradient(135deg,#2563eb,#6366f1);border-radius:18px;text-decoration:none;box-shadow:0 6px 24px rgba(99,102,241,.28);transition:transform .2s,box-shadow .2s;"
+      onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(99,102,241,.38)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(99,102,241,.28)'">
+      <div style="font-size:42px;flex-shrink:0;">🎓</div>
+      <div style="flex:1;">
+        <p style="margin:0 0 4px;font-size:19px;font-weight:900;color:white;letter-spacing:.01em;">
+          Buscador de Profesionales
+        </p>
+        <p style="margin:0;font-size:13px;color:rgba(255,255,255,.85);line-height:1.5;">
+          Médicos · Abogados · Arquitectos · Contadores · Ingenieros y más en tu ciudad
+        </p>
+      </div>
+      <div style="flex-shrink:0;background:rgba(255,255,255,.18);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:800;color:white;white-space:nowrap;">
+        Buscar <i class="fa-solid fa-arrow-right"></i>
+      </div>
+    </a>
+
   </div>
 </div>
 
@@ -138,45 +186,294 @@
     <a href="#" onclick="abrirModalCV(event)" class="btn btn-success" style="width:auto; padding:14px 30px;">
       <i class="fa-solid fa-briefcase"></i> Busco trabajo / CV
     </a>
-    <a href="/registro.html?tipo=empleador" class="btn" style="background:#7c3aed;color:white;width:auto;padding:14px 30px;">
+    <a href="#" onclick="abrirModalEmpresa(event)" class="btn" style="background:#7c3aed;color:white;width:auto;padding:14px 30px;">
       <i class="fa-solid fa-building"></i> Busco personal
     </a>
   </div>
 </section>
 
-<!-- MODAL REGISTRO RÁPIDO CV -->
+<!-- MODAL REGISTRO OFICIO -->
+<div class="modal-overlay" id="modalOficio" onclick="cerrarModalOficioClick(event)">
+  <div class="modal-box" style="max-width:500px;">
+    <button class="modal-close" onclick="cerrarModalOficio()">×</button>
+    <div class="modal-content" style="padding:0;overflow:hidden;">
+
+      <!-- Cabecera degradé -->
+      <div style="background:linear-gradient(135deg,#f97316,#ea580c);padding:28px 28px 22px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:10px;">🔨</div>
+        <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:white;">
+          ¡Publicá tu oficio y conseguí clientes!
+        </h2>
+        <p style="margin:0;color:rgba(255,255,255,.88);font-size:14px;line-height:1.5;">
+          Miles de personas en tu ciudad están buscando alguien como vos ahora mismo
+        </p>
+      </div>
+
+      <!-- Beneficios -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid #f1f5f9;">
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-right:1px solid #f1f5f9;">
+          <span style="font-size:22px;">🔍</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Aparecés en el buscador de tu ciudad</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">💬</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Los clientes te contactan por WhatsApp</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-right:1px solid #f1f5f9;border-top:1px solid #f1f5f9;">
+          <span style="font-size:22px;">⭐</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Calificaciones que te posicionan primero</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-top:1px solid #f1f5f9;">
+          <span style="font-size:22px;">🆓</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">100% gratis para empezar</span>
+        </div>
+      </div>
+
+      <!-- Formulario -->
+      <div style="padding:22px 28px 28px;">
+        <p style="font-size:13px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin:0 0 14px;">
+          Creá tu cuenta gratis
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label>Nombre *</label><input id="ofNombre" placeholder="Juan"></div>
+          <div><label>Apellido *</label><input id="ofApellido" placeholder="García"></div>
+        </div>
+        <label>Email *</label>
+        <input id="ofEmail" type="email" placeholder="juan@email.com">
+        <label>Contraseña *</label>
+        <input id="ofPassword" type="password" placeholder="Mínimo 6 caracteres">
+        <label>WhatsApp <span style="font-size:11px;color:#94a3b8;font-weight:400;">(para que los clientes te contacten)</span></label>
+        <input id="ofTel" type="tel" placeholder="Ej: 1123456789">
+        <div id="msgOficio" style="margin-top:10px;"></div>
+        <button class="btn" id="btnOficio" onclick="registrarOficio()"
+          style="margin-top:14px;font-size:16px;font-weight:800;background:linear-gradient(135deg,#f97316,#ea580c);color:white;border:none;width:100%;padding:14px;">
+          <i class="fa-solid fa-hammer"></i> Crear cuenta y publicar mi oficio
+        </button>
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;">
+          <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+          <span style="font-size:12px;color:#94a3b8;white-space:nowrap;">o registrate con</span>
+          <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+        </div>
+        <button onclick="googleSignInOficio()" class="btn-google" style="width:100%;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+          Registrarse con Google
+        </button>
+        <p style="text-align:center;font-size:13px;color:#94a3b8;margin:10px 0 0;">
+          ¿Ya tenés cuenta? <a href="/login.html" style="color:#f97316;">Iniciá sesión</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REGISTRO CV -->
 <div class="modal-overlay" id="modalCV" onclick="cerrarModalCVClick(event)">
-  <div class="modal-box" style="max-width:480px;">
+  <div class="modal-box" style="max-width:500px;">
     <button class="modal-close" onclick="cerrarModalCV()">×</button>
-    <div class="modal-content" style="padding:28px;">
-      <div style="text-align:center;margin-bottom:20px;">
-        <div style="font-size:44px;margin-bottom:10px;">💼</div>
-        <h2 style="margin:0 0 6px;font-size:22px;font-weight:800;color:#1e293b;">Subí tu CV</h2>
-        <p style="margin:0;color:#64748b;font-size:14px;">Creá tu perfil gratis y que los empleadores te encuentren en tu zona</p>
+    <div class="modal-content" style="padding:0;overflow:hidden;">
+
+      <!-- Cabecera degradé -->
+      <div style="background:linear-gradient(135deg,#0ea5e9,#059669);padding:28px 28px 22px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:10px;">💼</div>
+        <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:white;">
+          ¡Publicá tu CV y que las empresas te encuentren!
+        </h2>
+        <p style="margin:0;color:rgba(255,255,255,.88);font-size:14px;line-height:1.5;">
+          Empleadores de tu ciudad están buscando alguien como vos ahora mismo
+        </p>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <label>Nombre *</label>
-          <input id="cvNombre" placeholder="Juan">
+
+      <!-- Beneficios -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid #f1f5f9;">
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-right:1px solid #f1f5f9;">
+          <span style="font-size:22px;">🏢</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Empresas de tu zona te ven</span>
         </div>
-        <div>
-          <label>Apellido *</label>
-          <input id="cvApellido" placeholder="García">
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">📲</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Te llaman por WhatsApp directo</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-right:1px solid #f1f5f9;border-top:1px solid #f1f5f9;">
+          <span style="font-size:22px;">🎯</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Elegís los rubros que te interesan</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-top:1px solid #f1f5f9;">
+          <span style="font-size:22px;">🆓</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">100% gratis, sin comisiones</span>
         </div>
       </div>
-      <label>Email *</label>
-      <input id="cvEmail" type="email" placeholder="juan@email.com">
-      <label>Contraseña *</label>
-      <input id="cvPassword" type="password" placeholder="Mínimo 6 caracteres">
-      <label>Teléfono / WhatsApp</label>
-      <input id="cvTel" type="tel" placeholder="Ej: 1123456789">
-      <div id="msgCV" style="margin-top:10px;"></div>
-      <button class="btn btn-success" id="btnCV" onclick="registrarCV()" style="margin-top:12px;font-size:16px;">
-        <i class="fa-solid fa-arrow-right"></i> Crear cuenta y subir mi CV
-      </button>
-      <p style="text-align:center;font-size:13px;color:#94a3b8;margin:12px 0 0;">
-        ¿Ya tenés cuenta? <a href="/login.html">Iniciá sesión</a>
-      </p>
+
+      <!-- Formulario -->
+      <div style="padding:22px 28px 28px;">
+        <p style="font-size:13px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin:0 0 14px;">
+          Creá tu cuenta gratis
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label>Nombre *</label><input id="cvNombre" placeholder="Juan"></div>
+          <div><label>Apellido *</label><input id="cvApellido" placeholder="García"></div>
+        </div>
+        <label>Email *</label>
+        <input id="cvEmail" type="email" placeholder="juan@email.com">
+        <label>Contraseña *</label>
+        <input id="cvPassword" type="password" placeholder="Mínimo 6 caracteres">
+        <label>WhatsApp <span style="font-size:11px;color:#94a3b8;font-weight:400;">(para que las empresas te contacten)</span></label>
+        <input id="cvTel" type="tel" placeholder="Ej: 1123456789">
+        <div id="msgCV" style="margin-top:10px;"></div>
+        <button class="btn" id="btnCV" onclick="registrarCV()"
+          style="margin-top:14px;font-size:16px;font-weight:800;background:linear-gradient(135deg,#0ea5e9,#059669);color:white;border:none;width:100%;padding:14px;">
+          <i class="fa-solid fa-paper-plane"></i> Crear cuenta y subir mi CV
+        </button>
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;">
+          <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+          <span style="font-size:12px;color:#94a3b8;white-space:nowrap;">o registrate con</span>
+          <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+        </div>
+        <button onclick="googleSignInCV()" class="btn-google" style="width:100%;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+          Registrarse con Google
+        </button>
+        <p style="text-align:center;font-size:13px;color:#94a3b8;margin:10px 0 0;">
+          ¿Ya tenés cuenta? <a href="/login.html" style="color:#0ea5e9;">Iniciá sesión</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROFESIONAL -->
+<div class="modal-overlay" id="modalProfesional" onclick="cerrarModalProfesionalClick(event)">
+  <div class="modal-box" style="max-width:500px;">
+    <button class="modal-close" onclick="cerrarModalProfesional()">×</button>
+    <div class="modal-content" style="padding:0;overflow:hidden;">
+
+      <div style="background:linear-gradient(135deg,#0ea5e9,#6366f1);padding:28px 28px 22px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:10px;">🎓</div>
+        <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:white;">
+          ¡Publicá tu profesión y conseguí clientes!
+        </h2>
+        <p style="margin:0;color:rgba(255,255,255,.88);font-size:14px;line-height:1.5;">
+          Médicos, abogados, arquitectos — miles de personas te buscan ahora mismo en tu ciudad
+        </p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid #f1f5f9;">
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-right:1px solid #f1f5f9;">
+          <span style="font-size:22px;">🔍</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Aparecés en el buscador de tu ciudad</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">💬</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Los clientes te contactan por WhatsApp</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-right:1px solid #f1f5f9;border-top:1px solid #f1f5f9;">
+          <span style="font-size:22px;">⭐</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Calificaciones que te posicionan primero</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-top:1px solid #f1f5f9;">
+          <span style="font-size:22px;">🆓</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">100% gratis, sin comisiones</span>
+        </div>
+      </div>
+
+      <div style="padding:20px 28px 24px;">
+        <a href="/registro_profesional.html"
+          style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;font-size:16px;font-weight:800;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:white;border:none;border-radius:12px;text-decoration:none;margin-bottom:12px;">
+          <i class="fa-solid fa-graduation-cap"></i> Registrarme como profesional
+        </a>
+        <button onclick="googleSignInProfesional()" class="btn-google" style="width:100%;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+          Registrarse con Google
+        </button>
+        <p style="text-align:center;font-size:13px;color:#94a3b8;margin:10px 0 0;">
+          ¿Ya tenés cuenta? <a href="/login.html" style="color:#0ea5e9;">Iniciá sesión</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REGISTRO EMPRESA / EMPLEADOR -->
+<div class="modal-overlay" id="modalEmpresa" onclick="cerrarModalEmpresaClick(event)">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="modal-close" onclick="cerrarModalEmpresa()">×</button>
+    <div class="modal-content" style="padding:0;overflow:hidden;">
+
+      <!-- Cabecera degradé púrpura-azul -->
+      <div style="background:linear-gradient(135deg,#7c3aed,#2563eb);padding:28px 28px 22px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:10px;">🏢</div>
+        <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:white;">
+          ¡Sumá tu empresa a Trabajos Cerca!
+        </h2>
+        <p style="margin:0;color:rgba(255,255,255,.88);font-size:14px;line-height:1.5;">
+          Accedé a candidatos de tu zona y encontrá el empleado ideal en minutos
+        </p>
+      </div>
+
+      <!-- Beneficios -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid #f1f5f9;">
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-right:1px solid #f1f5f9;">
+          <span style="font-size:22px;">📋</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Accedés a CVs de candidatos de tu zona</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">💬</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Contacto directo por WhatsApp</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-right:1px solid #f1f5f9;border-top:1px solid #f1f5f9;">
+          <span style="font-size:22px;">🎯</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Filtrá por rubro, ciudad y disponibilidad</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-top:1px solid #f1f5f9;">
+          <span style="font-size:22px;">🚀</span>
+          <span style="font-size:12px;font-weight:700;color:#374151;">Beneficios exclusivos futuros para empresas</span>
+        </div>
+      </div>
+
+      <!-- Propuesta de valor -->
+      <div style="background:#f5f3ff;border-bottom:1px solid #ede9fe;padding:12px 20px;display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:20px;flex-shrink:0;">💡</span>
+        <p style="margin:0;font-size:12px;color:#4c1d95;line-height:1.6;">
+          <strong>¿Por qué registrarte?</strong> Las empresas que se sumen ahora tendrán acceso anticipado a nuevas funciones:
+          publicaciones destacadas, notificaciones de candidatos nuevos en tu zona y panel de gestión de postulantes.
+          <strong>¡Todo gratis durante el período de lanzamiento!</strong>
+        </p>
+      </div>
+
+      <!-- Formulario -->
+      <div style="padding:20px 28px 28px;">
+        <p style="font-size:13px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin:0 0 14px;">
+          Creá tu cuenta empresa gratis
+        </p>
+        <label>Nombre de la empresa o comercio *</label>
+        <input id="emNombre" placeholder="Ej: Supermercado El Sol, Taller García...">
+        <label>Email *</label>
+        <input id="emEmail" type="email" placeholder="empresa@email.com">
+        <label>Contraseña *</label>
+        <input id="emPassword" type="password" placeholder="Mínimo 6 caracteres">
+        <label>WhatsApp <span style="font-size:11px;color:#94a3b8;font-weight:400;">(para que los candidatos te puedan contactar)</span></label>
+        <input id="emTel" type="tel" placeholder="Ej: 1123456789">
+        <div id="msgEmpresa" style="margin-top:10px;"></div>
+        <button class="btn" id="btnEmpresa" onclick="registrarEmpresa()"
+          style="margin-top:14px;font-size:16px;font-weight:800;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;border:none;width:100%;padding:14px;">
+          <i class="fa-solid fa-building"></i> Crear cuenta empresa gratis
+        </button>
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;">
+          <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+          <span style="font-size:12px;color:#94a3b8;white-space:nowrap;">o registrate con</span>
+          <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+        </div>
+        <button onclick="googleSignInEmpresa()" class="btn-google" style="width:100%;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+          Registrarse con Google
+        </button>
+        <p style="text-align:center;font-size:13px;color:#94a3b8;margin:10px 0 0;">
+          ¿Ya tenés cuenta? <a href="/login.html" style="color:#7c3aed;">Iniciá sesión</a>
+        </p>
+      </div>
+
     </div>
   </div>
 </div>
@@ -218,6 +515,62 @@ window.irA = async function(url){
 }
 
 cargarMenu()
+
+/* ── MODAL OFICIO ── */
+window.abrirModalOficio = function(e){
+  e?.preventDefault()
+  document.getElementById("modalOficio").classList.add("activo")
+  document.body.style.overflow = "hidden"
+}
+window.cerrarModalOficio = function(){
+  document.getElementById("modalOficio").classList.remove("activo")
+  document.body.style.overflow = ""
+}
+window.cerrarModalOficioClick = function(e){
+  if(e.target === document.getElementById("modalOficio")) cerrarModalOficio()
+}
+window.registrarOficio = async function(){
+  const nombre   = document.getElementById("ofNombre").value.trim()
+  const apellido = document.getElementById("ofApellido").value.trim()
+  const email    = document.getElementById("ofEmail").value.trim()
+  const password = document.getElementById("ofPassword").value
+  const movil    = document.getElementById("ofTel").value.trim()
+  const msg      = document.getElementById("msgOficio")
+  const btn      = document.getElementById("btnOficio")
+
+  if(!nombre || !apellido || !email || password.length < 6){
+    msg.innerHTML = '<div class="alerta alerta-err">Completá nombre, apellido, email y contraseña (mín. 6 caracteres)</div>'
+    return
+  }
+
+  btn.disabled = true
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creando tu cuenta...'
+
+  const { data, error } = await supabase.auth.signUp({ email, password })
+  if(error){
+    msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-hammer"></i> Crear cuenta y publicar mi oficio'
+    return
+  }
+
+  const perfilData = { nombre, apellido, email, movil, tipo: "profesional" }
+  localStorage.setItem("pendingPerfil", JSON.stringify(perfilData))
+
+  if(!data.user){
+    msg.innerHTML = `<div class="alerta alerta-ok">
+      <i class="fa-solid fa-envelope"></i>
+      Te enviamos un email a <strong>${email}</strong>. Hacé clic en el enlace para activar tu cuenta y completar tu oficio.
+    </div>`
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-hammer"></i> Crear cuenta y publicar mi oficio'
+    return
+  }
+
+  await supabase.from("perfiles").insert({ id: data.user.id, ...perfilData })
+  localStorage.removeItem("pendingPerfil")
+  window.location.href = "/perfil_servicio.html?nuevo=1"
+}
 
 /* ── MODAL CV ── */
 window.abrirModalCV = function(e){
@@ -275,7 +628,97 @@ window.registrarCV = async function(){
   window.location.href = "/perfil_cv.html?nuevo=1"
 }
 
-document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarModalCV() })
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape"){
+    cerrarModalCV(); cerrarModalOficio(); cerrarModalEmpresa(); cerrarModalProfesional()
+  }
+})
+
+/* ── MODAL PROFESIONAL ── */
+window.abrirModalProfesional = function(e){
+  e?.preventDefault()
+  document.getElementById("modalProfesional").classList.add("activo")
+  document.body.style.overflow = "hidden"
+}
+window.cerrarModalProfesional = function(){
+  document.getElementById("modalProfesional").classList.remove("activo")
+  document.body.style.overflow = ""
+}
+window.cerrarModalProfesionalClick = function(e){
+  if(e.target === document.getElementById("modalProfesional")) cerrarModalProfesional()
+}
+window.googleSignInProfesional = function(){
+  localStorage.setItem("googleTipo", "profesional")
+  localStorage.setItem("googleSubtipo", "universitario")
+  googleSignIn("profesional")
+}
+
+/* ── MODAL EMPRESA ── */
+window.abrirModalEmpresa = function(e){
+  e?.preventDefault()
+  document.getElementById("modalEmpresa").classList.add("activo")
+  document.body.style.overflow = "hidden"
+}
+window.cerrarModalEmpresa = function(){
+  document.getElementById("modalEmpresa").classList.remove("activo")
+  document.body.style.overflow = ""
+}
+window.cerrarModalEmpresaClick = function(e){
+  if(e.target === document.getElementById("modalEmpresa")) cerrarModalEmpresa()
+}
+window.registrarEmpresa = async function(){
+  const empresa  = document.getElementById("emNombre").value.trim()
+  const email    = document.getElementById("emEmail").value.trim()
+  const password = document.getElementById("emPassword").value
+  const movil    = document.getElementById("emTel").value.trim()
+  const msg      = document.getElementById("msgEmpresa")
+  const btn      = document.getElementById("btnEmpresa")
+
+  if(!empresa || !email || password.length < 6){
+    msg.innerHTML = '<div class="alerta alerta-err">Completá nombre de empresa, email y contraseña (mín. 6 caracteres)</div>'
+    return
+  }
+  btn.disabled = true
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creando cuenta...'
+
+  const { data, error } = await supabase.auth.signUp({ email, password })
+  if(error){
+    msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-building"></i> Crear cuenta empresa gratis'
+    return
+  }
+
+  const perfilData = { nombre: empresa, apellido: "", email, movil, tipo: "empleador", nombre_empresa: empresa }
+  localStorage.setItem("pendingPerfil", JSON.stringify(perfilData))
+
+  if(!data.user){
+    msg.innerHTML = `<div class="alerta alerta-ok">
+      <i class="fa-solid fa-envelope"></i>
+      Te enviamos un email a <strong>${email}</strong>. Confirmá tu cuenta para acceder al buscador.
+    </div>`
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-building"></i> Crear cuenta empresa gratis'
+    return
+  }
+
+  await supabase.from("perfiles").insert({ id: data.user.id, ...perfilData })
+  localStorage.removeItem("pendingPerfil")
+  window.location.href = "/perfil.html?nueva_empresa=1"
+}
+window.googleSignInEmpresa = function(){ googleSignIn("empleador") }
+
+/* ── GOOGLE SIGN-IN DESDE MODALES ── */
+async function googleSignIn(tipo){
+  localStorage.setItem("googleTipo", tipo)
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: "https://trabajocerca.vercel.app/auth_callback.html" }
+  })
+  if(error) alert("Error al conectar con Google: " + error.message)
+}
+window.googleSignInOficio = () => googleSignIn("profesional")
+window.googleSignInCV     = () => googleSignIn("trabajador")
 </script>
 
 <script src="/chat_widget.js"></script>

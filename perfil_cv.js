@@ -4,6 +4,48 @@ let habilidades  = []
 let experiencias = []
 let educaciones  = []
 
+const RUBROS = [
+  "Atención al público",
+  "Ventas y comercial",
+  "Administración",
+  "Contabilidad y finanzas",
+  "Logística y depósito",
+  "Cocina y gastronomía",
+  "Limpieza y mantenimiento",
+  "Seguridad y vigilancia",
+  "Educación y docencia",
+  "Salud y enfermería",
+  "Electricidad y gas",
+  "Construcción",
+  "Informática y sistemas",
+  "Marketing y publicidad",
+  "Transporte y delivery",
+  "Producción e industria",
+  "Diseño y arte",
+  "Turismo y hotelería",
+  "Cuidado de personas",
+  "Recursos humanos",
+  "Mecánica automotriz",
+  "Servicio técnico",
+  "Textil y confección",
+  "Agropecuario"
+]
+
+function renderRubros(seleccionados = []){
+  const grid = document.getElementById("rubrosGrid")
+  grid.innerHTML = RUBROS.map((r, i) => {
+    const checked = seleccionados.includes(r) ? "checked" : ""
+    return `<label class="rubro-chip">
+      <input type="checkbox" name="rubro" value="${r}" id="rubro_${i}" ${checked}>
+      <span>${r}</span>
+    </label>`
+  }).join("")
+}
+
+function getRubrosSeleccionados(){
+  return [...document.querySelectorAll('input[name="rubro"]:checked')].map(c => c.value)
+}
+
 async function init(){
   const { data: userData } = await supabase.auth.getUser()
   if(!userData.user){ location.href = "/login.html"; return }
@@ -11,6 +53,8 @@ async function init(){
   if(new URLSearchParams(location.search).get("nuevo")){
     document.getElementById("msgNuevo").style.display = "block"
   }
+
+  renderRubros([])
 
   const userId = userData.user.id
 
@@ -54,6 +98,7 @@ async function init(){
 
   document.getElementById("titulo").value        = cv.titulo_profesional || ""
   document.getElementById("resumen").value       = cv.resumen            || ""
+  document.getElementById("edad").value          = cv.edad               || ""
   document.getElementById("disponibilidad").value= cv.disponibilidad     || "inmediata"
   document.getElementById("modalidad").value     = cv.modalidad          || "presencial"
 
@@ -61,6 +106,8 @@ async function init(){
     habilidades = cv.habilidades.split(",").map(h => h.trim()).filter(Boolean)
     renderTags()
   }
+
+  renderRubros(Array.isArray(cv.rubros) ? cv.rubros : [])
 
   experiencias = Array.isArray(cv.experiencia) ? cv.experiencia : []
   renderExperiencias()
@@ -207,13 +254,17 @@ window.guardarCV = async function(){
     return
   }
 
+  const edadVal = parseInt(document.getElementById("edad").value) || null
+
   const payload = {
     usuario_id:         userId,
     titulo_profesional: titulo,
     resumen:            document.getElementById("resumen").value,
+    edad:               edadVal,
     disponibilidad:     document.getElementById("disponibilidad").value,
     modalidad:          document.getElementById("modalidad").value,
     habilidades:        habilidades.join(", "),
+    rubros:             getRubrosSeleccionados(),
     experiencia:        experiencias,
     educacion:          educaciones
   }

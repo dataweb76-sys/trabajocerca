@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registrá tu empresa — Trabajos Cerca</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/login.html"><i class="fa-solid fa-right-to-bracket"></i> <span>Ya tengo cuenta</span></a>
+  </nav>
+</header>
+
+<div class="container" style="max-width:560px;">
+
+  <!-- Hero -->
+  <div style="background:linear-gradient(135deg,#7c3aed,#1d4ed8);border-radius:18px;padding:28px 24px 24px;text-align:center;margin-bottom:18px;">
+    <div style="font-size:48px;margin-bottom:10px;">🏢</div>
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:900;color:white;line-height:1.2;">
+      Encontrá tu próximo empleado<br>en Trabajos Cerca
+    </h1>
+    <p style="margin:0;font-size:14px;color:rgba(255,255,255,.9);line-height:1.6;">
+      Miles de personas buscan trabajo en tu zona ahora mismo.<br>
+      <strong style="color:white;">Registrá tu empresa gratis y contactalos hoy.</strong>
+    </p>
+  </div>
+
+  <!-- Por qué registrarse -->
+  <div style="border:2px solid #e9d5ff;border-radius:14px;overflow:hidden;margin-bottom:18px;">
+    <div style="background:#f5f3ff;padding:10px 16px;border-bottom:1px solid #e9d5ff;">
+      <p style="margin:0;font-size:12px;font-weight:800;color:#4c1d95;text-transform:uppercase;letter-spacing:.04em;">
+        <i class="fa-solid fa-star" style="color:#7c3aed;"></i> ¿Por qué registrarte?
+      </p>
+    </div>
+    <div style="padding:14px 16px;">
+      <div style="display:flex;gap:12px;margin-bottom:11px;align-items:flex-start;">
+        <span style="font-size:20px;flex-shrink:0;">👁️</span>
+        <div>
+          <p style="margin:0 0 2px;font-weight:700;font-size:13px;color:#1e293b;">Accedé al CV completo de cada candidato</p>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.5;">Experiencia, estudios, habilidades y disponibilidad. Todo en un lugar.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:11px;align-items:flex-start;">
+        <span style="font-size:20px;flex-shrink:0;">💬</span>
+        <div>
+          <p style="margin:0 0 2px;font-weight:700;font-size:13px;color:#1e293b;">Contacto directo por WhatsApp, sin intermediarios</p>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.5;">Sin formularios ni esperas. Escribile al candidato en segundos.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-bottom:11px;align-items:flex-start;">
+        <span style="font-size:20px;flex-shrink:0;">🎯</span>
+        <div>
+          <p style="margin:0 0 2px;font-weight:700;font-size:13px;color:#1e293b;">Filtrá por rubro, ciudad y disponibilidad</p>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.5;">¿Necesitás un cajero en tu ciudad disponible de forma inmediata? Lo encontrás en segundos.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:20px;flex-shrink:0;">🚀</span>
+        <div>
+          <p style="margin:0 0 2px;font-weight:700;font-size:13px;color:#1e293b;">Beneficios exclusivos para empresas que se sumen ahora</p>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.5;">Publicaciones destacadas, alertas de candidatos nuevos y panel de gestión. <strong>Todo gratis durante el lanzamiento.</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aviso exclusividad -->
+  <div style="background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:12px;padding:10px 15px;display:flex;align-items:flex-start;gap:9px;margin-bottom:22px;">
+    <i class="fa-solid fa-circle-info" style="color:#7c3aed;margin-top:2px;flex-shrink:0;font-size:14px;"></i>
+    <p style="margin:0;font-size:12px;color:#4c1d95;line-height:1.5;">
+      <strong>Exclusivo para empresas y comercios.</strong>
+      ¿Sos una persona buscando trabajo?
+      <a href="/registro.html?tipo=trabajador" style="color:#7c3aed;font-weight:700;">Registrate acá →</a>
+    </p>
+  </div>
+
+  <!-- Formulario -->
+  <div style="background:white;border:1.5px solid #e2e8f0;border-radius:16px;padding:24px;">
+    <p style="margin:0 0 16px;font-size:13px;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.04em;">
+      <i class="fa-solid fa-pen-to-square" style="color:#7c3aed;"></i> Datos de tu empresa
+    </p>
+
+    <label><i class="fa-solid fa-building" style="color:#7c3aed;"></i> Nombre de la empresa o comercio *</label>
+    <input id="emNombre" placeholder="Ej: Supermercado El Sol, Taller García, Ferretería Central...">
+
+    <label>Email *</label>
+    <input id="emEmail" type="email" placeholder="empresa@email.com">
+
+    <label>Contraseña *</label>
+    <input id="emPassword" type="password" placeholder="Mínimo 6 caracteres">
+
+    <label>WhatsApp <span style="font-size:11px;color:#94a3b8;font-weight:400;">(para que los candidatos te contacten)</span></label>
+    <input id="emTel" type="tel" placeholder="Ej: 1123456789">
+
+    <label>Código Postal *</label>
+    <input id="emCP" placeholder="Ej: 1900" oninput="autocompletarCP(this.value)">
+
+    <label>Localidad *</label>
+    <select id="emLocalidad">
+      <option value="">Ingresá el código postal primero</option>
+    </select>
+
+    <label>Provincia</label>
+    <input id="emProvincia" readonly placeholder="Se completa automático">
+
+    <div style="margin-top:12px;">
+      <label class="check-opt">
+        <input type="checkbox" id="emTerminos">
+        <span class="check-custom"></span>
+        <span>Leí y acepto los <a href="#" onclick="abrirTerminos(event)" style="color:#7c3aed;">Términos y Condiciones de uso</a></span>
+      </label>
+    </div>
+
+    <div id="emMsg" style="margin-top:10px;"></div>
+
+    <button onclick="registrarEmpresa()" id="emBtn"
+      style="margin-top:16px;width:100%;padding:14px;font-size:16px;font-weight:800;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <i class="fa-solid fa-building"></i> Crear cuenta empresa gratis
+    </button>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:16px 0 12px;">
+      <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+      <span style="font-size:12px;color:#94a3b8;white-space:nowrap;">o registrate con</span>
+      <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+    </div>
+
+    <button onclick="registrarConGoogle()"
+      style="width:100%;padding:12px;font-size:14px;font-weight:600;background:white;color:#374151;border:1.5px solid #e2e8f0;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+      Registrarse con Google como empresa
+    </button>
+
+    <p style="text-align:center;font-size:13px;color:#94a3b8;margin:12px 0 0;">
+      ¿Ya tenés cuenta? <a href="/login.html" style="color:#7c3aed;">Iniciá sesión</a>
+    </p>
+  </div>
+
+</div>
+
+<!-- Modal Términos -->
+<div class="modal-overlay" id="modalTerminosOverlay" onclick="if(event.target===this)cerrarTerminos()">
+  <div class="modal-box" style="max-width:640px;max-height:90vh;display:flex;flex-direction:column;">
+    <button class="modal-close" onclick="cerrarTerminos()">×</button>
+    <div style="padding:28px 28px 0;">
+      <h2 style="font-size:20px;font-weight:900;color:#1e293b;margin-bottom:4px;">
+        <i class="fa-solid fa-file-contract" style="color:#7c3aed;"></i> Términos y Condiciones de Uso
+      </h2>
+    </div>
+    <div class="modal-content" style="overflow-y:auto;padding:16px 28px 28px;flex:1;">
+      <p style="font-size:13px;color:#64748b;">Al usar Trabajos Cerca aceptás que la plataforma actúa como intermediario tecnológico. No nos responsabilizamos por acuerdos entre usuarios. El empleador es responsable de verificar la información de los candidatos. Los datos de los candidatos son confidenciales y solo pueden ser usados para fines de contratación.</p>
+    </div>
+    <div style="padding:16px 28px;border-top:1px solid #f1f5f9;">
+      <button onclick="document.getElementById('emTerminos').checked=true;cerrarTerminos()" class="btn btn-primary" style="font-size:15px;">
+        <i class="fa-solid fa-check"></i> Entendido, acepto los términos
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from "./supabase.js"
+
+/* Autocompletar CP */
+window.autocompletarCP = async function(cp){
+  if(cp.length < 4) return
+  try {
+    const res = await fetch(`https://api.zippopotam.us/ar/${cp}`)
+    if(!res.ok) return
+    const data = await res.json()
+    const sel = document.getElementById("emLocalidad")
+    sel.innerHTML = '<option value="">Seleccioná</option>'
+    data.places.forEach(p => {
+      const o = document.createElement("option")
+      o.value = p["place name"]; o.textContent = p["place name"]
+      sel.appendChild(o)
+    })
+    document.getElementById("emProvincia").value = data.places[0]["state"]
+    if(data.places.length === 1) sel.value = data.places[0]["place name"]
+  } catch(e){}
+}
+
+/* Términos */
+window.abrirTerminos = function(e){ e.preventDefault(); document.getElementById("modalTerminosOverlay").classList.add("activo"); document.body.style.overflow="hidden" }
+window.cerrarTerminos = function(){ document.getElementById("modalTerminosOverlay").classList.remove("activo"); document.body.style.overflow="" }
+document.addEventListener("keydown", e => { if(e.key==="Escape") cerrarTerminos() })
+
+/* Obtener coordenadas */
+async function obtenerCoordenadas(ciudad, provincia){
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(ciudad)}&state=${encodeURIComponent(provincia)}&country=Argentina&format=json&limit=1`
+    const res = await fetch(url)
+    const data = await res.json()
+    if(!data.length) return { lat: null, lng: null }
+    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
+  } catch { return { lat: null, lng: null } }
+}
+
+/* Registro empresa */
+window.registrarEmpresa = async function(){
+  const empresa  = document.getElementById("emNombre").value.trim()
+  const email    = document.getElementById("emEmail").value.trim()
+  const password = document.getElementById("emPassword").value
+  const movil    = document.getElementById("emTel").value.trim()
+  const cp       = document.getElementById("emCP").value.trim()
+  const localidad= document.getElementById("emLocalidad").value
+  const provincia= document.getElementById("emProvincia").value
+  const terminos = document.getElementById("emTerminos").checked
+  const msg      = document.getElementById("emMsg")
+  const btn      = document.getElementById("emBtn")
+
+  if(!empresa){ msg.innerHTML = '<div class="alerta alerta-err">Ingresá el nombre de tu empresa o comercio</div>'; return }
+  if(!email || password.length < 6){ msg.innerHTML = '<div class="alerta alerta-err">Ingresá email y contraseña (mín. 6 caracteres)</div>'; return }
+  if(!localidad){ msg.innerHTML = '<div class="alerta alerta-err">Ingresá tu código postal y seleccioná la localidad</div>'; return }
+  if(!terminos){ msg.innerHTML = '<div class="alerta alerta-err">Debés aceptar los Términos y Condiciones</div>'; return }
+
+  btn.disabled = true
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creando cuenta...'
+
+  const { data, error } = await supabase.auth.signUp({ email, password })
+  if(error){
+    msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-building"></i> Crear cuenta empresa gratis'
+    return
+  }
+
+  const perfilData = {
+    nombre: empresa, apellido: "", email, movil,
+    nombre_empresa: empresa, mostrar_como: "empresa",
+    mostrar_telefono: true,
+    codigo_postal: cp, localidad, provincia,
+    pais: "Argentina", tipo: "empleador"
+  }
+
+  if(!data.user){
+    localStorage.setItem("pendingPerfil", JSON.stringify(perfilData))
+    msg.innerHTML = `<div class="alerta alerta-ok">
+      <i class="fa-solid fa-envelope"></i>
+      Te enviamos un email a <strong>${email}</strong>. Confirmá tu cuenta para acceder al buscador de empleados.
+    </div>`
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-building"></i> Crear cuenta empresa gratis'
+    return
+  }
+
+  const coords = await obtenerCoordenadas(localidad, provincia)
+  perfilData.lat = coords.lat; perfilData.lng = coords.lng
+
+  await supabase.from("perfiles").insert({ id: data.user.id, ...perfilData })
+  localStorage.removeItem("pendingPerfil")
+  window.location.href = "/perfil.html?nueva_empresa=1"
+}
+
+/* Google */
+window.registrarConGoogle = async function(){
+  localStorage.setItem("googleTipo", "empleador")
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: "https://trabajocerca.vercel.app/auth_callback.html" }
+  })
+  if(error) document.getElementById("emMsg").innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+}
+</script>
+
+<script src="/chat_widget.js"></script>
+</body>
+</html>

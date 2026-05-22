@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buscador de Profesionales — Trabajos Cerca</title>
+<meta name="description" content="Buscá médicos, abogados, arquitectos, contadores e ingenieros en tu ciudad. Contacto directo por WhatsApp.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/index.html"><i class="fa-solid fa-house"></i> <span>Inicio</span></a>
+    <a href="/mapa.html"><i class="fa-solid fa-map"></i> <span>Mapa</span></a>
+    <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
+  </nav>
+</header>
+
+<div class="container" style="max-width:900px;">
+
+  <div id="cabeceraBuscador">
+    <h2 id="tituloBuscador"><i class="fa-solid fa-graduation-cap" style="color:#6366f1"></i> Buscador de Profesionales</h2>
+    <p id="subtituloBuscador" style="color:#64748b;font-size:14px;margin:-10px 0 20px;">Médicos, abogados, arquitectos, contadores e ingenieros cerca tuyo</p>
+  </div>
+
+  <div class="filtros" style="align-items:flex-end;">
+    <div style="flex:2;">
+      <label>¿Qué profesional necesitás?</label>
+      <input id="buscar" placeholder="Ej: médico, abogado, contador, arquitecto..." onkeydown="if(event.key==='Enter') buscar()">
+    </div>
+    <div>
+      <label>Ciudad</label>
+      <input id="ciudad" placeholder="Ej: La Plata" onkeydown="if(event.key==='Enter') buscar()">
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <button class="btn btn-primary" onclick="buscar()" style="white-space:nowrap;">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      </button>
+    </div>
+  </div>
+
+  <div style="margin-bottom:24px;">
+    <p style="font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:.06em;margin:0 0 10px;text-transform:uppercase;">O elegí una profesión</p>
+    <div class="cats-chips" id="chipsCategoria"></div>
+  </div>
+
+  <div id="resultados">
+    <div style="text-align:center;padding:50px 20px;color:#94a3b8;">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size:36px;display:block;margin-bottom:14px;"></i>
+      <p>Cargando perfiles...</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL PERFIL -->
+<div class="modal-overlay" id="modalOverlay" onclick="cerrarModalClick(event)">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close" onclick="cerrarModal()">×</button>
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>window._TC_TIPO = "profesional"</script>
+<script type="module" src="/buscador_core.js"></script>
+<script src="/chat_widget.js"></script>
+</body>
+</html>

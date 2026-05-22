@@ -65,32 +65,43 @@ async function registrarUsuario(e){
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...'
 
   const tipo           = document.getElementById("tipo").value
-  const nombre         = document.getElementById("nombre").value.trim()
-  const apellido       = document.getElementById("apellido").value.trim()
+  const esEmp          = tipo === "empleador"
+  // Para empleador: el "nombre" es el nombre de la empresa
+  const nombreEmpInput = document.getElementById("nombre_empresa_emp")?.value.trim() || ""
+  const nombre         = esEmp ? nombreEmpInput : document.getElementById("nombre").value.trim()
+  const apellido       = esEmp ? "" : document.getElementById("apellido").value.trim()
   const email          = document.getElementById("email").value.trim()
   const password       = document.getElementById("password").value
   const movil          = document.getElementById("movil").value.trim()
   const codigo         = document.getElementById("codigo_postal").value.trim()
   const localidad      = document.getElementById("localidad").value
   const provincia      = document.getElementById("provincia").value
-  const nombre_empresa = (document.getElementById("nombre_empresa")?.value || "").trim()
-  const mostrar_como   = document.querySelector('input[name="mostrar_como"]:checked')?.value || "personal"
+  const nombre_empresa = esEmp ? nombreEmpInput : (document.getElementById("nombre_empresa")?.value || "").trim()
+  const mostrar_como   = esEmp ? "empresa" : (document.querySelector('input[name="mostrar_como"]:checked')?.value || "personal")
   const mostrar_tel    = document.getElementById("mostrar_telefono")?.checked ?? true
   const terminos       = document.getElementById("terminos")?.checked
 
   const msg = document.getElementById("msg")
 
+  const btnLabel = esEmp
+    ? '<i class="fa-solid fa-building"></i> Crear cuenta empresa gratis'
+    : 'Continuar <i class="fa-solid fa-arrow-right"></i>'
+
   if(!terminos){
     msg.innerHTML = '<div class="alerta alerta-err">Debés aceptar los Términos y Condiciones para continuar</div>'
-    btn.disabled = false
-    btn.innerHTML = 'Continuar <i class="fa-solid fa-arrow-right"></i>'
+    btn.disabled = false; btn.innerHTML = btnLabel
+    return
+  }
+
+  if(esEmp && !nombre){
+    msg.innerHTML = '<div class="alerta alerta-err">Ingresá el nombre de la empresa o comercio</div>'
+    btn.disabled = false; btn.innerHTML = btnLabel
     return
   }
 
   if(!localidad){
     msg.innerHTML = '<div class="alerta alerta-err">Seleccioná una localidad</div>'
-    btn.disabled = false
-    btn.innerHTML = 'Continuar <i class="fa-solid fa-arrow-right"></i>'
+    btn.disabled = false; btn.innerHTML = btnLabel
     return
   }
 
@@ -100,8 +111,7 @@ async function registrarUsuario(e){
 
   if(error){
     msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
-    btn.disabled = false
-    btn.innerHTML = 'Continuar <i class="fa-solid fa-arrow-right"></i>'
+    btn.disabled = false; btn.innerHTML = btnLabel
     return
   }
 
@@ -122,8 +132,7 @@ async function registrarUsuario(e){
       <i class="fa-solid fa-envelope"></i>
       Te enviamos un email de confirmación a <strong>${email}</strong>. Hacé clic en el enlace del mail para activar tu cuenta.
     </div>`
-    btn.disabled = false
-    btn.innerHTML = 'Continuar <i class="fa-solid fa-arrow-right"></i>'
+    btn.disabled = false; btn.innerHTML = btnLabel
     return
   }
 
@@ -135,7 +144,7 @@ async function registrarUsuario(e){
   if(tipo === "profesional"){
     window.location.href = "/perfil_servicio.html?nuevo=1"
   } else if(tipo === "empleador"){
-    window.location.href = "/perfil.html?nuevo=1"
+    window.location.href = "/perfil.html?nueva_empresa=1"
   } else {
     window.location.href = "/perfil_cv.html?nuevo=1"
   }

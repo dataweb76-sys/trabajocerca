@@ -54,8 +54,37 @@ CREATE TABLE IF NOT EXISTS curriculum (
   modalidad          text DEFAULT 'presencial',
   experiencia        jsonb DEFAULT '[]'::jsonb,
   educacion          jsonb DEFAULT '[]'::jsonb,
+  rubros             jsonb DEFAULT '[]'::jsonb,
+  cv_archivo         text,
   created_at         timestamptz DEFAULT now()
 );
+
+ALTER TABLE curriculum ADD COLUMN IF NOT EXISTS rubros    jsonb DEFAULT '[]'::jsonb;
+ALTER TABLE curriculum ADD COLUMN IF NOT EXISTS cv_archivo text;
+ALTER TABLE curriculum ADD COLUMN IF NOT EXISTS edad      int2;
+
+-- Columnas nuevas en perfiles (empleador y profesional universitario)
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS empresa_logo              text;
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS empresa_sector            text;
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS empresa_descripcion       text;
+ALTER TABLE perfiles ADD COLUMN IF NOT EXISTS profesion_universitaria   text;
+
+-- Ofertas de trabajo
+CREATE TABLE IF NOT EXISTS ofertas_trabajo (
+  id             uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  empleador_id   uuid REFERENCES perfiles(id) ON DELETE CASCADE,
+  empresa_nombre text,
+  empresa_logo   text,
+  puesto         text NOT NULL,
+  descripcion    text,
+  activo         boolean DEFAULT true,
+  created_at     timestamptz DEFAULT now()
+);
+ALTER TABLE ofertas_trabajo ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "ofertas_select" ON ofertas_trabajo FOR SELECT USING (true);
+CREATE POLICY "ofertas_insert" ON ofertas_trabajo FOR INSERT WITH CHECK (auth.uid() = empleador_id);
+CREATE POLICY "ofertas_update" ON ofertas_trabajo FOR UPDATE USING (auth.uid() = empleador_id);
+CREATE POLICY "ofertas_delete" ON ofertas_trabajo FOR DELETE USING (auth.uid() = empleador_id);
 
 -- TABLA REVIEWS
 CREATE TABLE IF NOT EXISTS reviews (
@@ -110,6 +139,16 @@ CREATE POLICY "reviews_insert" ON reviews FOR INSERT WITH CHECK (auth.uid() = au
 CREATE POLICY "fotos_select"  ON trabajos_fotos FOR SELECT USING (true);
 CREATE POLICY "fotos_insert"  ON trabajos_fotos FOR INSERT WITH CHECK (auth.uid() = usuario_id);
 CREATE POLICY "fotos_delete"  ON trabajos_fotos FOR DELETE USING (auth.uid() = usuario_id);
+
+-- RUBROS SUGERIDOS (por empleadores cuando no encuentran el rubro)
+CREATE TABLE IF NOT EXISTS rubros_sugeridos (
+  id         uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  termino    text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+ALTER TABLE rubros_sugeridos ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "rubros_sug_insert" ON rubros_sugeridos FOR INSERT WITH CHECK (true);
+CREATE POLICY "rubros_sug_select" ON rubros_sugeridos FOR SELECT USING (true);
 
 -- ============================================================
 -- STORAGE — bucket "trabajos" (crear en Supabase > Storage)
