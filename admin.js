@@ -232,8 +232,10 @@ async function cargarSolicitudes() {
     const nombre = (p.nombre_empresa && p.nombre_empresa.trim())
       ? p.nombre_empresa
       : `${p.nombre || ""} ${p.apellido || ""}`.trim() || "(sin nombre)"
-    const planLabel = s.plan === "basico" ? "Básico — $10.000/mes" : "Pro — $20.000/mes"
-    const planColor = s.plan === "basico" ? "#2563eb" : "#f97316"
+    const cant   = s.cantidad || 1
+    const precio = s.precio   || 10000
+    const planLabel = `${cant} trabajo${cant>1?"s":""} — $${precio.toLocaleString("es-AR")}/mes`
+    const planColor = cant >= 5 ? "#f97316" : cant >= 2 ? "#7c3aed" : "#2563eb"
     const fecha = new Date(s.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" })
 
     const foto = p.foto
@@ -268,9 +270,9 @@ async function cargarSolicitudes() {
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
         ${isPendiente ? `
-          <button onclick="aprobarSolicitud('${s.id}', '${s.usuario_id}', '${s.plan}')"
+          <button onclick="aprobarSolicitud('${s.id}', '${s.usuario_id}', ${cant})"
             class="btn btn-sm" style="background:#16a34a;color:white;">
-            <i class="fa-solid fa-circle-check"></i> Aprobar
+            <i class="fa-solid fa-circle-check"></i> Aprobar ${cant} trabajo${cant>1?"s":""}
           </button>
           <button onclick="rechazarSolicitud('${s.id}')"
             class="btn btn-sm btn-outline" style="color:#dc2626;border-color:#dc2626;font-size:12px;">
@@ -299,9 +301,10 @@ async function cargarSolicitudes() {
 }
 
 /* ── Aprobar solicitud ── */
-window.aprobarSolicitud = async function(solicitudId, usuarioId, plan) {
-  const planNivel = plan === "basico" ? 1 : 2
-  const planLabel = plan === "basico" ? "Básico" : "Pro"
+window.aprobarSolicitud = async function(solicitudId, usuarioId, cantidad) {
+  // plan_nivel: 1 = 1 trabajo, 2 = 2 trabajos, 3 = 5 trabajos
+  const planNivel = cantidad >= 5 ? 3 : cantidad >= 2 ? 2 : 1
+  const esDestacado = cantidad >= 5  // Plan Pro incluye badge Destacado
 
   const row = document.getElementById(`sol-${solicitudId}`)
   if (row) row.style.opacity = "0.5"
@@ -310,7 +313,7 @@ window.aprobarSolicitud = async function(solicitudId, usuarioId, plan) {
   const { error: e1 } = await supabase
     .from("perfiles").update({
       plan_nivel: planNivel,
-      ...(plan === "pro" ? { destacado: true } : {})
+      ...(esDestacado ? { destacado: true } : {})
     }).eq("id", usuarioId)
 
   if (e1) { alert("Error: " + e1.message); if (row) row.style.opacity = "1"; return }
@@ -319,22 +322,22 @@ window.aprobarSolicitud = async function(solicitudId, usuarioId, plan) {
   await supabase.from("solicitudes_portfolio")
     .update({ estado: "aprobado" }).eq("id", solicitudId)
 
-  // Notificar al profesional
+  // Notificar al profesional con la cantidad exacta
   await supabase.from("notificaciones").insert({
     usuario_id: usuarioId,
     tipo:       "sistema",
-    titulo:     `🎉 Plan ${planLabel} activado`,
-    cuerpo:     `Tu plan fue aprobado. Entrá a "Mi servicio" y empezá a subir fotos de tus trabajos.`,
+    titulo:     `🎉 ¡Tu plan fue aprobado!`,
+    cuerpo:     `Ya podés subir hasta ${cantidad} trabajo${cantidad>1?"s":""} realizado${cantidad>1?"s":""} con fotos. ` +
+                `Entrá a "Mi servicio" → sección "Trabajos realizados".`,
     url:        "/perfil_servicio.html"
   }).catch(() => {})
 
   // Actualizar stats y lista
   await Promise.all([cargarSolicitudes(), cargarStats()])
-  // Actualizar en la tabla de perfiles también
   const idx = _perfiles.findIndex(p => p.id === usuarioId)
   if (idx >= 0) {
     _perfiles[idx].plan_nivel = planNivel
-    if (plan === "pro") _perfiles[idx].destacado = true
+    if (esDestacado) _perfiles[idx].destacado = true
   }
 }
 

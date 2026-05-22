@@ -283,6 +283,19 @@ window.guardarServicio = async function(){
 
 /* ── PORTFOLIO ── */
 
+const PLANES_CONFIG = {
+  p1: { label:"Básico",    cantidad:1, precio:10000,  color:"#2563eb" },
+  p2: { label:"Estándar",  cantidad:2, precio:15000,  color:"#7c3aed" },
+  p3: { label:"Pro",       cantidad:5, precio:30000,  color:"#f97316" },
+}
+
+function getMaxItems(nivel){
+  if(nivel === 3) return 5
+  if(nivel === 2) return 2
+  if(nivel === 1) return 1
+  return 0
+}
+
 async function cargarPortfolio(){
   const lista = document.getElementById("listaPortfolio")
   if(!lista || !userId) return
@@ -293,12 +306,18 @@ async function cargarPortfolio(){
     .eq("usuario_id", userId)
     .order("created_at", { ascending: false })
 
-  const maxItems = planNivel >= 2 ? 10 : planNivel === 1 ? 5 : 3
+  const maxItems = getMaxItems(planNivel)
 
   if(!items?.length){
-    lista.innerHTML = `<p style="color:#94a3b8;font-size:13px;text-align:center;padding:8px 0;">
-      No tenés trabajos publicados aún. Podés agregar hasta <strong>${maxItems}</strong>.
-    </p>`
+    lista.innerHTML = maxItems > 0
+      ? `<p style="color:#94a3b8;font-size:13px;text-align:center;padding:8px 0;">
+           No tenés trabajos publicados aún. Podés agregar hasta <strong>${maxItems}</strong>.
+         </p>`
+      : `<div style="text-align:center;padding:16px 12px;">
+           <i class="fa-solid fa-camera" style="font-size:28px;color:#cbd5e1;display:block;margin-bottom:8px;"></i>
+           <p style="margin:0;font-size:13px;color:#94a3b8;">Aún no tenés trabajos publicados.</p>
+           <p style="margin:4px 0 0;font-size:12px;color:#cbd5e1;">Elegí un plan para mostrar tus fotos en el perfil.</p>
+         </div>`
   } else {
     lista.innerHTML = items.map(item => {
       const fotos = [item.foto1, item.foto2, item.foto3].filter(Boolean)
@@ -332,15 +351,13 @@ async function cargarPortfolio(){
 }
 
 window.clickAgregarTrabajo = async function(){
-  const maxItems = planNivel >= 2 ? 10 : planNivel === 1 ? 5 : 3
+  const maxItems = getMaxItems(planNivel)
+  if(maxItems === 0){ mostrarPlanes(); return }
   const { count } = await supabase
     .from("portfolio")
     .select("id", { count: "exact", head: true })
     .eq("usuario_id", userId)
-  if(count >= maxItems){
-    alert(`Alcanzaste el límite de ${maxItems} trabajos. Actualizá tu plan para agregar más.`)
-    return
-  }
+  if(count >= maxItems){ mostrarPlanes(); return }
   abrirFormPortfolio()
 }
 
@@ -362,8 +379,9 @@ window.cerrarPlanesClick = function(e){
 async function mostrarEstadoSolicitud(){
   const { data } = await supabase
     .from("solicitudes_portfolio")
-    .select("plan, estado, created_at")
+    .select("plan, cantidad, precio, estado, created_at")
     .eq("usuario_id", userId)
+    .eq("estado", "pendiente")
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -372,43 +390,94 @@ async function mostrarEstadoSolicitud(){
 
   const seccion = document.getElementById("seccionPortfolio")
   const btn     = document.getElementById("btnAgregarTrabajo")
+  const cant    = data.cantidad || 1
+  const precio  = data.precio   || 10000
 
-  if(data.estado === "pendiente"){
-    const planNombre = data.plan === "basico" ? "Básico ($10.000)" : "Pro ($20.000)"
-    if(seccion){
-      const aviso = document.createElement("div")
-      aviso.style.cssText = "background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#713f12;"
-      aviso.innerHTML = `<i class="fa-solid fa-clock" style="color:#f59e0b;margin-right:6px;"></i>
-        <strong>Solicitud pendiente — Plan ${planNombre}</strong><br>
-        <span style="color:#92400e;">Tu solicitud fue enviada. Te avisamos cuando esté aprobada.</span>`
-      seccion.insertBefore(aviso, seccion.querySelector("#listaPortfolio"))
-    }
-    if(btn) btn.disabled = true
+  if(seccion){
+    const aviso = document.createElement("div")
+    aviso.style.cssText = "background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#713f12;"
+    aviso.innerHTML = `<i class="fa-solid fa-clock" style="color:#f59e0b;margin-right:6px;"></i>
+      <strong>Solicitud pendiente — ${cant} trabajo${cant>1?"s":""} ($${precio.toLocaleString("es-AR")}/mes)</strong><br>
+      <span style="color:#92400e;">Tu solicitud fue enviada. Te avisaremos cuando esté aprobada para que puedas subir tus fotos.</span>`
+    seccion.insertBefore(aviso, seccion.querySelector("#listaPortfolio"))
   }
+  if(btn) btn.disabled = true
 }
 
-/* ── Solicitar plan ── */
-window.solicitarPlan = async function(plan){
-  const msgEl = document.getElementById("msgSolicitud")
-  msgEl.innerHTML = `<div style="color:#64748b;font-size:13px;text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Enviando solicitud...</div>`
+/* ── Plan modal: elegir plan → paso pago ── */
+let _planActual = null
+
+window.elegirPlan = function(planKey){
+  const plan = PLANES_CONFIG[planKey]
+  if(!plan) return
+  _planActual = planKey
+
+  document.getElementById("pasoEleccion").style.display = "none"
+  document.getElementById("pasoPago").style.display     = "block"
+  document.getElementById("msgSolicitud").innerHTML     = ""
+
+  document.getElementById("resumeLabel").textContent =
+    `${plan.label} — ${plan.cantidad} trabajo${plan.cantidad>1?"s":""} realizados`
+  document.getElementById("resumeSub").textContent =
+    `$${plan.precio.toLocaleString("es-AR")} por mes · hasta 3 fotos por trabajo`
+}
+
+window.volverEleccion = function(){
+  document.getElementById("pasoEleccion").style.display = "block"
+  document.getElementById("pasoPago").style.display     = "none"
+  _planActual = null
+}
+
+window.pagarMP = function(){
+  const plan = PLANES_CONFIG[_planActual]
+  if(!plan) return
+  // Link de MercadoPago al alias (no muestra el alias en el HTML)
+  window.open("https://link.mercadopago.com.ar/danielmfaggi", "_blank")
+}
+
+window.contactarWA = async function(){
+  const plan = PLANES_CONFIG[_planActual]
+  if(!plan) return
+  // Obtener nombre del profesional para el mensaje
+  const { data: perfil } = await supabase.from("perfiles")
+    .select("nombre, apellido, nombre_empresa").eq("id", userId).single()
+  const nombre = (perfil?.nombre_empresa || `${perfil?.nombre||""} ${perfil?.apellido||""}`.trim()) || "un profesional"
+  const msg = encodeURIComponent(
+    `Hola! Soy ${nombre} y quiero contratar el plan ${plan.label} de Trabajos Cerca ` +
+    `(${plan.cantidad} trabajo${plan.cantidad>1?"s":""} · $${plan.precio.toLocaleString("es-AR")}/mes). ` +
+    `¿Cómo coordino el pago?`
+  )
+  window.open(`https://wa.me/5492954320639?text=${msg}`, "_blank")
+}
+
+window.confirmarSolicitud = async function(){
+  if(!_planActual) return
+  const plan   = PLANES_CONFIG[_planActual]
+  const msgEl  = document.getElementById("msgSolicitud")
 
   // Verificar si ya tiene solicitud pendiente
   const { data: existente } = await supabase
     .from("solicitudes_portfolio")
-    .select("id, estado")
+    .select("id")
     .eq("usuario_id", userId)
     .eq("estado", "pendiente")
     .maybeSingle()
 
   if(existente){
-    msgEl.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:10px 14px;">Ya tenés una solicitud pendiente. Esperá a que sea procesada.</div>`
+    msgEl.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:10px 14px;">
+      Ya tenés una solicitud pendiente. Esperá a que sea aprobada.</div>`
     return
   }
 
-  // Insertar solicitud
+  msgEl.innerHTML = `<div style="color:#64748b;font-size:13px;text-align:center;">
+    <i class="fa-solid fa-spinner fa-spin"></i> Enviando...</div>`
+
   const { error } = await supabase.from("solicitudes_portfolio").insert({
     usuario_id: userId,
-    plan
+    plan:       _planActual,
+    cantidad:   plan.cantidad,
+    precio:     plan.precio,
+    estado:     "pendiente"
   })
 
   if(error){
@@ -417,32 +486,37 @@ window.solicitarPlan = async function(plan){
   }
 
   // Notificar admins
-  const { data: admins } = await supabase
-    .from("perfiles").select("id").eq("admin", true)
-
+  const { data: admins } = await supabase.from("perfiles").select("id").eq("admin", true)
   if(admins?.length){
-    const planLabel = plan === "basico" ? "Básico ($10.000/mes)" : "Pro ($20.000/mes)"
     await supabase.from("notificaciones").insert(
       admins.map(a => ({
         usuario_id: a.id,
         tipo:       "sistema",
-        titulo:     `Nueva solicitud de plan ${planLabel}`,
-        cuerpo:     `Un profesional solicita activar trabajos realizados. Revisá el panel admin.`,
+        titulo:     `💰 Nueva solicitud de plan — ${plan.cantidad} trabajo${plan.cantidad>1?"s":""}`,
+        cuerpo:     `Plan ${plan.label} ($${plan.precio.toLocaleString("es-AR")}/mes). Revisá el panel admin para aprobar.`,
         url:        "/admin.html"
       }))
     ).catch(() => {})
   }
 
-  msgEl.innerHTML = `
-    <div class="alerta alerta-ok" style="padding:12px 14px;">
-      <i class="fa-solid fa-check-circle"></i>
-      <strong>¡Solicitud enviada!</strong><br>
-      <span style="font-size:13px;">Te avisamos por notificación cuando esté aprobada. Una vez aprobada, vas a poder subir tus fotos desde acá.</span>
-    </div>`
+  // También abrir WA al admin avisando automáticamente
+  const { data: perfil } = await supabase.from("perfiles")
+    .select("nombre, apellido, nombre_empresa").eq("id", userId).single()
+  const nombre = (perfil?.nombre_empresa || `${perfil?.nombre||""} ${perfil?.apellido||""}`.trim()) || "un profesional"
+  const waMsg = encodeURIComponent(
+    `⚡ Nueva solicitud de plan en Trabajos Cerca!\n` +
+    `👤 ${nombre}\n` +
+    `📦 Plan ${plan.label} — ${plan.cantidad} trabajo${plan.cantidad>1?"s":""}\n` +
+    `💵 $${plan.precio.toLocaleString("es-AR")}/mes\n` +
+    `✅ El profesional confirmó que ya pagó. Revisá el admin panel.`
+  )
+  window.open(`https://wa.me/5492954320639?text=${waMsg}`, "_blank")
 
-  // Deshabilitar ambos botones
-  document.querySelectorAll("#modalPlanes button[onclick*='solicitarPlan']")
-    .forEach(b => b.disabled = true)
+  msgEl.innerHTML = `
+    <div class="alerta alerta-ok" style="padding:12px 14px;margin-top:10px;">
+      <i class="fa-solid fa-check-circle"></i> <strong>¡Listo! Solicitud enviada.</strong><br>
+      <span style="font-size:13px;">Te avisamos por notificación cuando tu cuenta esté activa (menos de 24hs).</span>
+    </div>`
 }
 
 function abrirFormPortfolio(){

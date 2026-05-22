@@ -95,7 +95,11 @@ async function cargarPerfil(){
           </div>`
         }).join("")}
       </div>`
-    : ""
+    : `<div class="card" style="text-align:center;padding:22px 16px;">
+        <i class="fa-solid fa-camera" style="font-size:32px;color:#cbd5e1;display:block;margin-bottom:10px;"></i>
+        <p style="margin:0;font-size:14px;font-weight:700;color:#94a3b8;">Trabajos realizados</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#cbd5e1;">Este profesional aún no subió fotos de sus trabajos</p>
+      </div>`
 
   /* ── Reviews ── */
   const reviewsHtml = reviews?.length

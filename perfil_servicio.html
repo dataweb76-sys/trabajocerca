@@ -332,77 +332,155 @@
 
 <!-- MODAL PLANES -->
 <div class="modal-overlay" id="modalPlanes" onclick="cerrarPlanesClick(event)">
-  <div class="modal-box" style="max-width:520px;">
+  <div class="modal-box" style="max-width:500px;">
     <button class="modal-close" onclick="cerrarPlanes()">×</button>
 
     <!-- Cabecera -->
-    <div style="background:linear-gradient(135deg,#f97316,#ea580c);padding:24px 26px 20px;text-align:center;border-radius:16px 16px 0 0;">
-      <div style="font-size:42px;margin-bottom:8px;">📸</div>
-      <h2 style="margin:0 0 6px;font-size:21px;font-weight:900;color:white;">Trabajos Realizados</h2>
-      <p style="margin:0;color:rgba(255,255,255,.88);font-size:13px;line-height:1.5;">
-        Mostrá fotos de tus trabajos y demostrá tu calidad.<br>
-        Los clientes confían más en profesionales con fotos reales.
+    <div style="background:linear-gradient(135deg,#f97316,#ea580c);padding:22px 24px 18px;text-align:center;border-radius:16px 16px 0 0;">
+      <div style="font-size:38px;margin-bottom:6px;">📸</div>
+      <h2 style="margin:0 0 4px;font-size:20px;font-weight:900;color:white;">Fotos de Trabajos Realizados</h2>
+      <p style="margin:0;color:rgba(255,255,255,.88);font-size:13px;line-height:1.4;">
+        Mostrá tu trabajo real y conseguí más clientes.<br>Abonás una vez por mes.
       </p>
     </div>
 
-    <div style="padding:22px 24px 26px;">
+    <!-- PASO 1: Elegir plan -->
+    <div id="pasoEleccion" style="padding:20px 22px 24px;">
 
-      <!-- Intro -->
-      <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:12px 14px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start;">
-        <i class="fa-solid fa-circle-info" style="color:#f97316;margin-top:2px;flex-shrink:0;"></i>
-        <p style="margin:0;font-size:13px;color:#7c2d12;line-height:1.5;">
-          Elegís un plan, nos lo pedís, <strong>abonás una vez por mes</strong> y nosotros te habilitamos la sección de fotos. Tus trabajos aparecen en tu perfil público para que los clientes los vean antes de contactarte.
+      <!-- Planes: columna única, más compactos -->
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+
+        <!-- Plan 1 trabajo -->
+        <div style="border:2px solid #e2e8f0;border-radius:13px;padding:14px 16px;display:flex;align-items:center;gap:14px;background:white;cursor:pointer;transition:border-color .15s;"
+             onclick="window.elegirPlan('p1')"
+             onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0'">
+          <div style="text-align:center;min-width:70px;">
+            <p style="margin:0;font-size:22px;font-weight:900;color:#1e293b;line-height:1;">$10.000</p>
+            <p style="margin:0;font-size:10px;color:#94a3b8;font-weight:600;">/ mes</p>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
+              <span style="background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">BÁSICO</span>
+              <strong style="font-size:14px;color:#1e293b;">1 trabajo realizado</strong>
+            </div>
+            <p style="margin:0;font-size:12px;color:#64748b;">Hasta 3 fotos por trabajo · Visible en tu perfil público</p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;font-size:13px;"></i>
+        </div>
+
+        <!-- Plan 2 trabajos -->
+        <div style="border:2px solid #7c3aed;border-radius:13px;padding:14px 16px;display:flex;align-items:center;gap:14px;background:#faf5ff;cursor:pointer;transition:border-color .15s;"
+             onclick="window.elegirPlan('p2')"
+             onmouseover="this.style.borderColor='#6d28d9'" onmouseout="this.style.borderColor='#7c3aed'">
+          <div style="text-align:center;min-width:70px;">
+            <p style="margin:0;font-size:22px;font-weight:900;color:#1e293b;line-height:1;">$15.000</p>
+            <p style="margin:0;font-size:10px;color:#94a3b8;font-weight:600;">/ mes</p>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
+              <span style="background:#ede9fe;color:#7c3aed;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">ESTÁNDAR</span>
+              <strong style="font-size:14px;color:#1e293b;">2 trabajos realizados</strong>
+            </div>
+            <p style="margin:0;font-size:12px;color:#64748b;">Hasta 3 fotos por trabajo · Visible en tu perfil público</p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;font-size:13px;"></i>
+        </div>
+
+        <!-- Plan 5 trabajos -->
+        <div style="border:2px solid #f97316;border-radius:13px;padding:14px 16px;display:flex;align-items:center;gap:14px;background:#fff7ed;cursor:pointer;transition:border-color .15s;"
+             onclick="window.elegirPlan('p3')"
+             onmouseover="this.style.borderColor='#ea580c'" onmouseout="this.style.borderColor='#f97316'">
+          <div style="text-align:center;min-width:70px;">
+            <p style="margin:0;font-size:22px;font-weight:900;color:#1e293b;line-height:1;">$30.000</p>
+            <p style="margin:0;font-size:10px;color:#94a3b8;font-weight:600;">/ mes</p>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
+              <span style="background:#ffedd5;color:#ea580c;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;"><i class="fa-solid fa-crown" style="font-size:9px;"></i> PRO</span>
+              <strong style="font-size:14px;color:#1e293b;">5 trabajos realizados</strong>
+            </div>
+            <p style="margin:0;font-size:12px;color:#64748b;">Hasta 3 fotos por trabajo · Badge <strong>Destacado</strong> incluido</p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;font-size:13px;"></i>
+        </div>
+
+      </div>
+
+      <p style="text-align:center;font-size:12px;color:#94a3b8;margin:0;">
+        <i class="fa-solid fa-shield-halved" style="font-size:10px;"></i>
+        Tocá el plan para ver cómo pagar · Activamos tu cuenta en 24hs
+      </p>
+    </div>
+
+    <!-- PASO 2: Pagar -->
+    <div id="pasoPago" style="display:none;padding:20px 22px 24px;">
+
+      <!-- Resumen del plan elegido -->
+      <div id="resumePlan" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-images" style="color:#f97316;font-size:18px;flex-shrink:0;"></i>
+        <div>
+          <p style="margin:0;font-size:13px;font-weight:700;color:#1e293b;" id="resumeLabel">—</p>
+          <p style="margin:0;font-size:12px;color:#64748b;" id="resumeSub">—</p>
+        </div>
+      </div>
+
+      <!-- Opciones de pago -->
+      <p style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin:0 0 10px;">¿Cómo querés pagar?</p>
+      <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:18px;">
+
+        <!-- MercadoPago -->
+        <button id="btnMP" onclick="window.pagarMP()" style="
+          display:flex;align-items:center;gap:12px;padding:13px 16px;
+          background:#009ee3;color:white;border:none;border-radius:11px;
+          font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+          transition:opacity .15s;width:100%;text-align:left;">
+          <span style="font-size:20px;">💳</span>
+          <div>
+            <div>Pagar por MercadoPago</div>
+            <div style="font-size:11px;font-weight:500;opacity:.9;">Se abre el link de pago — abonás el monto del plan</div>
+          </div>
+        </button>
+
+        <!-- WhatsApp -->
+        <button id="btnWA" onclick="window.contactarWA()" style="
+          display:flex;align-items:center;gap:12px;padding:13px 16px;
+          background:#25d366;color:white;border:none;border-radius:11px;
+          font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+          transition:opacity .15s;width:100%;text-align:left;">
+          <i class="fa-brands fa-whatsapp" style="font-size:22px;"></i>
+          <div>
+            <div>Contactar por WhatsApp</div>
+            <div style="font-size:11px;font-weight:500;opacity:.9;">Hablá con nosotros y coordinamos el pago</div>
+          </div>
+        </button>
+
+      </div>
+
+      <!-- Confirmar -->
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:11px;padding:13px 16px;margin-bottom:14px;">
+        <p style="margin:0 0 8px;font-size:13px;color:#166534;font-weight:600;">
+          <i class="fa-solid fa-circle-check"></i> ¿Ya realizaste el pago?
         </p>
+        <p style="margin:0 0 10px;font-size:12px;color:#475569;line-height:1.5;">
+          Hacé clic abajo para avisarnos. Revisamos y activamos tu cuenta en menos de 24 horas.
+        </p>
+        <button onclick="window.confirmarSolicitud()" style="
+          display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+          padding:11px;background:#16a34a;color:white;border:none;border-radius:9px;
+          font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+          <i class="fa-solid fa-paper-plane"></i> Ya pagué — Avisanos
+        </button>
       </div>
 
-      <!-- Planes -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+      <div id="msgSolicitud" style="min-height:6px;"></div>
 
-        <!-- Plan Básico -->
-        <div style="border:2px solid #2563eb;border-radius:14px;padding:16px 14px;text-align:center;background:white;">
-          <div style="display:inline-flex;align-items:center;gap:4px;background:#2563eb;color:white;font-size:10px;font-weight:800;padding:2px 10px;border-radius:20px;margin-bottom:10px;">
-            <i class="fa-solid fa-image" style="font-size:9px;"></i> BÁSICO
-          </div>
-          <p style="margin:0 0 2px;font-size:28px;font-weight:900;color:#1e293b;">$10.000</p>
-          <p style="margin:0 0 12px;font-size:12px;color:#64748b;">por mes</p>
-          <ul style="list-style:none;padding:0;margin:0 0 14px;font-size:13px;color:#475569;text-align:left;display:flex;flex-direction:column;gap:5px;">
-            <li><i class="fa-solid fa-check" style="color:#2563eb;margin-right:5px;"></i>2 trabajos publicados</li>
-            <li><i class="fa-solid fa-check" style="color:#2563eb;margin-right:5px;"></i>3 fotos por trabajo</li>
-            <li><i class="fa-solid fa-check" style="color:#2563eb;margin-right:5px;"></i>Visible en tu perfil</li>
-          </ul>
-          <button onclick="window.solicitarPlan('basico')" class="btn btn-sm"
-            style="background:#2563eb;color:white;width:100%;justify-content:center;">
-            <i class="fa-solid fa-paper-plane"></i> Solicitar
-          </button>
-        </div>
-
-        <!-- Plan Pro -->
-        <div style="border:2px solid #f97316;border-radius:14px;padding:16px 14px;text-align:center;background:#fff7ed;">
-          <div style="display:inline-flex;align-items:center;gap:4px;background:#f97316;color:white;font-size:10px;font-weight:800;padding:2px 10px;border-radius:20px;margin-bottom:10px;">
-            <i class="fa-solid fa-crown" style="font-size:9px;"></i> PRO
-          </div>
-          <p style="margin:0 0 2px;font-size:28px;font-weight:900;color:#1e293b;">$20.000</p>
-          <p style="margin:0 0 12px;font-size:12px;color:#64748b;">por mes</p>
-          <ul style="list-style:none;padding:0;margin:0 0 14px;font-size:13px;color:#475569;text-align:left;display:flex;flex-direction:column;gap:5px;">
-            <li><i class="fa-solid fa-check" style="color:#f97316;margin-right:5px;"></i>5 trabajos publicados</li>
-            <li><i class="fa-solid fa-check" style="color:#f97316;margin-right:5px;"></i>3 fotos por trabajo</li>
-            <li><i class="fa-solid fa-check" style="color:#f97316;margin-right:5px;"></i>Badge Destacado incluido</li>
-          </ul>
-          <button onclick="window.solicitarPlan('pro')" class="btn btn-sm"
-            style="background:#f97316;color:white;width:100%;justify-content:center;">
-            <i class="fa-solid fa-paper-plane"></i> Solicitar
-          </button>
-        </div>
-
-      </div>
-
-      <div id="msgSolicitud" style="min-height:10px;"></div>
-
-      <p style="text-align:center;font-size:12px;color:#94a3b8;margin:10px 0 0;">
-        <i class="fa-solid fa-lock" style="font-size:10px;"></i>
-        Al solicitar te contactamos para confirmar el pago y activamos el plan.
-      </p>
+      <button onclick="window.volverEleccion()" style="
+        background:none;border:none;color:#64748b;font-size:13px;
+        cursor:pointer;font-family:inherit;padding:4px 0;display:flex;align-items:center;gap:5px;">
+        <i class="fa-solid fa-arrow-left" style="font-size:11px;"></i> Elegir otro plan
+      </button>
     </div>
+
   </div>
 </div>
 
