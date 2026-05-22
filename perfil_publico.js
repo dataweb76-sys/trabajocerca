@@ -25,9 +25,9 @@ async function cargarPerfil(){
     { data: reviews },
     { data: fotos }
   ] = await Promise.all([
-    supabase.from("perfiles").select("*").eq("id", id).single(),
-    supabase.from("servicios").select("*").eq("usuario_id", id).single(),
-    supabase.from("reviews").select("*").eq("trabajador_id", id).eq("tipo","servicio").order("created_at", { ascending: false }),
+    supabase.from("perfiles").select("*").eq("id", id).maybeSingle(),
+    supabase.from("servicios").select("*").eq("usuario_id", id).maybeSingle(),
+    supabase.from("reviews").select("*").eq("trabajador_id", id).order("created_at", { ascending: false }),
     supabase.from("portfolio").select("*").eq("usuario_id", id)
   ])
 
