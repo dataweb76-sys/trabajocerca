@@ -76,17 +76,26 @@ async function cargarPerfil(){
       </div>`
   }
 
-  /* ── Fotos ── */
-  let fotosHtml = fotos?.length
-    ? `<div class="card"><h3><i class="fa-solid fa-images"></i> Trabajos realizados</h3>
-        <div class="fotos-grid">${fotos.map(f=>`<div><img src="${f.imagen}" alt="${f.descripcion||""}">
-          ${f.descripcion?`<p style="font-size:12px;color:#64748b;margin:4px 0 0;">${f.descripcion}</p>`:""}</div>`).join("")}
-        </div></div>`
-    : `<div class="card" style="text-align:center;padding:26px;color:#94a3b8;">
-        <i class="fa-solid fa-lock" style="font-size:26px;display:block;margin-bottom:8px;"></i>
-        <p style="margin:0;font-weight:600;">Fotos de trabajos</p>
-        <p style="margin:4px 0 0;font-size:13px;">Próximamente disponible</p>
+  /* ── Fotos de trabajos realizados ── */
+  const itemsConFotos = fotos?.filter(f => f.foto1 || f.foto2 || f.foto3) || []
+  let fotosHtml = itemsConFotos.length
+    ? `<div class="card">
+        <h3><i class="fa-solid fa-images" style="color:#f97316;"></i> Trabajos realizados</h3>
+        ${itemsConFotos.map(item => {
+          const imgs = [item.foto1, item.foto2, item.foto3].filter(Boolean)
+          return `<div style="margin-bottom:18px;">
+            ${item.titulo ? `<p style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 8px;">
+              <i class="fa-solid fa-hammer" style="color:#f97316;font-size:12px;margin-right:5px;"></i>${item.titulo}</p>` : ""}
+            <div class="fotos-grid">
+              ${imgs.map(f => `<img src="${f}" alt="${item.titulo||""}"
+                onclick="window.open('${f}','_blank')"
+                style="cursor:zoom-in;border-radius:10px;">`).join("")}
+            </div>
+            ${item.descripcion ? `<p style="font-size:12px;color:#64748b;margin:6px 0 0;line-height:1.5;">${item.descripcion}</p>` : ""}
+          </div>`
+        }).join("")}
       </div>`
+    : ""
 
   /* ── Reviews ── */
   const reviewsHtml = reviews?.length

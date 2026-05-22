@@ -293,12 +293,11 @@ async function cargarPortfolio(){
     .eq("usuario_id", userId)
     .order("created_at", { ascending: false })
 
-  const maxItems = planNivel === 1 ? 2 : planNivel >= 2 ? 5 : 0
+  const maxItems = planNivel >= 2 ? 10 : planNivel === 1 ? 5 : 3
 
   if(!items?.length){
     lista.innerHTML = `<p style="color:#94a3b8;font-size:13px;text-align:center;padding:8px 0;">
-      No tenés trabajos publicados aún.
-      ${maxItems > 0 ? `Podés agregar hasta <strong>${maxItems}</strong>.` : ""}
+      No tenés trabajos publicados aún. Podés agregar hasta <strong>${maxItems}</strong>.
     </p>`
   } else {
     lista.innerHTML = items.map(item => {
@@ -322,9 +321,9 @@ async function cargarPortfolio(){
   const btn = document.getElementById("btnAgregarTrabajo")
   if(btn){
     const count = items?.length || 0
-    if(planNivel > 0 && count >= maxItems){
+    if(count >= maxItems){
       btn.disabled = true
-      btn.innerHTML = `<i class="fa-solid fa-lock"></i> Límite alcanzado (${count}/${maxItems})`
+      btn.innerHTML = `<i class="fa-solid fa-images"></i> Límite alcanzado (${count}/${maxItems})`
     } else {
       btn.disabled = false
       btn.innerHTML = `<i class="fa-solid fa-plus"></i> Agregar trabajo realizado`
@@ -333,17 +332,13 @@ async function cargarPortfolio(){
 }
 
 window.clickAgregarTrabajo = async function(){
-  if(planNivel === 0){
-    mostrarPlanes()
-    return
-  }
-  const maxItems = planNivel === 1 ? 2 : 5
+  const maxItems = planNivel >= 2 ? 10 : planNivel === 1 ? 5 : 3
   const { count } = await supabase
     .from("portfolio")
     .select("id", { count: "exact", head: true })
     .eq("usuario_id", userId)
   if(count >= maxItems){
-    mostrarPlanes()
+    alert(`Alcanzaste el límite de ${maxItems} trabajos. Actualizá tu plan para agregar más.`)
     return
   }
   abrirFormPortfolio()
