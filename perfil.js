@@ -54,9 +54,10 @@ async function init(){
     ? `<a href="/buscador_trabajos.html" class="btn btn-success"><i class="fa-solid fa-users"></i> Buscar empleados</a>`
     : `<a href="/perfil_cv.html" class="btn btn-success"><i class="fa-solid fa-file-lines"></i> Gestionar mi CV</a>`
 
-  /* ── Disponibilidad + Estadísticas + Guardados (solo profesionales) ── */
+  /* ── Disponibilidad + Estadísticas + Trabajos realizados (solo profesionales) ── */
   let disponibleHtml = ""
-  let statsHtml = ""
+  let statsHtml      = ""
+  let trabajosHtml   = ""
   if(data.tipo === "profesional"){
     const { data: srv } = await supabase
       .from("servicios").select("id,disponible,disponible_ahora").eq("usuario_id", userId).single()
@@ -150,6 +151,61 @@ async function init(){
           <a href="/buscador_oficios.html" style="font-size:11px;color:#38bdf8;text-decoration:none;">Ver buscador →</a>
         </div>
       </div>`
+
+    /* ── Trabajos realizados ── */
+    const planNivel  = data.plan_nivel || 0
+    const maxTrab    = planNivel >= 3 ? 5 : planNivel === 2 ? 2 : planNivel === 1 ? 1 : 0
+
+    if(planNivel === 0){
+      trabajosHtml = `
+      <div onclick="window.abrirModalTrabajos()" style="
+        background:linear-gradient(135deg,#c2410c,#f97316,#fb923c);
+        border-radius:16px;padding:20px 20px;margin-bottom:16px;
+        cursor:pointer;position:relative;overflow:hidden;
+        transition:transform .2s,box-shadow .2s;box-shadow:0 4px 20px rgba(249,115,22,.3);"
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(249,115,22,.4)'"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(249,115,22,.3)'">
+        <div style="position:absolute;top:-30px;right:-20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
+        <div style="position:absolute;bottom:-30px;left:10px;width:80px;height:80px;background:rgba(255,255,255,.06);border-radius:50%;"></div>
+        <div style="position:relative;">
+          <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">
+            <span style="font-size:38px;line-height:1;flex-shrink:0;">📷</span>
+            <div>
+              <p style="margin:0 0 3px;font-size:17px;font-weight:900;color:white;line-height:1.2;">Mostrá tus trabajos realizados</p>
+              <p style="margin:0;font-size:13px;color:rgba(255,255,255,.9);line-height:1.5;">
+                Los clientes confían <strong style="color:white;text-decoration:underline;">3× más</strong> en profesionales con fotos reales. ¡Destacate de la competencia!
+              </p>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;">
+            <span style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 11px;font-size:12px;color:white;font-weight:600;">📈 +200% más contactos</span>
+            <span style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 11px;font-size:12px;color:white;font-weight:600;">⭐ Mejor posición</span>
+            <span style="background:rgba(255,255,255,.2);border-radius:20px;padding:5px 11px;font-size:12px;color:white;font-weight:600;">💵 Desde $10.000/mes</span>
+          </div>
+          <div style="display:inline-flex;align-items:center;gap:8px;background:white;color:#c2410c;border-radius:10px;padding:11px 22px;font-size:15px;font-weight:900;box-shadow:0 3px 12px rgba(0,0,0,.2);">
+            <i class="fa-solid fa-camera"></i> Ver planes — Activar ahora
+          </div>
+        </div>
+      </div>`
+    } else {
+      const planLabel = planNivel >= 3 ? "Pro" : planNivel === 2 ? "Estándar" : "Básico"
+      trabajosHtml = `
+      <div style="background:white;border:2px solid #bbf7d0;border-radius:14px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+        <span style="font-size:32px;flex-shrink:0;">📸</span>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px;">
+            <span style="background:#dcfce7;color:#15803d;font-size:11px;font-weight:800;padding:2px 9px;border-radius:20px;border:1px solid #86efac;">✓ PLAN ${planLabel.toUpperCase()} ACTIVO</span>
+          </div>
+          <p style="margin:2px 0;font-size:14px;font-weight:700;color:#1e293b;">
+            Podés subir hasta <strong>${maxTrab} trabajo${maxTrab>1?"s":""}</strong> con fotos
+          </p>
+          <p style="margin:0;font-size:12px;color:#64748b;">Tus clientes los ven en tu perfil público</p>
+        </div>
+        <a href="/perfil_servicio.html" style="display:flex;align-items:center;gap:6px;background:#f97316;color:white;text-decoration:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;white-space:nowrap;flex-shrink:0;">
+          <i class="fa-solid fa-plus"></i> Agregar fotos
+        </a>
+      </div>`
+    }
   }
 
   /* ── Favoritos guardados (todos los usuarios) ── */
@@ -258,6 +314,7 @@ async function init(){
 
     ${statsHtml}
     ${disponibleHtml}
+    ${trabajosHtml}
 
     ${data.tipo === "empleador" ? `
     <!-- ── ACCIONES EMPLEADOR ── -->
@@ -461,6 +518,22 @@ window.subirLogoEmpresa = async function(input){
   const prev = document.getElementById("logoEmpresaActual")
   if(prev) prev.innerHTML = `<img src="${data.publicUrl}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;border:2px solid #bfdbfe;">`
   setTimeout(() => { msgEl.innerHTML = "" }, 3000)
+}
+
+/* ── MODAL TRABAJOS REALIZADOS ── */
+window.abrirModalTrabajos = function(){
+  document.getElementById("modalTrabajos").classList.add("activo")
+  document.body.style.overflow = "hidden"
+}
+window.cerrarModalTrabajos = function(){
+  document.getElementById("modalTrabajos").classList.remove("activo")
+  document.body.style.overflow = ""
+  document.getElementById("pasoEleccionT").style.display = "block"
+  document.getElementById("pasoPagoT").style.display     = "none"
+  window._planT = null
+}
+window.cerrarModalTrabajosClick = function(e){
+  if(e.target === document.getElementById("modalTrabajos")) cerrarModalTrabajos()
 }
 
 /* ── MODAL PUBLICAR PUESTO ── */
