@@ -200,6 +200,7 @@ function generarPagina(oficio, ciudad){
 
 <script src="/notif_widget.js"></script>
 <script src="/push_widget.js"></script>
+<script src="/splash.js"></script>
 </body>
 </html>`
 }
