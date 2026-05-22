@@ -139,6 +139,16 @@ async function cargarPerfil(){
       ${ratingHtml}
       ${wa?`<a class="btn-whatsapp" href="${wa}" target="_blank" rel="noopener">
         <i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</a>`:""}
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+        <button id="btnCompartir" onclick="compartirPerfil('${id}')"
+          style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;font-weight:600;color:#475569;cursor:pointer;">
+          <i class="fa-solid fa-share-nodes"></i> Compartir
+        </button>
+        <button onclick="compartirWA('${displayNombre}','${id}')"
+          style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:9px;font-size:13px;font-weight:600;color:#16a34a;cursor:pointer;">
+          <i class="fa-brands fa-whatsapp"></i> Compartir en WA
+        </button>
+      </div>
     </div>
     ${servicioHtml}
     ${fotosHtml}
@@ -154,6 +164,10 @@ async function cargarPerfil(){
         .bindPopup(`<b>${displayNombre}</b><br>${servicio.categoria}`).openPopup()
     }, 60)
   }
+
+  // Registrar vista (no cuenta el propio profesional)
+  registrarVista(id)
+
   } catch(err){
     console.error("Error en cargarPerfil:", err)
     const el = document.getElementById("contenido")
@@ -218,3 +232,27 @@ window.enviarRating = async function(trabajadorId){
 }
 
 cargarPerfil()
+
+/* ── Tracking de vistas ── */
+async function registrarVista(profesionalId){
+  const { data: authData } = await supabase.auth.getUser()
+  if(authData?.user?.id === profesionalId) return
+  supabase.from("perfil_eventos").insert({ profesional_id: profesionalId, tipo: "vista" }).catch(()=>{})
+}
+
+/* ── Compartir perfil ── */
+window.compartirPerfil = function(id){
+  const url = `${location.origin}/perfil_publico.html?id=${id}`
+  if(navigator.share){
+    navigator.share({ title: "Trabajos Cerca", url })
+  } else {
+    navigator.clipboard?.writeText(url).then(() => {
+      const btn = document.getElementById("btnCompartir")
+      if(btn){ btn.innerHTML = `<i class="fa-solid fa-check"></i> ¡Copiado!`; setTimeout(() => { btn.innerHTML = `<i class="fa-solid fa-share-nodes"></i> Compartir` }, 2000) }
+    })
+  }
+}
+window.compartirWA = function(nombre, id){
+  const url = `${location.origin}/perfil_publico.html?id=${id}`
+  window.open(`https://wa.me/?text=${encodeURIComponent(`Mirá el perfil de ${nombre} en Trabajos Cerca: ${url}`)}`, "_blank")
+}

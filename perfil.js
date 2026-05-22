@@ -54,24 +54,132 @@ async function init(){
     ? `<a href="/buscador_trabajos.html" class="btn btn-success"><i class="fa-solid fa-users"></i> Buscar empleados</a>`
     : `<a href="/perfil_cv.html" class="btn btn-success"><i class="fa-solid fa-file-lines"></i> Gestionar mi CV</a>`
 
-  /* ── Disponibilidad (solo para profesionales) ── */
+  /* ── Disponibilidad + Estadísticas + Guardados (solo profesionales) ── */
   let disponibleHtml = ""
+  let statsHtml = ""
   if(data.tipo === "profesional"){
-    const { data: srv } = await supabase.from("servicios").select("id,disponible").eq("usuario_id", userId).single()
-    const isDisp = srv?.disponible !== false
+    const { data: srv } = await supabase
+      .from("servicios").select("id,disponible,disponible_ahora").eq("usuario_id", userId).single()
+    const isDisp      = srv?.disponible !== false
+    const isDispAhora = srv?.disponible_ahora === true
+
     disponibleHtml = `
-      <div class="toggle-wrap">
-        <label class="toggle">
-          <input type="checkbox" id="toggleDisponible" ${isDisp ? "checked" : ""}
-            onchange="cambiarDisponibilidad(this.checked,'${srv?.id || ""}')">
-          <span class="toggle-slider"></span>
-        </label>
-        <div>
-          <strong id="labelDisp" style="font-size:15px;">${isDisp ? "Disponible" : "No disponible ahora"}</strong>
-          <p style="margin:2px 0 0;font-size:13px;color:#64748b;">
-            ${isDisp ? "Aparecés en las búsquedas" : "Estás oculto en las búsquedas"}
-          </p>
+      <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 18px;margin-bottom:16px;">
+        <h3 style="margin:0 0 14px;font-size:16px;font-weight:800;"><i class="fa-solid fa-circle-dot" style="color:#22c55e;"></i> Disponibilidad</h3>
+
+        <!-- Visible en búsquedas -->
+        <div class="toggle-wrap" style="margin-bottom:12px;">
+          <label class="toggle">
+            <input type="checkbox" id="toggleDisponible" ${isDisp ? "checked" : ""}
+              onchange="cambiarDisponibilidad(this.checked,'${srv?.id || ""}')">
+            <span class="toggle-slider"></span>
+          </label>
+          <div>
+            <strong id="labelDisp" style="font-size:14px;">${isDisp ? "Visible en búsquedas" : "Oculto en búsquedas"}</strong>
+            <p style="margin:1px 0 0;font-size:12px;color:#64748b;">
+              ${isDisp ? "Los clientes pueden encontrarte" : "No aparecés en los resultados"}
+            </p>
+          </div>
         </div>
+
+        <!-- Disponible Ahora -->
+        <div style="border-top:1px solid #e2e8f0;padding-top:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+            <div>
+              <strong style="font-size:14px;display:flex;align-items:center;gap:6px;">
+                ${isDispAhora ? `<span style="width:10px;height:10px;background:#22c55e;border-radius:50%;display:inline-block;animation:pulse-green 2s infinite;flex-shrink:0;"></span>` : `<span style="width:10px;height:10px;background:#cbd5e1;border-radius:50%;display:inline-block;flex-shrink:0;"></span>`}
+                <span id="labelDispAhora">${isDispAhora ? "Disponible ahora" : "No disponible ahora"}</span>
+              </strong>
+              <p style="margin:1px 0 0;font-size:12px;color:#64748b;" id="subDispAhora">
+                ${isDispAhora ? "Aparecés con punto verde en los resultados · dura 8 horas" : "Activalo cuando podés atender clientes al momento"}
+              </p>
+            </div>
+            <button onclick="toggleDispAhora('${srv?.id || ""}', ${!isDispAhora})"
+              id="btnDispAhora"
+              style="background:${isDispAhora ? "#dcfce7" : "#f1f5f9"};border:1.5px solid ${isDispAhora ? "#86efac" : "#e2e8f0"};color:${isDispAhora ? "#16a34a" : "#64748b"};border-radius:10px;padding:8px 16px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:all .2s;">
+              ${isDispAhora ? "🟢 Desactivar" : "⚡ Estoy disponible"}
+            </button>
+          </div>
+        </div>
+      </div>`
+
+    /* ── Estadísticas ── */
+    const hace7 = new Date(Date.now() - 7*24*60*60*1000).toISOString()
+    const { data: eventos } = await supabase
+      .from("perfil_eventos")
+      .select("tipo")
+      .eq("profesional_id", userId)
+      .gte("created_at", hace7)
+
+    const vistas   = eventos?.filter(e => e.tipo === "vista").length    || 0
+    const waClicks = eventos?.filter(e => e.tipo === "wa_click").length  || 0
+
+    const { count: favCount } = await supabase
+      .from("favoritos").select("id", { count: "exact", head: true })
+      .eq("profesional_id", userId)
+
+    const { data: allItems } = await supabase
+      .from("servicios").select("usuario_id, perfiles(plan_nivel)")
+      .eq("activo", true).limit(500)
+    const posicion = (allItems?.findIndex(s => s.usuario_id === userId) ?? -1) + 1
+
+    statsHtml = `
+      <div style="background:linear-gradient(135deg,#1e293b,#334155);border-radius:14px;padding:18px 20px;margin-bottom:16px;color:white;">
+        <h3 style="margin:0 0 14px;font-size:15px;font-weight:800;color:white;">
+          <i class="fa-solid fa-chart-line" style="color:#38bdf8;"></i> Tus estadísticas — últimos 7 días
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+          <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:26px;font-weight:900;color:#38bdf8;">${vistas}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px;"><i class="fa-solid fa-eye"></i> Vistas del perfil</div>
+          </div>
+          <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:26px;font-weight:900;color:#4ade80;">${waClicks}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px;"><i class="fa-brands fa-whatsapp"></i> Clicks WhatsApp</div>
+          </div>
+          <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:26px;font-weight:900;color:#f472b6;">${favCount || 0}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px;">❤️ Guardados</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;color:#cbd5e1;">
+            <i class="fa-solid fa-trophy" style="color:#fbbf24;margin-right:5px;"></i>
+            ${posicion > 0 ? `Posición <strong style="color:white;">#${posicion}</strong> en el buscador` : "Completá tu perfil para aparecer en búsquedas"}
+          </span>
+          <a href="/buscador_oficios.html" style="font-size:11px;color:#38bdf8;text-decoration:none;">Ver buscador →</a>
+        </div>
+      </div>`
+  }
+
+  /* ── Favoritos guardados (todos los usuarios) ── */
+  let guardadosHtml = ""
+  const { data: favs } = await supabase
+    .from("favoritos")
+    .select("profesional_id, perfiles(id,nombre,apellido,nombre_empresa,mostrar_como,foto,localidad,verificado,destacado)")
+    .eq("usuario_id", userId)
+    .limit(20)
+
+  if(favs?.length){
+    guardadosHtml = `
+      <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;">
+      <h3 style="margin:0 0 14px;font-size:17px;"><i class="fa-solid fa-heart" style="color:#f43f5e;"></i> Mis guardados</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${favs.map(f => {
+          const p = f.perfiles || {}
+          const nombre = (p.mostrar_como === "empresa" && p.nombre_empresa) ? p.nombre_empresa : `${p.nombre||""} ${p.apellido||""}`.trim()
+          const foto = p.foto
+            ? `<img src="${p.foto}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;flex-shrink:0;">`
+            : `<div style="width:44px;height:44px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;color:#94a3b8;flex-shrink:0;font-size:18px;"><i class="fa-solid fa-user"></i></div>`
+          return `<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;">
+            ${foto}
+            <div style="flex:1;min-width:0;">
+              <strong style="font-size:14px;">${nombre}</strong>
+              ${p.localidad ? `<p style="margin:1px 0 0;font-size:12px;color:#64748b;"><i class="fa-solid fa-location-dot" style="font-size:10px;"></i> ${p.localidad}</p>` : ""}
+            </div>
+            <a href="/perfil_publico.html?id=${f.profesional_id}" class="btn btn-sm btn-outline" style="font-size:12px;">Ver perfil</a>
+          </div>`
+        }).join("")}
       </div>`
   }
 
@@ -148,6 +256,7 @@ async function init(){
 
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;">
 
+    ${statsHtml}
     ${disponibleHtml}
 
     ${data.tipo === "empleador" ? `
@@ -325,6 +434,8 @@ async function init(){
       </div>
     ` : ""}
 
+    ${guardadosHtml}
+
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
 
     <button class="btn btn-outline" onclick="cerrarSesion()" style="color:#ef4444;border-color:#ef4444;">
@@ -370,8 +481,42 @@ window.cambiarDisponibilidad = async function(activo, servicioId){
   const lbl = document.getElementById("labelDisp")
   if(!servicioId) return
   await supabase.from("servicios").update({ disponible: activo }).eq("id", servicioId)
-  lbl.textContent = activo ? "Disponible" : "No disponible ahora"
-  lbl.nextElementSibling.textContent = activo ? "Aparecés en las búsquedas" : "Estás oculto en las búsquedas"
+  lbl.textContent = activo ? "Visible en búsquedas" : "Oculto en búsquedas"
+  lbl.nextElementSibling.textContent = activo ? "Los clientes pueden encontrarte" : "No aparecés en los resultados"
+}
+
+window.toggleDispAhora = async function(servicioId, nuevoVal){
+  if(!servicioId) return
+  const btn  = document.getElementById("btnDispAhora")
+  const lbl  = document.getElementById("labelDispAhora")
+  const sub  = document.getElementById("subDispAhora")
+  if(btn) btn.disabled = true
+
+  await supabase.from("servicios").update({ disponible_ahora: nuevoVal }).eq("id", servicioId)
+
+  if(lbl) lbl.textContent = nuevoVal ? "Disponible ahora" : "No disponible ahora"
+  if(sub) sub.textContent = nuevoVal
+    ? "Aparecés con punto verde en los resultados · dura 8 horas"
+    : "Activalo cuando podés atender clientes al momento"
+  if(btn){
+    btn.disabled = false
+    btn.textContent = nuevoVal ? "🟢 Desactivar" : "⚡ Estoy disponible"
+    btn.style.background    = nuevoVal ? "#dcfce7" : "#f1f5f9"
+    btn.style.borderColor   = nuevoVal ? "#86efac" : "#e2e8f0"
+    btn.style.color         = nuevoVal ? "#16a34a" : "#64748b"
+    btn.setAttribute("onclick", `toggleDispAhora('${servicioId}', ${!nuevoVal})`)
+  }
+
+  // Auto-apagar después de 8 horas (registro del tiempo de activación)
+  if(nuevoVal){
+    localStorage.setItem("dispAhoraActivado", Date.now().toString())
+    setTimeout(() => {
+      supabase.from("servicios").update({ disponible_ahora: false }).eq("id", servicioId)
+        .then(() => { if(lbl) lbl.textContent = "No disponible ahora" })
+    }, 8 * 60 * 60 * 1000)
+  } else {
+    localStorage.removeItem("dispAhoraActivado")
+  }
 }
 
 /* ── AUTOCOMPLETAR CP EN PERFIL ── */

@@ -222,6 +222,42 @@
   cargar(false)
   setInterval(() => cargar(false), 60000)
 
+  /* ── Badge de mensajes no leídos ── */
+  async function chequearMensajes(){
+    try {
+      const res = await fetch(
+        `${SB_URL}/rest/v1/conversaciones?or=(usuario1_id.eq.${userId},usuario2_id.eq.${userId})&select=usuario1_id,usuario2_id,no_leidos_u1,no_leidos_u2`,
+        { headers: hdrs() }
+      )
+      if(!res.ok) return
+      const convs = await res.json()
+      let total = 0
+      convs.forEach(c => {
+        if(c.usuario1_id === userId) total += (c.no_leidos_u1 || 0)
+        else total += (c.no_leidos_u2 || 0)
+      })
+      // Actualizar badge en el link de mensajes del nav
+      const msgLinks = document.querySelectorAll('a[href="/mensajes.html"]')
+      msgLinks.forEach(link => {
+        let badge = link.querySelector(".msg-nav-badge")
+        if(total > 0){
+          if(!badge){
+            badge = document.createElement("span")
+            badge.className = "msg-nav-badge"
+            badge.style.cssText = "background:#ef4444;color:white;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:20px;padding:0 3px;display:inline-flex;align-items:center;justify-content:center;margin-left:3px;line-height:1;"
+            link.appendChild(badge)
+          }
+          badge.textContent = total > 9 ? "9+" : total
+        } else if(badge){
+          badge.remove()
+        }
+      })
+    } catch(e){}
+  }
+
+  chequearMensajes()
+  setInterval(() => chequearMensajes(), 15000)
+
   /* ── Ícono admin (solo si es admin) ── */
   async function chequearAdmin(){
     try {

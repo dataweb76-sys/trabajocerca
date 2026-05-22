@@ -13,6 +13,12 @@ const TIPO = window._TC_TIPO  // "oficio" o "profesional"
 let mapModal           = null
 let ratingSeleccionado = 0
 let _miNombre          = null
+let _favoritosSet      = new Set()
+
+/* ── CSS animación disponible ahora ── */
+const styleDisp = document.createElement("style")
+styleDisp.textContent = `@keyframes pulse-green { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)} 50%{box-shadow:0 0 0 6px rgba(34,197,94,0)} }`
+document.head.appendChild(styleDisp)
 
 /* ── AUTH ── */
 function getAccessToken(){
@@ -33,6 +39,21 @@ async function getMiNombre(){
     if(res.ok){ const d = await res.json(); _miNombre = d?.[0]?.nombre || "" }
   } catch(e){ _miNombre = "" }
   return _miNombre
+}
+
+/* ── FAVORITOS ── */
+async function cargarFavoritos(){
+  const userId = getCurrentUserId()
+  if(!userId) return
+  const token = getAccessToken()
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/favoritos?usuario_id=eq.${userId}&select=profesional_id`,
+      { headers: { ...SB_HEADERS, "Authorization": `Bearer ${token}` } })
+    if(res.ok){
+      const rows = await res.json()
+      _favoritosSet = new Set(rows.map(r => r.profesional_id))
+    }
+  } catch(e){}
 }
 
 function waLink(movil, destNombre, destCategoria){
@@ -66,6 +87,7 @@ function puedeVerTel(p){ return p.mostrar_telefono !== false }
 
 /* ── CATEGORÍAS POR TIPO ── */
 const CHIPS_OFICIOS = [
+  ["🟢","Disponible ahora"],
   ["🔨","Albañilería"],["💧","Plomería"],["🔥","Gasista"],["⚡","Electricista"],
   ["🎨","Pintura"],["🪚","Carpintería"],["🌿","Jardinería"],["⚙️","Herrería"],
   ["🔑","Cerrajería"],["🧹","Limpieza"],["📦","Mudanzas"],["❄️","Refrigeración"],
@@ -74,6 +96,7 @@ const CHIPS_OFICIOS = [
   ["👔","Planchado"],["✂️","Peluquería"],["📷","Fotógrafo"]
 ]
 const CHIPS_PROFESIONALES = [
+  ["🟢","Disponible ahora"],
   ["🩺","Médico"],["🦷","Odontólogo"],["🧠","Psicólogo"],["🤸","Kinesiólogo"],
   ["🥗","Nutricionista"],["🐾","Veterinario"],["📐","Arquitecto"],["⚖️","Abogado"],
   ["📊","Contador"],["🏗️","Ingeniero"],["🖥️","Diseñador"],["📚","Profesor"],
@@ -125,10 +148,14 @@ window.buscar = async function(){
   cont.innerHTML = `<div style="text-align:center;padding:40px;color:#64748b;">
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
-  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,perfiles(id,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,verificado,profesion_universitaria)"
+  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,disponible_ahora,perfiles(id,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,verificado,profesion_universitaria)"
   let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=500`
 
-  if(palabra){ const p=encodeURIComponent(`*${palabra}*`); url+=`&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p},servicios_lista.ilike.${p})` }
+  if(palabra && palabra === "Disponible ahora"){
+    url += `&disponible_ahora=eq.true`
+  } else if(palabra){
+    const p=encodeURIComponent(`*${palabra}*`); url+=`&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p},servicios_lista.ilike.${p})`
+  }
   if(ciudad)  url+=`&localidad=ilike.*${encodeURIComponent(ciudad)}*`
 
   let data
@@ -160,6 +187,7 @@ window.buscar = async function(){
   }
 
   await getMiNombre()
+  await cargarFavoritos()
 
   /* ── Puntajes ── */
   const profileIds = data.map(d=>d.perfiles?.id).filter(Boolean)
@@ -229,10 +257,13 @@ window.buscar = async function(){
     card.onmouseleave = () => { card.style.boxShadow=""; card.style.transform="" }
     card.onclick      = () => abrirModal(item)
 
+    const profileId = p.id || ""
+
     card.innerHTML = `
       <div style="display:flex;gap:14px;align-items:flex-start;">
         <div style="position:relative;flex-shrink:0;">
           ${foto}
+          ${item.disponible_ahora===true?`<span style="position:absolute;top:-2px;left:-2px;background:#22c55e;border-radius:50%;width:14px;height:14px;border:2px solid white;animation:pulse-green 2s infinite;" title="Disponible ahora"></span>`:""}
           ${p.destacado?`<span style="position:absolute;bottom:-3px;right:-3px;background:#f59e0b;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-crown" style="font-size:9px;color:white;"></i></span>`:""}
           ${p.verificado?`<span style="position:absolute;top:-3px;right:-3px;background:#0ea5e9;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;" title="Perfil verificado"><i class="fa-solid fa-circle-check" style="font-size:10px;color:white;"></i></span>`:""}
         </div>
@@ -252,6 +283,11 @@ window.buscar = async function(){
         <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();abrirModal(${JSON.stringify(item).replace(/"/g,"&quot;")})">
           <i class="fa-solid fa-eye"></i> Ver perfil
         </button>
+        ${profileId?`<button onclick="event.stopPropagation();toggleFavorito('${profileId}',this)"
+          style="background:${_favoritosSet.has(profileId)?'#fee2e2':'#f8fafc'};border:1.5px solid ${_favoritosSet.has(profileId)?'#fca5a5':'#e2e8f0'};border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;transition:all .15s;"
+          title="${_favoritosSet.has(profileId)?'Quitar de guardados':'Guardar'}">
+          ${_favoritosSet.has(profileId)?'❤️':'🤍'}
+        </button>`:""}
         ${wa?`<a href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
           class="btn btn-sm" style="background:#25D366;color:white;display:inline-flex;align-items:center;gap:6px;">
           <i class="fa-brands fa-whatsapp"></i> WhatsApp</a>`:""}
@@ -290,6 +326,7 @@ window.abrirModal = function(item, irCalificar=false){
         ${p.verificado?`<div style="display:inline-flex;align-items:center;gap:5px;background:#0ea5e9;color:white;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;"><i class="fa-solid fa-circle-check"></i> VERIFICADO</div>`:""}
       </div>
       <h2 style="margin:8px 0 4px;font-size:22px;">${_dname}</h2>
+      ${item.disponible_ahora?`<div style="display:inline-flex;align-items:center;gap:5px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:3px 10px;font-size:12px;color:#16a34a;font-weight:700;margin-bottom:8px;"><span style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block;"></span> Disponible ahora</div>`:""}
       <p style="margin:0;color:#f97316;font-weight:700;font-size:16px;"><i class="fa-solid fa-tools"></i> ${item.categoria}</p>
       <p style="margin:4px 0 0;color:#64748b;font-size:14px;"><i class="fa-solid fa-location-dot"></i> ${ubic}</p>
       <div style="margin-top:10px;" id="puntajeBadgeTop"></div>
@@ -302,8 +339,11 @@ window.abrirModal = function(item, irCalificar=false){
       <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 6px;">Descripción:</p>
       <p style="font-size:14px;color:#475569;line-height:1.6;margin:0;">${item.descripcion}</p></div>`:""}
     <div id="portfolioModal" style="margin-bottom:4px;"></div>
-    ${wa?`<a href="${wa}" target="_blank" rel="noopener" class="btn-whatsapp" style="display:flex;justify-content:center;margin-bottom:12px;">
+    ${wa?`<a href="${wa}" target="_blank" rel="noopener" class="btn-whatsapp" onclick="registrarWAClick('${p.id}')" style="display:flex;justify-content:center;margin-bottom:12px;">
       <i class="fa-brands fa-whatsapp"></i> Consultar por WhatsApp</a>`:""}
+    ${getCurrentUserId() && getCurrentUserId() !== p.id ? `<button onclick="window.iniciarConversacion && window.iniciarConversacion('${p.id}')"
+      style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;margin-bottom:12px;border:1.5px solid #2563eb;border-radius:10px;background:white;color:#2563eb;font-weight:700;font-size:15px;cursor:pointer;">
+      <i class="fa-solid fa-comment-dots"></i> Enviar mensaje</button>` : ""}
     ${p.instagram?`<a href="https://instagram.com/${(p.instagram||"").replace("@","")}" target="_blank" rel="noopener"
       style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:16px;padding:12px;border-radius:10px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;font-weight:600;font-size:15px;text-decoration:none;">
       <i class="fa-brands fa-instagram" style="font-size:18px;"></i> ${p.instagram}</a>`:""}
@@ -493,6 +533,46 @@ window.enviarReview = async function(profileId, nombre){
       `<div class="alerta alerta-ok"><i class="fa-solid fa-check-circle"></i> ¡Gracias! Sumaste <strong>${ratingSeleccionado} punto${ratingSeleccionado!==1?"s":""}</strong> al puntaje de ${nombre}.</div>`
     setTimeout(() => cargarReviews(profileId, nombre), 900)
   } catch(e){ msg.innerHTML=`<div class="alerta alerta-err" style="font-size:13px;padding:8px 12px;">${e.message}</div>` }
+}
+
+/* ── FAVORITOS toggle ── */
+window.toggleFavorito = async function(profesionalId, btn) {
+  const userId = getCurrentUserId()
+  if(!userId) { location.href = "/login.html"; return }
+  const token = getAccessToken()
+  const esFav = _favoritosSet.has(profesionalId)
+
+  if(esFav) {
+    await fetch(`${SB_URL}/rest/v1/favoritos?usuario_id=eq.${userId}&profesional_id=eq.${profesionalId}`, {
+      method: "DELETE",
+      headers: { ...SB_HEADERS, "Authorization": `Bearer ${token}` }
+    })
+    _favoritosSet.delete(profesionalId)
+    btn.style.background = "#f8fafc"
+    btn.style.borderColor = "#e2e8f0"
+    btn.textContent = "🤍"
+  } else {
+    await fetch(`${SB_URL}/rest/v1/favoritos`, {
+      method: "POST",
+      headers: { ...SB_HEADERS, "Authorization": `Bearer ${token}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify({ usuario_id: userId, profesional_id: profesionalId })
+    })
+    _favoritosSet.add(profesionalId)
+    btn.style.background = "#fee2e2"
+    btn.style.borderColor = "#fca5a5"
+    btn.textContent = "❤️"
+  }
+}
+
+/* ── TRACKING WA CLICK ── */
+window.registrarWAClick = async function(profesionalId) {
+  try {
+    await fetch(`${SB_URL}/rest/v1/perfil_eventos`, {
+      method: "POST",
+      headers: { ...SB_HEADERS, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify({ profesional_id: profesionalId, tipo: "wa_click" })
+    })
+  } catch(e){}
 }
 
 /* ── CERRAR MODAL ── */

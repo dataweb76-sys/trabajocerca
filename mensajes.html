@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mensajes — Trabajos Cerca</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  .msg-layout {
+    display: flex;
+    height: calc(100vh - 56px);
+    max-width: 860px;
+    margin: 0 auto;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    background: white;
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* Panel izquierdo - lista de conversaciones */
+  .conv-lista {
+    width: 300px;
+    min-width: 300px;
+    border-right: 1.5px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+  }
+  .conv-header {
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    background: white;
+  }
+  .conv-header h2 { margin: 0; font-size: 17px; font-weight: 800; }
+  .conv-scroll { flex: 1; overflow-y: auto; }
+  .conv-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background .15s;
+  }
+  .conv-item:hover { background: #eff6ff; }
+  .conv-item.activa { background: #eff6ff; border-left: 3px solid #2563eb; }
+  .conv-item.no-leida { background: #fefce8; }
+  .conv-avatar {
+    width: 42px; height: 42px; border-radius: 50%; object-fit: cover;
+    flex-shrink: 0; border: 2px solid #e2e8f0;
+  }
+  .conv-avatar-ph {
+    width: 42px; height: 42px; border-radius: 50%; background: #f1f5f9;
+    display: flex; align-items: center; justify-content: center;
+    color: #94a3b8; font-size: 18px; flex-shrink: 0;
+  }
+  .conv-nombre { font-weight: 700; font-size: 14px; color: #1e293b; }
+  .conv-preview { font-size: 12px; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+  .conv-tiempo { font-size: 11px; color: #94a3b8; margin-left: auto; white-space: nowrap; }
+  .conv-badge { background: #2563eb; color: white; font-size: 10px; font-weight: 800; min-width: 16px; height: 16px; border-radius: 20px; display: flex; align-items: center; justify-content: center; padding: 0 4px; margin-left: auto; }
+
+  /* Panel derecho - chat */
+  .chat-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .chat-header {
+    padding: 14px 18px;
+    border-bottom: 1.5px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+  }
+  .chat-mensajes {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #f8fafc;
+  }
+  .msg-burbuja {
+    max-width: 72%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .msg-propio {
+    background: #2563eb;
+    color: white;
+    border-bottom-right-radius: 4px;
+    align-self: flex-end;
+  }
+  .msg-otro {
+    background: white;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+  }
+  .msg-tiempo { font-size: 10px; opacity: .65; margin-top: 3px; }
+  .chat-input {
+    padding: 12px 14px;
+    border-top: 1.5px solid #e2e8f0;
+    display: flex;
+    gap: 8px;
+    background: white;
+  }
+  .chat-input textarea {
+    flex: 1;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    resize: none;
+    font-family: inherit;
+    outline: none;
+    min-height: 44px;
+    max-height: 100px;
+  }
+  .chat-input textarea:focus { border-color: #2563eb; }
+  .chat-vacio {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    gap: 10px;
+  }
+
+  @media (max-width: 600px) {
+    .msg-layout { flex-direction: column; height: auto; border-radius: 0; margin: 0; }
+    .conv-lista { width: 100%; min-width: 0; border-right: none; border-bottom: 1.5px solid #e2e8f0; max-height: 220px; }
+    .chat-panel { height: 60vh; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/index.html"><i class="fa-solid fa-house"></i> <span>Inicio</span></a>
+    <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
+    <a href="/pedidos.html"><i class="fa-solid fa-clipboard-list"></i> <span>Pedidos</span></a>
+    <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
+  </nav>
+</header>
+
+<div style="max-width:892px;margin:0 auto;padding:0 16px;">
+  <div class="msg-layout">
+
+    <!-- Lista conversaciones -->
+    <div class="conv-lista">
+      <div class="conv-header">
+        <h2><i class="fa-solid fa-comments" style="color:#2563eb;font-size:15px;margin-right:6px;"></i>Mensajes</h2>
+      </div>
+      <div class="conv-scroll" id="listaConv">
+        <div style="text-align:center;padding:30px;color:#94a3b8;">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat-panel" id="chatPanel">
+      <div class="chat-vacio" id="chatVacio">
+        <i class="fa-solid fa-comments" style="font-size:48px;opacity:.3;"></i>
+        <p style="font-size:15px;font-weight:600;">Seleccioná una conversación</p>
+        <p style="font-size:13px;margin-top:-6px;">o iniciá una desde el perfil de un profesional</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module" src="/mensajes.js"></script>
+<script src="/notif_widget.js"></script>
+<script src="/chat_widget.js"></script>
+</body>
+</html>
