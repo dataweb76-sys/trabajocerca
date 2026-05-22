@@ -70,6 +70,27 @@
 
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ── Strip de provincias ── */
+#prov-strip-wrap {
+  overflow-x: auto; white-space: nowrap;
+  padding: 10px 16px; background: #fff;
+  border-bottom: 1.5px solid #e2e8f0;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+#prov-strip-wrap::-webkit-scrollbar { display: none; }
+#prov-strip { display: inline-flex; gap: 7px; align-items: center; }
+.prov-chip {
+  display: inline-block; white-space: nowrap;
+  padding: 5px 13px; border-radius: 20px;
+  border: 1.5px solid #e2e8f0; background: #f8fafc;
+  font-size: 13px; font-weight: 600; color: #475569;
+  cursor: pointer; transition: all .18s; font-family: inherit;
+}
+.prov-chip:hover { background: #eff6ff; color: #2563eb; border-color: #93c5fd; }
+.prov-chip.active { background: #2563eb; color: #fff; border-color: #2563eb; font-weight: 700; }
+#hero-prov-txt { transition: opacity .3s; }
+</style>
 </head>
 <body>
 
@@ -82,10 +103,15 @@
 
 <section class="hero">
   <div>
-    <h1>El trabajo que buscás, en tu ciudad</h1>
+    <h1>El trabajo que buscás, en <span id="hero-prov-txt">tu ciudad</span></h1>
     <p>Conectamos profesionales, trabajadores y empleadores de toda Argentina</p>
   </div>
 </section>
+
+<!-- Scroll de provincias — tocá la tuya para personalizar -->
+<div id="prov-strip-wrap" title="Seleccioná tu provincia">
+  <div id="prov-strip"></div>
+</div>
 
 <div class="buscadores-grid">
   <div class="buscador-card" onclick="location.href='/buscador_trabajos.html'">
@@ -728,5 +754,85 @@ window.googleSignInCV     = () => googleSignIn("trabajador")
 
 <script src="/chat_widget.js"></script>
 <script src="/splash.js"></script>
+
+<!-- ── Strip de provincias + hero dinámico ── -->
+<script>
+;(function(){
+  const PROVINCIAS = [
+    'Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba',
+    'Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja',
+    'Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan',
+    'San Luis','Santa Cruz','Santa Fe','Santiago del Estero',
+    'Tierra del Fuego','Tucumán'
+  ]
+  const KEY = 'tc_provincia'
+  let actual = localStorage.getItem(KEY) || ''
+
+  /* Renderizar chips */
+  const strip = document.getElementById('prov-strip')
+  if(!strip) return
+  PROVINCIAS.forEach(p => {
+    const btn = document.createElement('button')
+    btn.className = 'prov-chip' + (p === actual ? ' active' : '')
+    btn.textContent = p
+    btn.onclick = () => seleccionar(p)
+    strip.appendChild(btn)
+  })
+
+  function actualizarH1(p){
+    const el = document.getElementById('hero-prov-txt')
+    if(el) el.textContent = p || 'tu ciudad'
+  }
+
+  function seleccionar(p){
+    actual = p
+    localStorage.setItem(KEY, p)
+    actualizarH1(p)
+    document.querySelectorAll('.prov-chip').forEach(c =>
+      c.classList.toggle('active', c.textContent === p)
+    )
+    const chip = document.querySelector('.prov-chip.active')
+    if(chip) chip.scrollIntoView({ block:'nearest', inline:'center', behavior:'smooth' })
+  }
+
+  /* Provincia ya guardada → aplicar de inmediato */
+  if(actual){
+    actualizarH1(actual)
+    setTimeout(() => {
+      const chip = document.querySelector('.prov-chip.active')
+      if(chip) chip.scrollIntoView({ block:'nearest', inline:'center' })
+    }, 80)
+  } else {
+    /* Sin provincia guardada → detectar por IP y guardar */
+    fetch('https://ipapi.co/json/')
+      .then(r => r.json())
+      .then(data => {
+        const prov = normalizarProv(data.region || '')
+        if(prov) seleccionar(prov)
+      })
+      .catch(() => {})
+  }
+
+  function normalizarProv(raw){
+    if(!raw) return ''
+    const r = raw.toLowerCase()
+    const mapa = {
+      'buenos aires':'Buenos Aires','ciudad autónoma':'CABA','capital federal':'CABA','caba':'CABA',
+      'córdoba':'Córdoba','cordoba':'Córdoba','santa fe':'Santa Fe','mendoza':'Mendoza',
+      'tucumán':'Tucumán','tucuman':'Tucumán','entre ríos':'Entre Ríos','entre rios':'Entre Ríos',
+      'salta':'Salta','misiones':'Misiones','chaco':'Chaco','corrientes':'Corrientes',
+      'santiago del estero':'Santiago del Estero','san juan':'San Juan','jujuy':'Jujuy',
+      'río negro':'Río Negro','rio negro':'Río Negro','neuquén':'Neuquén','neuquen':'Neuquén',
+      'formosa':'Formosa','chubut':'Chubut','san luis':'San Luis','catamarca':'Catamarca',
+      'la rioja':'La Rioja','la pampa':'La Pampa','santa cruz':'Santa Cruz',
+      'tierra del fuego':'Tierra del Fuego'
+    }
+    for(const key of Object.keys(mapa)){
+      if(r.includes(key)) return mapa[key]
+    }
+    return ''
+  }
+})()
+</script>
 </body>
 </html>

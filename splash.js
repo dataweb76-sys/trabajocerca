@@ -152,32 +152,35 @@
   // Arrancar barra
   setTimeout(() => { if(bar) bar.style.width = '0%' }, 50)
 
-  /* ── Geolocalización por IP ── */
-  fetch('https://ipapi.co/json/')
-    .then(r => r.json())
-    .then(data => {
-      const lugar = document.getElementById('tc-splash-lugar-txt')
-      if(!lugar) return
+  /* ── Geolocalización: primero localStorage, luego IP ── */
+  function mostrarProvincia(texto){
+    const lugar = document.getElementById('tc-splash-lugar-txt')
+    if(!lugar) return
+    if(texto){
+      lugar.textContent = texto
+      const sub = document.getElementById('tc-splash-subtitulo')
+      if(sub) sub.innerHTML = `Empleos, personal, oficios y profesionales<br>en <strong style="color:white;">${texto}</strong> y alrededores.`
+    } else {
+      lugar.textContent = 'Argentina'
+    }
+  }
 
-      // Normalizar nombre de provincia argentina
-      const prov = normalizarProvincia(data.region || data.city || '')
-      const ciudad = data.city || ''
-
-      if(prov || ciudad){
-        const texto = prov || ciudad
-        lugar.textContent = texto
-
-        // Actualizar subtítulo con la provincia
-        const sub = document.getElementById('tc-splash-subtitulo')
-        if(sub) sub.innerHTML = `Empleos, personal, oficios y profesionales<br>en <strong style="color:white;">${texto}</strong> y alrededores.`
-      } else {
-        lugar.textContent = 'Argentina'
-      }
-    })
-    .catch(() => {
-      const lugar = document.getElementById('tc-splash-lugar-txt')
-      if(lugar) lugar.textContent = 'Argentina'
-    })
+  const provGuardada = localStorage.getItem('tc_provincia')
+  if(provGuardada){
+    // Usar la provincia que el usuario ya seleccionó en el strip
+    mostrarProvincia(provGuardada)
+  } else {
+    // Detectar por IP y guardar para futuras visitas
+    fetch('https://ipapi.co/json/')
+      .then(r => r.json())
+      .then(data => {
+        const prov = normalizarProvincia(data.region || data.city || '')
+        const texto = prov || data.city || ''
+        if(texto) localStorage.setItem('tc_provincia', texto)
+        mostrarProvincia(texto)
+      })
+      .catch(() => mostrarProvincia(''))
+  }
 
   function normalizarProvincia(raw){
     if(!raw) return ''
