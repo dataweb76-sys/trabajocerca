@@ -35,6 +35,184 @@
   </div>
 </div>
 
+<!-- ══════════ MODAL TRABAJOS REALIZADOS ══════════ -->
+<div class="modal-overlay" id="modalTrabajos" onclick="cerrarModalTrabajosClick(event)">
+  <div class="modal-box" style="max-width:500px;">
+    <button class="modal-close" onclick="cerrarModalTrabajos()">×</button>
+
+    <!-- Header impactante -->
+    <div style="background:linear-gradient(135deg,#c2410c,#f97316,#fbbf24);padding:26px 24px 22px;text-align:center;border-radius:16px 16px 0 0;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
+      <div style="font-size:44px;margin-bottom:10px;">📸</div>
+      <h2 style="margin:0 0 6px;font-size:21px;font-weight:900;color:white;">Mostrá tus Trabajos Realizados</h2>
+      <p style="margin:0;color:rgba(255,255,255,.92);font-size:13px;line-height:1.5;">
+        Los profesionales con fotos reales consiguen <strong style="color:white;">3× más clientes</strong>.<br>
+        Subí hasta 3 fotos por trabajo y demostrá tu calidad.
+      </p>
+    </div>
+
+    <!-- Prueba social -->
+    <div style="background:#fff7ed;border-bottom:1.5px solid #fed7aa;padding:12px 22px;display:flex;gap:18px;justify-content:center;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7c2d12;font-weight:700;">
+        <i class="fa-solid fa-eye" style="color:#f97316;"></i> Más visibilidad en búsquedas
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7c2d12;font-weight:700;">
+        <i class="fa-solid fa-star" style="color:#f59e0b;"></i> Mayor confianza del cliente
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7c2d12;font-weight:700;">
+        <i class="fa-brands fa-whatsapp" style="color:#25d366;"></i> Más contactos por WhatsApp
+      </div>
+    </div>
+
+    <!-- PASO 1: Elegir plan -->
+    <div id="pasoEleccionT" style="padding:20px 22px 24px;">
+
+      <p style="margin:0 0 14px;font-size:13px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.07em;">
+        <i class="fa-solid fa-tag" style="color:#f97316;"></i> Elegí tu plan
+      </p>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+
+        <!-- Plan 1 trabajo -->
+        <div onclick="window.elegirPlanT('p1')" style="
+          border:2px solid #e2e8f0;border-radius:13px;padding:14px 16px;
+          display:flex;align-items:center;gap:14px;background:white;
+          cursor:pointer;transition:all .18s;"
+          onmouseover="this.style.borderColor='#2563eb';this.style.background='#eff6ff'"
+          onmouseout="this.style.borderColor='#e2e8f0';this.style.background='white'">
+          <div style="text-align:center;min-width:72px;">
+            <p style="margin:0;font-size:24px;font-weight:900;color:#1e293b;line-height:1;">$10.000</p>
+            <p style="margin:0;font-size:10px;color:#94a3b8;font-weight:600;">/ mes</p>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
+              <span style="background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">BÁSICO</span>
+              <strong style="font-size:14px;color:#1e293b;">1 trabajo realizado</strong>
+            </div>
+            <p style="margin:0;font-size:12px;color:#64748b;">Hasta 3 fotos · Visible en tu perfil público</p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;"></i>
+        </div>
+
+        <!-- Plan 2 trabajos -->
+        <div onclick="window.elegirPlanT('p2')" style="
+          border:2px solid #7c3aed;border-radius:13px;padding:14px 16px;
+          display:flex;align-items:center;gap:14px;background:#faf5ff;
+          cursor:pointer;transition:all .18s;"
+          onmouseover="this.style.borderColor='#6d28d9';this.style.background='#ede9fe'"
+          onmouseout="this.style.borderColor='#7c3aed';this.style.background='#faf5ff'">
+          <div style="text-align:center;min-width:72px;">
+            <p style="margin:0;font-size:24px;font-weight:900;color:#1e293b;line-height:1;">$15.000</p>
+            <p style="margin:0;font-size:10px;color:#94a3b8;font-weight:600;">/ mes</p>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
+              <span style="background:#ede9fe;color:#7c3aed;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">ESTÁNDAR</span>
+              <strong style="font-size:14px;color:#1e293b;">2 trabajos realizados</strong>
+            </div>
+            <p style="margin:0;font-size:12px;color:#64748b;">Hasta 3 fotos c/u · Mejor posicionamiento</p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;"></i>
+        </div>
+
+        <!-- Plan 5 trabajos -->
+        <div onclick="window.elegirPlanT('p3')" style="
+          border:2px solid #f97316;border-radius:13px;padding:14px 16px;
+          display:flex;align-items:center;gap:14px;background:#fff7ed;
+          cursor:pointer;transition:all .18s;position:relative;"
+          onmouseover="this.style.borderColor='#ea580c';this.style.background='#ffedd5'"
+          onmouseout="this.style.borderColor='#f97316';this.style.background='#fff7ed'">
+          <div style="position:absolute;top:-1px;right:12px;background:#f97316;color:white;font-size:10px;font-weight:800;padding:1px 10px;border-radius:0 0 8px 8px;">
+            ⭐ MÁS POPULAR
+          </div>
+          <div style="text-align:center;min-width:72px;">
+            <p style="margin:0;font-size:24px;font-weight:900;color:#1e293b;line-height:1;">$30.000</p>
+            <p style="margin:0;font-size:10px;color:#94a3b8;font-weight:600;">/ mes</p>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
+              <span style="background:#ffedd5;color:#ea580c;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;"><i class="fa-solid fa-crown" style="font-size:9px;"></i> PRO</span>
+              <strong style="font-size:14px;color:#1e293b;">5 trabajos realizados</strong>
+            </div>
+            <p style="margin:0;font-size:12px;color:#64748b;">3 fotos c/u · Badge <strong>Destacado</strong> incluido gratis</p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;"></i>
+        </div>
+
+      </div>
+
+      <p style="text-align:center;font-size:12px;color:#94a3b8;margin:0;">
+        <i class="fa-solid fa-rotate" style="font-size:10px;"></i> Renovación mensual · Cancelás cuando querés
+      </p>
+
+    </div>
+
+    <!-- PASO 2: Pagar -->
+    <div id="pasoPagoT" style="display:none;padding:20px 22px 24px;">
+
+      <div id="resumePlanT" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-images" style="color:#f97316;font-size:20px;flex-shrink:0;"></i>
+        <div>
+          <p style="margin:0;font-size:14px;font-weight:800;color:#1e293b;" id="resumeLabelT">—</p>
+          <p style="margin:0;font-size:12px;color:#64748b;" id="resumeSubT">—</p>
+        </div>
+      </div>
+
+      <p style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin:0 0 10px;">¿Cómo querés pagar?</p>
+
+      <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:16px;">
+        <button onclick="window.pagarMPT()" style="
+          display:flex;align-items:center;gap:12px;padding:14px 16px;
+          background:#009ee3;color:white;border:none;border-radius:11px;
+          font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;text-align:left;">
+          <span style="font-size:22px;">💳</span>
+          <div>
+            <div>Pagar por MercadoPago</div>
+            <div style="font-size:11px;font-weight:400;opacity:.9;">Abrimos el link de pago seguro</div>
+          </div>
+          <i class="fa-solid fa-arrow-right" style="margin-left:auto;opacity:.7;"></i>
+        </button>
+
+        <button onclick="window.contactarWAT()" style="
+          display:flex;align-items:center;gap:12px;padding:14px 16px;
+          background:#25d366;color:white;border:none;border-radius:11px;
+          font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;text-align:left;">
+          <i class="fa-brands fa-whatsapp" style="font-size:24px;"></i>
+          <div>
+            <div>Contactar por WhatsApp</div>
+            <div style="font-size:11px;font-weight:400;opacity:.9;">Coordinamos el pago directamente</div>
+          </div>
+          <i class="fa-solid fa-arrow-right" style="margin-left:auto;opacity:.7;"></i>
+        </button>
+      </div>
+
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:11px;padding:14px 16px;margin-bottom:14px;">
+        <p style="margin:0 0 5px;font-size:13px;font-weight:700;color:#166534;">
+          <i class="fa-solid fa-circle-check"></i> ¿Ya realizaste el pago?
+        </p>
+        <p style="margin:0 0 10px;font-size:12px;color:#475569;line-height:1.5;">
+          Avisanos y activamos tu cuenta en menos de 24 horas.
+        </p>
+        <button onclick="window.confirmarSolicitudT()" style="
+          display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+          padding:12px;background:#16a34a;color:white;border:none;border-radius:9px;
+          font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">
+          <i class="fa-solid fa-paper-plane"></i> Ya pagué — Avisanos
+        </button>
+      </div>
+
+      <div id="msgSolicitudT" style="min-height:6px;"></div>
+
+      <button onclick="window.volverEleccionT()" style="
+        background:none;border:none;color:#64748b;font-size:13px;
+        cursor:pointer;font-family:inherit;padding:4px 0;display:flex;align-items:center;gap:5px;">
+        <i class="fa-solid fa-arrow-left" style="font-size:11px;"></i> Elegir otro plan
+      </button>
+    </div>
+
+  </div>
+</div>
+
 <!-- ══════════ MODAL PUBLICAR PUESTO ══════════ -->
 <div class="modal-overlay" id="modalPuestoOverlay" onclick="cerrarModalPuestoClick(event)">
   <div class="modal-box" style="max-width:520px;">
@@ -188,9 +366,121 @@ window.publicarPuesto = async function(){
 }
 
 document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarModalPuesto?.() })
+
+/* ══════════ MODAL TRABAJOS REALIZADOS ══════════ */
+const PLANES_T = {
+  p1: { label:"Básico",   cantidad:1, precio:10000 },
+  p2: { label:"Estándar", cantidad:2, precio:15000 },
+  p3: { label:"Pro",      cantidad:5, precio:30000 },
+}
+window._planT = null
+
+window.elegirPlanT = function(planKey){
+  const plan = PLANES_T[planKey]
+  if(!plan) return
+  window._planT = planKey
+  document.getElementById("pasoEleccionT").style.display = "none"
+  document.getElementById("pasoPagoT").style.display    = "block"
+  document.getElementById("msgSolicitudT").innerHTML    = ""
+  document.getElementById("resumeLabelT").textContent   =
+    `Plan ${plan.label} — ${plan.cantidad} trabajo${plan.cantidad > 1 ? "s" : ""} realizados`
+  document.getElementById("resumeSubT").textContent     =
+    `$${plan.precio.toLocaleString("es-AR")}/mes · hasta 3 fotos por trabajo`
+}
+
+window.volverEleccionT = function(){
+  document.getElementById("pasoEleccionT").style.display = "block"
+  document.getElementById("pasoPagoT").style.display    = "none"
+  window._planT = null
+}
+
+window.pagarMPT = function(){
+  window.open("https://link.mercadopago.com.ar/danielmfaggi", "_blank")
+}
+
+window.contactarWAT = async function(){
+  const planKey = window._planT
+  if(!planKey) return
+  const plan = PLANES_T[planKey]
+  const { data: ud } = await supabase.auth.getUser()
+  const uid = ud?.user?.id
+  let nombre = "un profesional"
+  if(uid){
+    const { data: p } = await supabase.from("perfiles").select("nombre,apellido,nombre_empresa").eq("id", uid).single()
+    nombre = p?.nombre_empresa || `${p?.nombre || ""} ${p?.apellido || ""}`.trim() || nombre
+  }
+  const msg = encodeURIComponent(
+    `Hola! Soy ${nombre} y quiero contratar el plan ${plan.label} de Trabajos Cerca ` +
+    `(${plan.cantidad} trabajo${plan.cantidad > 1 ? "s" : ""} realizados · ` +
+    `$${plan.precio.toLocaleString("es-AR")}/mes). ¿Cómo coordino el pago?`
+  )
+  window.open(`https://wa.me/5492954320639?text=${msg}`, "_blank")
+}
+
+window.confirmarSolicitudT = async function(){
+  const planKey = window._planT
+  if(!planKey) return
+  const plan   = PLANES_T[planKey]
+  const msgEl  = document.getElementById("msgSolicitudT")
+  const { data: ud } = await supabase.auth.getUser()
+  if(!ud?.user){
+    msgEl.innerHTML = '<div class="alerta alerta-err">Debés estar logueado para continuar.</div>'
+    return
+  }
+  const uid = ud.user.id
+  // Verificar si ya hay solicitud pendiente
+  const { data: existente } = await supabase.from("solicitudes_portfolio")
+    .select("id").eq("usuario_id", uid).eq("estado", "pendiente").maybeSingle()
+  if(existente){
+    msgEl.innerHTML = '<div class="alerta alerta-err">Ya tenés una solicitud pendiente. Aguardá la aprobación.</div>'
+    return
+  }
+  msgEl.innerHTML = '<span style="font-size:13px;color:#64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Enviando solicitud...</span>'
+  const { error } = await supabase.from("solicitudes_portfolio").insert({
+    usuario_id: uid,
+    plan:       planKey,
+    cantidad:   plan.cantidad,
+    precio:     plan.precio,
+    estado:     "pendiente"
+  })
+  if(error){
+    msgEl.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+    return
+  }
+  // Notificar a los admins en la DB
+  const { data: admins } = await supabase.from("perfiles").select("id").eq("admin", true)
+  if(admins?.length){
+    await supabase.from("notificaciones").insert(
+      admins.map(a => ({
+        usuario_id: a.id,
+        tipo:       "sistema",
+        titulo:     `💰 Nueva solicitud — ${plan.cantidad} trabajo${plan.cantidad > 1 ? "s" : ""}`,
+        cuerpo:     `Plan ${plan.label} ($${plan.precio.toLocaleString("es-AR")}/mes). Revisá el admin panel.`,
+        url:        "/admin.html"
+      }))
+    ).catch(() => {})
+  }
+  // Obtener nombre para el mensaje de WA al admin
+  const { data: perfil } = await supabase.from("perfiles").select("nombre,apellido,nombre_empresa").eq("id", uid).single()
+  const nombre = perfil?.nombre_empresa || `${perfil?.nombre || ""} ${perfil?.apellido || ""}`.trim() || "un profesional"
+  const waMsg = encodeURIComponent(
+    `⚡ Nueva solicitud!\n` +
+    `👤 ${nombre}\n` +
+    `📦 Plan ${plan.label} — ${plan.cantidad} trabajo${plan.cantidad > 1 ? "s" : ""} realizados\n` +
+    `💵 $${plan.precio.toLocaleString("es-AR")}/mes\n` +
+    `✅ El profesional confirmó que ya realizó el pago.`
+  )
+  window.open(`https://wa.me/5492954320639?text=${waMsg}`, "_blank")
+  msgEl.innerHTML = `
+    <div class="alerta alerta-ok">
+      <i class="fa-solid fa-check-circle"></i>
+      <strong>¡Solicitud enviada!</strong><br>
+      <span style="font-size:12px;">Te avisaremos cuando tu cuenta esté activa (menos de 24 horas).</span>
+    </div>`
+}
 </script>
 
-<script type="module" src="/perfil.js?v=4"></script>
+<script type="module" src="/perfil.js?v=5"></script>
 <script src="/notif_widget.js"></script>
 <script src="/push_widget.js"></script>
 <script src="/chat_widget.js"></script>
