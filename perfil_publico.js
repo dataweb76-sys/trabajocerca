@@ -152,14 +152,22 @@ async function cargarPerfil(){
       ${ratingHtml}
       ${wa?`<a class="btn-whatsapp" href="${wa}" target="_blank" rel="noopener">
         <i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</a>`:""}
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+      <div style="display:flex;gap:7px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
         <button id="btnCompartir" onclick="compartirPerfil('${id}')"
-          style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;font-weight:600;color:#475569;cursor:pointer;">
-          <i class="fa-solid fa-share-nodes"></i> Compartir
+          style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;font-weight:600;color:#475569;cursor:pointer;">
+          <i class="fa-solid fa-link"></i> Copiar link
         </button>
         <button onclick="compartirWA('${displayNombre}','${id}')"
-          style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:9px;font-size:13px;font-weight:600;color:#16a34a;cursor:pointer;">
-          <i class="fa-brands fa-whatsapp"></i> Compartir en WA
+          style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:9px;font-size:13px;font-weight:600;color:#16a34a;cursor:pointer;">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp
+        </button>
+        <button onclick="compartirFB('${id}')"
+          style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:9px;font-size:13px;font-weight:600;color:#1d4ed8;cursor:pointer;">
+          <i class="fa-brands fa-facebook"></i> Facebook
+        </button>
+        <button onclick="compartirX('${displayNombre}','${id}')"
+          style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;font-weight:600;color:#0f172a;cursor:pointer;">
+          <i class="fa-brands fa-x-twitter"></i> X
         </button>
       </div>
     </div>
@@ -256,16 +264,21 @@ async function registrarVista(profesionalId){
 /* ── Compartir perfil ── */
 window.compartirPerfil = function(id){
   const url = `${location.origin}/perfil_publico.html?id=${id}`
-  if(navigator.share){
-    navigator.share({ title: "Trabajos Cerca", url })
-  } else {
-    navigator.clipboard?.writeText(url).then(() => {
-      const btn = document.getElementById("btnCompartir")
-      if(btn){ btn.innerHTML = `<i class="fa-solid fa-check"></i> ¡Copiado!`; setTimeout(() => { btn.innerHTML = `<i class="fa-solid fa-share-nodes"></i> Compartir` }, 2000) }
-    })
-  }
+  navigator.clipboard?.writeText(url).then(() => {
+    const btn = document.getElementById("btnCompartir")
+    if(btn){ btn.innerHTML = `<i class="fa-solid fa-check"></i> ¡Copiado!`; setTimeout(() => { btn.innerHTML = `<i class="fa-solid fa-link"></i> Copiar link` }, 2000) }
+  })
 }
 window.compartirWA = function(nombre, id){
   const url = `${location.origin}/perfil_publico.html?id=${id}`
   window.open(`https://wa.me/?text=${encodeURIComponent(`Mirá el perfil de ${nombre} en Trabajos Cerca: ${url}`)}`, "_blank")
+}
+window.compartirFB = function(id){
+  const url = encodeURIComponent(`${location.origin}/perfil_publico.html?id=${id}`)
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank", "width=600,height=400")
+}
+window.compartirX = function(nombre, id){
+  const url = `${location.origin}/perfil_publico.html?id=${id}`
+  const txt = encodeURIComponent(`Mirá el perfil de ${nombre} en Trabajos Cerca 💼`)
+  window.open(`https://twitter.com/intent/tweet?text=${txt}&url=${encodeURIComponent(url)}`, "_blank", "width=600,height=400")
 }

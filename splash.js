@@ -3,7 +3,16 @@
    ① Logo limpio en TODAS las páginas
    ② Splash de bienvenida (solo en el home)
    ③ Modal de registro con 4 tipos
+   ④ Guardar código de referido (?ref=UUID)
 ══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────
+   ④ REFERIDO — guardar código si viene en la URL
+───────────────────────────────────────────────────────── */
+;(function(){
+  const ref = new URLSearchParams(location.search).get('ref')
+  if(ref && ref.length > 20) localStorage.setItem('tc_ref', ref)
+})()
 
 /* ─────────────────────────────────────────────────────────
    ① LOGO  (corre en todas las páginas)

@@ -1,5 +1,26 @@
 import { supabase } from "./supabase.js"
 
+/* ── Crédito de referido ── */
+async function creditarReferido(nuevoUserId){
+  const ref = localStorage.getItem('tc_ref')
+  if(!ref || ref === nuevoUserId) return
+  try {
+    const { data: ya } = await supabase.from("referidos").select("id").eq("referido_id", nuevoUserId).maybeSingle()
+    if(ya) return
+    await supabase.from("referidos").insert({ referidor_id: ref, referido_id: nuevoUserId })
+    const { data: rp } = await supabase.from("perfiles").select("puntos_referidos").eq("id", ref).single()
+    const pts = (rp?.puntos_referidos || 0) + 1
+    await supabase.from("perfiles").update({ puntos_referidos: pts }).eq("id", ref)
+    await supabase.from("notificaciones").insert({
+      usuario_id: ref, tipo: "sistema",
+      titulo: "🎉 ¡Ganaste 1 punto de referido!",
+      cuerpo: "Alguien se registró con tu link de invitación. ¡Seguí compartiendo!",
+      url: "/perfil.html"
+    })
+    localStorage.removeItem('tc_ref')
+  } catch(e){ console.warn("creditarReferido:", e) }
+}
+
 async function init(){
   const { data: userData } = await supabase.auth.getUser()
   if(!userData.user){ location.href = "/login.html"; return }
@@ -14,6 +35,7 @@ async function init(){
       const { data: existing } = await supabase.from("perfiles").select("id").eq("id", userId).single()
       if(!existing){
         await supabase.from("perfiles").insert({ id: userId, ...perfilData })
+        await creditarReferido(userId)
       }
     } catch(e){}
     localStorage.removeItem("pendingPerfil")
@@ -207,6 +229,52 @@ async function init(){
       </div>`
     }
   }
+
+  /* ── Referidos ── */
+  const puntosRef = data.puntos_referidos || 0
+  const refLink   = `${location.origin}/?ref=${userId}`
+  const referidosHtml = `
+    <div style="background:linear-gradient(135deg,#7c3aed,#2563eb);border-radius:16px;padding:20px 20px;margin-bottom:16px;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-30px;right:-20px;width:110px;height:110px;background:rgba(255,255,255,.08);border-radius:50%;"></div>
+      <div style="position:absolute;bottom:-30px;left:10px;width:80px;height:80px;background:rgba(255,255,255,.06);border-radius:50%;"></div>
+      <div style="position:relative;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+          <div style="background:rgba(255,255,255,.18);border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🎁</div>
+          <div>
+            <p style="margin:0 0 2px;font-size:17px;font-weight:900;color:white;">Invitá amigos y ganá puntos</p>
+            <p style="margin:0;font-size:13px;color:rgba(255,255,255,.85);">Cada persona que se registre con tu link suma <strong style="color:white;">1 punto</strong></p>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+          <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;">
+            <span style="font-size:30px;font-weight:900;color:white;line-height:1;">${puntosRef}</span>
+            <span style="font-size:12px;color:rgba(255,255,255,.8);font-weight:700;">punto${puntosRef !== 1 ? "s" : ""}<br>ganado${puntosRef !== 1 ? "s" : ""}</span>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.12);border-radius:11px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:rgba(255,255,255,.7);word-break:break-all;flex:1;font-family:monospace;">${refLink}</span>
+          <button id="btnCopiarRef"
+            onclick="window.copiarRefLink('${refLink}')"
+            style="background:white;color:#7c3aed;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+            <i class="fa-solid fa-copy"></i> Copiar
+          </button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button onclick="window.compartirRefWA('${refLink}')"
+            style="display:inline-flex;align-items:center;gap:7px;background:#25d366;color:white;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp
+          </button>
+          <button onclick="window.compartirRefFB('${refLink}')"
+            style="display:inline-flex;align-items:center;gap:7px;background:#1877f2;color:white;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;">
+            <i class="fa-brands fa-facebook"></i> Facebook
+          </button>
+          <button onclick="window.compartirRefNativo('${refLink}')"
+            style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.2);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;">
+            <i class="fa-solid fa-share-nodes"></i> Más
+          </button>
+        </div>
+      </div>
+    </div>`
 
   /* ── Favoritos guardados (todos los usuarios) ── */
   let guardadosHtml = ""
@@ -491,6 +559,7 @@ async function init(){
       </div>
     ` : ""}
 
+    ${referidosHtml}
     ${guardadosHtml}
 
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
@@ -756,6 +825,28 @@ window.compartirInicio = function(){
   const url   = "https://trabajocerca.vercel.app/"
   const texto = "¡Encontrá profesionales, oficios y trabajo en tu ciudad! 👷‍♂️💼 Trabajos Cerca — 100% gratis."
   compartir(url, "Trabajos Cerca", texto)
+}
+
+/* ── COMPARTIR LINK DE REFERIDOS ── */
+window.copiarRefLink = function(url){
+  navigator.clipboard?.writeText(url).then(() => {
+    const btn = document.getElementById("btnCopiarRef")
+    if(btn){ btn.innerHTML = '<i class="fa-solid fa-check"></i> ¡Copiado!'; setTimeout(() => { btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar' }, 2000) }
+  })
+}
+window.compartirRefWA = function(url){
+  const txt = encodeURIComponent(`¡Unite a Trabajos Cerca! Conseguí empleo, clientes o empleados en tu zona. Registrate acá: ${url}`)
+  window.open(`https://wa.me/?text=${txt}`, "_blank")
+}
+window.compartirRefFB = function(url){
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank", "width=600,height=400")
+}
+window.compartirRefNativo = function(url){
+  if(navigator.share){
+    navigator.share({ title: "Trabajos Cerca", text: "¡Unite a Trabajos Cerca y encontrá trabajo u oportunidades en tu zona!", url })
+  } else {
+    window.copiarRefLink(url)
+  }
 }
 
 /* ── CERRAR SESIÓN ── */

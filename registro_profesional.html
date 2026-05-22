@@ -325,6 +325,27 @@ window.cerrarTerminos = function(){ document.getElementById("modalTerminosOverla
 document.addEventListener("keydown", e => { if(e.key==="Escape") cerrarTerminos() })
 
 /* Coordenadas */
+/* ── Crédito de referido ── */
+async function creditarReferido(nuevoUserId){
+  const ref = localStorage.getItem('tc_ref')
+  if(!ref || ref === nuevoUserId) return
+  try {
+    const { data: ya } = await supabase.from("referidos").select("id").eq("referido_id", nuevoUserId).maybeSingle()
+    if(ya) return
+    await supabase.from("referidos").insert({ referidor_id: ref, referido_id: nuevoUserId })
+    const { data: rp } = await supabase.from("perfiles").select("puntos_referidos").eq("id", ref).single()
+    const pts = (rp?.puntos_referidos || 0) + 1
+    await supabase.from("perfiles").update({ puntos_referidos: pts }).eq("id", ref)
+    await supabase.from("notificaciones").insert({
+      usuario_id: ref, tipo: "sistema",
+      titulo: "🎉 ¡Ganaste 1 punto de referido!",
+      cuerpo: "Alguien se registró con tu link de invitación. ¡Seguí compartiendo!",
+      url: "/perfil.html"
+    })
+    localStorage.removeItem('tc_ref')
+  } catch(e){ console.warn("creditarReferido:", e) }
+}
+
 async function obtenerCoordenadas(ciudad, provincia){
   try {
     const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(ciudad)}&state=${encodeURIComponent(provincia)}&country=Argentina&format=json&limit=1`
@@ -397,6 +418,7 @@ window.registrarProfesional = async function(){
   await supabase.from("perfiles").insert({ id: data.user.id, ...perfilData })
   localStorage.removeItem("pendingPerfil")
   localStorage.setItem("pendingProfesion", profesion)
+  await creditarReferido(data.user.id)
   window.location.href = "/perfil_servicio.html?nuevo=1&prof=1"
 }
 

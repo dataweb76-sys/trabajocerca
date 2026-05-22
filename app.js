@@ -1,6 +1,29 @@
 import { supabase } from "./supabase.js"
 
 /* ============================
+   REFERIDOS
+============================ */
+async function creditarReferido(nuevoUserId){
+  const ref = localStorage.getItem('tc_ref')
+  if(!ref || ref === nuevoUserId) return
+  try {
+    const { data: ya } = await supabase.from("referidos").select("id").eq("referido_id", nuevoUserId).maybeSingle()
+    if(ya) return
+    await supabase.from("referidos").insert({ referidor_id: ref, referido_id: nuevoUserId })
+    const { data: rp } = await supabase.from("perfiles").select("puntos_referidos").eq("id", ref).single()
+    const pts = (rp?.puntos_referidos || 0) + 1
+    await supabase.from("perfiles").update({ puntos_referidos: pts }).eq("id", ref)
+    await supabase.from("notificaciones").insert({
+      usuario_id: ref, tipo: "sistema",
+      titulo: "🎉 ¡Ganaste 1 punto de referido!",
+      cuerpo: "Alguien se registró con tu link de invitación. ¡Seguí compartiendo!",
+      url: "/perfil.html"
+    })
+    localStorage.removeItem('tc_ref')
+  } catch(e){ console.warn("creditarReferido:", e) }
+}
+
+/* ============================
    AUTOCOMPLETAR UBICACIÓN
 ============================ */
 
@@ -140,6 +163,7 @@ async function registrarUsuario(e){
   const userId = data.user.id
   await supabase.from("perfiles").insert({ id: userId, ...perfilData })
   localStorage.removeItem("pendingPerfil")
+  await creditarReferido(userId)
 
   if(tipo === "profesional"){
     window.location.href = "/perfil_servicio.html?nuevo=1"
