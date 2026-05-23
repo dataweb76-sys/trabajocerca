@@ -102,54 +102,98 @@
     return bestScore > 0 ? best.r : DEFAULT_R
   }
 
+  /* ══════ SVG de Lara (cara femenina) ══════ */
+  const SVG_LARA = `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="21" r="13" fill="#fde7c8"/>
+    <ellipse cx="20" cy="11" rx="12" ry="7" fill="#7c3aed"/>
+    <ellipse cx="9" cy="18" rx="3.5" ry="7" fill="#7c3aed"/>
+    <ellipse cx="31" cy="18" rx="3.5" ry="7" fill="#7c3aed"/>
+    <ellipse cx="15.5" cy="20" rx="1.8" ry="2" fill="#1e293b"/>
+    <ellipse cx="24.5" cy="20" rx="1.8" ry="2" fill="#1e293b"/>
+    <circle cx="16" cy="19.4" r=".6" fill="white"/>
+    <circle cx="25" cy="19.4" r=".6" fill="white"/>
+    <path d="M20 22.5 Q19 24 20 24.5 Q21 24 20 22.5" fill="#e8a87c"/>
+    <path d="M16 26.5 Q20 29.5 24 26.5" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+    <circle cx="13.5" cy="24" r="2.5" fill="#f8a4a4" opacity=".5"/>
+    <circle cx="26.5" cy="24" r="2.5" fill="#f8a4a4" opacity=".5"/>
+  </svg>`
+
+  const SVG_SEND = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+  </svg>`
+
   /* ══════ CSS ══════ */
   const css = `
   #lara-widget * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
 
-  /* Botón flotante */
-  #lara-btn {
-    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-    cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;
-    user-select: none;
-  }
-  #lara-avatar {
-    width: 62px; height: 62px; border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #2563eb);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 18px rgba(124,58,237,.45);
-    transition: transform .2s, box-shadow .2s;
+  /* ── Contenedor (relativo para posicionar el panel) ── */
+  #lara-widget {
     position: relative;
-  }
-  #lara-btn:hover #lara-avatar { transform: scale(1.08); box-shadow: 0 6px 24px rgba(124,58,237,.6); }
-  #lara-avatar svg { width: 38px; height: 38px; }
-  #lara-notif {
-    position: absolute; top: 2px; right: 2px;
-    width: 13px; height: 13px; border-radius: 50%;
-    background: #ef4444; border: 2px solid white;
-  }
-  #lara-name-tag {
-    background: linear-gradient(135deg, #7c3aed, #2563eb);
-    color: white; font-size: 11px; font-weight: 700;
-    padding: 2px 10px; border-radius: 20px;
-    letter-spacing: .04em; box-shadow: 0 2px 8px rgba(124,58,237,.3);
+    display: inline-flex;
+    align-items: center;
   }
 
-  /* Ventana de chat */
+  /* ── Botón inline en el header ── */
+  #lara-btn {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 13px 6px 8px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.18);
+    color: white;
+    transition: background .2s;
+    user-select: none;
+    white-space: nowrap;
+  }
+  #lara-btn:hover { background: rgba(255,255,255,.30); }
+
+  /* ── Avatar pequeño ── */
+  #lara-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(255,255,255,.25);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; position: relative;
+  }
+  #lara-avatar svg { width: 22px; height: 22px; }
+
+  /* ── Punto de notificación ── */
+  #lara-notif {
+    position: absolute; top: 0px; right: 0px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #ef4444; border: 2px solid #2563eb;
+    display: none;
+  }
+
+  /* ── Etiqueta de texto ── */
+  #lara-name-tag {
+    font-size: 13px; font-weight: 700; color: white;
+    letter-spacing: .01em;
+  }
+
+  /* ── Panel de chat — cae desde el header ── */
   #lara-chat {
-    position: fixed; bottom: 104px; right: 24px; z-index: 9998;
-    width: 340px; max-height: 520px;
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    width: 340px;
     background: white; border-radius: 18px;
     box-shadow: 0 8px 40px rgba(0,0,0,.18);
     display: flex; flex-direction: column; overflow: hidden;
-    transform: scale(.85) translateY(20px); opacity: 0;
+    transform: translateX(-50%) scale(.88) translateY(-10px);
+    opacity: 0;
     pointer-events: none;
     transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .2s;
+    z-index: 9998;
   }
   #lara-chat.abierto {
-    transform: scale(1) translateY(0); opacity: 1; pointer-events: all;
+    transform: translateX(-50%) scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: all;
   }
 
-  /* Header */
+  /* ── Header del chat ── */
   #lara-header {
     background: linear-gradient(135deg, #7c3aed, #2563eb);
     padding: 14px 16px; display: flex; align-items: center; gap: 12px;
@@ -171,7 +215,7 @@
   }
   #lara-close:hover { background: rgba(255,255,255,.3); }
 
-  /* Mensajes */
+  /* ── Mensajes ── */
   #lara-msgs {
     flex: 1; overflow-y: auto; padding: 14px 14px 6px;
     display: flex; flex-direction: column; gap: 10px;
@@ -197,7 +241,7 @@
   }
   .lara-msg-icon svg { width: 16px; height: 16px; }
 
-  /* FAQs chips */
+  /* ── FAQs ── */
   #lara-faqs {
     padding: 6px 14px 10px;
     display: flex; flex-wrap: wrap; gap: 6px;
@@ -217,7 +261,7 @@
   }
   .lara-faq-chip:hover { background: #dbeafe; transform: scale(1.03); }
 
-  /* Input */
+  /* ── Input ── */
   #lara-input-row {
     padding: 10px 12px; border-top: 1px solid #f1f5f9;
     display: flex; gap: 8px;
@@ -237,7 +281,7 @@
   #lara-send:hover { transform: scale(1.1); box-shadow: 0 3px 10px rgba(124,58,237,.4); }
   #lara-send svg { width: 16px; height: 16px; }
 
-  /* Typing indicator */
+  /* ── Typing indicator ── */
   .lara-typing { display: flex; align-items: center; gap: 4px; padding: 6px 4px; }
   .lara-typing span {
     width: 7px; height: 7px; border-radius: 50%; background: #94a3b8;
@@ -250,57 +294,41 @@
     40%{ transform:translateY(-6px); }
   }
 
-  @media(max-width:400px){
-    #lara-chat { width: calc(100vw - 24px); right: 12px; }
-    #lara-btn { right: 12px; }
+  /* ── Mobile ── */
+  @media(max-width: 520px){
+    #lara-name-tag { display: none; }
+    #lara-btn { padding: 6px 8px; }
+    #lara-chat {
+      position: fixed;
+      top: 62px;
+      left: 12px;
+      right: 12px;
+      width: auto;
+      transform: scale(.88) translateY(-10px);
+    }
+    #lara-chat.abierto {
+      transform: scale(1) translateY(0);
+    }
   }
   `
-
-  /* ══════ SVG de Lara (cara femenina) ══════ */
-  const SVG_LARA = `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- cara -->
-    <circle cx="20" cy="21" r="13" fill="#fde7c8"/>
-    <!-- pelo -->
-    <ellipse cx="20" cy="11" rx="12" ry="7" fill="#7c3aed"/>
-    <ellipse cx="9" cy="18" rx="3.5" ry="7" fill="#7c3aed"/>
-    <ellipse cx="31" cy="18" rx="3.5" ry="7" fill="#7c3aed"/>
-    <!-- ojos -->
-    <ellipse cx="15.5" cy="20" rx="1.8" ry="2" fill="#1e293b"/>
-    <ellipse cx="24.5" cy="20" rx="1.8" ry="2" fill="#1e293b"/>
-    <circle cx="16" cy="19.4" r=".6" fill="white"/>
-    <circle cx="25" cy="19.4" r=".6" fill="white"/>
-    <!-- nariz -->
-    <path d="M20 22.5 Q19 24 20 24.5 Q21 24 20 22.5" fill="#e8a87c"/>
-    <!-- sonrisa -->
-    <path d="M16 26.5 Q20 29.5 24 26.5" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-    <!-- mejillas -->
-    <circle cx="13.5" cy="24" r="2.5" fill="#f8a4a4" opacity=".5"/>
-    <circle cx="26.5" cy="24" r="2.5" fill="#f8a4a4" opacity=".5"/>
-  </svg>`
-
-  const SVG_SEND = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-  </svg>`
 
   /* ══════ HTML ══════ */
   const html = `
   <div id="lara-widget">
-    <!-- Botón flotante -->
     <div id="lara-btn" onclick="window._laraToggle()">
       <div id="lara-avatar">
         ${SVG_LARA}
         <div id="lara-notif"></div>
       </div>
-      <div id="lara-name-tag">Lara</div>
+      <div id="lara-name-tag">Consultá tus dudas</div>
     </div>
 
-    <!-- Ventana de chat -->
     <div id="lara-chat">
       <div id="lara-header">
         <div id="lara-header-avatar">${SVG_LARA}</div>
         <div id="lara-header-info">
           <strong>Lara</strong>
-          <span>Asistente de Trabajos Cerca</span>
+          <span>Consultá tus dudas · Trabajos Cerca</span>
         </div>
         <button id="lara-close" onclick="window._laraToggle()">×</button>
       </div>
@@ -321,14 +349,38 @@
     </div>
   </div>`
 
-  /* ══════ Inyectar ══════ */
+  /* ══════ Inyectar CSS ══════ */
   const styleEl = document.createElement("style")
   styleEl.textContent = css
   document.head.appendChild(styleEl)
 
+  /* ══════ Inyectar HTML — entre logo y nav en el topbar ══════ */
+  const topbar = document.querySelector(".topbar") || document.querySelector("header")
+  const nav    = topbar ? topbar.querySelector("nav") : null
+
   const wrap = document.createElement("div")
   wrap.innerHTML = html
-  document.body.appendChild(wrap)
+
+  if(nav && topbar){
+    // Insertar entre logo y nav
+    topbar.insertBefore(wrap.firstElementChild, nav)
+  } else if(topbar){
+    topbar.appendChild(wrap.firstElementChild)
+  } else {
+    // Fallback: botón flotante si no hay topbar
+    const fallbackEl = wrap.firstElementChild
+    fallbackEl.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:9999;"
+    document.body.appendChild(fallbackEl)
+  }
+
+  /* ══════ Cerrar al clickear afuera ══════ */
+  document.addEventListener("click", e => {
+    const widget = document.getElementById("lara-widget")
+    if(widget && !widget.contains(e.target)){
+      document.getElementById("lara-chat")?.classList.remove("abierto")
+      abierto = false
+    }
+  })
 
   /* ══════ Estado ══════ */
   let abierto = false
@@ -362,7 +414,8 @@
   }
 
   /* ── Toggle ventana ── */
-  window._laraToggle = function(){
+  window._laraToggle = function(e){
+    if(e) e.stopPropagation()
     abierto = !abierto
     chatEl.classList.toggle("abierto", abierto)
     if(abierto){
