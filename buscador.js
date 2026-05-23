@@ -100,7 +100,7 @@ const CHIPS_OFICIOS = [
   ["🎨","Pintura"],["🪚","Carpintería"],["🌿","Jardinería"],["⚙️","Herrería"],
   ["🔑","Cerrajería"],["🧹","Limpieza"],["📦","Mudanzas"],["❄️","Refrigeración"],
   ["💻","Informática"],["🍽️","Gastronomía"],["🥩","Carnicería"],["📋","Gestoría"],
-  ["🛵","Cadetería"],["🚗","Mecánico"],["🛋️","Tapicería"],
+  ["🛵","Cadetería"],["🚗","Mecánico"],["🛋️","Tapicería"],["☀️","Instalaciones Fotovoltaicas"],
   ["💪","Personal Trainer"],["💉","Enfermero"],["👶","Niñera"],["🛵","Delivery"],
   ["👔","Planchado"],["✂️","Peluquería"],["📷","Fotógrafo"]
 ]
@@ -113,14 +113,16 @@ const CHIPS_PROFESIONALES = [
 const CHIPS_TODOS = [...CHIPS_OFICIOS, ...CHIPS_PROFESIONALES]
 
 function renderChips(){
-  const cont  = document.getElementById("chipsCategoria")
+  const cont = document.getElementById("chipsCategoria")
   if(!cont) return
   const lista = _tipoBuscador === "oficio"      ? CHIPS_OFICIOS
               : _tipoBuscador === "profesional"  ? CHIPS_PROFESIONALES
               : CHIPS_TODOS
-  cont.innerHTML = lista.map(([ico, cat]) =>
-    `<button onclick="filtrarCategoria('${cat}')">${ico} ${cat}</button>`
-  ).join("")
+  cont.innerHTML = `
+    <select class="cat-select" onchange="if(this.value){ filtrarCategoria(this.value); this.value='' }">
+      <option value="">— Elegí una categoría —</option>
+      ${lista.map(([ico, cat]) => `<option value="${cat}">${ico} ${cat}</option>`).join("")}
+    </select>`
 }
 
 function configurarTipo(){

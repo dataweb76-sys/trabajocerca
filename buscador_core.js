@@ -95,7 +95,7 @@ const CHIPS_OFICIOS = [
   ["🎨","Pintura"],["🪚","Carpintería"],["🌿","Jardinería"],["⚙️","Herrería"],
   ["🔑","Cerrajería"],["🧹","Limpieza"],["📦","Mudanzas"],["❄️","Refrigeración"],
   ["💻","Informática"],["🍽️","Gastronomía"],["🥩","Carnicería"],["📋","Gestoría"],
-  ["🛵","Cadetería"],["🚗","Mecánico"],["🛋️","Tapicería"],
+  ["🛵","Cadetería"],["🚗","Mecánico"],["🛋️","Tapicería"],["☀️","Instalaciones Fotovoltaicas"],
   ["💪","Personal Trainer"],["💉","Enfermero"],["👶","Niñera"],["🛵","Delivery"],
   ["👔","Planchado"],["✂️","Peluquería"],["📷","Fotógrafo"]
 ]
@@ -125,12 +125,14 @@ function esProfesionalUni(item){
   return CATS_PROF.some(c => cat.includes(c) || c.includes(cat))
 }
 
-/* ── CHIPS ── */
+/* ── SELECTOR DE CATEGORÍA ── */
 function renderChips(){
   const cont = document.getElementById("chipsCategoria"); if(!cont) return
-  cont.innerHTML = CHIPS.map(([ico, cat]) =>
-    `<button onclick="filtrarCategoria('${cat}')">${ico} ${cat}</button>`
-  ).join("")
+  cont.innerHTML = `
+    <select class="cat-select" onchange="if(this.value){ filtrarCategoria(this.value); this.value='' }">
+      <option value="">— Elegí una categoría —</option>
+      ${CHIPS.map(([ico, cat]) => `<option value="${cat}">${ico} ${cat}</option>`).join("")}
+    </select>`
 }
 
 /* ── FILTRO RÁPIDO ── */
