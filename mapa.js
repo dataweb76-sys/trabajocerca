@@ -52,17 +52,21 @@ async function cargarProfesionales(){
   const { data, error } = await supabase
     .from("servicios")
     .select(`id, categoria, titulo, descripcion, servicios_lista, horarios, localidad, provincia, lat, lng,
-      perfiles(id, nombre, apellido, nombre_empresa, mostrar_como, mostrar_telefono, movil, foto)`)
+      perfiles(id, nombre, apellido, nombre_empresa, mostrar_como, mostrar_telefono, movil, foto, lat, lng)`)
     .eq("activo", true)
-    .not("lat", "is", null)
-    .not("lng", "is", null)
 
   if(error){ console.error("[mapa] Error Supabase:", error); return }
-  if(!data?.length){ console.warn("[mapa] Sin datos con coordenadas"); return }
+  if(!data?.length){ console.warn("[mapa] Sin datos"); return }
 
+  let mostrados = 0
   data.forEach(item => {
     const p = item.perfiles
     if(!p) return
+
+    // Usar lat/lng del servicio; si no tiene, usar lat/lng del perfil
+    const lat = item.lat ?? p.lat
+    const lng = item.lng ?? p.lng
+    if(!lat || !lng) return   // sin coordenadas: no se puede mostrar en el mapa
 
     const nombre = (p.mostrar_como === "empresa" && p.nombre_empresa)
       ? p.nombre_empresa
@@ -70,6 +74,10 @@ async function cargarProfesionales(){
 
     const mostrarTel = p.mostrar_telefono !== false
     const wa = mostrarTel ? waLinkMapa(p.movil, nombre, item.categoria) : null
+
+    // Enriquecer item con coordenadas resueltas para usarlas en el popup/modal
+    item._lat = lat
+    item._lng = lng
 
     /* Guardar en cache indexado por el id del servicio (siempre disponible) */
     _itemsCache[item.id] = { item, p, nombre, wa }
@@ -94,12 +102,13 @@ async function cargarProfesionales(){
         </button>
       </div>`
 
-    L.marker([item.lat, item.lng], { icon: iconoNaranja })
+    L.marker([lat, lng], { icon: iconoNaranja })
       .addTo(map)
       .bindPopup(popup, { maxWidth: 260 })
+    mostrados++
   })
 
-  actualizarContador(data.length)
+  actualizarContador(mostrados)
 }
 
 function actualizarContador(n){

@@ -96,7 +96,8 @@ const CHIPS_OFICIOS = [
   ["🔨","Albañilería"],["💧","Plomería"],["🔥","Gasista"],["⚡","Electricista"],
   ["🎨","Pintura"],["🪚","Carpintería"],["🌿","Jardinería"],["⚙️","Herrería"],
   ["🔑","Cerrajería"],["🧹","Limpieza"],["📦","Mudanzas"],["❄️","Refrigeración"],
-  ["💻","Informática"],["🍽️","Gastronomía"],["🚗","Mecánico"],["🛋️","Tapicería"],
+  ["💻","Informática"],["🍽️","Gastronomía"],["🥩","Carnicería"],["📋","Gestoría"],
+  ["🛵","Cadetería"],["🚗","Mecánico"],["🛋️","Tapicería"],
   ["💪","Personal Trainer"],["💉","Enfermero"],["👶","Niñera"],["🛵","Delivery"],
   ["👔","Planchado"],["✂️","Peluquería"],["📷","Fotógrafo"]
 ]
