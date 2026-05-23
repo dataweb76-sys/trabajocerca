@@ -14,8 +14,8 @@
     },
     {
       q: "¿Cómo publico mis servicios?",
-      tags: ["publicar","servicio","oficio","profesion","como pongo","agregar"],
-      r: `Iniciá sesión, andá a <strong>Mi Perfil</strong> y completá la sección "Mis Servicios". Elegí tu categoría, escribí una descripción y guardá. ¡Ya aparecés en el buscador! 🔨`
+      tags: ["publicar","servicio","oficio","profesion","como pongo","agregar","categoria","categorias"],
+      r: `Iniciá sesión, andá a <strong>Mi Perfil</strong> y completá la sección "Mis Servicios". Elegí tu categoría, escribí una descripción y guardá. ¡Ya aparecés en el buscador! 🔨<br><br>Tenemos categorías como Plomero, Electricista, Carpintero, <strong>Carnicero / Carnicería</strong>, <strong>Gestoría</strong>, Contador, Abogado y muchas más.`
     },
     {
       q: "¿Para qué sirve compartir mi perfil?",
@@ -40,10 +40,11 @@
     {
       q: "¿Cuáles son los planes disponibles?",
       tags: ["plan","planes","precio","costo","basico","pro","pagar","abono","suscripcion"],
-      r: `Hay dos planes pagos:<br>
-      💙 <strong>Plan Básico — $10.000/mes</strong>: hasta 2 fotos en portfolio.<br>
-      🔥 <strong>Plan Pro — $180.000/mes</strong>: hasta 5 fotos + prioridad en resultados.<br>
-      Consultanos por WhatsApp para activar tu plan. 📲`
+      r: `Hay tres planes pagos:<br>
+      🥉 <strong>Plan 1 — $10.000/mes</strong>: 1 trabajo en portfolio.<br>
+      🥈 <strong>Plan 2 — $15.000/mes</strong>: hasta 2 trabajos en portfolio.<br>
+      🏆 <strong>Plan Pro — $30.000/mes</strong>: hasta 5 trabajos + prioridad en resultados.<br>
+      Todos los precios son en pesos argentinos. Pagás desde tu perfil con MercadoPago. 💳`
     },
     {
       q: "¿Cómo me contacto con un profesional?",

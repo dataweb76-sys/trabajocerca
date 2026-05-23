@@ -384,7 +384,7 @@
         </button>
 
         <!-- Opción 3: Oficio -->
-        <button class="tc-reg-card" onclick="location.href='/registro_profesional.html?tipo=oficio'">
+        <button class="tc-reg-card" onclick="location.href='/registro.html?tipo=profesional'">
           <div class="tc-reg-icon" style="background:#fff7ed;">
             <span>🔧</span>
           </div>
