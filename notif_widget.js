@@ -219,9 +219,43 @@
     return new Date(iso).toLocaleDateString("es-AR", { day:"numeric", month:"short" })
   }
 
-  /* Carga inicial + polling cada 60s */
-  cargar(false)
-  setInterval(() => cargar(false), 60000)
+  /* ── Notificación del sistema al recibir nuevas notificaciones ── */
+  let _ultimoConteo = 0
+  function notificarSiHayNuevas(notifs){
+    const noLeidas = notifs.filter(n => !n.leida)
+    if(_ultimoConteo === 0){ _ultimoConteo = noLeidas.length; return } // primera carga: no notificar
+    const nuevas = noLeidas.slice(0, noLeidas.length - _ultimoConteo)
+    if(noLeidas.length > _ultimoConteo && Notification.permission === 'granted'){
+      const ultima = noLeidas[0]
+      try {
+        new Notification(ultima.titulo || 'Trabajos Cerca', {
+          body: ultima.cuerpo || '',
+          icon: '/icon-192.png',
+          badge: '/icon-192.png',
+          tag: 'tc-notif-' + ultima.id
+        })
+      } catch(e){}
+    }
+    _ultimoConteo = noLeidas.length
+  }
+
+  async function cargarConNotif(){
+    try {
+      const res = await fetch(
+        `${SB_URL}/rest/v1/notificaciones?usuario_id=eq.${userId}&order=created_at.desc&limit=25`,
+        { headers: hdrs() }
+      )
+      if(!res.ok) return
+      const data = await res.json()
+      notificarSiHayNuevas(data)
+      _notifs = data
+      render()
+    } catch(e){}
+  }
+
+  /* Carga inicial + polling cada 30s */
+  cargar(false).then(() => { _ultimoConteo = _notifs.filter(n => !n.leida).length })
+  setInterval(() => cargarConNotif(), 30000)
 
   /* ── Badge de mensajes no leídos ── */
   async function chequearMensajes(){

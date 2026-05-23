@@ -18,6 +18,8 @@ const SERVICIOS = {
   "Gastronomía":   ["Catering para eventos", "Cocina a domicilio", "Parrilladas", "Postres y tortas", "Servicios de mozo"],
   "Mecánico Automotriz": ["Mecánica general", "Service y mantenimiento", "Frenos y suspensión", "Electricidad del auto", "Diagnóstico computarizado", "Gomería"],
   "Tapicería":     ["Tapizado de autos", "Tapizado de muebles", "Reparación de cuero", "Cortinas y persianas", "Capotería"],
+  "Gestoría":         ["Gestoría del automotor", "Transferencia de vehículos", "Trámites en Registro Civil", "Habilitaciones comerciales", "Trámites municipales", "Renovación de licencias de conducir", "Inicio de sucesiones", "Trámites notariales", "Gestión de documentación", "Trámites ANSES y AFIP"],
+  "Carnicero / Carnicería": ["Venta de carne vacuna", "Venta de cerdo y pollo", "Embutidos y fiambres", "Cortes especiales a pedido", "Venta al por mayor", "Asado y parrilla a pedido", "Achuras y menudencias"],
   "Personal Trainer": ["Entrenamiento personalizado", "Entrenamiento funcional", "Pérdida de peso", "Musculación", "Yoga", "Pilates", "Crossfit", "Entrenamiento online", "Preparación física deportiva"],
   "Enfermero/a":   ["Cuidado de adultos mayores", "Atención post-quirúrgica", "Inyecciones y curaciones", "Control de medicación", "Atención domiciliaria", "Acompañante terapéutico"],
   "Niñera / Cuidadora": ["Cuidado de niños en el hogar", "Babysitting", "Apoyo escolar básico", "Cuidado de bebés", "Por horas o días", "Turno noche"],

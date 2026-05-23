@@ -4,7 +4,7 @@
    - Manejo de Push Notifications
 ══════════════════════════════════════════════ */
 
-const CACHE_NAME = 'tc-v1'
+const CACHE_NAME = 'tc-v2'
 const CACHE_STATIC = ['/index.html', '/style.css', '/logo.png']
 
 /* ── Instalación ── */
@@ -22,8 +22,18 @@ self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+    ).then(() => {
+      // Avisar a todos los clientes que hay nueva versión activa
+      self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' }))
+      })
+    })
   )
+})
+
+/* ── Mensaje desde la página (skip waiting manual) ── */
+self.addEventListener('message', e => {
+  if(e.data?.type === 'SKIP_WAITING') self.skipWaiting()
 })
 
 /* ── Fetch: network-first, cache como fallback ── */
