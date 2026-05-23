@@ -220,21 +220,28 @@
   }
 
   /* ── Notificación del sistema al recibir nuevas notificaciones ── */
-  let _ultimoConteo = 0
+  let _ultimoConteo = -1  // -1 = aún no inicializado (distinguible de 0 notificaciones)
   function notificarSiHayNuevas(notifs){
     const noLeidas = notifs.filter(n => !n.leida)
-    if(_ultimoConteo === 0){ _ultimoConteo = noLeidas.length; return } // primera carga: no notificar
-    const nuevas = noLeidas.slice(0, noLeidas.length - _ultimoConteo)
-    if(noLeidas.length > _ultimoConteo && Notification.permission === 'granted'){
-      const ultima = noLeidas[0]
-      try {
-        new Notification(ultima.titulo || 'Trabajos Cerca', {
-          body: ultima.cuerpo || '',
-          icon: '/icon-192.png',
-          badge: '/icon-192.png',
-          tag: 'tc-notif-' + ultima.id
-        })
-      } catch(e){}
+    if(_ultimoConteo === -1){
+      // Primera carga: guardamos la línea base sin disparar alerta
+      _ultimoConteo = noLeidas.length
+      return
+    }
+    if(noLeidas.length > _ultimoConteo){
+      // Pedir permiso si todavía no se preguntó
+      if(Notification.permission === 'default') Notification.requestPermission()
+      if(Notification.permission === 'granted'){
+        const ultima = noLeidas[0]
+        try {
+          new Notification(ultima.titulo || 'Trabajos Cerca', {
+            body: ultima.cuerpo || '',
+            icon: '/icon-192.png',
+            badge: '/icon-192.png',
+            tag: 'tc-notif-' + ultima.id
+          })
+        } catch(e){}
+      }
     }
     _ultimoConteo = noLeidas.length
   }
@@ -254,10 +261,11 @@
   }
 
   /* Carga inicial + polling cada 30s */
-  cargar(false).then(() => { _ultimoConteo = _notifs.filter(n => !n.leida).length })
+  cargarConNotif()   // usa notificarSiHayNuevas para establecer la línea base
   setInterval(() => cargarConNotif(), 30000)
 
-  /* ── Badge de mensajes no leídos ── */
+  /* ── Badge + notificación de mensajes no leídos ── */
+  let _ultimoConteoMensajes = -1  // -1 = aún no inicializado
   async function chequearMensajes(){
     try {
       const res = await fetch(
@@ -271,6 +279,23 @@
         if(c.usuario1_id === userId) total += (c.no_leidos_u1 || 0)
         else total += (c.no_leidos_u2 || 0)
       })
+
+      // Disparar notificación si llegaron mensajes nuevos (no en la primera carga)
+      if(_ultimoConteoMensajes >= 0 && total > _ultimoConteoMensajes){
+        if(Notification.permission === 'default') Notification.requestPermission()
+        if(Notification.permission === 'granted'){
+          try {
+            new Notification('Nuevo mensaje — Trabajos Cerca', {
+              body: 'Tenés mensajes sin leer',
+              icon: '/icon-192.png',
+              badge: '/icon-192.png',
+              tag: 'tc-msg'
+            })
+          } catch(e){}
+        }
+      }
+      _ultimoConteoMensajes = total
+
       // Actualizar badge en el link de mensajes del nav
       const msgLinks = document.querySelectorAll('a[href="/mensajes.html"]')
       msgLinks.forEach(link => {
