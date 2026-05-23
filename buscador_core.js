@@ -110,6 +110,34 @@ const CHIPS_PROFESIONALES = [
 // Chips según página
 const CHIPS = TIPO === "profesional" ? CHIPS_PROFESIONALES : CHIPS_OFICIOS
 
+/* ── Ciudades por provincia ── */
+const CIUDADES_POR_PROVINCIA = {
+  "Buenos Aires":       ["La Plata","Mar del Plata","Quilmes","Morón","San Isidro","Tigre","Lomas de Zamora","La Matanza","Moreno","Merlo","San Martín","Tres de Febrero","Bahía Blanca","Avellaneda","Lanús","Berazategui","Florencio Varela","Esteban Echeverría","Almirante Brown","Pilar","Tandil","San Nicolás","Campana","Zárate","Luján","Chivilcoy","Pergamino","Necochea","Olavarría","Azul","Junín","San Pedro","Bragado","Chascomús","Dolores","9 de Julio","Lincoln","Pehuajó","Trenque Lauquen","Coronel Suárez","General Pueyrredón","Ezeiza","Hurlingham","Ituzaingó","José C. Paz","Malvinas Argentinas","San Fernando","San Miguel","Vicente López","Brandsen","Ensenada","Berisso","Cañuelas","Balcarce","Miramar","Villa Gesell","Pinamar","Tandil","Bolívar"],
+  "CABA":               ["Palermo","Belgrano","Caballito","Flores","Recoleta","Almagro","Villa Crespo","San Telmo","La Boca","Boedo","Barracas","Villa Devoto","Villa del Parque","Villa Urquiza","Saavedra","Núñez","Coghlan","Colegiales","Chacarita","Paternal","Villa Pueyrredón","Mataderos","Villa Lugano","Villa Soldati","Parque Patricios","Nueva Pompeya","Balvanera","Monserrat","San Nicolás","Retiro","Puerto Madero","San Cristóbal","Liniers","Floresta","Vélez Sársfield","Monte Castro","Versalles"],
+  "Catamarca":          ["San Fernando del Valle de Catamarca","Andalgalá","Belén","Tinogasta","Santa María","Recreo","Frías","Fiambalá","Londres"],
+  "Chaco":              ["Resistencia","Presidencia Roque Sáenz Peña","Barranqueras","Fontana","Villa Ángela","Charata","Las Breñas","Quitilipi","Puerto Tirol","Machagai"],
+  "Chubut":             ["Comodoro Rivadavia","Rawson","Trelew","Puerto Madryn","Esquel","Sarmiento","Rada Tilly","Trevelin","El Maitén","Río Mayo"],
+  "Córdoba":            ["Córdoba","Río Cuarto","Villa María","San Francisco","Villa Carlos Paz","Alta Gracia","Bell Ville","Río Tercero","Jesús María","La Calera","Unquillo","Río Ceballos","Marcos Juárez","Dean Funes","Laboulaye","Cruz del Eje","Villa Allende","Mendiolaza","Cosquín","La Falda","Mina Clavero","Oliva","Morteros","Leones","Monte Maíz","Huinca Renancó","Villa Nueva","General Cabrera"],
+  "Corrientes":         ["Corrientes","Goya","Paso de los Libres","Mercedes","Curuzú Cuatiá","Santo Tomé","Bella Vista","Esquina","Ituzaingó","Monte Caseros","Saladas","Mburucuyá"],
+  "Entre Ríos":         ["Paraná","Concordia","Gualeguaychú","Concepción del Uruguay","Gualeguay","Colón","Chajarí","Victoria","La Paz","Villaguay","San Salvador","Basavilbaso","Diamante","Nogoyá"],
+  "Formosa":            ["Formosa","Clorinda","Pirané","El Colorado","Las Lomitas","Ingeniero Juárez"],
+  "Jujuy":              ["San Salvador de Jujuy","Palpalá","San Pedro de Jujuy","El Carmen","Libertador General San Martín","La Quiaca","Tilcara","Humahuaca","Abra Pampa"],
+  "La Pampa":           ["Santa Rosa","General Pico","Eduardo Castex","Realicó","Toay","Victorica","General Acha","Guatraché","Macachín","Winifreda","Catriló","Rancul"],
+  "La Rioja":           ["La Rioja","Chilecito","Aimogasta","Chamical","Chepes","Vinchina","Famatina","Patquía"],
+  "Mendoza":            ["Mendoza","Godoy Cruz","Guaymallén","Las Heras","Maipú","Luján de Cuyo","San Rafael","San Martín","Rivadavia","Tunuyán","Malargüe","Junín","General Alvear","La Paz","Santa Rosa"],
+  "Misiones":           ["Posadas","Eldorado","Puerto Iguazú","Oberá","Apóstoles","Leandro N. Alem","Puerto Rico","Wanda","Montecarlo","San Vicente","Aristóbulo del Valle"],
+  "Neuquén":            ["Neuquén","Plottier","Cipolletti","Cutral Có","Plaza Huincul","Junín de los Andes","San Martín de los Andes","Villa La Angostura","Zapala","Centenario","Las Lajas"],
+  "Río Negro":          ["Viedma","Bariloche","General Roca","Cipolletti","Allen","Catriel","El Bolsón","Villa Regina","Cinco Saltos","Choele Choel","Ingeniero Huergo"],
+  "Salta":              ["Salta","San Ramón de la Nueva Orán","Tartagal","General Güemes","Metán","Rosario de la Frontera","Cafayate","Joaquín V. González","Embarcación","Aguaray"],
+  "San Juan":           ["San Juan","Rawson","Chimbas","Santa Lucía","Rivadavia","Pocito","Caucete","9 de Julio","Zonda","Angaco","Albardón"],
+  "San Luis":           ["San Luis","Villa Mercedes","Justo Daract","Quines","Mercedes","Tilisarao","La Toma","Concarán","Buena Esperanza"],
+  "Santa Cruz":         ["Río Gallegos","Caleta Olivia","Pico Truncado","El Calafate","Puerto Deseado","Las Heras","Puerto Santa Cruz","El Chaltén","Río Turbio"],
+  "Santa Fe":           ["Rosario","Santa Fe","Rafaela","Reconquista","Santo Tomé","Venado Tuerto","Villa Constitución","Casilda","Cañada de Gómez","Esperanza","Firmat","San Lorenzo","Gálvez","Rufino","Vera","Avellaneda","Ceres","Sunchales","Las Rosas","Pérez","Granadero Baigorria","Funes"],
+  "Santiago del Estero":["Santiago del Estero","La Banda","Termas de Río Hondo","Añatuya","Frías","Quimilí","Loreto","Monte Quemado","Selva","Clodomira"],
+  "Tierra del Fuego":   ["Ushuaia","Río Grande","Tolhuin"],
+  "Tucumán":            ["San Miguel de Tucumán","Tafí Viejo","Banda del Río Salí","Yerba Buena","Concepción","Monteros","Aguilares","Famaillá","Alberdi","Bella Vista","Río Chico","Lules"]
+}
+
 // Nombres de categorías profesionales normalizados (sin tildes, minúsculas)
 function normStr(s){
   return (s||"").toLowerCase()
@@ -123,6 +151,26 @@ function esProfesionalUni(item){
   if(item.perfiles?.profesion_universitaria) return true
   const cat = normStr(item.categoria)
   return CATS_PROF.some(c => cat.includes(c) || c.includes(cat))
+}
+
+/* ── SELECTOR DE CIUDAD (según provincia elegida) ── */
+function inicializarCiudadInput(){
+  const el = document.getElementById("ciudad")
+  if(!el || !_PROV_FILTRO) return
+  const ciudades = CIUDADES_POR_PROVINCIA[_PROV_FILTRO]
+  if(!ciudades?.length) return
+
+  const sel = document.createElement("select")
+  sel.id        = "ciudad"
+  sel.className = "ciudad-select"
+  sel.onchange  = () => window.buscar()
+  sel.innerHTML = `<option value="">📍 Todas las ciudades</option>` +
+    ciudades.map(c => `<option value="${c}">${c}</option>`).join("")
+  el.parentNode.replaceChild(sel, el)
+
+  // Actualizar label
+  const lbl = el.closest("div")?.querySelector("label") || sel.closest("div")?.querySelector("label")
+  if(lbl) lbl.textContent = `Ciudad (${_PROV_FILTRO})`
 }
 
 /* ── SELECTOR DE CATEGORÍA ── */
@@ -648,5 +696,6 @@ window.cerrarModalClick = function(e){
 document.addEventListener("keydown", e => { if(e.key==="Escape") cerrarModal() })
 
 /* ── INICIAR ── */
+inicializarCiudadInput()
 renderChips()
 buscar()
