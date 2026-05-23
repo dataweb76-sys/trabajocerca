@@ -71,25 +71,46 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-/* ── Strip de provincias ── */
-#prov-strip-wrap {
-  overflow-x: auto; white-space: nowrap;
-  padding: 10px 16px; background: #fff;
-  border-bottom: 1.5px solid #e2e8f0;
-  scrollbar-width: none; -ms-overflow-style: none;
-}
-#prov-strip-wrap::-webkit-scrollbar { display: none; }
-#prov-strip { display: inline-flex; gap: 7px; align-items: center; }
-.prov-chip {
-  display: inline-block; white-space: nowrap;
-  padding: 5px 13px; border-radius: 20px;
-  border: 1.5px solid #e2e8f0; background: #f8fafc;
-  font-size: 13px; font-weight: 600; color: #475569;
-  cursor: pointer; transition: all .18s; font-family: inherit;
-}
-.prov-chip:hover { background: #eff6ff; color: #2563eb; border-color: #93c5fd; }
-.prov-chip.active { background: #2563eb; color: #fff; border-color: #2563eb; font-weight: 700; }
+/* ── Selector de provincia en el hero ── */
 #hero-prov-txt { transition: opacity .3s; }
+.prov-selector-wrap {
+  margin-top: 18px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.prov-selector-label {
+  font-size: 13px; color: rgba(255,255,255,.82); margin: 0; font-weight: 500;
+}
+.prov-selector-inner {
+  position: relative; display: inline-flex; align-items: center;
+}
+.prov-selector-inner i {
+  position: absolute; left: 12px; color: rgba(255,255,255,.85); font-size: 13px; pointer-events: none;
+}
+#prov-select {
+  appearance: none; -webkit-appearance: none;
+  background: rgba(255,255,255,.15);
+  backdrop-filter: blur(8px);
+  color: white;
+  border: 1.5px solid rgba(255,255,255,.45);
+  border-radius: 24px;
+  padding: 9px 40px 9px 34px;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  outline: none; font-family: inherit;
+  min-width: 220px; text-align: center;
+  transition: background .2s, border-color .2s;
+}
+#prov-select:hover { background: rgba(255,255,255,.25); border-color: rgba(255,255,255,.7); }
+#prov-select option { color: #1e293b; background: white; font-weight: 600; }
+.prov-arrow {
+  position: absolute; right: 13px; color: rgba(255,255,255,.85);
+  font-size: 11px; pointer-events: none;
+}
+/* Badge provincia activa en los buscadores */
+#prov-filtro-banner {
+  display: flex; align-items: center; gap: 10px;
+  background: #eff6ff; border: 1.5px solid #bfdbfe;
+  border-radius: 10px; padding: 10px 16px; margin-bottom: 16px;
+}
 </style>
 </head>
 <body>
@@ -105,13 +126,44 @@
   <div>
     <h1>El trabajo que buscás, en <span id="hero-prov-txt">tu ciudad</span></h1>
     <p>Conectamos profesionales, trabajadores y empleadores de toda Argentina</p>
+
+    <!-- Selector de provincia -->
+    <div class="prov-selector-wrap">
+      <p class="prov-selector-label">¿Deseás buscar en otra provincia?</p>
+      <div class="prov-selector-inner">
+        <i class="fa-solid fa-location-dot"></i>
+        <select id="prov-select" onchange="window._seleccionarProvincia(this.value)">
+          <option value="">📍 Toda Argentina</option>
+          <option>Buenos Aires</option>
+          <option>CABA</option>
+          <option>Catamarca</option>
+          <option>Chaco</option>
+          <option>Chubut</option>
+          <option>Córdoba</option>
+          <option>Corrientes</option>
+          <option>Entre Ríos</option>
+          <option>Formosa</option>
+          <option>Jujuy</option>
+          <option>La Pampa</option>
+          <option>La Rioja</option>
+          <option>Mendoza</option>
+          <option>Misiones</option>
+          <option>Neuquén</option>
+          <option>Río Negro</option>
+          <option>Salta</option>
+          <option>San Juan</option>
+          <option>San Luis</option>
+          <option>Santa Cruz</option>
+          <option>Santa Fe</option>
+          <option>Santiago del Estero</option>
+          <option>Tierra del Fuego</option>
+          <option>Tucumán</option>
+        </select>
+        <span class="prov-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+    </div>
   </div>
 </section>
-
-<!-- Scroll de provincias — tocá la tuya para personalizar -->
-<div id="prov-strip-wrap" title="Seleccioná tu provincia">
-  <div id="prov-strip"></div>
-</div>
 
 <div class="buscadores-grid">
   <div class="buscador-card" onclick="location.href='/buscador_trabajos.html'">
@@ -755,75 +807,30 @@ window.googleSignInCV     = () => googleSignIn("trabajador")
 <script src="/chat_widget.js"></script>
 <script src="/splash.js"></script>
 
-<!-- ── Strip de provincias + hero dinámico ── -->
+<!-- ── Selector de provincia + hero dinámico ── -->
 <script>
 ;(function(){
-  const PROVINCIAS = [
-    'Buenos Aires','CABA','Catamarca','Chaco','Chubut','Córdoba',
-    'Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja',
-    'Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan',
-    'San Luis','Santa Cruz','Santa Fe','Santiago del Estero',
-    'Tierra del Fuego','Tucumán'
-  ]
   const KEY = 'tc_provincia'
   let actual = localStorage.getItem(KEY) || ''
-
-  /* Renderizar chips */
-  const strip = document.getElementById('prov-strip')
-  if(!strip) return
-  PROVINCIAS.forEach(p => {
-    const btn = document.createElement('button')
-    btn.className = 'prov-chip' + (p === actual ? ' active' : '')
-    btn.textContent = p
-    btn.onclick = () => seleccionar(p)
-    strip.appendChild(btn)
-  })
 
   function actualizarH1(p){
     const el = document.getElementById('hero-prov-txt')
     if(el) el.textContent = p || 'tu ciudad'
   }
 
-  function seleccionar(p){
+  /* Función global para cambiar provincia */
+  window._seleccionarProvincia = function(p){
     actual = p
-    localStorage.setItem(KEY, p)
+    if(p) localStorage.setItem(KEY, p)
+    else  localStorage.removeItem(KEY)
     actualizarH1(p)
-    document.querySelectorAll('.prov-chip').forEach(c =>
-      c.classList.toggle('active', c.textContent === p)
-    )
-    const chip = document.querySelector('.prov-chip.active')
-    if(chip) chip.scrollIntoView({ block:'nearest', inline:'center', behavior:'smooth' })
   }
 
-  /* Provincia ya guardada → aplicar de inmediato */
-  if(actual){
+  /* Aplicar provincia guardada al cargar */
+  const sel = document.getElementById('prov-select')
+  if(sel && actual){
+    sel.value = actual
     actualizarH1(actual)
-    setTimeout(() => {
-      const chip = document.querySelector('.prov-chip.active')
-      if(chip) chip.scrollIntoView({ block:'nearest', inline:'center' })
-    }, 80)
-  }
-  /* Si no hay provincia guardada, el splash picker se encarga de la elección.
-     No llamamos ipapi.co aquí para evitar que sobreescriba la selección del usuario. */
-
-  function normalizarProv(raw){
-    if(!raw) return ''
-    const r = raw.toLowerCase()
-    const mapa = {
-      'buenos aires':'Buenos Aires','ciudad autónoma':'CABA','capital federal':'CABA','caba':'CABA',
-      'córdoba':'Córdoba','cordoba':'Córdoba','santa fe':'Santa Fe','mendoza':'Mendoza',
-      'tucumán':'Tucumán','tucuman':'Tucumán','entre ríos':'Entre Ríos','entre rios':'Entre Ríos',
-      'salta':'Salta','misiones':'Misiones','chaco':'Chaco','corrientes':'Corrientes',
-      'santiago del estero':'Santiago del Estero','san juan':'San Juan','jujuy':'Jujuy',
-      'río negro':'Río Negro','rio negro':'Río Negro','neuquén':'Neuquén','neuquen':'Neuquén',
-      'formosa':'Formosa','chubut':'Chubut','san luis':'San Luis','catamarca':'Catamarca',
-      'la rioja':'La Rioja','la pampa':'La Pampa','santa cruz':'Santa Cruz',
-      'tierra del fuego':'Tierra del Fuego'
-    }
-    for(const key of Object.keys(mapa)){
-      if(r.includes(key)) return mapa[key]
-    }
-    return ''
   }
 })()
 </script>

@@ -10,6 +10,9 @@ const SB_HEADERS = { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
 // TIPO FIJO — definido por el HTML que carga este script
 const TIPO = window._TC_TIPO  // "oficio" o "profesional"
 
+// Provincia guardada (filtro global persistente)
+const _PROV_FILTRO = localStorage.getItem('tc_provincia') || ''
+
 let mapModal           = null
 let ratingSeleccionado = 0
 let _miNombre          = null
@@ -157,7 +160,8 @@ window.buscar = async function(){
   } else if(palabra){
     const p=encodeURIComponent(`*${palabra}*`); url+=`&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p},servicios_lista.ilike.${p})`
   }
-  if(ciudad)  url+=`&localidad=ilike.*${encodeURIComponent(ciudad)}*`
+  if(ciudad)       url+=`&localidad=ilike.*${encodeURIComponent(ciudad)}*`
+  if(_PROV_FILTRO) url+=`&provincia=ilike.*${encodeURIComponent(_PROV_FILTRO)}*`
 
   let data
   try {
@@ -223,7 +227,16 @@ window.buscar = async function(){
     return b._puntos - a._puntos
   })
 
-  cont.innerHTML = `
+  const bannerProv = _PROV_FILTRO
+    ? `<div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:13px;color:#1d4ed8;font-weight:700;">
+          <i class="fa-solid fa-location-dot"></i> Mostrando resultados en: <strong>${_PROV_FILTRO}</strong>
+        </span>
+        <a href="/index.html" style="font-size:12px;color:#64748b;text-decoration:underline;">Cambiar provincia</a>
+       </div>`
+    : ''
+
+  cont.innerHTML = bannerProv + `
     <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
       <i class="fa-solid fa-trophy" style="color:#f59e0b;font-size:20px;flex-shrink:0;"></i>
       <p style="margin:0;font-size:13px;color:#92400e;">
@@ -231,7 +244,7 @@ window.buscar = async function(){
       </p>
     </div>
     <p style="color:#64748b;margin-bottom:16px;font-size:14px;">
-      ${data.length} resultado${data.length!==1?"s":""} · ordenados por puntaje
+      ${data.length} resultado${data.length!==1?"s":""} · ordenados por puntaje${_PROV_FILTRO ? ` · ${_PROV_FILTRO}` : ""}
     </p>`
 
   data.forEach(item => {
