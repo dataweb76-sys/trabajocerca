@@ -97,6 +97,10 @@ function renderTabla() {
           class="btn btn-sm btn-outline" style="font-size:12px;">
           <i class="fa-solid fa-eye"></i> Ver perfil
         </a>
+        <button onclick="eliminarCuenta('${p.id}', '${(nombre).replace(/'/g,"\\'")}', '${p.email||""}')"
+          class="btn btn-sm btn-outline" style="color:#dc2626;border-color:#dc2626;font-size:12px;">
+          <i class="fa-solid fa-trash"></i> Eliminar
+        </button>
       </div>
     </div>`
   }).join("")
@@ -349,6 +353,44 @@ window.rechazarSolicitud = async function(solicitudId) {
     .update({ estado: "rechazado" }).eq("id", solicitudId)
 
   await cargarSolicitudes()
+}
+
+/* ── Eliminar cuenta ── */
+window.eliminarCuenta = async function(id, nombre, email) {
+  const confirmMsg =
+    `⚠️ ELIMINAR CUENTA\n\n` +
+    `Nombre: ${nombre}\n` +
+    `Email: ${email}\n\n` +
+    `Esto eliminará el perfil, servicio, reseñas, fotos y la cuenta de acceso.\n` +
+    `Esta acción NO se puede deshacer.\n\n` +
+    `¿Estás seguro?`
+
+  if (!confirm(confirmMsg)) return
+
+  const row = document.getElementById(`row-${id}`)
+  if (row) { row.style.opacity = "0.4"; row.style.pointerEvents = "none" }
+
+  try {
+    // 1. Llamar la función SQL que elimina el usuario de auth.users (y en cascada todo lo demás)
+    const { error } = await supabase.rpc("eliminar_usuario", { usuario_id: id })
+
+    if (error) {
+      // Si la función no existe, intentar eliminar solo el perfil
+      const { error: e2 } = await supabase.from("perfiles").delete().eq("id", id)
+      if (e2) throw e2
+      alert(`✓ Perfil eliminado.\nNota: la cuenta de auth.users debe borrarse manualmente en el dashboard de Supabase si el botón de login aún funciona.`)
+    } else {
+      alert(`✓ Cuenta de ${nombre} eliminada completamente.`)
+    }
+
+    // Quitar de la lista local y re-renderizar
+    _perfiles = _perfiles.filter(p => p.id !== id)
+    renderTabla()
+    cargarStats()
+  } catch (e) {
+    alert("Error al eliminar: " + e.message)
+    if (row) { row.style.opacity = "1"; row.style.pointerEvents = "" }
+  }
 }
 
 /* ── Init ── */
