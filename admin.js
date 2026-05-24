@@ -20,7 +20,7 @@ async function cargarPerfiles() {
 
   const { data, error } = await supabase
     .from("perfiles")
-    .select("id, nombre, apellido, nombre_empresa, email, localidad, provincia, verificado, destacado, admin, created_at")
+    .select("id, nombre, apellido, nombre_empresa, email, localidad, provincia, verificado, destacado, admin, created_at, servicios(categoria)")
     .order("created_at", { ascending: false })
     .limit(200)
 
@@ -60,12 +60,15 @@ function renderTabla() {
       : `${p.nombre||""} ${p.apellido||""}`.trim() || "(sin nombre)"
 
     const fecha = p.created_at ? new Date(p.created_at).toLocaleDateString("es-AR") : "-"
+    const cat   = p.servicios?.[0]?.categoria || null
 
     return `
     <div class="admin-row" id="row-${p.id}">
       <div class="admin-info">
         <strong style="font-size:15px;">${nombre}</strong>
         <span style="font-size:12px;color:#64748b;">${p.email||""}</span>
+        ${cat ? `<span style="font-size:11px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:20px;padding:1px 10px;font-weight:700;display:inline-block;width:fit-content;">
+          <i class="fa-solid fa-tag"></i> ${cat}</span>` : `<span style="font-size:11px;color:#94a3b8;">Sin categoría</span>`}
         <span style="font-size:12px;color:#94a3b8;">
           ${p.localidad||""}${p.provincia?", "+p.provincia:""}
           · Registrado: ${fecha}
@@ -166,19 +169,32 @@ window.filtrarPerfiles = function(val) {
 
 /* ── Stats ── */
 async function cargarStats() {
+  const hoy  = new Date(); hoy.setHours(0,0,0,0)
+  const ayer = new Date(hoy); ayer.setDate(ayer.getDate() - 1)
+  const hace7 = new Date(Date.now() - 7*24*60*60*1000).toISOString()
+
   const [
     { count: total },
     { count: verificados },
     { count: destacados },
     { count: solPendientes },
-    { count: pedidos }
+    visitasHoyRes,
+    visitasAyerRes,
+    visitas7Res
   ] = await Promise.all([
     supabase.from("perfiles").select("id", { count: "exact", head: true }),
     supabase.from("perfiles").select("id", { count: "exact", head: true }).eq("verificado", true),
     supabase.from("perfiles").select("id", { count: "exact", head: true }).eq("destacado", true),
     supabase.from("solicitudes_portfolio").select("id", { count: "exact", head: true }).eq("estado", "pendiente"),
-    supabase.from("pedidos").select("id", { count: "exact", head: true }).eq("estado", "abierto")
+    supabase.from("visitas_pagina").select("id", { count: "exact", head: true }).gte("created_at", hoy.toISOString()),
+    supabase.from("visitas_pagina").select("id", { count: "exact", head: true }).gte("created_at", ayer.toISOString()).lt("created_at", hoy.toISOString()),
+    supabase.from("visitas_pagina").select("id", { count: "exact", head: true }).gte("created_at", hace7)
   ])
+
+  const visitasHoy  = visitasHoyRes.count  || 0
+  const visitasAyer = visitasAyerRes.count || 0
+  const visitas7    = visitas7Res.count    || 0
+  const tendencia   = visitasHoy >= visitasAyer ? "⬆️" : "⬇️"
 
   document.getElementById("statsGrid").innerHTML = `
     <div class="stat-box">
@@ -196,6 +212,11 @@ async function cargarStats() {
     <div class="stat-box" style="border-color:${solPendientes > 0 ? "#fed7aa" : "#e2e8f0"};background:${solPendientes > 0 ? "#fff7ed" : "white"}">
       <div class="stat-num" style="color:${solPendientes > 0 ? "#ea580c" : "#1e293b"}">${solPendientes || 0}</div>
       <div class="stat-label"><i class="fa-solid fa-images" style="color:#f97316;"></i> Sol. portfolio</div>
+    </div>
+    <div class="stat-box" style="border-color:#c7d2fe;background:#eef2ff;">
+      <div class="stat-num" style="color:#4f46e5;">${visitasHoy} ${tendencia}</div>
+      <div class="stat-label" style="color:#4f46e5;"><i class="fa-solid fa-chart-line"></i> Visitas hoy</div>
+      <div style="font-size:11px;color:#6366f1;margin-top:4px;">Ayer: ${visitasAyer} · 7 días: ${visitas7}</div>
     </div>
   `
 }

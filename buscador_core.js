@@ -372,6 +372,15 @@ window.abrirModal = function(item, irCalificar=false){
   const p = item.perfiles || {}
   if(mapModal){ mapModal.remove(); mapModal = null }
 
+  /* ── Registrar vista (no cuenta el propio profesional) ── */
+  if(p.id && getCurrentUserId() !== p.id){
+    fetch(`${SB_URL}/rest/v1/perfil_eventos`, {
+      method: "POST",
+      headers: { ...SB_HEADERS, "Content-Type": "application/json", "Prefer": "return=minimal" },
+      body: JSON.stringify({ profesional_id: p.id, tipo: "vista" })
+    }).catch(()=>{})
+  }
+
   const foto = p.foto
     ? `<img src="${p.foto}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #2563eb;">`
     : `<div style="width:90px;height:90px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:36px;color:#2563eb;"><i class="fa-solid fa-user"></i></div>`
