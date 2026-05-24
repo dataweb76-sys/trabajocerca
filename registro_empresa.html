@@ -268,7 +268,7 @@ window.registrarConGoogle = async function(){
   localStorage.setItem("googleTipo", "empleador")
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: "https://trabajocerca.vercel.app/auth_callback.html" }
+    options: { redirectTo: "https://trabajoscerca.com.ar/auth_callback.html" }
   })
   if(error) document.getElementById("emMsg").innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
 }

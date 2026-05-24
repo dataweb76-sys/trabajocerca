@@ -1,4 +1,4 @@
-import { supabase } from "./supabase.js"
+﻿import { supabase } from "./supabase.js"
 
 /* ============================
    REFERIDOS
@@ -185,7 +185,7 @@ async function registroConGoogle(){
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: "https://trabajocerca.vercel.app/auth_callback.html"
+      redirectTo: "https://trabajoscerca.com.ar/auth_callback.html"
     }
   })
   if(error){

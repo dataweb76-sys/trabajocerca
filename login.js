@@ -1,4 +1,4 @@
-import { supabase } from "./supabase.js"
+﻿import { supabase } from "./supabase.js"
 
 async function login(){
   const email    = document.getElementById("email").value.trim()
@@ -19,7 +19,7 @@ async function loginConGoogle(){
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: "https://trabajocerca.vercel.app/auth_callback.html"
+      redirectTo: "https://trabajoscerca.com.ar/auth_callback.html"
     }
   })
   if(error){

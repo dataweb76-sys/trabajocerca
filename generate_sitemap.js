@@ -1,7 +1,7 @@
-const fs   = require('fs')
+﻿const fs   = require('fs')
 const path = require('path')
 
-const SITE = "https://trabajocerca.vercel.app"
+const SITE = "https://trabajoscerca.com.ar"
 const HOY  = new Date().toISOString().split('T')[0]
 
 const PAGINAS_PRINCIPALES = [

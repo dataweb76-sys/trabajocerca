@@ -5,6 +5,7 @@
     "start": "node server.js"
   },
   "devDependencies": {
-    "pg": "^8.21.0"
+    "pg": "^8.21.0",
+    "sharp": "^0.34.5"
   }
 }

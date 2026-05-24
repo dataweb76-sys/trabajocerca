@@ -14,14 +14,14 @@
 <meta name="robots" content="index, follow">
 <meta name="author" content="Trabajos Cerca">
 <meta name="google-site-verification" content="c452578b3430da39">
-<link rel="canonical" href="https://trabajocerca.vercel.app/">
+<link rel="canonical" href="https://trabajoscerca.com.ar/">
 
 <!-- Open Graph (WhatsApp, Facebook, LinkedIn) -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://trabajocerca.vercel.app/">
+<meta property="og:url" content="https://trabajoscerca.com.ar/">
 <meta property="og:title" content="Trabajos Cerca — Encontrá el profesional que necesitás en tu ciudad">
 <meta property="og:description" content="Plomeros, electricistas, contadores, médicos y más de 30 oficios en toda Argentina. Buscá por ciudad, contacto directo por WhatsApp. 100% gratis.">
-<meta property="og:image" content="https://trabajocerca.vercel.app/og-image.png">
+<meta property="og:image" content="https://trabajoscerca.com.ar/og-image.png">
 <meta property="og:locale" content="es_AR">
 <meta property="og:site_name" content="Trabajos Cerca">
 
@@ -29,7 +29,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Trabajos Cerca — Profesionales y oficios en tu ciudad">
 <meta name="twitter:description" content="Encontrá plomeros, electricistas, contadores y más en Argentina. Contacto directo por WhatsApp.">
-<meta name="twitter:image" content="https://trabajocerca.vercel.app/og-image.png">
+<meta name="twitter:image" content="https://trabajoscerca.com.ar/og-image.png">
 
 <!-- JSON-LD Structured Data -->
 <script type="application/ld+json">
@@ -37,12 +37,12 @@
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Trabajos Cerca",
-  "url": "https://trabajocerca.vercel.app",
+  "url": "https://trabajoscerca.com.ar",
   "description": "Plataforma para encontrar profesionales y oficios cerca tuyo en Argentina",
   "inLanguage": "es-AR",
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "https://trabajocerca.vercel.app/buscador.html?q={search_term_string}",
+    "target": "https://trabajoscerca.com.ar/buscador.html?q={search_term_string}",
     "query-input": "required name=search_term_string"
   }
 }
@@ -52,8 +52,8 @@
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Trabajos Cerca",
-  "url": "https://trabajocerca.vercel.app",
-  "logo": "https://trabajocerca.vercel.app/logo.png",
+  "url": "https://trabajoscerca.com.ar",
+  "logo": "https://trabajoscerca.com.ar/logo.png",
   "description": "Plataforma argentina que conecta profesionales, trabajadores y empleadores de todo el país",
   "areaServed": {
     "@type": "Country",
@@ -823,7 +823,7 @@ async function googleSignIn(tipo){
   localStorage.setItem("googleTipo", tipo)
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: "https://trabajocerca.vercel.app/auth_callback.html" }
+    options: { redirectTo: "https://trabajoscerca.com.ar/auth_callback.html" }
   })
   if(error) alert("Error al conectar con Google: " + error.message)
 }

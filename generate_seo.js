@@ -1,8 +1,8 @@
-// Genera páginas SEO estáticas para las combinaciones oficio/ciudad más buscadas
+﻿// Genera páginas SEO estáticas para las combinaciones oficio/ciudad más buscadas
 const fs   = require('fs')
 const path = require('path')
 
-const SITE = "https://trabajocerca.vercel.app"
+const SITE = "https://trabajoscerca.com.ar"
 
 const OFICIOS = [
   { nombre: "Plomero",      slug: "plomero",      cat: "Plomería",      emoji: "🔧", desc: "reparaciones de cañerías, pérdidas de agua, instalaciones sanitarias" },

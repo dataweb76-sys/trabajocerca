@@ -1,4 +1,4 @@
-import { supabase } from "./supabase.js"
+﻿import { supabase } from "./supabase.js"
 
 /* ── Crédito de referido ── */
 async function creditarReferido(nuevoUserId){
@@ -816,13 +816,13 @@ async function compartir(url, titulo, texto){
 }
 
 window.compartirPerfil = function(userId){
-  const url   = `https://trabajocerca.vercel.app/perfil_publico?id=${userId}`
+  const url   = `https://trabajoscerca.com.ar/perfil_publico?id=${userId}`
   const texto = "Mirá mi perfil en Trabajos Cerca 👷‍♂️ Encontrá profesionales y oficios cerca tuyo."
   compartir(url, "Mi perfil — Trabajos Cerca", texto)
 }
 
 window.compartirInicio = function(){
-  const url   = "https://trabajocerca.vercel.app/"
+  const url   = "https://trabajoscerca.com.ar/"
   const texto = "¡Encontrá profesionales, oficios y trabajo en tu ciudad! 👷‍♂️💼 Trabajos Cerca — 100% gratis."
   compartir(url, "Trabajos Cerca", texto)
 }
