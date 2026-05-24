@@ -105,6 +105,51 @@
   position: absolute; right: 13px; color: rgba(255,255,255,.85);
   font-size: 11px; pointer-events: none;
 }
+/* ── Botones de búsqueda glassmorphism en el hero ── */
+.hero-buscar-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+  flex-wrap: wrap;
+  padding: 0 16px;
+}
+.hero-buscar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid rgba(255,255,255,0.42);
+  border-radius: 16px;
+  padding: 15px 26px;
+  color: white;
+  font-weight: 800;
+  font-size: 15px;
+  text-decoration: none;
+  box-shadow: 0 4px 22px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: background .2s, border-color .2s, transform .15s, box-shadow .2s;
+  flex: 1;
+  min-width: 150px;
+  justify-content: center;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.hero-buscar-btn:hover {
+  background: rgba(255,255,255,0.28);
+  border-color: rgba(255,255,255,0.72);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.3);
+  color: white;
+  text-decoration: none;
+}
+.hero-buscar-btn .hb-ico { font-size: 21px; }
+@media(max-width:560px){
+  .hero-buscar-btn { font-size:14px; padding:13px 18px; }
+  .hero-buscar-btn .hb-ico { font-size:18px; }
+}
+
 /* Badge provincia activa en los buscadores */
 #prov-filtro-banner {
   display: flex; align-items: center; gap: 10px;
@@ -162,15 +207,24 @@
         <span class="prov-arrow"><i class="fa-solid fa-chevron-down"></i></span>
       </div>
     </div>
+
+    <!-- Botones de búsqueda -->
+    <div class="hero-buscar-btns">
+      <a href="/buscador_oficios.html" class="hero-buscar-btn">
+        <span class="hb-ico">🔨</span> Buscar Oficios
+      </a>
+      <a href="/buscador_profesionales.html" class="hero-buscar-btn">
+        <span class="hb-ico">🎓</span> Buscar Profesionales
+      </a>
+      <a href="/buscador_trabajos.html" class="hero-buscar-btn">
+        <span class="hb-ico">💼</span> Buscar Empleados
+      </a>
+    </div>
+
   </div>
 </section>
 
 <div class="buscadores-grid">
-  <div class="buscador-card" onclick="location.href='/buscador_trabajos.html'">
-    <span class="bc-ico">💼</span>
-    <h3>Buscador de Empleados</h3>
-    <p>Empresas y personas que buscan empleados en tu zona</p>
-  </div>
   <div class="buscador-card" onclick="abrirModalOficio(event)">
     <span class="bc-ico">🔨</span>
     <h3>Ingresá tu Oficio</h3>
@@ -185,54 +239,6 @@
     <span class="bc-ico">🎓</span>
     <h3>Ingresá tu Profesión</h3>
     <p>Médicos, abogados, arquitectos y más profesionales</p>
-  </div>
-</div>
-
-<!-- ══ BOTONES BUSCADORES DESTACADOS ══ -->
-<div style="max-width:860px;margin:0 auto;padding:0 20px 36px;">
-  <p style="text-align:center;font-size:13px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin:0 0 16px;">
-    <i class="fa-solid fa-magnifying-glass"></i> &nbsp;Encontrá a quien necesitás
-  </p>
-  <div style="display:flex;flex-direction:column;gap:14px;">
-
-    <!-- Buscador de Oficios -->
-    <a href="/buscador_oficios.html"
-      style="display:flex;align-items:center;gap:18px;padding:22px 28px;background:linear-gradient(135deg,#1d4ed8,#0ea5e9);border-radius:18px;text-decoration:none;box-shadow:0 6px 24px rgba(29,78,216,.28);transition:transform .2s,box-shadow .2s;"
-      onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(29,78,216,.38)'"
-      onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(29,78,216,.28)'">
-      <div style="font-size:42px;flex-shrink:0;">🔨</div>
-      <div style="flex:1;">
-        <p style="margin:0 0 4px;font-size:19px;font-weight:900;color:white;letter-spacing:.01em;">
-          Buscador de Oficios
-        </p>
-        <p style="margin:0;font-size:13px;color:rgba(255,255,255,.85);line-height:1.5;">
-          Plomeros · Electricistas · Carpinteros · Pintores · Albañiles y muchos más cerca tuyo
-        </p>
-      </div>
-      <div style="flex-shrink:0;background:rgba(255,255,255,.18);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:800;color:white;white-space:nowrap;">
-        Buscar <i class="fa-solid fa-arrow-right"></i>
-      </div>
-    </a>
-
-    <!-- Buscador de Profesionales -->
-    <a href="/buscador_profesionales.html"
-      style="display:flex;align-items:center;gap:18px;padding:22px 28px;background:linear-gradient(135deg,#2563eb,#6366f1);border-radius:18px;text-decoration:none;box-shadow:0 6px 24px rgba(99,102,241,.28);transition:transform .2s,box-shadow .2s;"
-      onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(99,102,241,.38)'"
-      onmouseout="this.style.transform='';this.style.boxShadow='0 6px 24px rgba(99,102,241,.28)'">
-      <div style="font-size:42px;flex-shrink:0;">🎓</div>
-      <div style="flex:1;">
-        <p style="margin:0 0 4px;font-size:19px;font-weight:900;color:white;letter-spacing:.01em;">
-          Buscador de Profesionales
-        </p>
-        <p style="margin:0;font-size:13px;color:rgba(255,255,255,.85);line-height:1.5;">
-          Médicos · Abogados · Arquitectos · Contadores · Ingenieros y más en tu ciudad
-        </p>
-      </div>
-      <div style="flex-shrink:0;background:rgba(255,255,255,.18);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:800;color:white;white-space:nowrap;">
-        Buscar <i class="fa-solid fa-arrow-right"></i>
-      </div>
-    </a>
-
   </div>
 </div>
 
