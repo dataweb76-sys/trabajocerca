@@ -173,7 +173,23 @@ function inicializarCiudadInput(){
   if(lbl) lbl.textContent = `Ciudad (${_PROV_FILTRO})`
 }
 
-/* ── SELECTOR DE CATEGORÍA ── */
+/* ── POBLAR SELECT PRINCIPAL DE BÚSQUEDA ── */
+function inicializarBuscarSelect(){
+  const el = document.getElementById("buscar")
+  if(!el || el.tagName !== "SELECT") return
+  const placeholder = el.options[0]?.text || "— Elegí una categoría —"
+  el.innerHTML = `<option value="">${placeholder}</option>` +
+    CHIPS.map(([ico, cat]) => `<option value="${cat}">${ico} ${cat}</option>`).join("")
+  el.onchange = () => {
+    // Al cambiar categoría, resetear ciudad y buscar
+    const c = document.getElementById("ciudad")
+    if(c) c.value = ""
+    buscar()
+    document.getElementById("resultados")?.scrollIntoView({ behavior:"smooth", block:"start" })
+  }
+}
+
+/* ── SELECTOR DE CATEGORÍA (chips — fallback si existe el contenedor) ── */
 function renderChips(){
   const cont = document.getElementById("chipsCategoria"); if(!cont) return
   cont.innerHTML = `
@@ -706,5 +722,6 @@ document.addEventListener("keydown", e => { if(e.key==="Escape") cerrarModal() }
 
 /* ── INICIAR ── */
 inicializarCiudadInput()
-renderChips()
+inicializarBuscarSelect()   // puebla el select #buscar con las categorías del tipo de página
+renderChips()               // fallback: si existe #chipsCategoria lo puebla también
 buscar()

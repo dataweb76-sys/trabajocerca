@@ -1208,6 +1208,11 @@ a:hover { text-decoration: underline; }
   box-shadow: 0 0 0 3px rgba(37,99,235,.15);
 }
 
+/* Dentro del panel de filtros, el select de categoría ocupa todo el ancho */
+.filtros .cat-select {
+  max-width: 100%;
+}
+
 /* ── Portfolio ── */
 
 .foto-upload-box {

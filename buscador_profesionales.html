@@ -39,7 +39,9 @@
   <div class="filtros" style="align-items:flex-end;">
     <div style="flex:2;">
       <label>¿Qué profesional necesitás?</label>
-      <input id="buscar" placeholder="Ej: médico, abogado, contador, arquitecto..." onkeydown="if(event.key==='Enter') buscar()">
+      <select id="buscar" class="cat-select">
+        <option value="">— Elegí una profesión —</option>
+      </select>
     </div>
     <div>
       <label>Ciudad</label>
@@ -51,11 +53,6 @@
         <i class="fa-solid fa-magnifying-glass"></i> Buscar
       </button>
     </div>
-  </div>
-
-  <div style="margin-bottom:24px;">
-    <p style="font-size:12px;font-weight:700;color:#94a3b8;letter-spacing:.06em;margin:0 0 10px;text-transform:uppercase;">O elegí una profesión</p>
-    <div class="cats-chips" id="chipsCategoria"></div>
   </div>
 
   <div id="resultados">
