@@ -145,9 +145,30 @@
   text-decoration: none;
 }
 .hero-buscar-btn .hb-ico { font-size: 21px; }
-@media(max-width:560px){
-  .hero-buscar-btn { font-size:14px; padding:13px 18px; }
-  .hero-buscar-btn .hb-ico { font-size:18px; }
+/* ── Grid de registro: 3 cards centradas, separadas del hero ── */
+.buscadores-grid {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 48px;
+}
+@media(max-width:600px){
+  .buscadores-grid {
+    grid-template-columns: 1fr;
+    margin-top: 28px;
+    padding: 0 16px;
+  }
+  .hero-buscar-btns {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 20px;
+    gap: 10px;
+  }
+  .hero-buscar-btn {
+    min-width: unset;
+    font-size: 14px;
+    padding: 13px 18px;
+    flex: none;
+  }
+  .hero-buscar-btn .hb-ico { font-size: 18px; }
 }
 
 /* Badge provincia activa en los buscadores */
