@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#7c3aed">
+<title>Sorteo — Trabajos Cerca</title>
+<meta name="description" content="Compartí Trabajos Cerca en Instagram y participá para ganar 5 trabajos gratis. Sorteo el 30 de junio de 2026.">
+<link rel="canonical" href="https://www.trabajoscerca.com.ar/sorteo.html">
+<meta property="og:title" content="Sorteo Trabajos Cerca — ¡Ganá 5 trabajos gratis!">
+<meta property="og:description" content="Compartí en Instagram, registrate y participá del sorteo. 2 ganadores, 5 trabajos gratis cada uno.">
+<meta property="og:url" content="https://www.trabajoscerca.com.ar/sorteo.html">
+<meta property="og:image" content="https://www.trabajoscerca.com.ar/og-image.png">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════
+   SORTEO — Estilos específicos
+═══════════════════════════════════ */
+
+.sorteo-hero {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
+  color: white;
+  text-align: center;
+  padding: 60px 24px 80px;
+  position: relative;
+  overflow: hidden;
+}
+.sorteo-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.sorteo-hero .badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 999px;
+  padding: 6px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(4px);
+}
+.sorteo-hero h1 {
+  font-size: clamp(30px, 5vw, 54px);
+  font-weight: 900;
+  margin: 0 0 14px;
+  line-height: 1.15;
+  position: relative;
+}
+.sorteo-hero .sub {
+  font-size: clamp(15px, 2.5vw, 20px);
+  opacity: 0.88;
+  margin: 0 0 36px;
+  position: relative;
+}
+.premio-chips {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  position: relative;
+  margin-bottom: 8px;
+}
+.premio-chip {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 14px;
+  padding: 14px 22px;
+  font-size: 15px;
+  font-weight: 700;
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.premio-chip span { font-size: 22px; }
+
+/* COUNTDOWN */
+.countdown-wrap {
+  background: white;
+  border-radius: 20px;
+  padding: 30px 28px 24px;
+  max-width: 600px;
+  margin: -40px auto 0;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 8px 40px rgba(79,70,229,0.18);
+  text-align: center;
+}
+.countdown-label {
+  font-size: 13px;
+  color: #7c3aed;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.countdown {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cd-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 64px;
+}
+.cd-num {
+  font-size: clamp(32px, 6vw, 48px);
+  font-weight: 900;
+  color: #4f46e5;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.cd-sep {
+  font-size: 36px;
+  font-weight: 900;
+  color: #a855f7;
+  line-height: 1;
+  margin-top: 2px;
+  align-self: flex-start;
+}
+.cd-lbl {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+.participantes-badge {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #64748b;
+}
+.participantes-badge strong {
+  color: #7c3aed;
+  font-size: 18px;
+}
+
+/* PASOS */
+.pasos-wrap {
+  max-width: 700px;
+  margin: 48px auto 0;
+  padding: 0 20px;
+}
+.pasos-titulo {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 28px;
+}
+.pasos {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.paso {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  background: white;
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.paso:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.11); }
+.paso-num {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  font-weight: 900;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.paso-txt strong { display: block; font-size: 15px; color: #1e293b; margin-bottom: 4px; }
+.paso-txt p { margin: 0; font-size: 13px; color: #64748b; line-height: 1.5; }
+
+/* BOTÓN COMPARTIR */
+.btn-instagram {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #f09433, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888);
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 13px 28px;
+  border-radius: 12px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  margin-top: 6px;
+}
+.btn-instagram:hover { opacity: 0.9; transform: scale(1.03); }
+
+/* FORMULARIO INSCRIPCIÓN */
+.form-sorteo-wrap {
+  max-width: 560px;
+  margin: 40px auto 0;
+  padding: 0 20px;
+}
+.form-sorteo {
+  background: white;
+  border-radius: 20px;
+  padding: 32px 28px;
+  box-shadow: 0 4px 24px rgba(79,70,229,0.12);
+  border: 2px solid #ede9fe;
+}
+.form-sorteo h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  color: #1e293b;
+}
+.form-sorteo .form-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 24px;
+}
+.form-sorteo label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+.form-sorteo input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+.form-sorteo input:focus { border-color: #7c3aed; }
+.form-sorteo input.error { border-color: #ef4444; }
+.btn-inscribirse {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.btn-inscribirse:hover { opacity: 0.9; transform: scale(1.01); }
+.btn-inscribirse:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+/* ESTADO: ya inscripto */
+.ya-inscripto {
+  text-align: center;
+  padding: 28px 24px;
+}
+.ya-inscripto .check-ico {
+  font-size: 52px;
+  color: #22c55e;
+  margin-bottom: 14px;
+  display: block;
+}
+.ya-inscripto h3 { margin: 0 0 8px; color: #1e293b; font-size: 20px; }
+.ya-inscripto p { margin: 0; color: #64748b; font-size: 14px; }
+
+/* ESTADO: no logueado */
+.no-login {
+  text-align: center;
+  padding: 28px 24px;
+}
+.no-login .lock-ico {
+  font-size: 40px;
+  color: #7c3aed;
+  margin-bottom: 14px;
+  display: block;
+}
+.no-login h3 { margin: 0 0 10px; font-size: 18px; color: #1e293b; }
+.no-login p  { margin: 0 0 18px; font-size: 13px; color: #64748b; }
+.btn-login-sorteo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #4f46e5;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 11px 24px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.btn-login-sorteo:hover { background: #4338ca; }
+
+/* BASES */
+.bases-wrap {
+  max-width: 680px;
+  margin: 48px auto 60px;
+  padding: 0 20px;
+}
+.bases {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px 28px;
+}
+.bases h4 {
+  margin: 0 0 14px;
+  font-size: 15px;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bases ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 2;
+}
+
+/* GANADORES (post-sorteo) */
+.ganadores-wrap {
+  max-width: 600px;
+  margin: 48px auto 0;
+  padding: 0 20px;
+  display: none;
+}
+.ganadores-wrap.visible { display: block; }
+.ganador-card {
+  background: linear-gradient(135deg, #fef9c3, #fef08a);
+  border: 2px solid #facc15;
+  border-radius: 20px;
+  padding: 28px 24px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.ganador-card .trofeo { font-size: 48px; display: block; margin-bottom: 8px; }
+.ganador-card h3 { margin: 0 0 6px; font-size: 20px; color: #713f12; }
+.ganador-card p { margin: 0; font-size: 14px; color: #92400e; }
+
+@media (max-width: 600px) {
+  .countdown { gap: 6px; }
+  .cd-num { font-size: 32px; }
+  .cd-sep { font-size: 28px; }
+  .cd-unit { min-width: 52px; }
+  .form-sorteo { padding: 24px 18px; }
+  .sorteo-hero { padding: 50px 18px 70px; }
+  .paso { padding: 16px 16px; gap: 14px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/index.html"><i class="fa-solid fa-house"></i> <span>Inicio</span></a>
+    <a href="/mapa.html"><i class="fa-solid fa-map"></i> <span>Mapa</span></a>
+    <a href="/pedidos.html"><i class="fa-solid fa-clipboard-list"></i> <span>Pedidos</span></a>
+    <a href="/mensajes.html"><i class="fa-solid fa-comment-dots"></i> <span>Mensajes</span></a>
+    <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="sorteo-hero">
+  <div class="badge">🎉 Sorteo Especial · 30 de junio 2026</div>
+  <h1>¡Ganá 5 trabajos<br>completamente gratis!</h1>
+  <p class="sub">Compartí Trabajos Cerca en Instagram y participá.<br>Sorteamos <strong>2 ganadores</strong> el 30 de junio.</p>
+  <div class="premio-chips">
+    <div class="premio-chip"><span>🏆</span> 2 ganadores</div>
+    <div class="premio-chip"><span>🔨</span> 5 trabajos gratis c/u</div>
+    <div class="premio-chip"><span>📅</span> Sorteo 30/06/2026</div>
+  </div>
+</div>
+
+<!-- COUNTDOWN -->
+<div class="container" style="padding:0 16px;">
+  <div class="countdown-wrap">
+    <div class="countdown-label"><i class="fa-solid fa-hourglass-half"></i> &nbsp;Tiempo restante para el sorteo</div>
+    <div class="countdown">
+      <div class="cd-unit"><span class="cd-num" id="cd-dias">--</span><span class="cd-lbl">días</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><span class="cd-num" id="cd-hs">--</span><span class="cd-lbl">horas</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><span class="cd-num" id="cd-min">--</span><span class="cd-lbl">min</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-unit"><span class="cd-num" id="cd-seg">--</span><span class="cd-lbl">seg</span></div>
+    </div>
+    <div class="participantes-badge">
+      <strong id="conteo-inscriptos">...</strong> personas ya participan del sorteo
+    </div>
+  </div>
+</div>
+
+<!-- PASOS -->
+<div class="pasos-wrap">
+  <p class="pasos-titulo">¿Cómo participar?</p>
+  <div class="pasos">
+    <div class="paso">
+      <div class="paso-num">1</div>
+      <div class="paso-txt">
+        <strong>Registrate en Trabajos Cerca</strong>
+        <p>Creá tu cuenta gratuita si todavía no tenés una. Solo tardás 2 minutos.</p>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-num">2</div>
+      <div class="paso-txt">
+        <strong>Compartí en Instagram</strong>
+        <p>Publicá en tu feed o story con el texto y hashtags de abajo. Tiene que ser una publicación pública.</p>
+        <button class="btn-instagram" onclick="copiarTexto()" id="btnCopiar">
+          <i class="fa-brands fa-instagram"></i> Copiar texto para compartir
+        </button>
+        <div id="textoCopiadoMsg" style="font-size:12px;color:#22c55e;margin-top:8px;display:none;">
+          <i class="fa-solid fa-check"></i> ¡Texto copiado! Ahora pegalo en Instagram.
+        </div>
+        <div id="textoParaCompartir" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-top:12px;font-size:13px;color:#334155;line-height:1.6;">
+          🔨 ¿Necesitás un plomero, electricista o profesional? Los encontrás en <strong>trabajoscerca.com.ar</strong> ⚡<br><br>
+          Buscá por ciudad, contacto directo por WhatsApp. ¡100% gratis! 🎉<br><br>
+          #TrabajosCerca #Oficios #Argentina #Plomero #Electricista #Profesionales
+        </div>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-num">3</div>
+      <div class="paso-txt">
+        <strong>Completá el formulario</strong>
+        <p>Ingresá tu usuario de Instagram y el link a tu publicación. ¡Listo, ya estás participando!</p>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-num">4</div>
+      <div class="paso-txt">
+        <strong>Esperá el sorteo</strong>
+        <p>El <strong>30 de junio de 2026</strong> sorteamos 2 ganadores en vivo. Los avisamos por email y publicamos los ganadores acá.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GANADORES (se muestra solo después del sorteo) -->
+<div class="ganadores-wrap" id="ganadoresWrap">
+  <h2 style="text-align:center;font-size:24px;margin-bottom:24px;">🏆 Ganadores del Sorteo</h2>
+  <div id="listaGanadores"></div>
+</div>
+
+<!-- FORMULARIO / ESTADO -->
+<div class="form-sorteo-wrap">
+  <div class="form-sorteo" id="formEstado">
+    <div style="text-align:center;padding:30px 0;color:#94a3b8;">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i>
+      <p style="margin-top:12px;font-size:14px;">Cargando...</p>
+    </div>
+  </div>
+</div>
+
+<!-- BASES Y CONDICIONES -->
+<div class="bases-wrap">
+  <div class="bases">
+    <h4><i class="fa-solid fa-file-lines" style="color:#7c3aed;"></i> Bases y condiciones</h4>
+    <ul>
+      <li>El sorteo es válido para usuarios registrados en <strong>trabajoscerca.com.ar</strong></li>
+      <li>La publicación de Instagram debe ser <strong>pública</strong> y estar activa al momento del sorteo</li>
+      <li>Se admite <strong>una sola inscripción</strong> por persona</li>
+      <li>Los 2 ganadores recibirán <strong>5 trabajos realizados sin comisión</strong> (uso de la plataforma)</li>
+      <li>El sorteo se realiza el <strong>30 de junio de 2026</strong></li>
+      <li>Los ganadores son notificados por email y publicados en esta página</li>
+      <li>Trabajos Cerca se reserva el derecho de verificar las publicaciones</li>
+    </ul>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from "/supabase.js"
+
+/* ── Fecha del sorteo ─────────────── */
+const FECHA_SORTEO = new Date("2026-06-30T20:00:00-03:00") // 20hs Argentina
+
+/* ── Countdown ───────────────────── */
+function actualizarCountdown() {
+  const diff = FECHA_SORTEO - new Date()
+  if (diff <= 0) {
+    document.querySelectorAll(".cd-num").forEach(el => el.textContent = "00")
+    cargarGanadores()
+    return
+  }
+  const dias = Math.floor(diff / 86400000)
+  const hs   = Math.floor((diff % 86400000) / 3600000)
+  const min  = Math.floor((diff % 3600000)  / 60000)
+  const seg  = Math.floor((diff % 60000)    / 1000)
+  document.getElementById("cd-dias").textContent = String(dias).padStart(2,"0")
+  document.getElementById("cd-hs").textContent   = String(hs).padStart(2,"0")
+  document.getElementById("cd-min").textContent  = String(min).padStart(2,"0")
+  document.getElementById("cd-seg").textContent  = String(seg).padStart(2,"0")
+}
+actualizarCountdown()
+setInterval(actualizarCountdown, 1000)
+
+/* ── Conteo de inscriptos ─────────── */
+async function cargarConteo() {
+  const { data } = await supabase.rpc("contar_inscriptos_sorteo")
+  document.getElementById("conteo-inscriptos").textContent = data ?? 0
+}
+cargarConteo()
+
+// Realtime: actualizar conteo en vivo
+supabase
+  .channel("sorteo-conteo")
+  .on("postgres_changes", { event: "INSERT", schema: "public", table: "sorteo_inscriptos" }, () => {
+    cargarConteo()
+  })
+  .subscribe()
+
+/* ── Ganadores (post sorteo) ─────── */
+async function cargarGanadores() {
+  const { data } = await supabase
+    .from("sorteo_ganadores")
+    .select("*")
+    .order("created_at")
+  if (!data || data.length === 0) return
+  const wrap = document.getElementById("ganadoresWrap")
+  const lista = document.getElementById("listaGanadores")
+  wrap.classList.add("visible")
+  lista.innerHTML = data.map((g, i) => `
+    <div class="ganador-card">
+      <span class="trofeo">${i === 0 ? "🥇" : "🥈"}</span>
+      <h3>@${g.instagram_usuario}</h3>
+      <p>Ganador ${i + 1} — 5 trabajos gratis 🎉</p>
+    </div>
+  `).join("")
+}
+
+/* ── Estado del formulario ─────────── */
+async function renderFormulario() {
+  const { data: { user } } = await supabase.auth.getUser()
+  const el = document.getElementById("formEstado")
+
+  // No logueado
+  if (!user) {
+    el.innerHTML = `
+      <div class="no-login">
+        <span class="lock-ico"><i class="fa-solid fa-lock"></i></span>
+        <h3>Iniciá sesión para participar</h3>
+        <p>Necesitás una cuenta en Trabajos Cerca para inscribirte al sorteo.</p>
+        <a href="/login.html?redirect=/sorteo.html" class="btn-login-sorteo">
+          <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
+        </a>
+      </div>
+    `
+    return
+  }
+
+  // Verificar si ya está inscripto
+  const { data: yaInscripto } = await supabase
+    .from("sorteo_inscriptos")
+    .select("id, instagram_usuario, fecha_inscripcion")
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  if (yaInscripto) {
+    const fecha = new Date(yaInscripto.fecha_inscripcion).toLocaleDateString("es-AR", {
+      day: "numeric", month: "long", year: "numeric"
+    })
+    el.innerHTML = `
+      <div class="ya-inscripto">
+        <span class="check-ico"><i class="fa-solid fa-circle-check"></i></span>
+        <h3>¡Ya estás participando!</h3>
+        <p>Inscripto como <strong>@${yaInscripto.instagram_usuario}</strong><br>el ${fecha}</p>
+        <p style="margin-top:12px;">Te avisamos por email si ganás. ¡Buena suerte! 🍀</p>
+      </div>
+    `
+    return
+  }
+
+  // Formulario de inscripción
+  el.innerHTML = `
+    <h3><i class="fa-solid fa-ticket" style="color:#7c3aed;margin-right:8px;"></i>Inscribirse al sorteo</h3>
+    <p class="form-sub">Completá los datos después de compartir en Instagram.</p>
+
+    <label for="ig-usuario">Tu usuario de Instagram *</label>
+    <input type="text" id="ig-usuario" placeholder="@tuusuario" autocomplete="off">
+
+    <label for="ig-url">Link a tu publicación (opcional)</label>
+    <input type="url" id="ig-url" placeholder="https://www.instagram.com/p/...">
+
+    <div id="form-error" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"></div>
+
+    <button class="btn-inscribirse" id="btnInscribirse" onclick="inscribirse()">
+      <i class="fa-solid fa-ticket"></i> ¡Quiero participar!
+    </button>
+    <p style="font-size:11px;color:#94a3b8;text-align:center;margin-top:10px;">
+      Al inscribirte aceptás las bases y condiciones del sorteo.
+    </p>
+  `
+}
+renderFormulario()
+
+/* ── Inscripción ────────────────── */
+window.inscribirse = async function() {
+  const btn = document.getElementById("btnInscribirse")
+  const errEl = document.getElementById("form-error")
+  let usuario = document.getElementById("ig-usuario").value.trim().replace(/^@/, "")
+  const url    = document.getElementById("ig-url").value.trim()
+
+  errEl.style.display = "none"
+
+  if (!usuario) {
+    document.getElementById("ig-usuario").classList.add("error")
+    errEl.textContent = "Ingresá tu usuario de Instagram."
+    errEl.style.display = "block"
+    return
+  }
+
+  btn.disabled = true
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Inscribiendo...'
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { window.location.href = "/login.html?redirect=/sorteo.html"; return }
+
+  const { error } = await supabase.from("sorteo_inscriptos").insert({
+    user_id: user.id,
+    instagram_usuario: usuario,
+    instagram_url: url || null
+  })
+
+  if (error) {
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-ticket"></i> ¡Quiero participar!'
+    if (error.code === "23505") {
+      errEl.textContent = "Ya estás inscripto con esta cuenta."
+    } else {
+      errEl.textContent = "Error al inscribirte. Intentá de nuevo."
+    }
+    errEl.style.display = "block"
+    return
+  }
+
+  // Éxito — re-renderizar
+  renderFormulario()
+  cargarConteo()
+}
+
+/* ── Copiar texto para Instagram ─── */
+window.copiarTexto = function() {
+  const texto = `🔨 ¿Necesitás un plomero, electricista o profesional? Los encontrás en trabajoscerca.com.ar ⚡\n\nBuscá por ciudad, contacto directo por WhatsApp. ¡100% gratis! 🎉\n\n#TrabajosCerca #Oficios #Argentina #Plomero #Electricista #Profesionales`
+  navigator.clipboard.writeText(texto).then(() => {
+    document.getElementById("textoCopiadoMsg").style.display = "block"
+    const btn = document.getElementById("btnCopiar")
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> ¡Copiado!'
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fa-brands fa-instagram"></i> Copiar texto para compartir'
+    }, 3000)
+  })
+}
+</script>
+
+<script src="/notif_widget.js"></script>
+<script src="/push_widget.js"></script>
+<script src="/chat_widget.js"></script>
+<script src="/splash.js"></script>
+<script src="/analytics.js"></script>
+</body>
+</html>
