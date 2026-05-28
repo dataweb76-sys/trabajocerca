@@ -607,143 +607,6 @@
   </div>
 </div>
 
-<!-- PRODE STRIP: barra compacta visible siempre cuando aplica -->
-<div class="prode-strip" id="prodeStrip">
-  <div class="prode-strip-inner">
-    <div class="prode-strip-prizes">
-      <span class="prode-strip-chip gold">🌐 1° Web gratis</span>
-      <span class="prode-strip-chip gold">🇦🇷 $500.000 ARG campeón</span>
-      <span id="stripRefCount" class="prode-strip-chip">🔒 0/10 invitados</span>
-    </div>
-    <button class="prode-strip-btn" onclick="abrirGateModal()">
-      ⚽ Premios en juego →
-    </button>
-  </div>
-</div>
-
-<!-- GATE MODAL (popup desde abajo) -->
-<div class="gate-overlay" id="gatePanel" onclick="cerrarGateModal(event)">
-  <div class="gate-modal" id="gateModalBox">
-    <div class="gate-modal-handle"></div>
-    <div style="position:relative;padding:20px 20px 0;">
-      <button class="gate-modal-close" onclick="cerrarGateModal()">×</button>
-      <div style="text-align:center;margin-bottom:14px;">
-        <div style="font-size:12px;font-weight:800;color:#fbbf24;letter-spacing:2px;text-transform:uppercase;">🏆 PREMIOS EN JUEGO</div>
-      </div>
-    </div>
-    <div class="gate-card">
-
-    <!-- Premios -->
-    <div style="padding:22px 24px 16px;border-bottom:1px solid rgba(255,255,255,.1);">
-      <div style="text-align:center;margin-bottom:16px;">
-        <div style="font-size:13px;font-weight:700;color:#fbbf24;letter-spacing:2px;text-transform:uppercase;">🏆 PREMIOS EN JUEGO</div>
-      </div>
-      <div class="gate-prizes">
-        <div class="gate-prize-item">
-          <span class="gate-prize-ico">🌐</span>
-          <div class="gate-prize-title">1° LUGAR</div>
-          <div style="font-size:17px;font-weight:900;color:white;margin-bottom:4px;">PÁGINA WEB GRATIS</div>
-          <div class="gate-prize-desc">Diseño + desarrollo completo. Solo pagás costos de base de datos.</div>
-        </div>
-        <div class="gate-prize-item">
-          <span class="gate-prize-ico">🇦🇷</span>
-          <div class="gate-prize-title">SI ARGENTINA CAMPEÓN</div>
-          <div style="font-size:17px;font-weight:900;color:#fbbf24;margin-bottom:4px;">$500.000 ARS</div>
-          <div class="gate-prize-desc">Necesitás 3 resultados exactos de partidos de Argentina para calificar.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Reglas rápidas -->
-    <div style="padding:16px 24px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;gap:20px;flex-wrap:wrap;justify-content:center;">
-      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.75);">
-        <span style="font-size:22px;display:block;margin-bottom:3px;">🎯</span>
-        <strong style="color:white;">3 puntos</strong><br>resultado exacto
-      </div>
-      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.75);">
-        <span style="font-size:22px;display:block;margin-bottom:3px;">✅</span>
-        <strong style="color:white;">1 punto</strong><br>tendencia correcta
-      </div>
-      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.75);">
-        <span style="font-size:22px;display:block;margin-bottom:3px;">🔒</span>
-        <strong style="color:white;">1 hora antes</strong><br>se cierran predicciones
-      </div>
-      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.75);">
-        <span style="font-size:22px;display:block;margin-bottom:3px;">⚽</span>
-        <strong style="color:white;">104 partidos</strong><br>para predecir
-      </div>
-    </div>
-
-    <!-- Compartir y progreso -->
-    <div class="gate-share">
-      <div style="font-size:14px;font-weight:700;color:white;margin-bottom:14px;">
-        📎 Tu link de invitación — compartilo y desbloqueá el prode:
-      </div>
-
-      <!-- Link input + copiar -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
-        <input id="gateLinkInput" readonly style="
-          flex:1;min-width:0;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);
-          color:white;border-radius:10px;padding:10px 14px;font-size:13px;font-family:monospace;outline:none;">
-        <button onclick="copiarGateLink()" style="
-          background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
-          color:white;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;
-          cursor:pointer;white-space:nowrap;transition:background .15s;"
-          onmouseover="this.style.background='rgba(255,255,255,.28)'"
-          onmouseout="this.style.background='rgba(255,255,255,.18)'">
-          📋 Copiar
-        </button>
-      </div>
-
-      <!-- Botones de compartir -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
-        <a id="gateWA" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#25D366;color:white;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;text-decoration:none;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
-          <i class="fa-brands fa-whatsapp"></i> WhatsApp
-        </a>
-        <a id="gateFB" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#1877F2;color:white;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;text-decoration:none;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
-          <i class="fa-brands fa-facebook"></i> Facebook
-        </a>
-        <a id="gateX" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#000;color:white;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;text-decoration:none;border:1px solid rgba(255,255,255,.2);" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
-          <i class="fa-brands fa-x-twitter"></i> X
-        </a>
-        <button onclick="copiarGateIG()" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:white;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
-          <i class="fa-brands fa-instagram"></i> Instagram
-        </button>
-      </div>
-
-      <!-- Progreso -->
-      <div style="background:rgba(255,255,255,.07);border-radius:14px;padding:16px 18px;margin-bottom:16px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:13px;font-weight:700;color:white;">Amigos registrados con tu link</span>
-          <span id="gateRefCount" style="font-size:20px;font-weight:900;color:#fbbf24;">0/10</span>
-        </div>
-        <div class="ref-progress-bar">
-          <div class="ref-progress-fill" id="gateRefBar" style="width:0%"></div>
-        </div>
-        <div id="gateRefMsg" style="font-size:13px;color:rgba(255,255,255,.6);margin-top:8px;text-align:center;">
-          Cargando...
-        </div>
-      </div>
-
-      <!-- Botón ingresar a participar -->
-      <div style="text-align:center;padding-bottom:8px;">
-        <button onclick="abrirPopupReglas()" style="
-          display:inline-flex;align-items:center;gap:10px;
-          background:linear-gradient(135deg,#facc15,#f59e0b);
-          color:#1c1917;font-weight:900;font-size:16px;
-          padding:14px 36px;border-radius:14px;border:none;cursor:pointer;
-          box-shadow:0 4px 20px rgba(250,204,21,.45);
-          transition:transform .15s;"
-          onmouseover="this.style.transform='scale(1.03)'"
-          onmouseout="this.style.transform='scale(1)'">
-          ⚽ Ingresar a participar
-        </button>
-      </div>
-    </div>
-
-  </div>
-  </div><!-- /gate-modal -->
-</div><!-- /gate-overlay -->
 
 <!-- MODAL: REGLAS Y CONDICIONES PARA PARTICIPAR -->
 <div id="popupReglas" style="
@@ -921,6 +784,21 @@
       <i class="fa-solid fa-spinner fa-spin" style="font-size:32px;display:block;margin-bottom:12px;"></i>
       <p>Cargando fixture...</p>
     </div>
+  </div>
+
+  <!-- Botón guía de premios -->
+  <div style="text-align:center;padding:8px 20px 32px;">
+    <button onclick="abrirPopupReglas()" style="
+      display:inline-flex;align-items:center;gap:8px;
+      background:white;color:#15803d;
+      border:1.5px solid #bbf7d0;border-radius:12px;
+      padding:11px 22px;font-size:14px;font-weight:700;
+      cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.06);
+      transition:all .15s;"
+      onmouseover="this.style.background='#f0fdf4';this.style.borderColor='#86efac'"
+      onmouseout="this.style.background='white';this.style.borderColor='#bbf7d0'">
+      📋 Ver premios y cómo participar
+    </button>
   </div>
 </div>
 
@@ -1125,19 +1003,7 @@ async function init() {
     document.getElementById("stat-pts").textContent = "—"
   }
 
-  // Mostrar strip + abrir gate modal si está logueado pero no puede jugar
-  if (currentUser && !puedeJugar) {
-    mostrarGatePanel(currentUser.id)
-  }
-  // Mostrar strip también para invitados (con premios genéricos)
-  if (!currentUser) {
-    const strip = document.getElementById("prodeStrip")
-    if (strip) {
-      strip.style.display = "block"
-      const sc = document.getElementById("stripRefCount")
-      if (sc) sc.textContent = "🔒 Registrate gratis"
-    }
-  }
+  // (gate panel eliminado — ver botón al pie del fixture)
 
   // Participantes del sorteo = usuarios con al menos 1 predicción cargada
   // (para llegar acá ya cumplieron los 10 referidos)
@@ -1594,97 +1460,13 @@ window.mostrarToastNecesitas = function() {
 }
 
 /* ══════════════════════════════════
-   Gate panel (logueado sin refs)
+   Gate panel — eliminado
 ══════════════════════════════════ */
-window.abrirGateModal = function() {
-  const panel = document.getElementById("gatePanel")
-  if (panel) panel.classList.add("activo")
-  document.body.style.overflow = "hidden"
-}
-window.cerrarGateModal = function(e) {
-  if (e && e.target !== document.getElementById("gatePanel")) return
-  const panel = document.getElementById("gatePanel")
-  if (panel) panel.classList.remove("activo")
-  document.body.style.overflow = ""
-}
-
 async function mostrarGatePanel(userId) {
-  // Mostrar strip compacto
-  const strip = document.getElementById("prodeStrip")
-  if (strip) strip.style.display = "block"
-
-  // Abrir modal automáticamente la primera vez (solo si no lo vio ya)
-  const yaVio = sessionStorage.getItem("tc_gate_visto")
-  if (!yaVio) {
-    setTimeout(() => { window.abrirGateModal(); sessionStorage.setItem("tc_gate_visto","1") }, 600)
-  }
-
-  const refLink = `https://www.trabajoscerca.com.ar/?ref=${userId}`
-  const msg = encodeURIComponent(
-    `⚽ ¡Registrate en Trabajos Cerca y ayudame a participar en el Prode del Mundial 2026! 🏆\nGanás la chance de ganar una web gratis o $500.000 ARS si Argentina es campeón 🇦🇷\n👉 ${refLink}`
-  )
-
-  document.getElementById("gateLinkInput").value = refLink
-  document.getElementById("gateWA").href = `https://wa.me/?text=${msg}`
-  document.getElementById("gateFB").href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(refLink)}`
-  document.getElementById("gateX").href  = `https://twitter.com/intent/tweet?text=${msg}`
-
-  // Cargar contador
-  const { data: total } = await supabase.rpc("contar_referidos", { p_user_id: userId })
-  const n      = total ?? 0
-  const pct    = Math.min(100, Math.round((n / 10) * 100))
-  const faltan = Math.max(0, 10 - n)
-
-  document.getElementById("gateRefCount").textContent = `${n}/10`
-  document.getElementById("gateRefBar").style.width   = pct + "%"
-
-  // Actualizar strip
-  const sc = document.getElementById("stripRefCount")
-  if (sc) sc.textContent = n >= 10 ? "✅ Desbloqueado" : `🔒 ${n}/10 invitados`
-
-  const msgEl = document.getElementById("gateRefMsg")
-  if (n >= 10) {
-    document.getElementById("gateRefBar").style.background = "linear-gradient(90deg,#22c55e,#4ade80)"
-    msgEl.innerHTML = `
-      <div style="margin-top:12px;text-align:center;">
-        <div style="font-size:16px;font-weight:900;color:#4ade80;margin-bottom:10px;">
-          ✅ ¡Ya podés participar en el prode!
-        </div>
-        <a href="#tabsSection" onclick="document.getElementById('gatePanel').style.display='none';cambiarTab('fixture')" style="
-          display:inline-flex;align-items:center;gap:8px;
-          background:linear-gradient(135deg,#facc15,#f59e0b);
-          color:#1c1917;font-weight:900;font-size:15px;
-          padding:12px 28px;border-radius:12px;text-decoration:none;
-          box-shadow:0 4px 16px rgba(250,204,21,.45);">
-          ⚽ Ingresar al fixture y predecir →
-        </a>
-      </div>`
-    // Recargar página para actualizar puedeJugar
-    setTimeout(() => location.reload(), 500)
-  } else {
-    msgEl.innerHTML = `<span>Te faltan <strong style="color:#fbbf24;">${faltan} amigo${faltan !== 1 ? "s" : ""}</strong> para desbloquear el prode · Compartí tu link 👆</span>`
-  }
+  // gate panel eliminado por simplificación UX
 }
-
-window.copiarGateLink = function() {
-  const v = document.getElementById("gateLinkInput").value
-  navigator.clipboard.writeText(v).then(() => {
-    const btn = event.target
-    const p   = btn.innerHTML
-    btn.innerHTML = "✅ Copiado!"
-    setTimeout(() => btn.innerHTML = p, 2000)
-  })
-}
-window.copiarGateIG = function() {
-  const v   = document.getElementById("gateLinkInput").value
-  const txt = `⚽ ¡Registrate en Trabajos Cerca y ayudame a participar en el Prode del Mundial 2026! 🏆\nGanás la chance de ganar una web gratis o $500.000 ARS si Argentina campeón 🇦🇷\n👉 ${v}`
-  navigator.clipboard.writeText(txt).then(() => {
-    const btn = event.target.closest("button")
-    const p   = btn.innerHTML
-    btn.innerHTML = "✅ ¡Copiado!"
-    setTimeout(() => btn.innerHTML = p, 3000)
-  })
-}
+window.copiarGateLink = function() {}
+window.copiarGateIG   = function() {}
 
 /* ══════════════════════════════════
    Arranque
