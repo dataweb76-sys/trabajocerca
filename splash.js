@@ -22,7 +22,7 @@
     const logoDiv = document.querySelector('.logo')
     if(!logoDiv) return
     logoDiv.innerHTML = `
-      <a href="/index.html" style="
+      <a href="https://www.trabajoscerca.com.ar" style="
         display:flex; align-items:center; gap:10px; text-decoration:none;
       ">
         <img src="/icon-192.png" alt="TC"
@@ -115,6 +115,12 @@
     font-weight: 900; color: #fff;
     margin: 0 0 4px; letter-spacing: -.02em;
   }
+  #tc-splash-bienvenida {
+    font-size: clamp(11px, 3vw, 13px);
+    font-weight: 800; color: #93c5fd;
+    letter-spacing: .18em; text-transform: uppercase;
+    margin: 0 0 8px;
+  }
   #tc-splash-tagline {
     font-size: clamp(13px, 3.8vw, 16px);
     color: rgba(255,255,255,.78);
@@ -122,6 +128,25 @@
     max-width: 380px;
   }
   #tc-splash-tagline strong { color: #93c5fd; }
+  #tc-splash-slogan {
+    display: inline-block;
+    background: linear-gradient(135deg, #facc15, #f97316);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: clamp(19px, 5.5vw, 26px);
+    font-weight: 900; letter-spacing: -.02em;
+    margin: 2px 0 20px; line-height: 1.2;
+  }
+  #tc-splash-badges {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 22px;
+  }
+  .tc-splash-badge {
+    background: rgba(255,255,255,.13);
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 99px; padding: 5px 14px;
+    font-size: 12px; font-weight: 700; color: rgba(255,255,255,.9);
+  }
 
   /* Divisor */
   .tc-divisor {
@@ -203,20 +228,28 @@
   ════════════════════════════════════════ */
   if(!provGuardada){
     el.innerHTML = `
-      <div class="tc-sp-dot" style="width:320px;height:320px;top:-120px;right:-100px;"></div>
-      <div class="tc-sp-dot" style="width:220px;height:220px;bottom:-70px;left:-70px;"></div>
+      <div class="tc-sp-dot" style="width:360px;height:360px;top:-140px;right:-110px;"></div>
+      <div class="tc-sp-dot" style="width:250px;height:250px;bottom:-80px;left:-80px;"></div>
       <div id="tc-splash-inner">
         <img id="tc-splash-logo" src="/icon-192.png" alt="Trabajos Cerca" onerror="this.src='/logo.png'">
+        <p id="tc-splash-bienvenida">✨ ¡Bienvenido/a a</p>
         <h1 id="tc-splash-nombre">Trabajos Cerca</h1>
+        <div id="tc-splash-slogan">Tu próximo trabajo<br>está más cerca 🚀</div>
         <p id="tc-splash-tagline">
-          El lugar donde conseguir un empleo,<br>
-          <strong>empleados, oficios o un profesional.</strong>
+          Encontrá <strong>empleo, empleados, oficios</strong><br>
+          o profesionales en tu ciudad — 100% gratis.
         </p>
+        <div id="tc-splash-badges">
+          <span class="tc-splash-badge">🔍 Buscar empleo</span>
+          <span class="tc-splash-badge">🔧 Oficios</span>
+          <span class="tc-splash-badge">🏢 Publicar puestos</span>
+          <span class="tc-splash-badge">⚽ Prode Mundial</span>
+        </div>
         <div class="tc-divisor"></div>
         <p id="tc-prov-label">📍 ¿En qué provincia estás?</p>
         <div id="tc-prov-grid"></div>
         <button id="tc-btn-entrar" onclick="window._tcSplashCerrar()">
-          Entrar a la app <span class="arr">→</span>
+          ¡Entrar gratis! <span class="arr">→</span>
         </button>
         <button id="tc-splash-skip" onclick="window._tcSplashCerrar()">Omitir selección de provincia</button>
       </div>
@@ -255,18 +288,20 @@
   ════════════════════════════════════════ */
   } else {
     el.innerHTML = `
-      <div class="tc-sp-dot" style="width:320px;height:320px;top:-120px;right:-100px;"></div>
-      <div class="tc-sp-dot" style="width:220px;height:220px;bottom:-70px;left:-70px;"></div>
+      <div class="tc-sp-dot" style="width:360px;height:360px;top:-140px;right:-110px;"></div>
+      <div class="tc-sp-dot" style="width:250px;height:250px;bottom:-80px;left:-80px;"></div>
       <div id="tc-splash-inner">
         <img id="tc-splash-logo" src="/icon-192.png" alt="Trabajos Cerca" onerror="this.src='/logo.png'">
+        <p id="tc-splash-bienvenida">✨ ¡Bienvenido/a de vuelta a</p>
         <h1 id="tc-splash-nombre">Trabajos Cerca</h1>
+        <div id="tc-splash-slogan">Tu próximo trabajo<br>está más cerca 🚀</div>
         <p id="tc-splash-tagline">
-          El lugar donde conseguir un empleo,<br>
-          <strong>empleados, oficios o un profesional.</strong>
+          Empleo, oficios y profesionales<br>
+          <strong>en tu ciudad — 100% gratis.</strong>
         </p>
         <div id="tc-splash-lugar"><span>📍</span><span>${provGuardada}</span></div>
         <button id="tc-btn-entrar" onclick="window._tcSplashCerrar()">
-          Entrar a la app <span class="arr">→</span>
+          ¡Entrar! <span class="arr">→</span>
         </button>
         <div id="tc-splash-bar-wrap"><div id="tc-splash-bar"></div></div>
         <p id="tc-splash-timer">Cerrando en <span id="tc-splash-seg">6</span>s</p>
