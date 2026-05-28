@@ -476,23 +476,6 @@
   #statsBar     { display:none !important; }
   .prode-strip  { display:none !important; }
 
-  /* Tabs pegados al hero, sin margen */
-  .mundial-tabs {
-    margin-top: 0;
-    border-radius: 0;
-    background: #fff;
-    border-bottom: 2px solid #f1f5f9;
-    padding: 0;
-  }
-  .tab-btn { font-size:13px; padding:11px 6px; border-radius:0; }
-  .tab-btn.active {
-    border-bottom: 3px solid #15803d;
-    color: #15803d;
-    box-shadow: none;
-    background: white;
-  }
-  .tab-btn span { display:none; }
-
   /* Filtros de fase: scroll horizontal sin margen */
   .fase-filter {
     flex-wrap:nowrap; overflow-x:auto;
@@ -516,9 +499,6 @@
   .grupo-filter::-webkit-scrollbar { display:none; }
   .grupo-btn { flex-shrink:0; width:34px; height:34px; }
 
-  /* Tabs container: sin padding NI margin extra */
-  #tabsContainer { padding:0 !important; margin:0 !important; min-height:unset !important; }
-
   /* Match grid */
   .match-grid { grid-template-columns:1fr; padding:0 12px 32px; margin-top:10px; }
 
@@ -539,6 +519,84 @@
   .premios-wrap { grid-template-columns:1fr; padding:0 14px; }
   .premios-wrap .premio-card.argentina { grid-column:1; }
   .podio { grid-template-columns:1fr; }
+}
+
+/* ════════════════════════════════════
+   3 BOTONES DE ACCIÓN
+════════════════════════════════════ */
+#accionesBar {
+  display:flex; gap:14px;
+  max-width:700px; margin:28px auto;
+  padding:0 20px;
+}
+.accion-btn {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  gap:4px; padding:20px 10px; border-radius:18px; border:none;
+  cursor:pointer; transition:transform .15s, box-shadow .15s;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+}
+.accion-btn:hover  { transform:translateY(-3px); box-shadow:0 10px 28px rgba(0,0,0,.22); }
+.accion-btn:active { transform:scale(.97); }
+.accion-ico   { font-size:30px; line-height:1; }
+.accion-titulo{ font-size:15px; font-weight:900; color:white; }
+.accion-sub   { font-size:11px; color:rgba(255,255,255,.82); text-align:center; line-height:1.3; }
+
+/* ════════════════════════════════════
+   MODALES DESLIZANTES (Fixture / Ranking / Premios)
+════════════════════════════════════ */
+.modal-mundo-wrap {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.62);
+  z-index:9100;
+  display:flex; align-items:flex-end; justify-content:center;
+}
+.modal-mundo-box {
+  background:#f8fafc;
+  border-radius:22px 22px 0 0;
+  width:100%; max-width:700px;
+  max-height:92vh;
+  display:flex; flex-direction:column;
+  animation:slideUp .25s ease;
+  overflow:hidden;
+}
+.modal-mundo-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px 12px;
+  background:white;
+  border-bottom:1px solid #f1f5f9;
+  flex-shrink:0; position:sticky; top:0; z-index:2;
+}
+.modal-mundo-header h3 { margin:0; font-size:16px; font-weight:900; color:#0f172a; }
+.modal-mundo-close {
+  background:#f1f5f9; border:none; border-radius:50%;
+  width:32px; height:32px; font-size:20px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; color:#64748b;
+  flex-shrink:0;
+}
+.modal-mundo-body {
+  overflow-y:auto; flex:1;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:env(safe-area-inset-bottom, 16px);
+}
+
+/* Modal "no podés jugar" */
+#modalNoPuede .modal-mundo-box {
+  background:white; border-radius:22px 22px 0 0;
+  max-height:75vh;
+}
+.no-puede-item {
+  display:flex; gap:12px; align-items:flex-start;
+  padding:12px 14px; border-radius:12px; margin-bottom:10px;
+}
+
+/* Mobile overrides */
+@media(max-width:600px){
+  #accionesBar      { gap:8px; margin:14px auto; padding:0 12px; }
+  .accion-btn       { padding:14px 8px; border-radius:14px; }
+  .accion-ico       { font-size:26px; }
+  .accion-titulo    { font-size:13px; }
+  .accion-sub       { font-size:10px; }
+  .modal-mundo-header h3 { font-size:15px; }
 }
 </style>
 </head>
@@ -735,161 +793,248 @@
   </div>
 </div>
 
-<!-- TABS -->
-<div class="container" id="tabsContainer" style="padding:0 16px;">
-  <div class="mundial-tabs" id="mundialTabs">
-    <button class="tab-btn active" onclick="cambiarTab('fixture')" id="tab-fixture">
-      <i class="fa-solid fa-calendar-days"></i> <span>Fixture</span>
-    </button>
-    <button class="tab-btn" onclick="cambiarTab('ranking')" id="tab-ranking">
-      <i class="fa-solid fa-trophy"></i> <span>Ranking</span>
-    </button>
-    <button class="tab-btn" onclick="cambiarTab('premios')" id="tab-premios">
-      <i class="fa-solid fa-gift"></i> <span>Premios</span>
-    </button>
+<!-- ══════════════════════════════════
+     3 BOTONES DE ACCIÓN
+══════════════════════════════════ -->
+<div id="accionesBar">
+
+  <button class="accion-btn" onclick="abrirModal('Fixture')"
+    style="background:linear-gradient(135deg,#15803d 0%,#16a34a 100%);">
+    <div class="accion-ico">⚽</div>
+    <div class="accion-titulo">Fixture</div>
+    <div class="accion-sub">Predecí los 104 partidos</div>
+  </button>
+
+  <button class="accion-btn" onclick="abrirModal('Ranking')"
+    style="background:linear-gradient(135deg,#7c3aed 0%,#6d28d9 100%);">
+    <div class="accion-ico">🏆</div>
+    <div class="accion-titulo">Ranking</div>
+    <div class="accion-sub">Ver posiciones</div>
+  </button>
+
+  <button class="accion-btn" onclick="abrirModal('Premios')"
+    style="background:linear-gradient(135deg,#d97706 0%,#f59e0b 100%);">
+    <div class="accion-ico">🎁</div>
+    <div class="accion-titulo">Premios</div>
+    <div class="accion-sub">¿Qué podés ganar?</div>
+  </button>
+
+</div>
+
+<!-- ══════════════════════════════════
+     MODAL: FIXTURE
+══════════════════════════════════ -->
+<div id="modalFixtureWrap" class="modal-mundo-wrap" style="display:none;"
+  onclick="if(event.target===this)cerrarModal('Fixture')">
+  <div class="modal-mundo-box">
+
+    <div class="modal-mundo-header">
+      <h3>⚽ Fixture · Mundial 2026</h3>
+      <button class="modal-mundo-close" onclick="cerrarModal('Fixture')">×</button>
+    </div>
+
+    <div class="modal-mundo-body">
+      <!-- Filtro de fase -->
+      <div class="fase-filter" id="faseFilter">
+        <button class="fase-btn active" onclick="filtrarFase('grupo')"    id="fb-grupo">Grupos</button>
+        <button class="fase-btn"        onclick="filtrarFase('octavos')"  id="fb-octavos">Octavos</button>
+        <button class="fase-btn"        onclick="filtrarFase('cuartos')"  id="fb-cuartos">Cuartos</button>
+        <button class="fase-btn"        onclick="filtrarFase('semis')"    id="fb-semis">Semis</button>
+        <button class="fase-btn"        onclick="filtrarFase('tercero')"  id="fb-tercero">3° Puesto</button>
+        <button class="fase-btn"        onclick="filtrarFase('final')"    id="fb-final">⭐ Final</button>
+      </div>
+
+      <!-- Filtro de grupo -->
+      <div class="grupo-filter" id="grupoFilter">
+        <button class="grupo-btn active" onclick="filtrarGrupo('A')" id="gb-A">A</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('B')" id="gb-B">B</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('C')" id="gb-C">C</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('D')" id="gb-D">D</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('E')" id="gb-E">E</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('F')" id="gb-F">F</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('G')" id="gb-G">G</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('H')" id="gb-H">H</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('I')" id="gb-I">I</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('J')" id="gb-J">J</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('K')" id="gb-K">K</button>
+        <button class="grupo-btn" onclick="filtrarGrupo('L')" id="gb-L">L</button>
+      </div>
+
+      <div class="match-grid" id="matchGrid">
+        <div style="grid-column:1/-1;text-align:center;padding:50px;color:#94a3b8;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:32px;display:block;margin-bottom:12px;"></i>
+          <p>Cargando fixture...</p>
+        </div>
+      </div>
+
+      <!-- Botón guía de premios -->
+      <div style="text-align:center;padding:8px 20px 32px;">
+        <button onclick="cerrarModal('Fixture');abrirModal('Premios')" style="
+          display:inline-flex;align-items:center;gap:8px;
+          background:white;color:#d97706;
+          border:1.5px solid #fde68a;border-radius:12px;
+          padding:11px 22px;font-size:14px;font-weight:700;
+          cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+          🎁 Ver premios y cómo participar
+        </button>
+      </div>
+    </div><!-- /modal-mundo-body -->
+  </div><!-- /modal-mundo-box -->
+</div><!-- /modalFixtureWrap -->
+
+<!-- ══════════════════════════════════
+     MODAL: RANKING
+══════════════════════════════════ -->
+<div id="modalRankingWrap" class="modal-mundo-wrap" style="display:none;"
+  onclick="if(event.target===this)cerrarModal('Ranking')">
+  <div class="modal-mundo-box">
+
+    <div class="modal-mundo-header">
+      <h3>🏆 Ranking · Mundial 2026</h3>
+      <button class="modal-mundo-close" onclick="cerrarModal('Ranking')">×</button>
+    </div>
+
+    <div class="modal-mundo-body" style="padding:16px;">
+      <div class="ranking-wrap">
+        <div class="podio" id="podio">
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:#94a3b8;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i>
+          </div>
+        </div>
+        <div class="ranking-table" id="rankingTable" style="display:none;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Jugador</th><th>Pts</th>
+                <th>Exactos</th><th>Tendencias</th><th>Predicciones</th>
+              </tr>
+            </thead>
+            <tbody id="rankingBody"></tbody>
+          </table>
+        </div>
+        <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:16px;">
+          El ranking se actualiza en tiempo real a medida que se ingresan resultados.
+        </p>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- TAB: FIXTURE -->
-<div id="tabFixture">
-  <!-- Filtro de fase -->
-  <div class="fase-filter" id="faseFilter">
-    <button class="fase-btn active" onclick="filtrarFase('grupo')"    id="fb-grupo">Grupos</button>
-    <button class="fase-btn"        onclick="filtrarFase('octavos')"  id="fb-octavos">Octavos</button>
-    <button class="fase-btn"        onclick="filtrarFase('cuartos')"  id="fb-cuartos">Cuartos</button>
-    <button class="fase-btn"        onclick="filtrarFase('semis')"    id="fb-semis">Semis</button>
-    <button class="fase-btn"        onclick="filtrarFase('tercero')"  id="fb-tercero">3° Puesto</button>
-    <button class="fase-btn"        onclick="filtrarFase('final')"    id="fb-final">⭐ Final</button>
-  </div>
+<!-- ══════════════════════════════════
+     MODAL: PREMIOS
+══════════════════════════════════ -->
+<div id="modalPremiosWrap" class="modal-mundo-wrap" style="display:none;"
+  onclick="if(event.target===this)cerrarModal('Premios')">
+  <div class="modal-mundo-box">
 
-  <!-- Filtro de grupo (solo para fase grupos) -->
-  <div class="grupo-filter" id="grupoFilter">
-    <button class="grupo-btn active" onclick="filtrarGrupo('A')" id="gb-A">A</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('B')" id="gb-B">B</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('C')" id="gb-C">C</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('D')" id="gb-D">D</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('E')" id="gb-E">E</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('F')" id="gb-F">F</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('G')" id="gb-G">G</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('H')" id="gb-H">H</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('I')" id="gb-I">I</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('J')" id="gb-J">J</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('K')" id="gb-K">K</button>
-    <button class="grupo-btn" onclick="filtrarGrupo('L')" id="gb-L">L</button>
-  </div>
-
-  <div class="match-grid" id="matchGrid">
-    <div style="grid-column:1/-1;text-align:center;padding:50px;color:#94a3b8;">
-      <i class="fa-solid fa-spinner fa-spin" style="font-size:32px;display:block;margin-bottom:12px;"></i>
-      <p>Cargando fixture...</p>
-    </div>
-  </div>
-
-  <!-- Botón guía de premios -->
-  <div style="text-align:center;padding:8px 20px 32px;">
-    <button onclick="abrirPopupReglas()" style="
-      display:inline-flex;align-items:center;gap:8px;
-      background:white;color:#15803d;
-      border:1.5px solid #bbf7d0;border-radius:12px;
-      padding:11px 22px;font-size:14px;font-weight:700;
-      cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.06);
-      transition:all .15s;"
-      onmouseover="this.style.background='#f0fdf4';this.style.borderColor='#86efac'"
-      onmouseout="this.style.background='white';this.style.borderColor='#bbf7d0'">
-      📋 Ver premios y cómo participar
-    </button>
-  </div>
-</div>
-
-<!-- TAB: RANKING -->
-<div id="tabRanking" style="display:none;">
-  <div class="ranking-wrap">
-    <div class="podio" id="podio">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#94a3b8;">
-        <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i>
-      </div>
-    </div>
-    <div class="ranking-table" id="rankingTable" style="display:none;">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Jugador</th>
-            <th>Pts</th>
-            <th>Exactos</th>
-            <th>Tendencias</th>
-            <th>Predicciones</th>
-          </tr>
-        </thead>
-        <tbody id="rankingBody"></tbody>
-      </table>
-    </div>
-    <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:16px;">
-      El ranking se actualiza en tiempo real a medida que se ingresan resultados.
-    </p>
-  </div>
-</div>
-
-<!-- TAB: PREMIOS -->
-<div id="tabPremios" style="display:none;">
-  <div class="premios-wrap">
-
-    <div class="premio-card">
-      <span class="premio-ico">🥇</span>
-      <div class="premio-titulo">1° Lugar — Página Web Completa</div>
-      <div class="premio-desc">El jugador con más puntos al finalizar el mundial gana el diseño y desarrollo de una página web profesional completa.</div>
-      <div class="premio-condicion">
-        <strong>¿Qué incluye?</strong><br>
-        Diseño personalizado · Dominio por 1 año · Hosting incluido · Solo pagás base de datos si la necesitás
-      </div>
+    <div class="modal-mundo-header">
+      <h3>🎁 Premios · Mundial 2026</h3>
+      <button class="modal-mundo-close" onclick="cerrarModal('Premios')">×</button>
     </div>
 
-    <div class="premio-card" style="border-color:#e0e7ff;">
-      <span class="premio-ico">🥈🥉</span>
-      <div class="premio-titulo">2° y 3° Lugar — Premio Sorpresa</div>
-      <div class="premio-desc">El segundo y tercer lugar recibirán premios especiales que anunciaremos próximamente.</div>
-      <div class="premio-condicion">
-        <strong>En juego:</strong><br>
-        A definir — seguí participando y acumulando puntos 👀
-      </div>
-    </div>
+    <div class="modal-mundo-body" style="padding:16px;">
+      <div class="premios-wrap">
 
-    <div class="premio-card argentina">
-      <span class="premio-ico">🇦🇷⭐⭐⭐</span>
-      <div class="premio-titulo">Premio Especial — Argentina Campeón del Mundo</div>
-      <div class="premio-desc">
-        Si la Selección Argentina llega a la final <strong>y sale campeona</strong>, todos los participantes que hayan acertado el resultado exacto de <strong>3 o más partidos de Argentina</strong> reciben este premio.
-      </div>
-      <div class="premio-monto">$500.000 ARS</div>
-      <div class="premio-condicion">
-        <strong>Condiciones:</strong><br>
-        • Argentina debe llegar a la final Y ganar el mundial<br>
-        • Necesitás 3 o más resultados exactos (3 puntos c/u) de partidos de Argentina<br>
-        • Si hay más de un ganador, el premio se divide en partes iguales<br>
-        • Solo cuentan resultados exactos (3 pts), no tendencias (1 pt)
-      </div>
-    </div>
-
-    <div class="premio-card" style="grid-column:1/-1;background:#f8fafc;border-color:#e2e8f0;">
-      <span class="premio-ico">⚽</span>
-      <div class="premio-titulo">Sistema de puntuación</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:8px;">
-        <div style="text-align:center;padding:16px;background:white;border-radius:12px;">
-          <div style="font-size:28px;font-weight:900;color:#15803d;">3 pts</div>
-          <div style="font-size:13px;color:#64748b;margin-top:4px;">Resultado exacto<br><small>Ej: predecís 2-1, termina 2-1</small></div>
+        <div class="premio-card">
+          <span class="premio-ico">🥇</span>
+          <div class="premio-titulo">1° Lugar — Página Web Completa</div>
+          <div class="premio-desc">El jugador con más puntos al finalizar el mundial gana el diseño y desarrollo de una página web profesional completa.</div>
+          <div class="premio-condicion">
+            <strong>¿Qué incluye?</strong><br>
+            Diseño personalizado · Dominio por 1 año · Hosting incluido · Solo pagás base de datos si la necesitás
+          </div>
         </div>
-        <div style="text-align:center;padding:16px;background:white;border-radius:12px;">
-          <div style="font-size:28px;font-weight:900;color:#a16207;">1 pt</div>
-          <div style="font-size:13px;color:#64748b;margin-top:4px;">Tendencia correcta<br><small>Ej: predecís victoria local, gana local</small></div>
+
+        <div class="premio-card" style="border-color:#e0e7ff;">
+          <span class="premio-ico">🥈🥉</span>
+          <div class="premio-titulo">2° y 3° Lugar — Premio Sorpresa</div>
+          <div class="premio-desc">El segundo y tercer lugar recibirán premios especiales que anunciaremos próximamente.</div>
+          <div class="premio-condicion">
+            <strong>En juego:</strong><br>
+            A definir — seguí participando y acumulando puntos 👀
+          </div>
         </div>
-        <div style="text-align:center;padding:16px;background:white;border-radius:12px;">
-          <div style="font-size:28px;font-weight:900;color:#94a3b8;">0 pts</div>
-          <div style="font-size:13px;color:#64748b;margin-top:4px;">Sin acierto<br><small>Tampoco la tendencia</small></div>
+
+        <div class="premio-card argentina">
+          <span class="premio-ico">🇦🇷⭐⭐⭐</span>
+          <div class="premio-titulo">Premio Especial — Argentina Campeón del Mundo</div>
+          <div class="premio-desc">
+            Si la Selección Argentina llega a la final <strong>y sale campeona</strong>, todos los participantes que hayan acertado el resultado exacto de <strong>3 o más partidos de Argentina</strong> reciben este premio.
+          </div>
+          <div class="premio-monto">$500.000 ARS</div>
+          <div class="premio-condicion">
+            <strong>Condiciones:</strong><br>
+            • Argentina debe llegar a la final Y ganar el mundial<br>
+            • Necesitás 3 o más resultados exactos (3 puntos c/u) de partidos de Argentina<br>
+            • Si hay más de un ganador, el premio se divide en partes iguales<br>
+            • Solo cuentan resultados exactos (3 pts), no tendencias (1 pt)
+          </div>
         </div>
-      </div>
-      <p style="font-size:13px;color:#64748b;margin:16px 0 0;text-align:center;">
-        Las predicciones se bloquean automáticamente cuando empieza cada partido.
+
+        <div class="premio-card" style="grid-column:1/-1;background:#f8fafc;border-color:#e2e8f0;">
+          <span class="premio-ico">⚽</span>
+          <div class="premio-titulo">Sistema de puntuación</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:8px;">
+            <div style="text-align:center;padding:16px;background:white;border-radius:12px;">
+              <div style="font-size:28px;font-weight:900;color:#15803d;">3 pts</div>
+              <div style="font-size:13px;color:#64748b;margin-top:4px;">Resultado exacto<br><small>Ej: predecís 2-1, termina 2-1</small></div>
+            </div>
+            <div style="text-align:center;padding:16px;background:white;border-radius:12px;">
+              <div style="font-size:28px;font-weight:900;color:#a16207;">1 pt</div>
+              <div style="font-size:13px;color:#64748b;margin-top:4px;">Tendencia correcta<br><small>Ej: predecís victoria local, gana local</small></div>
+            </div>
+            <div style="text-align:center;padding:16px;background:white;border-radius:12px;">
+              <div style="font-size:28px;font-weight:900;color:#94a3b8;">0 pts</div>
+              <div style="font-size:13px;color:#64748b;margin-top:4px;">Sin acierto<br><small>Tampoco la tendencia</small></div>
+            </div>
+          </div>
+          <p style="font-size:13px;color:#64748b;margin:16px 0 0;text-align:center;">
+            Las predicciones se bloquean automáticamente cuando empieza cada partido.
+          </p>
+        </div>
+
+      </div><!-- /premios-wrap -->
+    </div><!-- /modal-mundo-body -->
+  </div><!-- /modal-mundo-box -->
+</div><!-- /modalPremiosWrap -->
+
+<!-- ══════════════════════════════════
+     MODAL: TODAVÍA NO PODÉS PREDECIR
+══════════════════════════════════ -->
+<div id="modalNoPuede" class="modal-mundo-wrap" style="display:none;"
+  onclick="if(event.target===this){clearTimeout(window._redirectTimer);cerrarModal('NoPuede')}">
+  <div class="modal-mundo-box" style="background:white;max-height:75vh;">
+
+    <div class="modal-mundo-header" style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:none;">
+      <h3 style="color:white;">🔒 Todavía no podés predecir</h3>
+      <button class="modal-mundo-close"
+        style="background:rgba(255,255,255,.15);color:white;"
+        onclick="clearTimeout(window._redirectTimer);cerrarModal('NoPuede')">×</button>
+    </div>
+
+    <div class="modal-mundo-body" style="padding:20px;">
+      <p style="font-size:14px;color:#475569;margin:0 0 16px;text-align:center;">
+        Para poder cargar tus predicciones necesitás cumplir estos requisitos:
       </p>
+
+      <div id="noPuedeItems"><!-- items inyectados por JS --></div>
+
+      <!-- Contador regresivo -->
+      <div style="text-align:center;margin:20px 0 8px;">
+        <p style="font-size:12px;color:#94a3b8;margin:0 0 12px;">
+          Serás redirigido a tu perfil en <strong id="cuentaRegresiva">5</strong>s…
+        </p>
+        <button onclick="clearTimeout(window._redirectTimer);window.location.href='/perfil.html'"
+          style="
+            display:inline-flex;align-items:center;gap:8px;
+            background:linear-gradient(135deg,#1d4ed8,#2563eb);
+            color:white;font-weight:800;font-size:15px;
+            padding:13px 28px;border-radius:12px;border:none;
+            cursor:pointer;box-shadow:0 4px 16px rgba(29,78,216,.35);">
+          <i class="fa-solid fa-user"></i> Ir a mi perfil ahora →
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -930,7 +1075,8 @@ let PARTIDOS     = []     // todos los partidos
 let EQUIPOS      = {}     // id → equipo
 let MIS_PREDS    = {}     // partido_id → prediccion
 let currentUser  = null
-let puedeJugar   = false  // tiene >= 10 referidos
+let puedeJugar   = false  // cumplió todos los requisitos
+let nRefs        = 0      // cantidad de referidos registrados
 let faseActual   = "grupo"
 let grupoActual  = "A"
 
@@ -975,10 +1121,14 @@ async function init() {
     PARTIDOS = partidosRes.data
   }
 
-  // Verificar si puede jugar (10+ referidos)
+  // Verificar si puede jugar y contar referidos
   if (currentUser) {
-    const { data: puedeDato } = await supabase.rpc("puede_participar_mundial", { p_user_id: currentUser.id })
-    puedeJugar = puedeDato === true
+    const [puedeRes, refsRes] = await Promise.all([
+      supabase.rpc("puede_participar_mundial", { p_user_id: currentUser.id }),
+      supabase.rpc("contar_referidos", { p_user_id: currentUser.id })
+    ])
+    puedeJugar = puedeRes.data === true
+    nRefs      = refsRes.data ?? 0
   }
 
   // Predicciones del usuario
@@ -1027,15 +1177,17 @@ async function init() {
 }
 
 /* ══════════════════════════════════
-   Tabs
+   Modales de acción (Fixture / Ranking / Premios)
 ══════════════════════════════════ */
-window.cambiarTab = function(tab) {
-  document.getElementById("tabFixture").style.display  = tab === "fixture"  ? "" : "none"
-  document.getElementById("tabRanking").style.display  = tab === "ranking"  ? "" : "none"
-  document.getElementById("tabPremios").style.display  = tab === "premios"  ? "" : "none"
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"))
-  document.getElementById("tab-" + tab).classList.add("active")
-  if (tab === "ranking") renderRanking()
+window.abrirModal = function(nombre) {
+  const el = document.getElementById("modal" + nombre + "Wrap")
+  if (el) { el.style.display = "flex"; document.body.style.overflow = "hidden" }
+  if (nombre === "Ranking") renderRanking()
+}
+window.cerrarModal = function(nombre) {
+  const el = document.getElementById("modal" + nombre + "Wrap")
+  if (el) el.style.display = "none"
+  document.body.style.overflow = ""
 }
 
 /* ══════════════════════════════════
@@ -1154,7 +1306,7 @@ function renderCard(partido, modo) {
         ${miPredHTML}
       </div>`
   } else if (readonly) {
-    const clickFn = !currentUser ? "mostrarModalRegistro()" : "mostrarToastNecesitas()"
+    const clickFn = !currentUser ? "mostrarModalRegistro()" : "mostrarModalNoPuede()"
     const label   = !currentUser
       ? `<span onclick="${clickFn}" style="font-size:12px;color:#2563eb;font-weight:700;cursor:pointer;">⚽ Registrate para predecir →</span>`
       : `<span onclick="${clickFn}" style="font-size:12px;color:#7c3aed;font-weight:700;cursor:pointer;">🔒 Desbloqueá invitando amigos</span>`
@@ -1198,8 +1350,8 @@ function renderCard(partido, modo) {
     </div>`
   } else if (readonly) {
     // Invitado o sin refs: scores clickeables que abren modal
-    const clickFn = !currentUser ? "mostrarModalRegistro()" : "mostrarToastNecesitas()"
-    scoreZone = `<div class="score-ghost" onclick="${clickFn}" title="${!currentUser ? 'Registrate para predecir' : 'Necesitás 10 invitados'}">
+    const clickFn = !currentUser ? "mostrarModalRegistro()" : "mostrarModalNoPuede()"
+    scoreZone = `<div class="score-ghost" onclick="${clickFn}" title="${!currentUser ? 'Registrate para predecir' : 'Ver requisitos'}">
       <span class="score-ghost-num">?</span>
       <span class="score-sep" style="color:#e2e8f0;">-</span>
       <span class="score-ghost-num">?</span>
@@ -1423,39 +1575,90 @@ window.marcarInstagram = function() {
   }, 1500)
 }
 window.ingresarAlFixture = function() {
+  document.getElementById("popupReglas").style.display = "none"
   if (!puedeJugar) {
-    // Aún no tiene 10 refs → cierra popup y muestra toast
-    document.getElementById("popupReglas").style.display = "none"
-    mostrarToastNecesitas()
+    mostrarModalNoPuede()
     return
   }
-  // Tiene 10+ refs → oculta gate panel y muestra fixture completo
-  document.getElementById("popupReglas").style.display = "none"
-  document.getElementById("gatePanel").style.display = "none"
-  renderFixture()
+  // Puede jugar → abre modal de fixture
+  abrirModal("Fixture")
 }
 
 /* ══════════════════════════════════
-   Toast "necesitás invitados"
+   Modal "todavía no podés predecir"
 ══════════════════════════════════ */
-window.mostrarToastNecesitas = function() {
-  let t = document.getElementById("toastNecesitas")
-  if (!t) {
-    t = document.createElement("div")
-    t.id = "toastNecesitas"
-    t.style.cssText = `
-      position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-      background:#1e1b4b;color:white;padding:12px 22px;border-radius:12px;
-      font-size:14px;font-weight:700;z-index:9998;white-space:nowrap;
-      box-shadow:0 8px 32px rgba(0,0,0,.4);border:1px solid rgba(250,204,21,.4);
-      animation:fadeIn .2s ease;
-    `
-    document.body.appendChild(t)
+window.mostrarToastNecesitas = window.mostrarModalNoPuede = function() {
+  const faltan     = Math.max(0, 10 - nRefs)
+  const faltanRefs = nRefs < 10
+  // Si tiene 10 refs pero no puede jugar → problema de Instagram
+  const faltaIG    = !puedeJugar && nRefs >= 10
+
+  let items = ""
+
+  // — Requisito: 10 invitados —
+  if (faltanRefs) {
+    items += `
+      <div class="no-puede-item" style="background:#fef2f2;border:1.5px solid #fecaca;">
+        <span style="font-size:22px;flex-shrink:0;">❌</span>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:#b91c1c;">
+            Invitados registrados: ${nRefs}/10
+          </div>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">
+            Te faltan <strong>${faltan} amigo${faltan !== 1 ? "s" : ""}</strong> que se registren
+            con tu link personal. Lo encontrás en tu perfil.
+          </div>
+        </div>
+      </div>`
+  } else {
+    items += `
+      <div class="no-puede-item" style="background:#f0fdf4;border:1.5px solid #bbf7d0;">
+        <span style="font-size:22px;flex-shrink:0;">✅</span>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:#15803d;">Invitados: 10/10 completado</div>
+        </div>
+      </div>`
   }
-  t.innerHTML = "🔒 Necesitás 10 amigos registrados · <a href='/' style='color:#fbbf24;'>Ver mi link →</a>"
-  t.style.display = "block"
-  clearTimeout(window._toastTimer)
-  window._toastTimer = setTimeout(() => { t.style.display = "none" }, 3000)
+
+  // — Requisito: Instagram —
+  if (faltaIG) {
+    items += `
+      <div class="no-puede-item" style="background:#fdf4ff;border:1.5px solid #f0abfc;">
+        <span style="font-size:22px;flex-shrink:0;">❌</span>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:#7e22ce;">
+            Seguir @datawebdigital en Instagram
+          </div>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">
+            Seguí nuestra cuenta de Instagram para completar los requisitos.
+          </div>
+        </div>
+      </div>`
+  }
+
+  document.getElementById("noPuedeItems").innerHTML = items
+
+  // Mostrar el modal
+  const modal = document.getElementById("modalNoPuede")
+  modal.style.display = "flex"
+  document.body.style.overflow = "hidden"
+
+  // Cuenta regresiva 5s → redirigir al perfil
+  let secs = 5
+  const cr = document.getElementById("cuentaRegresiva")
+  if (cr) cr.textContent = secs
+  clearInterval(window._cuentaInterval)
+  clearTimeout(window._redirectTimer)
+  window._cuentaInterval = setInterval(() => {
+    secs--
+    if (cr) cr.textContent = secs
+    if (secs <= 0) {
+      clearInterval(window._cuentaInterval)
+    }
+  }, 1000)
+  window._redirectTimer = setTimeout(() => {
+    window.location.href = "/perfil.html"
+  }, 5000)
 }
 
 /* ══════════════════════════════════
