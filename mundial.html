@@ -344,14 +344,72 @@
   border-color:#2563eb;background:#eff6ff;color:#2563eb;
 }
 
-/* ─── GATE PANEL ─── */
-.gate-panel {
-  max-width:900px;margin:24px auto 0;padding:0 20px;
+/* ─── PRODE STRIP (barra compacta, siempre visible) ─── */
+.prode-strip {
+  max-width:700px;margin:10px auto 0;padding:0 16px;
+  display:none; /* se muestra via JS cuando aplica */
 }
-.gate-card {
-  background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 55%,#0f172a 100%);
-  border-radius:22px;overflow:hidden;color:white;
+.prode-strip-inner {
+  background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);
+  border:1.5px solid rgba(250,204,21,.35);
+  border-radius:14px;padding:11px 16px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.prode-strip-prizes {
+  display:flex;gap:10px;flex:1;min-width:0;align-items:center;flex-wrap:wrap;
+}
+.prode-strip-chip {
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+  border-radius:99px;padding:4px 11px;font-size:12px;font-weight:700;color:white;white-space:nowrap;
+}
+.prode-strip-chip.gold { border-color:rgba(250,204,21,.5);color:#fbbf24; }
+.prode-strip-btn {
+  background:linear-gradient(135deg,#facc15,#f59e0b);
+  color:#1c1917;font-weight:800;font-size:12px;
+  border:none;border-radius:10px;padding:8px 16px;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  transition:opacity .15s;
+}
+.prode-strip-btn:hover { opacity:.85; }
+
+/* ─── GATE PANEL — ahora es un MODAL ─── */
+.gate-overlay {
+  display:none;position:fixed;inset:0;z-index:9995;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(4px);
+  align-items:flex-end;justify-content:center;padding:0;
+  animation:fadeIn .2s ease;
+  overflow-y:auto;
+}
+.gate-overlay.activo { display:flex; }
+.gate-modal {
+  background:linear-gradient(160deg,#0f172a 0%,#1e1b4b 55%,#0f172a 100%);
   border:1.5px solid rgba(250,204,21,.3);
+  border-radius:22px 22px 0 0;
+  width:100%;max-width:680px;
+  max-height:90vh;overflow-y:auto;
+  color:white;
+  animation:slideUp .28s cubic-bezier(.22,1,.36,1);
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent;
+}
+.gate-modal::-webkit-scrollbar { width:3px; }
+.gate-modal::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); border-radius:4px; }
+.gate-modal-handle {
+  width:40px;height:4px;background:rgba(255,255,255,.25);
+  border-radius:99px;margin:12px auto 0;
+}
+.gate-modal-close {
+  position:absolute;top:14px;right:16px;
+  background:rgba(255,255,255,.15);border:none;color:white;
+  width:30px;height:30px;border-radius:50%;font-size:18px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.gate-modal-close:hover { background:rgba(255,255,255,.3); }
+
+/* ─── antiguo alias para compatibilidad ─── */
+.gate-card {
+  background:transparent;
 }
 .gate-prizes {
   display:grid;grid-template-columns:1fr 1fr;gap:0;
@@ -359,15 +417,13 @@
 }
 @media(max-width:580px){ .gate-prizes { grid-template-columns:1fr; } }
 .gate-prize-item {
-  padding:22px 24px;border-right:1px solid rgba(255,255,255,.1);
+  padding:18px 20px;border-right:1px solid rgba(255,255,255,.1);
 }
 .gate-prize-item:last-child { border-right:none; }
-.gate-prize-ico { font-size:36px;display:block;margin-bottom:8px; }
-.gate-prize-title { font-size:15px;font-weight:900;margin-bottom:4px;color:#fbbf24; }
-.gate-prize-desc { font-size:13px;color:rgba(255,255,255,.65);line-height:1.5; }
-.gate-share {
-  padding:24px;
-}
+.gate-prize-ico { font-size:32px;display:block;margin-bottom:6px; }
+.gate-prize-title { font-size:14px;font-weight:900;margin-bottom:4px;color:#fbbf24; }
+.gate-prize-desc { font-size:12px;color:rgba(255,255,255,.65);line-height:1.5; }
+.gate-share { padding:18px 20px; }
 .ref-progress-bar {
   background:rgba(255,255,255,.12);border-radius:99px;height:10px;overflow:hidden;margin:10px 0 6px;
 }
@@ -485,8 +541,16 @@
   /* Match grid */
   .match-grid { grid-template-columns:1fr; padding:0 12px 32px; }
 
-  /* Gate panel compacto */
-  .gate-card .gate-prizes { grid-template-columns:1fr; }
+  /* Strip compacto en mobile */
+  .prode-strip { padding:0 10px; }
+  .prode-strip-inner { flex-wrap:wrap; gap:8px; padding:9px 12px; }
+  .prode-strip-prizes { gap:6px; }
+  .prode-strip-chip { font-size:11px; padding:3px 9px; }
+  .prode-strip-btn { width:100%; text-align:center; justify-content:center; }
+
+  /* Gate modal desde abajo */
+  .gate-modal { border-radius:22px 22px 0 0; }
+  .gate-prizes { grid-template-columns:1fr; }
   .gate-prize-item { padding:14px 16px; }
   .gate-share { padding:14px 16px; }
 
@@ -561,9 +625,31 @@
   </div>
 </div>
 
-<!-- GATE PANEL (visible cuando logueado pero sin 10 referidos) -->
-<div class="gate-panel" id="gatePanel" style="display:none;">
-  <div class="gate-card">
+<!-- PRODE STRIP: barra compacta visible siempre cuando aplica -->
+<div class="prode-strip" id="prodeStrip">
+  <div class="prode-strip-inner">
+    <div class="prode-strip-prizes">
+      <span class="prode-strip-chip gold">🌐 1° Web gratis</span>
+      <span class="prode-strip-chip gold">🇦🇷 $500.000 ARG campeón</span>
+      <span id="stripRefCount" class="prode-strip-chip">🔒 0/10 invitados</span>
+    </div>
+    <button class="prode-strip-btn" onclick="abrirGateModal()">
+      ⚽ Premios en juego →
+    </button>
+  </div>
+</div>
+
+<!-- GATE MODAL (popup desde abajo) -->
+<div class="gate-overlay" id="gatePanel" onclick="cerrarGateModal(event)">
+  <div class="gate-modal" id="gateModalBox">
+    <div class="gate-modal-handle"></div>
+    <div style="position:relative;padding:20px 20px 0;">
+      <button class="gate-modal-close" onclick="cerrarGateModal()">×</button>
+      <div style="text-align:center;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:800;color:#fbbf24;letter-spacing:2px;text-transform:uppercase;">🏆 PREMIOS EN JUEGO</div>
+      </div>
+    </div>
+    <div class="gate-card">
 
     <!-- Premios -->
     <div style="padding:22px 24px 16px;border-bottom:1px solid rgba(255,255,255,.1);">
@@ -658,7 +744,7 @@
       </div>
 
       <!-- Botón ingresar a participar -->
-      <div style="text-align:center;">
+      <div style="text-align:center;padding-bottom:8px;">
         <button onclick="abrirPopupReglas()" style="
           display:inline-flex;align-items:center;gap:10px;
           background:linear-gradient(135deg,#facc15,#f59e0b);
@@ -674,7 +760,8 @@
     </div>
 
   </div>
-</div>
+  </div><!-- /gate-modal -->
+</div><!-- /gate-overlay -->
 
 <!-- MODAL: REGLAS Y CONDICIONES PARA PARTICIPAR -->
 <div id="popupReglas" style="
@@ -1056,9 +1143,18 @@ async function init() {
     document.getElementById("stat-pts").textContent = "—"
   }
 
-  // Mostrar gate panel si está logueado pero no puede jugar
+  // Mostrar strip + abrir gate modal si está logueado pero no puede jugar
   if (currentUser && !puedeJugar) {
     mostrarGatePanel(currentUser.id)
+  }
+  // Mostrar strip también para invitados (con premios genéricos)
+  if (!currentUser) {
+    const strip = document.getElementById("prodeStrip")
+    if (strip) {
+      strip.style.display = "block"
+      const sc = document.getElementById("stripRefCount")
+      if (sc) sc.textContent = "🔒 Registrate gratis"
+    }
   }
 
   // Participantes del sorteo = usuarios con al menos 1 predicción cargada
@@ -1518,10 +1614,28 @@ window.mostrarToastNecesitas = function() {
 /* ══════════════════════════════════
    Gate panel (logueado sin refs)
 ══════════════════════════════════ */
-async function mostrarGatePanel(userId) {
+window.abrirGateModal = function() {
   const panel = document.getElementById("gatePanel")
-  if (!panel) return
-  panel.style.display = "block"
+  if (panel) panel.classList.add("activo")
+  document.body.style.overflow = "hidden"
+}
+window.cerrarGateModal = function(e) {
+  if (e && e.target !== document.getElementById("gatePanel")) return
+  const panel = document.getElementById("gatePanel")
+  if (panel) panel.classList.remove("activo")
+  document.body.style.overflow = ""
+}
+
+async function mostrarGatePanel(userId) {
+  // Mostrar strip compacto
+  const strip = document.getElementById("prodeStrip")
+  if (strip) strip.style.display = "block"
+
+  // Abrir modal automáticamente la primera vez (solo si no lo vio ya)
+  const yaVio = sessionStorage.getItem("tc_gate_visto")
+  if (!yaVio) {
+    setTimeout(() => { window.abrirGateModal(); sessionStorage.setItem("tc_gate_visto","1") }, 600)
+  }
 
   const refLink = `https://www.trabajoscerca.com.ar/?ref=${userId}`
   const msg = encodeURIComponent(
@@ -1541,6 +1655,10 @@ async function mostrarGatePanel(userId) {
 
   document.getElementById("gateRefCount").textContent = `${n}/10`
   document.getElementById("gateRefBar").style.width   = pct + "%"
+
+  // Actualizar strip
+  const sc = document.getElementById("stripRefCount")
+  if (sc) sc.textContent = n >= 10 ? "✅ Desbloqueado" : `🔒 ${n}/10 invitados`
 
   const msgEl = document.getElementById("gateRefMsg")
   if (n >= 10) {
