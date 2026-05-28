@@ -401,17 +401,99 @@
 }
 .modal-reg-close:hover { background:rgba(255,255,255,.35); }
 
-/* ─── RESPONSIVE ─── */
+/* ─── RESPONSIVE MOBILE ─── */
 @media(max-width:600px){
-  .mundial-stats { flex-direction:column;gap:16px;padding:18px 20px; }
-  .stat-item { border-right:none;border-bottom:1px solid #f1f5f9;padding-bottom:14px; }
-  .stat-item:last-child { border-bottom:none;padding-bottom:0; }
-  .premios-wrap { grid-template-columns:1fr; }
+
+  /* Hero compacto */
+  .mundial-hero {
+    padding: 18px 14px 44px;
+  }
+  .sub-extra { display:none; }
+  .mundial-hero .badge-mundial {
+    font-size:11px; padding:4px 12px; margin-bottom:10px;
+  }
+  .mundial-hero h1 {
+    font-size:22px; margin-bottom:6px;
+  }
+  .mundial-hero .sub {
+    font-size:13px; margin-bottom:14px;
+  }
+  .premios-chips {
+    gap:7px;
+  }
+  .p-chip {
+    font-size:12px; padding:8px 12px;
+  }
+
+  /* Stats: grilla 2x2 en lugar de columna */
+  .mundial-stats {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    padding:10px 8px;
+    margin-top:-28px;
+  }
+  .stat-item {
+    border-right:1px solid #f1f5f9;
+    border-bottom:1px solid #f1f5f9;
+    padding:10px 6px;
+  }
+  .stat-item:nth-child(2) { border-right:none; }
+  .stat-item:nth-child(3) { border-bottom:none; }
+  .stat-item:nth-child(4) { border-right:none; border-bottom:none; }
+  .stat-num { font-size:20px; }
+  .stat-lbl { font-size:10px; }
+
+  /* Barra de meta: más compacta */
+  #metaBar {
+    margin-top:8px !important;
+  }
+  #metaBar > div:first-child span:first-child {
+    font-size:10px !important;
+  }
+
+  /* Tabs */
+  .mundial-tabs { margin-top:16px; }
+  .tab-btn { font-size:13px; padding:9px 6px; }
+  .tab-btn span { display:none; }
+
+  /* Filtros de fase: scroll horizontal */
+  .fase-filter {
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding:0 14px;
+    margin-top:14px;
+    justify-content:flex-start;
+    gap:7px;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .fase-filter::-webkit-scrollbar { display:none; }
+  .fase-btn { white-space:nowrap; padding:7px 13px; font-size:12px; flex-shrink:0; }
+
+  /* Filtros de grupo: scroll horizontal */
+  .grupo-filter {
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding:0 14px;
+    justify-content:flex-start;
+    scrollbar-width:none;
+  }
+  .grupo-filter::-webkit-scrollbar { display:none; }
+  .grupo-btn { flex-shrink:0; }
+
+  /* Match grid */
+  .match-grid { grid-template-columns:1fr; padding:0 12px 32px; }
+
+  /* Gate panel compacto */
+  .gate-card .gate-prizes { grid-template-columns:1fr; }
+  .gate-prize-item { padding:14px 16px; }
+  .gate-share { padding:14px 16px; }
+
+  /* Premios tab */
+  .premios-wrap { grid-template-columns:1fr; padding:0 14px; }
   .premios-wrap .premio-card.argentina { grid-column:1; }
   .podio { grid-template-columns:1fr; }
-  .match-grid { grid-template-columns:1fr; }
-  .tab-btn span { display:none; }
-  .mundial-hero { padding:40px 16px 60px; }
 }
 </style>
 </head>
@@ -434,11 +516,11 @@
 <div class="mundial-hero">
   <div class="badge-mundial">⚽ Prode Mundial 2026 — USA · México · Canadá</div>
   <h1>Predecí, ganás puntos,<br>¡te llevás el premio!</h1>
-  <p class="sub">Acertá resultados de los 104 partidos del Mundial 2026.<br>Los mejores 3 ganan premios increíbles.</p>
+  <p class="sub" id="heroSub">Acertá resultados de los 104 partidos del Mundial 2026.<br><span class="sub-extra">Los mejores 3 ganan premios increíbles.</span></p>
   <div class="premios-chips">
-    <div class="p-chip"><span>🥇</span> 1° — Página web gratis</div>
-    <div class="p-chip"><span>🏆</span> 3 pts resultado exacto · 1 pt tendencia</div>
-    <div class="p-chip"><span>🇦🇷</span> Premio especial Argentina campeón</div>
+    <div class="p-chip"><span>🥇</span> Web gratis</div>
+    <div class="p-chip"><span>🏆</span> 3 pts exacto · 1 pt tendencia</div>
+    <div class="p-chip"><span>🇦🇷</span> $500.000 ARG campeón</div>
   </div>
 </div>
 
