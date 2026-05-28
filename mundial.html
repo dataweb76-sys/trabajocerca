@@ -146,7 +146,22 @@
 .team-side {
   flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
 }
-.team-flag { font-size:28px;line-height:1; }
+.team-flag {
+  font-size:28px;line-height:1;
+  display:inline-block;
+  animation: flag-wave 2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+@keyframes flag-wave {
+  0%,100% { transform: rotate(-6deg) scale(1);   }
+  25%      { transform: rotate( 3deg) scale(1.06); }
+  50%      { transform: rotate( 6deg) scale(1.08); }
+  75%      { transform: rotate( 2deg) scale(1.04); }
+}
+.match-card.locked .team-flag,
+.match-card.completed .team-flag {
+  animation-play-state: paused;
+}
 .team-name { font-size:12px;font-weight:700;color:#374151;text-align:center; }
 
 .score-wrap {
@@ -507,12 +522,13 @@ import { supabase } from "/supabase.js"
 /* ══════════════════════════════════
    Estado global
 ══════════════════════════════════ */
-let PARTIDOS   = []       // todos los partidos
-let EQUIPOS    = {}       // id → equipo
-let MIS_PREDS  = {}       // partido_id → prediccion
-let currentUser = null
-let faseActual  = "grupo"
-let grupoActual = "A"
+let PARTIDOS     = []     // todos los partidos
+let EQUIPOS      = {}     // id → equipo
+let MIS_PREDS    = {}     // partido_id → prediccion
+let currentUser  = null
+let puedeJugar   = false  // tiene >= 10 referidos
+let faseActual   = "grupo"
+let grupoActual  = "A"
 
 const FASE_LABELS = {
   grupo: "Grupo",
@@ -555,8 +571,14 @@ async function init() {
     PARTIDOS = partidosRes.data
   }
 
-  // Predicciones del usuario
+  // Verificar si puede jugar (10+ referidos)
   if (currentUser) {
+    const { data: puedeDato } = await supabase.rpc("puede_participar_mundial", { p_user_id: currentUser.id })
+    puedeJugar = puedeDato === true
+  }
+
+  // Predicciones del usuario
+  if (currentUser && puedeJugar) {
     const { data: preds } = await supabase
       .from("mundial_predicciones")
       .select("*")
@@ -637,25 +659,46 @@ function renderFixture() {
   }
 
   if (!currentUser) {
-    // Mostrar fixture pero con aviso de login
-    grid.innerHTML = filtrados.map(p => renderCard(p, true)).join("") + `
+    grid.innerHTML = filtrados.map(p => renderCard(p, "guest")).join("") + `
     <div style="grid-column:1/-1;background:#eff6ff;border:2px solid #bfdbfe;border-radius:14px;
       padding:24px;text-align:center;">
       <i class="fa-solid fa-lock" style="font-size:24px;color:#2563eb;margin-bottom:10px;display:block;"></i>
       <strong style="color:#1e40af;">Iniciá sesión para guardar tus predicciones</strong><br>
       <a href="/login.html?redirect=/mundial.html" style="color:#2563eb;font-weight:700;font-size:14px;text-decoration:none;">
-        Entrar → </a>
+        Entrar →</a>
     </div>`
     return
   }
 
-  grid.innerHTML = filtrados.map(p => renderCard(p, false)).join("")
+  if (!puedeJugar) {
+    grid.innerHTML = filtrados.map(p => renderCard(p, "guest")).join("") + `
+    <div style="grid-column:1/-1;background:linear-gradient(135deg,#1e1b4b,#312e81);
+      border-radius:16px;padding:28px 24px;text-align:center;color:white;">
+      <div style="font-size:40px;margin-bottom:12px;">🔒</div>
+      <strong style="font-size:18px;display:block;margin-bottom:8px;">Necesitás 10 invitados para predecir</strong>
+      <p style="opacity:.8;font-size:14px;margin:0 0 18px;">
+        Compartí tu link personal y cuando 10 amigos se registren, desbloqueás el prode completo.
+      </p>
+      <a href="/index.html#refLink" style="
+        display:inline-flex;align-items:center;gap:8px;
+        background:#facc15;color:#1c1917;font-weight:800;
+        padding:12px 24px;border-radius:12px;text-decoration:none;font-size:15px;">
+        📎 Ir a mi link de invitación
+      </a>
+    </div>`
+    return
+  }
+
+  grid.innerHTML = filtrados.map(p => renderCard(p, "full")).join("")
 }
 
-function renderCard(partido, readonly) {
+function renderCard(partido, modo) {
+  // modo: "guest" | "full" | "locked" (no tiene 10 ref)
+  const readonly = modo === "guest"
   const now = new Date()
   const kickoff = new Date(partido.fecha_inicio)
-  const bloqueado = now >= kickoff
+  // Se bloquea 1 hora antes del inicio
+  const bloqueado = now >= new Date(kickoff.getTime() - 60 * 60 * 1000)
   const completado = partido.completado
   const pred = MIS_PREDS[partido.id]
 
@@ -681,25 +724,25 @@ function renderCard(partido, readonly) {
   // FOOTER: botón o estado
   let footer = ""
   if (completado) {
-    // Partido terminado: mostramos puntos del usuario
     let puntosHTML = ""
+    let miPredHTML = ""
     if (pred) {
-      const cls = pred.puntos_obtenidos === 3 ? "puntos-3" :
-                  pred.puntos_obtenidos === 1 ? "puntos-1" : "puntos-0"
-      const ico = pred.puntos_obtenidos === 3 ? "🎯" :
-                  pred.puntos_obtenidos === 1 ? "✅" : "❌"
-      puntosHTML = `<span class="puntos-badge ${cls}">${ico} ${pred.puntos_obtenidos} pt${pred.puntos_obtenidos !== 1 ? "s" : ""}</span>`
+      const pts = pred.puntos_obtenidos
+      const cls = pts === 3 ? "puntos-3" : pts === 1 ? "puntos-1" : "puntos-0"
+      const ico = pts === 3 ? "🎯" : pts === 1 ? "✅" : "❌"
+      const msg = pts === 3 ? "¡Resultado exacto!" : pts === 1 ? "Tendencia correcta" : "Sin puntos"
+      puntosHTML = `<span class="puntos-badge ${cls}">${ico} ${pts} pt${pts !== 1 ? "s" : ""} — ${msg}</span>`
+      miPredHTML = `<span class="mi-pred">Tu pred: ${pred.goles_local}-${pred.goles_visitante}</span>`
+    } else {
+      miPredHTML = `<span class="no-pred-tag">Sin predicción — 0 pts</span>`
     }
-    const miPredHTML = pred
-      ? `<span class="mi-pred">Tu pred: ${pred.goles_local}-${pred.goles_visitante}</span>`
-      : `<span class="no-pred-tag">Sin predicción</span>`
     footer = `
-      <div class="match-footer">
-        <div class="match-venue" title="${partido.estadio || ""}">${partido.ciudad || ""}</div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
-          ${puntosHTML}
+      <div class="match-footer" style="flex-direction:column;align-items:stretch;gap:6px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="match-venue" title="${partido.estadio || ""}">${partido.ciudad || ""}</div>
           ${miPredHTML}
         </div>
+        <div style="text-align:center;">${puntosHTML}</div>
       </div>`
   } else if (bloqueado) {
     // Partido en juego / por jugarse (ya cerró predicción)
@@ -765,9 +808,17 @@ function renderCard(partido, readonly) {
       </div>`
   }
 
-  const statusTag = bloqueado && !completado
-    ? `<span class="lock-tag"><i class="fa-solid fa-lock"></i> Cerrado</span>`
-    : ""
+  // Aviso si cierra en menos de 1 hora
+  const msHastaCierre = kickoff.getTime() - 60*60*1000 - now.getTime()
+  const porCerrar = !bloqueado && msHastaCierre < 30 * 60 * 1000 // menos de 30 min
+
+  const statusTag = completado
+    ? `<span style="font-size:10px;background:#dcfce7;color:#15803d;border-radius:6px;padding:2px 7px;font-weight:700;">FINAL</span>`
+    : bloqueado
+      ? `<span class="lock-tag"><i class="fa-solid fa-lock"></i> Cerrado</span>`
+      : porCerrar
+        ? `<span style="font-size:10px;background:#fef9c3;color:#a16207;border-radius:6px;padding:2px 7px;font-weight:700;">⚡ ¡Cierra pronto!</span>`
+        : ""
 
   return `
   <div class="match-card ${bloqueado ? "locked" : ""} ${completado ? "completed" : ""}" id="card-${partido.id}">
@@ -889,7 +940,7 @@ async function renderRanking() {
   podio.innerHTML = top3.map((u, i) => `
     <div class="podio-card ${clases[i]}">
       <span class="podio-pos">${emojis[i]}</span>
-      <div class="podio-nombre">${u.nombre || "Usuario"}</div>
+      <div class="podio-nombre">${u.nombre || "Jugador"}</div>
       <div class="podio-pts">${u.total_puntos}</div>
       <div class="podio-pts-lbl">puntos</div>
       <div class="podio-exactos">🎯 ${u.exactos} exactos · ✅ ${u.tendencias} tendencias</div>
