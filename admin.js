@@ -100,6 +100,10 @@ function renderTabla() {
           class="btn btn-sm btn-outline" style="font-size:12px;">
           <i class="fa-solid fa-eye"></i> Ver perfil
         </a>
+        <button onclick="toggleAdmin('${p.id}', ${!p.admin})"
+          class="btn btn-sm btn-outline" style="${p.admin ? "color:#7c3aed;border-color:#7c3aed;" : "color:#94a3b8;border-color:#cbd5e1;"}font-size:12px;">
+          <i class="fa-solid fa-shield-halved"></i> ${p.admin ? "Quitar admin" : "Dar admin"}
+        </button>
         <button onclick="eliminarCuenta('${p.id}', '${(nombre).replace(/'/g,"\\'")}', '${p.email||""}')"
           class="btn btn-sm btn-outline" style="color:#dc2626;border-color:#dc2626;font-size:12px;">
           <i class="fa-solid fa-trash"></i> Eliminar
@@ -412,6 +416,209 @@ window.eliminarCuenta = async function(id, nombre, email) {
     alert("Error al eliminar: " + e.message)
     if (row) { row.style.opacity = "1"; row.style.pointerEvents = "" }
   }
+}
+
+/* ── Toggle Admin ── */
+window.toggleAdmin = async function(id, nuevoVal) {
+  const accion = nuevoVal ? "dar permisos de administrador" : "quitar permisos de administrador"
+  if (!confirm(`¿Estás seguro de ${accion} a este usuario?`)) return
+
+  const { error } = await supabase
+    .from("perfiles").update({ admin: nuevoVal }).eq("id", id)
+
+  if (error) { alert("Error: " + error.message); return }
+
+  const idx = _perfiles.findIndex(p => p.id === id)
+  if (idx >= 0) _perfiles[idx].admin = nuevoVal
+  renderTabla()
+}
+
+/* ══════════════════════════════════════
+   GESTIÓN DE CATEGORÍAS
+══════════════════════════════════════ */
+
+let _catTipo = 'oficio'
+
+const CAT_DEFAULTS = {
+  oficio: {
+    'Plomería':               ['Plomería sanitaria','Plomería de gas','Destapaciones','Instalación termotanques','Plomería industrial'],
+    'Electricidad':           ['Instalaciones eléctricas','Tableros eléctricos','Iluminación','Automatizaciones','Mantenimiento'],
+    'Albañilería':            ['Construcción','Refacciones','Remodelaciones','Revoques','Pintura exterior','Colocación de pisos'],
+    'Pintura':                ['Pintura interior','Pintura exterior','Impermeabilizaciones','Revestimientos','Alisados','Estuco veneciano'],
+    'Carpintería':            ['Muebles a medida','Aberturas','Restauración','Decks','Revestimiento de maderas'],
+    'Herrería':               ['Rejas','Portones','Escaleras metálicas','Estructuras metálicas','Soldadura'],
+    'Gasista':                ['Instalación de gas','Habilitación de medidores','Calderas','Calefones','Estufas'],
+    'Jardinería':             ['Diseño de jardines','Mantenimiento','Podas','Riego automático','Paisajismo','Huerta orgánica'],
+    'Limpieza':               ['Limpieza de hogares','Limpieza de oficinas','Limpieza post obra','Limpieza de vidrios','Desinfección'],
+    'Informática':            ['Reparación de PC','Soporte técnico','Redes Wi-Fi','Recupero de datos','Configuración'],
+    'Cerrajería':             ['Apertura de puertas','Instalación de cerraduras','Duplicado de llaves','Caja de seguridad'],
+    'Climatización':          ['Instalación de aire acondicionado','Mantenimiento de AC','Calefacción central','Ventilación'],
+    'Mecánica':               ['Mecánica general','Frenos','Electricidad del auto','Transmisión','Mecánica de motos'],
+    'Mudanzas y Fletes':      ['Flete local','Mudanza chica','Mudanza grande','Transporte de mercaderías'],
+    'Belleza y Estética':     ['Peluquería','Barbería','Manicuria','Pedicuria','Maquillaje artístico','Depilación','Micropigmentación','Extensión de pestañas','Masajes','Uñas acrílicas/gel','Estética facial'],
+    'Cuidado de personas':    ['Niñera','Cuidado de adultos mayores','Acompañante terapéutico','Enfermería domiciliaria'],
+    'Fotografía y Video':     ['Fotografía de eventos','Fotografía de producto','Video institucional','Edición','Cobertura de bodas'],
+    'Diseño':                 ['Diseño gráfico','Diseño web','UX/UI','Diseño de logo','Diseño editorial'],
+    'Clases y Tutorías':      ['Matemáticas','Inglés','Física y química','Apoyo escolar','Música','Idiomas'],
+    'Otro oficio':            []
+  },
+  profesional: {
+    'Medicina':         ['Clínica médica','Pediatría','Cardiología','Dermatología','Ginecología','Traumatología','Neurología','Oftalmología','Psiquiatría','Cirugía general','Medicina familiar'],
+    'Odontología':      ['Odontología general','Ortodoncia','Implantología','Endodoncia','Periodoncia','Odontopediatría','Odontología estética'],
+    'Psicología':       ['Psicología clínica','Psicología infantil','Psicología laboral','Psicología de pareja','Neuropsicología','Orientación vocacional'],
+    'Nutrición':        ['Nutrición clínica','Nutrición deportiva','Nutrición pediátrica','Coaching nutricional'],
+    'Kinesiología':     ['Traumatológica','Neurológica','Deportiva','Respiratoria','Rehabilitación postquirúrgica'],
+    'Fonoaudiología':   ['Trastornos del lenguaje','Dislexia','Voz profesional','Deglución'],
+    'Enfermería':       ['Enfermería clínica','Domiciliaria','Pediátrica','Urgencias','Cuidados paliativos'],
+    'Veterinaria':      ['Pequeños animales','Animales de granja','Animales exóticos','Cirugía veterinaria'],
+    'Derecho':          ['Derecho civil','Derecho penal','Derecho laboral','Derecho de familia','Derecho comercial','Derecho tributario','Derecho inmobiliario'],
+    'Contabilidad':     ['Contabilidad general','Impuestos y AFIP','Auditoría','Contabilidad de pymes','Liquidación de sueldos'],
+    'Arquitectura':     ['Residencial','Comercial','Diseño de interiores','Planificación urbana','Dirección de obra','Paisajismo'],
+    'Ingeniería':       ['Civil','Mecánica','Eléctrica','Sistemas','Industrial','Ambiental'],
+    'Diseño':           ['Diseño gráfico','Diseño web/UX','Diseño de moda','Diseño industrial','Diseño editorial','Animación'],
+    'Informática':      ['Desarrollo web','Desarrollo mobile','Ciberseguridad','Redes y servidores','Soporte técnico','Data science / IA'],
+    'Educación':        ['Educación primaria','Educación secundaria','Educación especial','Idiomas','Apoyo escolar','Tutoría universitaria'],
+    'Otra profesión':   []
+  },
+  emprendimiento: {
+    'Gastronomía':               ['Empanadas','Pizzas','Hamburguesas','Sushi','Tartas y quiches','Facturas y medialunas','Alfajores y dulces','Tortas y pasteles','Cupcakes y muffins','Comida vegana/vegetariana','Catering','Menú del día','Milanesas','Asado y parrilla','Helados artesanales'],
+    'Fletes y Mudanzas':         ['Flete local','Flete provincial','Flete nacional','Mudanza chica','Mudanza grande','Carga liviana','Carga pesada','Mensajería'],
+    'Tienda y Comercio':         ['Electrodomésticos','Ropa y calzado','Alimentos no perecederos','Bebidas','Artículos del hogar','Juguetes','Libros y papelería','Ferretería','Artículos deportivos'],
+    'Belleza y Estética':        ['Peluquería a domicilio','Barbería a domicilio','Manicuria','Pedicuria','Depilación','Maquillaje','Micropigmentación','Extensión de pestañas','Uñas acrílicas/gel'],
+    'Indumentaria y Moda':       ['Ropa de mujer','Ropa de hombre','Ropa infantil','Ropa deportiva','Calzado','Accesorios','Lencería','Trajes de baño'],
+    'Artesanías y Manualidades': ['Tejidos y crochet','Macramé','Cerámica','Cuero artesanal','Velas aromáticas','Jabones artesanales','Joyería artesanal','Arte y pinturas'],
+    'Salud y Bienestar':         ['Productos naturales','Suplementos deportivos','Cosmética natural','Aromaterapia','Entrenamiento personal','Alimentación saludable'],
+    'Tecnología y Digital':      ['Diseño gráfico','Desarrollo web','Redes sociales','Fotografía','Edición de video','Impresión 3D','Reparación de celulares'],
+    'Hogar y Decoración':        ['Muebles artesanales','Plantas y jardín','Velas y difusores','Textil del hogar','Cuadros y arte'],
+    'Mascotas':                  ['Accesorios para mascotas','Comida artesanal','Juguetes','Peluquería canina','Paseos de perros'],
+    'Educación y Cursos':        ['Clases particulares','Idiomas','Música','Arte y pintura','Costura','Cocina y repostería','Programación','Apoyo escolar'],
+    'Eventos y Entretenimiento': ['Decoración de eventos','Tortas y mesa dulce','Animación infantil','Fotografía de eventos','Catering','DJ y música','Juegos e inflables'],
+    'Servicios Profesionales':   ['Contabilidad para pymes','Asesoría legal','Marketing y publicidad','Traducciones','Coaching'],
+    'Otro rubro':                []
+  }
+}
+
+let _catData = { oficio: null, profesional: null, emprendimiento: null }
+
+/* ── Toggle panel categorías ── */
+window.toggleCategorias = function() {
+  const sec = document.getElementById('seccionCategorias')
+  const chev = document.getElementById('catChevron')
+  const abierto = sec.style.display !== 'none'
+  sec.style.display = abierto ? 'none' : 'block'
+  chev.className = abierto ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up'
+  document.querySelector('#seccionCategorias').previousElementSibling
+    ?.querySelector('button')?.textContent
+  document.querySelector('[onclick="window.toggleCategorias()"]').innerHTML =
+    `<i class="fa-solid fa-chevron-${abierto ? 'down' : 'up'}" id="catChevron"></i> ${abierto ? 'Abrir' : 'Cerrar'}`
+  if(!abierto) window.abrirTabCat(_catTipo)
+}
+
+/* ── Cambiar tab ── */
+window.abrirTabCat = async function(tipo) {
+  _catTipo = tipo
+  ;['oficio','profesional','emprendimiento'].forEach(t => {
+    const btn = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1))
+    if(!btn) return
+    const colores = { oficio: '#ea580c', profesional: '#7c3aed', emprendimiento: '#d97706' }
+    if(t === tipo){
+      btn.style.background = colores[t]; btn.style.color = 'white'
+      btn.style.borderColor = colores[t]
+    } else {
+      btn.style.background = 'white'; btn.style.color = colores[t]
+      btn.style.borderColor = colores[t]
+    }
+  })
+  await renderCategorias()
+}
+
+/* ── Renderizar categorías ── */
+async function renderCategorias() {
+  const cont = document.getElementById('catContenido')
+  cont.innerHTML = `<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>`
+
+  // Intentar cargar desde Supabase
+  if(!_catData[_catTipo]){
+    const { data } = await supabase
+      .from('configuracion')
+      .select('valor')
+      .eq('clave', 'categorias_' + _catTipo)
+      .single()
+    _catData[_catTipo] = data?.valor || CAT_DEFAULTS[_catTipo]
+  }
+
+  const cats = _catData[_catTipo]
+  const colores = { oficio: '#ea580c', profesional: '#7c3aed', emprendimiento: '#d97706' }
+  const color = colores[_catTipo]
+
+  cont.innerHTML = Object.entries(cats).map(([cat, subs]) => `
+    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">
+        <strong style="font-size:13.5px;color:#1e293b;">${cat}</strong>
+        <div style="display:flex;gap:6px;">
+          <button onclick="window.editarSubcats('${cat.replace(/'/g,"\\'")}')"
+            class="btn btn-sm btn-outline" style="font-size:11px;color:#4f46e5;border-color:#4f46e5;">
+            <i class="fa-solid fa-pen"></i> Editar subs
+          </button>
+          <button onclick="window.eliminarCategoria('${cat.replace(/'/g,"\\'")}')"
+            class="btn btn-sm btn-outline" style="font-size:11px;color:#dc2626;border-color:#dc2626;">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      ${subs.length
+        ? `<div style="display:flex;flex-wrap:wrap;gap:5px;">${subs.map(s =>
+            `<span style="background:${color}1a;color:${color};border:1px solid ${color}40;
+              border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;">${s}</span>`
+          ).join('')}</div>`
+        : `<span style="font-size:11px;color:#94a3b8;font-style:italic;">Sin subcategorías</span>`
+      }
+    </div>`
+  ).join('') || `<p style="color:#94a3b8;text-align:center;padding:20px;">No hay categorías guardadas. Se usarán las predeterminadas del sistema.</p>`
+}
+
+/* ── Agregar categoría ── */
+window.agregarCategoria = async function() {
+  const nombre = document.getElementById('nuevaCatNombre').value.trim()
+  const subsStr = document.getElementById('nuevaCatSubs').value.trim()
+  if(!nombre) { alert('Ingresá el nombre de la categoría.'); return }
+
+  const subs = subsStr ? subsStr.split(',').map(s => s.trim()).filter(Boolean) : []
+
+  if(!_catData[_catTipo]) _catData[_catTipo] = { ...CAT_DEFAULTS[_catTipo] }
+  _catData[_catTipo][nombre] = subs
+
+  await guardarCategorias()
+  document.getElementById('nuevaCatNombre').value = ''
+  document.getElementById('nuevaCatSubs').value  = ''
+  renderCategorias()
+}
+
+/* ── Editar subcategorías ── */
+window.editarSubcats = async function(cat) {
+  const actual = (_catData[_catTipo]?.[cat] || []).join(', ')
+  const nuevo = prompt(`Subcategorías de "${cat}"\n(Separá con comas):`, actual)
+  if(nuevo === null) return
+  _catData[_catTipo][cat] = nuevo.split(',').map(s => s.trim()).filter(Boolean)
+  await guardarCategorias()
+  renderCategorias()
+}
+
+/* ── Eliminar categoría ── */
+window.eliminarCategoria = async function(cat) {
+  if(!confirm(`¿Eliminar la categoría "${cat}" y todas sus subcategorías?`)) return
+  if(!_catData[_catTipo]) _catData[_catTipo] = { ...CAT_DEFAULTS[_catTipo] }
+  delete _catData[_catTipo][cat]
+  await guardarCategorias()
+  renderCategorias()
+}
+
+/* ── Guardar en Supabase ── */
+async function guardarCategorias() {
+  const { error } = await supabase
+    .from('configuracion')
+    .upsert({ clave: 'categorias_' + _catTipo, valor: _catData[_catTipo] })
+  if(error) alert('Error al guardar: ' + error.message)
 }
 
 /* ── Init ── */

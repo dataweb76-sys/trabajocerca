@@ -135,6 +135,61 @@
 
   </div>
 
+  <!-- ══ Gestión de Categorías ══ -->
+  <div style="background:white;border:1.5px solid #c7d2fe;border-radius:14px;padding:20px 22px;margin-bottom:20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <h2 style="margin:0;font-size:17px;font-weight:800;">
+        <i class="fa-solid fa-tags" style="color:#4f46e5;"></i> Gestión de Categorías
+        <span style="font-size:12px;font-weight:400;color:#64748b;margin-left:8px;">Oficios · Profesionales · Emprendimientos</span>
+      </h2>
+      <button onclick="window.toggleCategorias()" class="btn btn-outline btn-sm" style="color:#4f46e5;border-color:#4f46e5;">
+        <i class="fa-solid fa-chevron-down" id="catChevron"></i> Abrir
+      </button>
+    </div>
+
+    <div id="seccionCategorias" style="display:none;">
+
+      <!-- Tabs tipo -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;border-bottom:2px solid #e2e8f0;padding-bottom:10px;">
+        <button onclick="window.abrirTabCat('oficio')" id="tabOficio"
+          class="btn btn-sm" style="background:#ea580c;color:white;">🔨 Oficios</button>
+        <button onclick="window.abrirTabCat('profesional')" id="tabProfesional"
+          class="btn btn-sm btn-outline" style="color:#7c3aed;border-color:#7c3aed;">🎓 Profesionales</button>
+        <button onclick="window.abrirTabCat('emprendimiento')" id="tabEmprendimiento"
+          class="btn btn-sm btn-outline" style="color:#d97706;border-color:#d97706;">💡 Emprendimientos</button>
+      </div>
+
+      <div id="catContenido">
+        <div style="text-align:center;padding:20px;color:#94a3b8;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Cargando...
+        </div>
+      </div>
+
+      <!-- Agregar categoría -->
+      <div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:10px;padding:14px 16px;margin-top:16px;">
+        <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#374151;">
+          <i class="fa-solid fa-plus"></i> Agregar nueva categoría
+        </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="nuevaCatNombre" placeholder="Nombre de la categoría" style="
+            flex:1;min-width:180px;padding:9px 12px;border:1.5px solid #e2e8f0;
+            border-radius:8px;font-size:13px;font-family:inherit;">
+          <input type="text" id="nuevaCatSubs" placeholder="Subcategorías separadas por coma" style="
+            flex:2;min-width:220px;padding:9px 12px;border:1.5px solid #e2e8f0;
+            border-radius:8px;font-size:13px;font-family:inherit;">
+          <button onclick="window.agregarCategoria()" class="btn btn-sm"
+            style="background:#4f46e5;color:white;white-space:nowrap;">
+            <i class="fa-solid fa-plus"></i> Agregar
+          </button>
+        </div>
+        <small style="color:#64748b;font-size:11px;margin-top:6px;display:block;">
+          Ejemplo subcategorías: "Plomería de gas, Plomería sanitaria, Calefacción"
+        </small>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Perfiles -->
   <div style="background:white;border:1.5px solid #e2e8f0;border-radius:14px;padding:20px 22px;">
 

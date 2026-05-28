@@ -251,6 +251,14 @@ body { background:#f8fafc; }
 
 <div class="reg-wrap">
 
+  <!-- Navbar -->
+  <nav style="background:white;border-bottom:1px solid #e2e8f0;padding:0 20px;display:flex;align-items:center;height:52px;">
+    <a href="/index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#1e293b;">
+      <img src="/logo.png" alt="Trabajos Cerca" style="height:34px;object-fit:contain;">
+      <span style="font-size:12.5px;color:#64748b;"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</span>
+    </a>
+  </nav>
+
   <!-- Header -->
   <div class="reg-header">
     <div class="reg-ico">🎓</div>
@@ -356,48 +364,36 @@ body { background:#f8fafc; }
     <div class="reg-seccion">
       <h2><i class="fa-solid fa-location-dot"></i> Tu ubicación</h2>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="campo">
-          <label>Provincia *</label>
-          <select id="prProvincia" onchange="cargarLocalidades('prProvincia','prLocalidad')" required>
-            <option value="">— Elegí —</option>
-            <option>Buenos Aires</option>
-            <option>Ciudad Autónoma de Buenos Aires</option>
-            <option>Catamarca</option>
-            <option>Chaco</option>
-            <option>Chubut</option>
-            <option>Córdoba</option>
-            <option>Corrientes</option>
-            <option>Entre Ríos</option>
-            <option>Formosa</option>
-            <option>Jujuy</option>
-            <option>La Pampa</option>
-            <option>La Rioja</option>
-            <option>Mendoza</option>
-            <option>Misiones</option>
-            <option>Neuquén</option>
-            <option>Río Negro</option>
-            <option>Salta</option>
-            <option>San Juan</option>
-            <option>San Luis</option>
-            <option>Santa Cruz</option>
-            <option>Santa Fe</option>
-            <option>Santiago del Estero</option>
-            <option>Tierra del Fuego</option>
-            <option>Tucumán</option>
-          </select>
+      <div class="campo">
+        <label>Código postal *</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="prCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8" required
+            style="flex:0 0 130px;"
+            onkeyup="if(this.value.length>=4)buscarPorCP(this.value,'prLocalidad','prProvincia')">
+          <button type="button"
+            onclick="buscarPorCP(document.getElementById('prCP').value,'prLocalidad','prProvincia')"
+            style="padding:10px 16px;background:#7c3aed;color:white;border:none;border-radius:9px;
+              font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">
+            <i class="fa-solid fa-magnifying-glass"></i> Buscar
+          </button>
         </div>
-        <div class="campo">
-          <label>Código postal</label>
-          <input type="text" id="prCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8">
-        </div>
+        <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
+          Ingresá tu CP y se cargarán las localidades de esa zona automáticamente.
+        </small>
       </div>
 
       <div class="campo">
-        <label>Localidad *</label>
-        <select id="prLocalidad" required>
-          <option value="">— Primero elegí provincia —</option>
+        <label>Localidad / Ciudad *</label>
+        <select id="prLocalidad" required
+          onchange="autoProvFromSelect(this,'prProvincia')">
+          <option value="">— Primero ingresá tu código postal —</option>
         </select>
+      </div>
+
+      <div class="campo">
+        <label>Provincia</label>
+        <input type="text" id="prProvincia" placeholder="Se completa automáticamente al elegir localidad"
+          readonly style="background:#f1f5f9;color:#475569;cursor:default;">
       </div>
     </div>
 
@@ -505,23 +501,33 @@ window.cargarSubcategoriasProf = function() {
   wrap.style.display = 'block'
 }
 
-/* ── GeoRef: cargar localidades ── */
-window.cargarLocalidades = async function(provId, locId) {
-  const prov = document.getElementById(provId).value
+/* ── GeoRef: buscar localidades por CP ── */
+window.buscarPorCP = async function(cp, locId, provId) {
+  if(!cp || cp.length < 4) return
   const locSel = document.getElementById(locId)
-  locSel.innerHTML = '<option>Cargando...</option>'
-  if(!prov){ locSel.innerHTML = '<option value="">— Primero elegí provincia —</option>'; return }
-
+  locSel.innerHTML = '<option>Buscando...</option>'
   try {
-    const url = `https://apis.datos.gob.ar/georef/api/municipios?provincia=${encodeURIComponent(prov)}&max=1000&campos=nombre&orden=nombre`
+    const url = `https://apis.datos.gob.ar/georef/api/localidades?codigo_postal=${cp}&max=200&campos=nombre,provincia&orden=nombre`
     const res  = await fetch(url)
     const json = await res.json()
-    const municipios = json.municipios || []
-    locSel.innerHTML = '<option value="">— Elegí tu localidad —</option>' +
-      municipios.map(m => `<option value="${m.nombre}">${m.nombre}</option>`).join('')
+    const locs = json.localidades || []
+    if(!locs.length){
+      locSel.innerHTML = '<option value="">Sin resultados para ese CP. Probá otro.</option>'
+      return
+    }
+    locSel.innerHTML = '<option value="">— Elegí tu localidad / ciudad —</option>' +
+      locs.map(l => `<option value="${l.nombre}" data-prov="${l.provincia.nombre}">${l.nombre}</option>`).join('')
+    // Auto-fill province from first result
+    if(provId) document.getElementById(provId).value = locs[0].provincia.nombre
   } catch(_) {
-    locSel.innerHTML = '<option value="">Error al cargar. Ingresala manualmente</option>'
+    locSel.innerHTML = '<option value="">Error al buscar. Intentá de nuevo.</option>'
   }
+}
+
+/* ── Sincronizar provincia al cambiar localidad ── */
+window.autoProvFromSelect = function(sel, provId) {
+  const opt = sel.options[sel.selectedIndex]
+  if(opt && opt.dataset.prov) document.getElementById(provId).value = opt.dataset.prov
 }
 
 /* ── Horario ── */
@@ -578,7 +584,8 @@ document.getElementById('formProf').addEventListener('submit', async e => {
   if(!email)                    return mostrarError('Ingresá tu email.')
   if(pass.length < 6)           return mostrarError('La contraseña debe tener al menos 6 caracteres.')
   if(!categoria)                return mostrarError('Elegí tu categoría profesional.')
-  if(!provincia || !localidad)  return mostrarError('Completá tu provincia y localidad.')
+  if(!localidad)  return mostrarError('Ingresá tu código postal y elegí tu localidad.')
+  if(!provincia)  return mostrarError('Seleccioná una localidad para completar la provincia.')
   if(!terminos)                 return mostrarError('Tenés que aceptar los términos y condiciones.')
 
   const dias = [...document.querySelectorAll('.dia-chip.activo')].map(d => d.dataset.dia)

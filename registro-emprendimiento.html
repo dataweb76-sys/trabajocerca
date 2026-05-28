@@ -130,42 +130,8 @@ body { background:#f8fafc; }
   color: #92400e;
 }
 
-/* Categoría emprendimiento */
-.cat-emp-wrap {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.cat-emp-btn {
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 10px 8px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #374151;
-  background: #f8fafc;
-  transition: all .15s;
-  user-select: none;
-}
-.cat-emp-btn .cat-ico { font-size: 22px; display: block; margin-bottom: 4px; }
-.cat-emp-btn.activo {
-  border-color: #d97706;
-  background: #fff7ed;
-  color: #92400e;
-}
-
 /* Subcategorías checkboxes */
 #subEmpWrap { margin-top: 14px; display: none; }
-#subEmpWrap > label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 8px;
-}
 
 /* Alcance */
 .alcance-opts { display: flex; flex-direction: column; gap: 8px; }
@@ -282,6 +248,14 @@ body { background:#f8fafc; }
 
 <div class="reg-wrap">
 
+  <!-- Navbar -->
+  <nav style="background:white;border-bottom:1px solid #e2e8f0;padding:0 20px;display:flex;align-items:center;height:52px;">
+    <a href="/index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#1e293b;">
+      <img src="/logo.png" alt="Trabajos Cerca" style="height:34px;object-fit:contain;">
+      <span style="font-size:12.5px;color:#64748b;"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</span>
+    </a>
+  </nav>
+
   <!-- Header -->
   <div class="reg-header">
     <div class="reg-ico">💡</div>
@@ -368,13 +342,33 @@ body { background:#f8fafc; }
     <div class="reg-seccion">
       <h2><i class="fa-solid fa-store"></i> Rubro del emprendimiento</h2>
 
-      <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:10px;">
-        Elegí la categoría *
-      </label>
-      <div class="cat-emp-wrap" id="catEmpGrid"></div>
+      <div class="campo">
+        <label>Categoría *</label>
+        <select id="emCategoria" onchange="seleccionarCatEmp(this.value)" required>
+          <option value="">— Elegí el rubro de tu emprendimiento —</option>
+          <option value="Gastronomía">🍔 Gastronomía</option>
+          <option value="Fletes y Mudanzas">🚚 Fletes y Mudanzas</option>
+          <option value="Tienda y Comercio">🛍️ Tienda y Comercio</option>
+          <option value="Belleza y Estética">💅 Belleza y Estética</option>
+          <option value="Indumentaria y Moda">👗 Indumentaria y Moda</option>
+          <option value="Artesanías y Manualidades">🎨 Artesanías y Manualidades</option>
+          <option value="Salud y Bienestar">🌿 Salud y Bienestar</option>
+          <option value="Tecnología y Digital">💻 Tecnología y Digital</option>
+          <option value="Hogar y Decoración">🏡 Hogar y Decoración</option>
+          <option value="Mascotas">🐶 Mascotas</option>
+          <option value="Educación y Cursos">📚 Educación y Cursos</option>
+          <option value="Eventos y Entretenimiento">🎉 Eventos y Entretenimiento</option>
+          <option value="Construcción y Refacciones">🏗️ Construcción y Refacciones</option>
+          <option value="Automotores">🚗 Automotores</option>
+          <option value="Servicios Profesionales">📋 Servicios Profesionales</option>
+          <option value="Otro rubro">💡 Otro rubro</option>
+        </select>
+      </div>
 
-      <div id="subEmpWrap">
-        <label>Tipos de productos/servicios * <small style="font-weight:400;color:#64748b;">— Tildá todos los que ofrecés</small></label>
+      <div id="subEmpWrap" style="display:none;margin-top:4px;">
+        <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:8px;">
+          Tipos de productos / servicios * <small style="font-weight:400;color:#64748b;">— Tildá todos los que ofrecés</small>
+        </label>
         <div id="subEmpCheckboxes"
           style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:7px;"></div>
       </div>
@@ -384,53 +378,41 @@ body { background:#f8fafc; }
     <div class="reg-seccion">
       <h2><i class="fa-solid fa-location-dot"></i> Ubicación</h2>
 
-      <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">
-        <div class="campo">
-          <label>Provincia *</label>
-          <select id="emProvincia" onchange="cargarLocalidades('emProvincia','emLocalidad')" required>
-            <option value="">— Elegí —</option>
-            <option>Buenos Aires</option>
-            <option>Ciudad Autónoma de Buenos Aires</option>
-            <option>Catamarca</option>
-            <option>Chaco</option>
-            <option>Chubut</option>
-            <option>Córdoba</option>
-            <option>Corrientes</option>
-            <option>Entre Ríos</option>
-            <option>Formosa</option>
-            <option>Jujuy</option>
-            <option>La Pampa</option>
-            <option>La Rioja</option>
-            <option>Mendoza</option>
-            <option>Misiones</option>
-            <option>Neuquén</option>
-            <option>Río Negro</option>
-            <option>Salta</option>
-            <option>San Juan</option>
-            <option>San Luis</option>
-            <option>Santa Cruz</option>
-            <option>Santa Fe</option>
-            <option>Santiago del Estero</option>
-            <option>Tierra del Fuego</option>
-            <option>Tucumán</option>
-          </select>
+      <div class="campo">
+        <label>Código postal *</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="emCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8" required
+            style="flex:0 0 130px;"
+            onkeyup="if(this.value.length>=4)buscarPorCP(this.value,'emLocalidad','emProvincia')">
+          <button type="button"
+            onclick="buscarPorCP(document.getElementById('emCP').value,'emLocalidad','emProvincia')"
+            style="padding:10px 16px;background:#d97706;color:white;border:none;border-radius:9px;
+              font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">
+            <i class="fa-solid fa-magnifying-glass"></i> Buscar
+          </button>
         </div>
-        <div class="campo">
-          <label>Código postal</label>
-          <input type="text" id="emCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8">
-        </div>
+        <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
+          Ingresá tu CP y se cargarán las localidades de esa zona automáticamente.
+        </small>
       </div>
 
       <div class="campo">
-        <label>Localidad *</label>
-        <select id="emLocalidad" required>
-          <option value="">— Primero elegí provincia —</option>
+        <label>Localidad / Ciudad *</label>
+        <select id="emLocalidad" required
+          onchange="autoProvFromSelect(this,'emProvincia')">
+          <option value="">— Primero ingresá tu código postal —</option>
         </select>
       </div>
 
       <div class="campo">
         <label>Dirección <small style="font-weight:400;color:#64748b;">(opcional)</small></label>
         <input type="text" id="emDireccion" placeholder="Ej: Av. Corrientes 1234, Piso 2">
+      </div>
+
+      <div class="campo">
+        <label>Provincia</label>
+        <input type="text" id="emProvincia" placeholder="Se completa automáticamente al elegir localidad"
+          readonly style="background:#f1f5f9;color:#475569;cursor:default;">
       </div>
     </div>
 
@@ -510,80 +492,32 @@ const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY)
    Categorías de emprendimientos
 ══════════════════════════════════════ */
 const EMPRENDIMIENTOS = {
-  'Gastronomía': {
-    ico: '🍔',
-    subs: ['Empanadas','Pizzas','Hamburguesas','Sushi','Tartas y quiches','Facturas y medialunas','Alfajores y dulces','Tortas y pasteles','Cupcakes y muffins','Comida árabe','Comida vegana/vegetariana','Catering','Menú del día','Milanesas','Asado y parrilla','Helados artesanales','Bebidas frías y jugos','Café y té']
-  },
-  'Belleza y Estética': {
-    ico: '💅',
-    subs: ['Peluquería a domicilio','Barbería a domicilio','Manicuria','Pedicuria','Depilación','Maquillaje artístico','Micropigmentación','Extensión de pestañas','Uñas acrílicas/gel','Estética facial','Masajes relajantes','Tratamientos corporales']
-  },
-  'Indumentaria y Moda': {
-    ico: '👗',
-    subs: ['Ropa de mujer','Ropa de hombre','Ropa infantil','Ropa deportiva','Calzado','Accesorios y bijouterie','Ropa de trabajo','Disfraces','Lencería','Trajes de baño']
-  },
-  'Artesanías y Manualidades': {
-    ico: '🎨',
-    subs: ['Tejidos y crochet','Macramé','Cerámica y alfarería','Cuero artesanal','Madera tallada','Velas aromáticas','Jabones artesanales','Papelería y cuadernos','Peluches y muñecos','Decoración del hogar','Joyería artesanal','Arte y pinturas']
-  },
-  'Tecnología y Digital': {
-    ico: '💻',
-    subs: ['Diseño gráfico','Desarrollo web','Redes sociales','Fotografía','Edición de video','Impresión 3D','Reparación de celulares','Reparación de computadoras','Clases de computación','Diseño de logos']
-  },
-  'Salud y Bienestar': {
-    ico: '🌿',
-    subs: ['Productos naturales y herboristería','Suplementos deportivos','Cosmética natural','Aromaterapia','Yoga y meditación','Entrenamiento personal','Alimentación saludable','Productos para bebés']
-  },
-  'Hogar y Decoración': {
-    ico: '🏡',
-    subs: ['Muebles artesanales','Plantas y jardín','Velas y difusores','Cuadros y arte','Textil del hogar','Almohadas y almohadones','Organizadores y cajas','Menaje y cocina']
-  },
-  'Mascotas': {
-    ico: '🐶',
-    subs: ['Accesorios para mascotas','Ropa para mascotas','Comida artesanal para mascotas','Juguetes para mascotas','Peluquería canina','Fotografía de mascotas']
-  },
-  'Educación y Cursos': {
-    ico: '📚',
-    subs: ['Clases particulares','Inglés u otros idiomas','Música e instrumentos','Arte y pintura','Costura y manualidades','Cocina y repostería','Yoga y pilates','Programación','Apoyo escolar']
-  },
-  'Eventos y Entretenimiento': {
-    ico: '🎉',
-    subs: ['Decoración de eventos','Tortas y mesa dulce','Animación infantil','Fotografía de eventos','Catering para fiestas','Dj y música','Alquiler de disfraces','Juegos y inflables']
-  },
-  'Servicios Profesionales': {
-    ico: '📋',
-    subs: ['Contabilidad para pymes','Asesoría legal','Marketing y publicidad','Traducciones','Coaching','Gestión de redes sociales','Diseño de presentaciones','Trámites y gestiones']
-  },
-  'Otro rubro': {
-    ico: '💡',
-    subs: []
-  }
+  'Gastronomía':              ['Empanadas','Pizzas','Hamburguesas','Sushi','Tartas y quiches','Facturas y medialunas','Alfajores y dulces','Tortas y pasteles','Cupcakes y muffins','Comida árabe','Comida vegana/vegetariana','Catering','Menú del día','Milanesas','Asado y parrilla','Helados artesanales','Bebidas frías y jugos','Café y té','Sandwiches','Lomitos','Sándwich de bondiola','Pollo frito','Comida peruana','Comida mexicana','Waffles y crepes'],
+  'Fletes y Mudanzas':        ['Flete local','Flete provincial','Flete a todo el país','Mudanza chica','Mudanza grande','Carga liviana','Carga pesada','Transporte de animales','Transporte de vehículos','Mensajería','Distribución de mercadería','Viajes compartidos'],
+  'Tienda y Comercio':        ['Electrodomésticos','Electrónica y tecnología','Ropa y calzado','Alimentos no perecederos','Bebidas','Artículos del hogar','Juguetes','Libros y papelería','Artículos de limpieza','Cosmética y perfumería','Ferretería','Repuestos','Artículos deportivos','Muebles','Colchones','Iluminación','Material de construcción'],
+  'Belleza y Estética':       ['Peluquería a domicilio','Barbería a domicilio','Manicuria','Pedicuria','Depilación','Maquillaje artístico','Micropigmentación','Extensión de pestañas','Uñas acrílicas/gel','Estética facial','Masajes relajantes','Tratamientos corporales','Bronceado','Cejas y pestañas'],
+  'Indumentaria y Moda':      ['Ropa de mujer','Ropa de hombre','Ropa infantil','Ropa deportiva','Calzado','Accesorios y bijouterie','Ropa de trabajo','Disfraces','Lencería','Trajes de baño','Indumentaria de cuero','Ropa de tela artesanal'],
+  'Artesanías y Manualidades':['Tejidos y crochet','Macramé','Cerámica y alfarería','Cuero artesanal','Madera tallada','Velas aromáticas','Jabones artesanales','Papelería y cuadernos','Peluches y muñecos','Decoración del hogar','Joyería artesanal','Arte y pinturas','Origami','Bordados'],
+  'Salud y Bienestar':        ['Productos naturales y herboristería','Suplementos deportivos','Cosmética natural','Aromaterapia','Yoga y meditación','Entrenamiento personal','Alimentación saludable','Productos para bebés','Remedios caseros','CBD y cannabis medicinal'],
+  'Tecnología y Digital':     ['Diseño gráfico','Desarrollo web','Redes sociales','Fotografía','Edición de video','Impresión 3D','Reparación de celulares','Reparación de computadoras','Clases de computación','Diseño de logos','Streaming y contenido digital','NFTs y arte digital'],
+  'Hogar y Decoración':       ['Muebles artesanales','Plantas y jardín','Velas y difusores','Cuadros y arte','Textil del hogar','Almohadas y almohadones','Organizadores y cajas','Menaje y cocina','Iluminación decorativa','Cuadros y pinturas'],
+  'Mascotas':                 ['Accesorios para mascotas','Ropa para mascotas','Comida artesanal para mascotas','Juguetes para mascotas','Peluquería canina','Fotografía de mascotas','Guardería de mascotas','Paseos de perros'],
+  'Educación y Cursos':       ['Clases particulares','Inglés u otros idiomas','Música e instrumentos','Arte y pintura','Costura y manualidades','Cocina y repostería','Yoga y pilates','Programación','Apoyo escolar','Cursos online','Talleres presenciales','Capacitaciones laborales'],
+  'Eventos y Entretenimiento':['Decoración de eventos','Tortas y mesa dulce','Animación infantil','Fotografía de eventos','Catering para fiestas','DJ y música en vivo','Alquiler de disfraces','Juegos e inflables','Video y edición de eventos','Ceremonias y rituales'],
+  'Construcción y Refacciones':['Materiales de construcción','Herramientas','Pinturas y revestimientos','Aberturas y ventanas','Cerámicos y pisos','Sanitarios y griferías','Materiales eléctricos','Materiales de plomería'],
+  'Automotores':              ['Repuestos de autos','Repuestos de motos','Accesorios para autos','Aceites y lubricantes','Llantas y neumáticos','Audio y alarmas','Limpieza de autos','Cubiertas'],
+  'Servicios Profesionales':  ['Contabilidad para pymes','Asesoría legal','Marketing y publicidad','Traducciones','Coaching','Gestión de redes sociales','Diseño de presentaciones','Trámites y gestiones','Seguros','Asesorías financieras'],
+  'Otro rubro':               []
 }
 
-let catSeleccionada = null
-
-/* ── Construir grid de categorías ── */
-;(function construirCategorias(){
-  const grid = document.getElementById('catEmpGrid')
-  Object.entries(EMPRENDIMIENTOS).forEach(([cat, val]) => {
-    const div = document.createElement('div')
-    div.className = 'cat-emp-btn'
-    div.dataset.cat = cat
-    div.innerHTML = `<span class="cat-ico">${val.ico}</span>${cat}`
-    div.addEventListener('click', () => seleccionarCat(cat, div))
-    grid.appendChild(div)
-  })
-})()
-
-function seleccionarCat(cat, el) {
-  document.querySelectorAll('.cat-emp-btn').forEach(b => b.classList.remove('activo'))
-  el.classList.add('activo')
-  catSeleccionada = cat
-  const subs = EMPRENDIMIENTOS[cat]?.subs || []
-  const wrap = document.getElementById('subEmpWrap')
+/* ── Selector de categoría (dropdown) ── */
+window.seleccionarCatEmp = function(cat) {
+  const subs = EMPRENDIMIENTOS[cat] || []
+  const wrap  = document.getElementById('subEmpWrap')
   const cbWrap = document.getElementById('subEmpCheckboxes')
+  cbWrap.innerHTML = ''
 
-  if(subs.length === 0){ wrap.style.display = 'none'; cbWrap.innerHTML = ''; return }
+  if(!cat || subs.length === 0){ wrap.style.display = 'none'; return }
 
   cbWrap.innerHTML = subs.map(s => `
     <label style="display:flex;align-items:center;gap:7px;padding:8px 11px;
@@ -605,23 +539,32 @@ function getSubtipos(){
     .map(c => c.value)
 }
 
-/* ── GeoRef ── */
-window.cargarLocalidades = async function(provId, locId) {
-  const prov = document.getElementById(provId).value
+/* ── GeoRef: buscar localidades por CP ── */
+window.buscarPorCP = async function(cp, locId, provId) {
+  if(!cp || cp.length < 4) return
   const locSel = document.getElementById(locId)
-  locSel.innerHTML = '<option>Cargando...</option>'
-  if(!prov){ locSel.innerHTML = '<option value="">— Primero elegí provincia —</option>'; return }
-
+  locSel.innerHTML = '<option>Buscando...</option>'
   try {
-    const url = `https://apis.datos.gob.ar/georef/api/municipios?provincia=${encodeURIComponent(prov)}&max=1000&campos=nombre&orden=nombre`
+    const url = `https://apis.datos.gob.ar/georef/api/localidades?codigo_postal=${cp}&max=200&campos=nombre,provincia&orden=nombre`
     const res  = await fetch(url)
     const json = await res.json()
-    const municipios = json.municipios || []
-    locSel.innerHTML = '<option value="">— Elegí tu localidad —</option>' +
-      municipios.map(m => `<option value="${m.nombre}">${m.nombre}</option>`).join('')
+    const locs = json.localidades || []
+    if(!locs.length){
+      locSel.innerHTML = '<option value="">Sin resultados para ese CP. Probá otro.</option>'
+      return
+    }
+    locSel.innerHTML = '<option value="">— Elegí tu localidad / ciudad —</option>' +
+      locs.map(l => `<option value="${l.nombre}" data-prov="${l.provincia.nombre}">${l.nombre}</option>`).join('')
+    if(provId) document.getElementById(provId).value = locs[0].provincia.nombre
   } catch(_){
-    locSel.innerHTML = '<option value="">Error al cargar. Ingresala manualmente</option>'
+    locSel.innerHTML = '<option value="">Error al buscar. Intentá de nuevo.</option>'
   }
+}
+
+/* ── Sincronizar provincia al cambiar localidad ── */
+window.autoProvFromSelect = function(sel, provId) {
+  const opt = sel.options[sel.selectedIndex]
+  if(opt && opt.dataset.prov) document.getElementById(provId).value = opt.dataset.prov
 }
 
 /* ── Toggle contraseña ── */
@@ -661,8 +604,10 @@ document.getElementById('formEmp').addEventListener('submit', async e => {
   if(!tel || tel.length < 8)    return mostrarError('Ingresá un número de WhatsApp válido.')
   if(!email)                    return mostrarError('Ingresá tu email.')
   if(pass.length < 6)           return mostrarError('La contraseña debe tener al menos 6 caracteres.')
+  const catSeleccionada = document.getElementById('emCategoria').value
   if(!catSeleccionada)          return mostrarError('Elegí la categoría de tu emprendimiento.')
-  if(!provincia || !localidad)  return mostrarError('Completá tu provincia y localidad.')
+  if(!localidad)                return mostrarError('Ingresá tu código postal y elegí tu localidad.')
+  if(!provincia)                return mostrarError('Seleccioná una localidad para completar la provincia.')
   if(!terminos)                 return mostrarError('Tenés que aceptar los términos y condiciones.')
 
   const btn = document.getElementById('btnRegistrar')
@@ -697,7 +642,7 @@ document.getElementById('formEmp').addEventListener('submit', async e => {
       display_como: display,
       telefono: '+549' + tel,
       tipo_perfil: 'emprendimiento',
-      emprendimiento_categoria: catSeleccionada,
+      emprendimiento_categoria: document.getElementById('emCategoria').value,
       emprendimiento_subtipos: subtipos,
       provincia,
       localidad,
