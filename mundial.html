@@ -460,86 +460,69 @@
 /* ─── RESPONSIVE MOBILE ─── */
 @media(max-width:600px){
 
-  /* Hero compacto */
+  /* ── MOBILE: hero mínimo + fixture inmediato ── */
+
+  /* Hero ultra compacto */
   .mundial-hero {
-    padding: 18px 14px 44px;
+    padding: 14px 14px 20px;
   }
   .sub-extra { display:none; }
-  .mundial-hero .badge-mundial {
-    font-size:11px; padding:4px 12px; margin-bottom:10px;
-  }
-  .mundial-hero h1 {
-    font-size:22px; margin-bottom:6px;
-  }
-  .mundial-hero .sub {
-    font-size:13px; margin-bottom:14px;
-  }
-  .premios-chips {
-    gap:7px;
-  }
-  .p-chip {
-    font-size:12px; padding:8px 12px;
-  }
+  .mundial-hero .badge-mundial { display:none; }
+  .mundial-hero h1 { font-size:20px; margin-bottom:4px; }
+  .mundial-hero .sub { font-size:12px; margin-bottom:10px; }
+  .premios-chips { gap:6px; }
+  .p-chip { font-size:11px; padding:6px 10px; }
 
-  /* Stats: grilla 2x2 en lugar de columna */
-  .mundial-stats {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:0;
-    padding:10px 8px;
-    margin-top:-28px;
-  }
-  .stat-item {
-    border-right:1px solid #f1f5f9;
-    border-bottom:1px solid #f1f5f9;
-    padding:10px 6px;
-  }
-  .stat-item:nth-child(2) { border-right:none; }
-  .stat-item:nth-child(3) { border-bottom:none; }
-  .stat-item:nth-child(4) { border-right:none; border-bottom:none; }
-  .stat-num { font-size:20px; }
-  .stat-lbl { font-size:10px; }
+  /* Ocultar stats + meta + strip en mobile → van a pestañas o no se necesitan */
+  .mundial-stats { display:none; }
+  #metaBar      { display:none !important; }
+  .prode-strip  { display:none !important; }
 
-  /* Barra de meta: más compacta */
-  #metaBar {
-    margin-top:8px !important;
+  /* Tabs pegados al hero, sin margen */
+  .mundial-tabs {
+    margin-top: 0;
+    border-radius: 0;
+    background: #fff;
+    border-bottom: 2px solid #f1f5f9;
+    padding: 0;
   }
-  #metaBar > div:first-child span:first-child {
-    font-size:10px !important;
+  .tab-btn { font-size:13px; padding:11px 6px; border-radius:0; }
+  .tab-btn.active {
+    border-bottom: 3px solid #15803d;
+    color: #15803d;
+    box-shadow: none;
+    background: white;
   }
-
-  /* Tabs */
-  .mundial-tabs { margin-top:16px; }
-  .tab-btn { font-size:13px; padding:9px 6px; }
   .tab-btn span { display:none; }
 
-  /* Filtros de fase: scroll horizontal */
+  /* Filtros de fase: scroll horizontal sin margen */
   .fase-filter {
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    padding:0 14px;
-    margin-top:14px;
-    justify-content:flex-start;
-    gap:7px;
-    scrollbar-width:none;
-    -ms-overflow-style:none;
+    flex-wrap:nowrap; overflow-x:auto;
+    padding:8px 12px 4px;
+    margin-top:0;
+    justify-content:flex-start; gap:7px;
+    scrollbar-width:none; -ms-overflow-style:none;
+    background:#fafafa; border-bottom:1px solid #f1f5f9;
   }
   .fase-filter::-webkit-scrollbar { display:none; }
-  .fase-btn { white-space:nowrap; padding:7px 13px; font-size:12px; flex-shrink:0; }
+  .fase-btn { white-space:nowrap; padding:6px 12px; font-size:12px; flex-shrink:0; }
 
   /* Filtros de grupo: scroll horizontal */
   .grupo-filter {
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    padding:0 14px;
+    flex-wrap:nowrap; overflow-x:auto;
+    padding:6px 12px 2px;
+    margin-top:0;
     justify-content:flex-start;
-    scrollbar-width:none;
+    scrollbar-width:none; background:#fafafa;
   }
   .grupo-filter::-webkit-scrollbar { display:none; }
-  .grupo-btn { flex-shrink:0; }
+  .grupo-btn { flex-shrink:0; width:34px; height:34px; }
+
+  /* Tabs container sin padding extra */
+  #tabsContainer { padding:0 !important; }
 
   /* Match grid */
-  .match-grid { grid-template-columns:1fr; padding:0 12px 32px; }
+  .match-grid { grid-template-columns:1fr; padding:0 12px 32px; margin-top:10px; }
 
   /* Strip compacto en mobile */
   .prode-strip { padding:0 10px; }
@@ -892,7 +875,7 @@
 </div>
 
 <!-- TABS -->
-<div class="container" style="padding:0 16px;">
+<div class="container" id="tabsContainer" style="padding:0 16px;">
   <div class="mundial-tabs" id="mundialTabs">
     <button class="tab-btn active" onclick="cambiarTab('fixture')" id="tab-fixture">
       <i class="fa-solid fa-calendar-days"></i> <span>Fixture</span>
