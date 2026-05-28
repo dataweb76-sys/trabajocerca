@@ -430,7 +430,7 @@
     </div>
     <div class="stat-item">
       <div class="stat-num" id="stat-participantes" style="color:#7c3aed;">--</div>
-      <div class="stat-lbl">Participantes del sorteo</div>
+      <div class="stat-lbl">Jugando el prode</div>
     </div>
     <div class="stat-item">
       <div class="stat-num" id="stat-predicciones">--</div>
@@ -901,18 +901,19 @@ async function init() {
     mostrarGatePanel(currentUser.id)
   }
 
-  // Participantes del sorteo (usuarios registrados en la plataforma)
-  const { count: totalUsers } = await supabase
-    .from("perfiles")
-    .select("id", { count: "estimated", head: true })
-  const nUsers = totalUsers ?? 0
-  document.getElementById("stat-participantes").textContent = nUsers.toLocaleString("es-AR")
+  // Participantes del sorteo = usuarios con al menos 1 predicción cargada
+  // (para llegar acá ya cumplieron los 10 referidos)
+  const { count: totalJugadores } = await supabase
+    .from("mundial_predicciones")
+    .select("user_id", { count: "exact", head: true })
+  const nJugadores = totalJugadores ?? 0
+  document.getElementById("stat-participantes").textContent = nJugadores.toLocaleString("es-AR")
 
-  // Barra meta 10.000
-  const pct10k = Math.min(100, Math.round((nUsers / 10000) * 100))
+  // Barra meta 10.000 participantes del sorteo
+  const pct10k = Math.min(100, Math.round((nJugadores / 10000) * 100))
   document.getElementById("metaPct").textContent = pct10k + "%"
-  document.getElementById("metaFill").style.width = pct10k + "%"
-  if (nUsers >= 10000) {
+  document.getElementById("metaFill").style.width = Math.max(pct10k, 0.5) + "%"
+  if (nJugadores >= 10000) {
     document.getElementById("metaFill").style.background = "linear-gradient(90deg,#22c55e,#4ade80)"
     document.getElementById("metaBar").querySelector("p").innerHTML =
       `✅ <strong style="color:#15803d;">¡Meta alcanzada! El sorteo es válido.</strong>`
