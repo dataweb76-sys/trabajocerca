@@ -80,6 +80,30 @@
       q: "¿Cómo funciona la Guía de la página?",
       tags: ["guia","ayuda","explicacion","como funciona","tutorial","instruccion"],
       r: `En tu perfil hay un banner azul que dice <strong>"Guía de la página"</strong>. Al hacer clic se abre una explicación completa del sistema de puntos, cómo acumular calificaciones y cómo sacarle el máximo provecho a tu perfil. 📖`
+    },
+    {
+      q: "¿Cómo participo en el Prode del Mundial 2026?",
+      tags: ["prode","mundial","fixture","participar","sorteo","como juego","como participo","premio","web gratis","500000","argentina campeon","invitar","referido"],
+      r: `¡Hay premios increíbles! Así participás:<br><br>
+      1️⃣ <strong>Registrate gratis</strong> en Trabajos Cerca.<br>
+      2️⃣ <strong>Seguí a <a href="https://www.instagram.com/datawebdigital/" target="_blank" style="color:#ec4899;font-weight:700;">@datawebdigital</a></strong> en Instagram.<br>
+      3️⃣ <strong>Invitá a 10 amigos</strong> a registrarse con tu link personal (lo encontrás en tu perfil).<br>
+      4️⃣ Una vez cumplidos los requisitos, <strong>predecí los 104 partidos</strong> del Mundial.<br><br>
+      🏆 <strong>Premios:</strong><br>
+      🥇 1° lugar → <strong>Página web completa GRATIS</strong><br>
+      🇦🇷 Si Argentina campeón + 3 resultados exactos → <strong>$500.000 ARS</strong><br><br>
+      📌 3 pts por resultado exacto · 1 pt por tendencia · Las predicciones se bloquean 1 hora antes de cada partido.<br><br>
+      <a href="/mundial.html" style="color:#15803d;font-weight:700;">→ Ir al Prode del Mundial</a>`
+    },
+    {
+      q: "¿Cuáles son los requisitos para participar en el prode?",
+      tags: ["requisitos","condiciones","necesito","cuanto","10 invitados","instagram","seguir","requisito prode","bases"],
+      r: `Para participar en el Prode del Mundial 2026 necesitás cumplir <strong>3 requisitos</strong>:<br><br>
+      ✅ <strong>Estar registrado</strong> en Trabajos Cerca (gratis).<br>
+      📸 <strong>Seguir a <a href="https://www.instagram.com/datawebdigital/" target="_blank" style="color:#ec4899;font-weight:700;">@datawebdigital</a></strong> en Instagram.<br>
+      👥 <strong>10 amigos registrados</strong> con tu link de invitación personal.<br><br>
+      Una vez cumplidos, entrás al fixture y podés predecir los 104 partidos. El sorteo es válido cuando la plataforma supere los <strong>10.000 participantes</strong>.<br><br>
+      <a href="/terminos-mundial.html" target="_blank" style="color:#2563eb;font-weight:700;">Ver bases y condiciones completas →</a>`
     }
   ]
 
