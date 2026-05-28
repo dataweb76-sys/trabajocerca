@@ -309,6 +309,77 @@
 .login-prompt h3 { font-size:20px;color:#1e293b;margin:0 0 10px; }
 .login-prompt p { font-size:14px;color:#64748b;margin:0 0 20px; }
 
+/* ─── SCORE GHOST (clickable para invitados) ─── */
+.score-ghost {
+  display:flex;align-items:center;gap:4px;cursor:pointer;
+}
+.score-ghost-num {
+  width:36px;height:36px;background:#f1f5f9;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:900;color:#cbd5e1;
+  border:2px dashed #e2e8f0;transition:border-color .2s,background .2s;
+}
+.score-ghost:hover .score-ghost-num {
+  border-color:#2563eb;background:#eff6ff;color:#2563eb;
+}
+
+/* ─── GATE PANEL ─── */
+.gate-panel {
+  max-width:900px;margin:24px auto 0;padding:0 20px;
+}
+.gate-card {
+  background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 55%,#0f172a 100%);
+  border-radius:22px;overflow:hidden;color:white;
+  border:1.5px solid rgba(250,204,21,.3);
+}
+.gate-prizes {
+  display:grid;grid-template-columns:1fr 1fr;gap:0;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+@media(max-width:580px){ .gate-prizes { grid-template-columns:1fr; } }
+.gate-prize-item {
+  padding:22px 24px;border-right:1px solid rgba(255,255,255,.1);
+}
+.gate-prize-item:last-child { border-right:none; }
+.gate-prize-ico { font-size:36px;display:block;margin-bottom:8px; }
+.gate-prize-title { font-size:15px;font-weight:900;margin-bottom:4px;color:#fbbf24; }
+.gate-prize-desc { font-size:13px;color:rgba(255,255,255,.65);line-height:1.5; }
+.gate-share {
+  padding:24px;
+}
+.ref-progress-bar {
+  background:rgba(255,255,255,.12);border-radius:99px;height:10px;overflow:hidden;margin:10px 0 6px;
+}
+.ref-progress-fill {
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,#22c55e,#4ade80);
+  transition:width .7s ease;
+}
+
+/* ─── MODAL REGISTRO ─── */
+.modal-reg-overlay {
+  position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fadeIn .2s ease;
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.modal-reg-box {
+  background:white;border-radius:24px;max-width:440px;width:100%;overflow:hidden;
+  box-shadow:0 24px 80px rgba(0,0,0,.4);animation:slideUp .25s ease;
+}
+@keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+.modal-reg-header {
+  background:linear-gradient(135deg,#064e3b 0%,#15803d 60%,#16a34a 100%);
+  padding:30px 24px 26px;text-align:center;color:white;position:relative;
+}
+.modal-reg-close {
+  position:absolute;top:14px;right:16px;background:rgba(255,255,255,.2);
+  border:none;color:white;border-radius:50%;width:30px;height:30px;
+  font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.modal-reg-close:hover { background:rgba(255,255,255,.35); }
+
 /* ─── RESPONSIVE ─── */
 @media(max-width:600px){
   .mundial-stats { flex-direction:column;gap:16px;padding:18px 20px; }
@@ -358,8 +429,8 @@
       <div class="stat-lbl">Días para el inicio</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num" id="stat-participantes">--</div>
-      <div class="stat-lbl">Participantes</div>
+      <div class="stat-num" id="stat-participantes" style="color:#7c3aed;">--</div>
+      <div class="stat-lbl">Participantes del sorteo</div>
     </div>
     <div class="stat-item">
       <div class="stat-num" id="stat-predicciones">--</div>
@@ -368,6 +439,233 @@
     <div class="stat-item">
       <div class="stat-num" id="stat-pts">--</div>
       <div class="stat-lbl">Mis puntos</div>
+    </div>
+  </div>
+  <!-- Barra de progreso hacia 10.000 participantes -->
+  <div id="metaBar" style="max-width:700px;margin:12px auto 0;padding:0 4px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+      <span style="font-size:11px;font-weight:700;color:#7c3aed;">
+        🎯 Meta para que el sorteo sea válido: <strong>10.000 participantes</strong>
+      </span>
+      <span id="metaPct" style="font-size:11px;font-weight:700;color:#7c3aed;">0%</span>
+    </div>
+    <div style="background:#f1f5f9;border-radius:99px;height:7px;overflow:hidden;">
+      <div id="metaFill" style="height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:99px;transition:width .8s ease;"></div>
+    </div>
+    <p style="font-size:11px;color:#94a3b8;margin:5px 0 0;text-align:center;">
+      El sorteo se concreta cuando el total de participantes supere los 10.000 inscriptos en la plataforma.
+    </p>
+  </div>
+</div>
+
+<!-- GATE PANEL (visible cuando logueado pero sin 10 referidos) -->
+<div class="gate-panel" id="gatePanel" style="display:none;">
+  <div class="gate-card">
+
+    <!-- Premios -->
+    <div style="padding:22px 24px 16px;border-bottom:1px solid rgba(255,255,255,.1);">
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:700;color:#fbbf24;letter-spacing:2px;text-transform:uppercase;">🏆 PREMIOS EN JUEGO</div>
+      </div>
+      <div class="gate-prizes">
+        <div class="gate-prize-item">
+          <span class="gate-prize-ico">🌐</span>
+          <div class="gate-prize-title">1° LUGAR</div>
+          <div style="font-size:17px;font-weight:900;color:white;margin-bottom:4px;">PÁGINA WEB GRATIS</div>
+          <div class="gate-prize-desc">Diseño + desarrollo completo. Solo pagás costos de base de datos.</div>
+        </div>
+        <div class="gate-prize-item">
+          <span class="gate-prize-ico">🇦🇷</span>
+          <div class="gate-prize-title">SI ARGENTINA CAMPEÓN</div>
+          <div style="font-size:17px;font-weight:900;color:#fbbf24;margin-bottom:4px;">$500.000 ARS</div>
+          <div class="gate-prize-desc">Necesitás 3 resultados exactos de partidos de Argentina para calificar.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reglas rápidas -->
+    <div style="padding:16px 24px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;gap:20px;flex-wrap:wrap;justify-content:center;">
+      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.75);">
+        <span style="font-size:22px;display:block;margin-bottom:3px;">🎯</span>
+        <strong style="color:white;">3 puntos</strong><br>resultado exacto
+      </div>
+      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.75);">
+        <span style="font-size:22px;display:block;margin-bottom:3px;">✅</span>
+        <strong style="color:white;">1 punto</strong><br>tendencia correcta
+      </div>
+      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.75);">
+        <span style="font-size:22px;display:block;margin-bottom:3px;">🔒</span>
+        <strong style="color:white;">1 hora antes</strong><br>se cierran predicciones
+      </div>
+      <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.75);">
+        <span style="font-size:22px;display:block;margin-bottom:3px;">⚽</span>
+        <strong style="color:white;">104 partidos</strong><br>para predecir
+      </div>
+    </div>
+
+    <!-- Compartir y progreso -->
+    <div class="gate-share">
+      <div style="font-size:14px;font-weight:700;color:white;margin-bottom:14px;">
+        📎 Tu link de invitación — compartilo y desbloqueá el prode:
+      </div>
+
+      <!-- Link input + copiar -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+        <input id="gateLinkInput" readonly style="
+          flex:1;min-width:0;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);
+          color:white;border-radius:10px;padding:10px 14px;font-size:13px;font-family:monospace;outline:none;">
+        <button onclick="copiarGateLink()" style="
+          background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);
+          color:white;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;
+          cursor:pointer;white-space:nowrap;transition:background .15s;"
+          onmouseover="this.style.background='rgba(255,255,255,.28)'"
+          onmouseout="this.style.background='rgba(255,255,255,.18)'">
+          📋 Copiar
+        </button>
+      </div>
+
+      <!-- Botones de compartir -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+        <a id="gateWA" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#25D366;color:white;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;text-decoration:none;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp
+        </a>
+        <a id="gateFB" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#1877F2;color:white;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;text-decoration:none;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+          <i class="fa-brands fa-facebook"></i> Facebook
+        </a>
+        <a id="gateX" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#000;color:white;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;text-decoration:none;border:1px solid rgba(255,255,255,.2);" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+          <i class="fa-brands fa-x-twitter"></i> X
+        </a>
+        <button onclick="copiarGateIG()" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:white;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+          <i class="fa-brands fa-instagram"></i> Instagram
+        </button>
+      </div>
+
+      <!-- Progreso -->
+      <div style="background:rgba(255,255,255,.07);border-radius:14px;padding:16px 18px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:13px;font-weight:700;color:white;">Amigos registrados con tu link</span>
+          <span id="gateRefCount" style="font-size:20px;font-weight:900;color:#fbbf24;">0/10</span>
+        </div>
+        <div class="ref-progress-bar">
+          <div class="ref-progress-fill" id="gateRefBar" style="width:0%"></div>
+        </div>
+        <div id="gateRefMsg" style="font-size:13px;color:rgba(255,255,255,.6);margin-top:8px;text-align:center;">
+          Cargando...
+        </div>
+      </div>
+
+      <!-- Botón ingresar a participar -->
+      <div style="text-align:center;">
+        <button onclick="abrirPopupReglas()" style="
+          display:inline-flex;align-items:center;gap:10px;
+          background:linear-gradient(135deg,#facc15,#f59e0b);
+          color:#1c1917;font-weight:900;font-size:16px;
+          padding:14px 36px;border-radius:14px;border:none;cursor:pointer;
+          box-shadow:0 4px 20px rgba(250,204,21,.45);
+          transition:transform .15s;"
+          onmouseover="this.style.transform='scale(1.03)'"
+          onmouseout="this.style.transform='scale(1)'">
+          ⚽ Ingresar a participar
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: REGLAS Y CONDICIONES PARA PARTICIPAR -->
+<div id="popupReglas" style="
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);
+  z-index:9998;align-items:center;justify-content:center;padding:16px;overflow-y:auto;
+" onclick="cerrarPopupReglas(event)">
+  <div style="
+    background:white;border-radius:24px;max-width:500px;width:100%;
+    overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5);
+    animation:slideUp .25s ease;margin:auto;
+  ">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 60%,#1e3a5f 100%);padding:26px 24px 22px;text-align:center;color:white;position:relative;">
+      <button onclick="document.getElementById('popupReglas').style.display='none'" style="
+        position:absolute;top:12px;right:14px;background:rgba(255,255,255,.15);
+        border:none;color:white;border-radius:50%;width:30px;height:30px;
+        font-size:18px;cursor:pointer;">×</button>
+      <div style="font-size:38px;margin-bottom:8px;">⚽📋</div>
+      <h3 style="margin:0 0 6px;font-size:18px;font-weight:900;">Condiciones para participar en el Prode</h3>
+      <p style="margin:0;font-size:13px;color:rgba(255,255,255,.75);">Leé las reglas antes de ingresar al fixture</p>
+    </div>
+
+    <!-- Condiciones -->
+    <div style="padding:20px 22px;">
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#f0fdf4;border-radius:12px;border-left:3px solid #22c55e;">
+          <span style="font-size:20px;flex-shrink:0;">1️⃣</span>
+          <div>
+            <div style="font-weight:800;font-size:13px;color:#15803d;">Registrarte en la plataforma</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px;">Necesitás una cuenta activa en Trabajos Cerca. El registro es <strong>completamente gratis</strong>.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#eff6ff;border-radius:12px;border-left:3px solid #3b82f6;">
+          <span style="font-size:20px;flex-shrink:0;">2️⃣</span>
+          <div>
+            <div style="font-weight:800;font-size:13px;color:#1d4ed8;">Invitar mínimo 10 personas</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px;">Compartí tu link personal y necesitás que <strong>al menos 10 personas se registren</strong> a través de él. Podés ver tu contador en tu perfil.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#fefce8;border-radius:12px;border-left:3px solid #facc15;">
+          <span style="font-size:20px;flex-shrink:0;">3️⃣</span>
+          <div>
+            <div style="font-weight:800;font-size:13px;color:#a16207;">Predecir los 104 partidos</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px;"><strong>3 pts</strong> por resultado exacto · <strong>1 pt</strong> por tendencia correcta. Las predicciones se bloquean <strong>1 hora antes</strong> de cada partido.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#f5f3ff;border-radius:12px;border-left:3px solid #7c3aed;">
+          <span style="font-size:20px;flex-shrink:0;">👥</span>
+          <div>
+            <div style="font-weight:800;font-size:13px;color:#7c3aed;">Meta de 10.000 participantes</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px;">Para que el sorteo sea válido, la plataforma debe superar los <strong>10.000 participantes registrados</strong> en total. El contador se muestra en tiempo real en esta página.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#fff7ed;border-radius:12px;border-left:3px solid #f97316;">
+          <span style="font-size:20px;flex-shrink:0;">🇦🇷</span>
+          <div>
+            <div style="font-weight:800;font-size:13px;color:#c2410c;">Premio especial Argentina Campeón</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px;">Si Argentina sale campeón, ganás <strong>$500.000 ARS</strong> si tenés 3 o más resultados exactos de partidos de Argentina.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Aceptar términos -->
+      <div style="background:#f8fafc;border-radius:12px;padding:14px 16px;margin-bottom:16px;border:1.5px solid #e2e8f0;">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="checkTerminos" onchange="validarAceptar()" style="
+            margin-top:3px;width:18px;height:18px;cursor:pointer;accent-color:#15803d;flex-shrink:0;">
+          <span style="font-size:12px;color:#374151;line-height:1.6;">
+            Acepto las <a href="/terminos-mundial.html" target="_blank" style="color:#2563eb;font-weight:700;">bases y condiciones del Prode Mundial 2026</a>.
+            Entiendo que la participación es gratuita, que debo tener 10 invitados registrados para predecir,
+            y que el sorteo requiere un mínimo de 10.000 participantes totales para ser válido.
+          </span>
+        </label>
+      </div>
+
+      <!-- Botón ingresar (se activa al aceptar) -->
+      <button id="btnIngresarFixture" disabled onclick="ingresarAlFixture()" style="
+        width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+        background:#e2e8f0;color:#94a3b8;font-weight:800;font-size:15px;
+        padding:14px;border-radius:12px;border:none;cursor:not-allowed;
+        transition:all .2s;" id="btnIngresarFixture">
+        ⚽ Ingresar al fixture
+      </button>
+      <p style="text-align:center;font-size:11px;color:#94a3b8;margin:8px 0 0;">
+        Participación 100% gratuita · Sin obligación de compra
+      </p>
     </div>
   </div>
 </div>
@@ -598,11 +896,27 @@ async function init() {
     document.getElementById("stat-pts").textContent = "—"
   }
 
-  // Participantes (conteo total único de usuarios)
-  const { count } = await supabase
-    .from("mundial_predicciones")
-    .select("user_id", { count: "estimated", head: true })
-  document.getElementById("stat-participantes").textContent = count ?? 0
+  // Mostrar gate panel si está logueado pero no puede jugar
+  if (currentUser && !puedeJugar) {
+    mostrarGatePanel(currentUser.id)
+  }
+
+  // Participantes del sorteo (usuarios registrados en la plataforma)
+  const { count: totalUsers } = await supabase
+    .from("perfiles")
+    .select("id", { count: "estimated", head: true })
+  const nUsers = totalUsers ?? 0
+  document.getElementById("stat-participantes").textContent = nUsers.toLocaleString("es-AR")
+
+  // Barra meta 10.000
+  const pct10k = Math.min(100, Math.round((nUsers / 10000) * 100))
+  document.getElementById("metaPct").textContent = pct10k + "%"
+  document.getElementById("metaFill").style.width = pct10k + "%"
+  if (nUsers >= 10000) {
+    document.getElementById("metaFill").style.background = "linear-gradient(90deg,#22c55e,#4ade80)"
+    document.getElementById("metaBar").querySelector("p").innerHTML =
+      `✅ <strong style="color:#15803d;">¡Meta alcanzada! El sorteo es válido.</strong>`
+  }
 
   // Render inicial
   renderFixture()
@@ -659,33 +973,14 @@ function renderFixture() {
   }
 
   if (!currentUser) {
-    grid.innerHTML = filtrados.map(p => renderCard(p, "guest")).join("") + `
-    <div style="grid-column:1/-1;background:#eff6ff;border:2px solid #bfdbfe;border-radius:14px;
-      padding:24px;text-align:center;">
-      <i class="fa-solid fa-lock" style="font-size:24px;color:#2563eb;margin-bottom:10px;display:block;"></i>
-      <strong style="color:#1e40af;">Iniciá sesión para guardar tus predicciones</strong><br>
-      <a href="/login.html?redirect=/mundial.html" style="color:#2563eb;font-weight:700;font-size:14px;text-decoration:none;">
-        Entrar →</a>
-    </div>`
+    // Invitado: ve fixture de solo lectura. Los scores muestran modal al clickear.
+    grid.innerHTML = filtrados.map(p => renderCard(p, "guest")).join("")
     return
   }
 
   if (!puedeJugar) {
-    grid.innerHTML = filtrados.map(p => renderCard(p, "guest")).join("") + `
-    <div style="grid-column:1/-1;background:linear-gradient(135deg,#1e1b4b,#312e81);
-      border-radius:16px;padding:28px 24px;text-align:center;color:white;">
-      <div style="font-size:40px;margin-bottom:12px;">🔒</div>
-      <strong style="font-size:18px;display:block;margin-bottom:8px;">Necesitás 10 invitados para predecir</strong>
-      <p style="opacity:.8;font-size:14px;margin:0 0 18px;">
-        Compartí tu link personal y cuando 10 amigos se registren, desbloqueás el prode completo.
-      </p>
-      <a href="/index.html#refLink" style="
-        display:inline-flex;align-items:center;gap:8px;
-        background:#facc15;color:#1c1917;font-weight:800;
-        padding:12px 24px;border-radius:12px;text-decoration:none;font-size:15px;">
-        📎 Ir a mi link de invitación
-      </a>
-    </div>`
+    // Logueado sin 10 refs: fixture de solo lectura + gate panel visible arriba
+    grid.innerHTML = filtrados.map(p => renderCard(p, "guest")).join("")
     return
   }
 
@@ -755,10 +1050,14 @@ function renderCard(partido, modo) {
         ${miPredHTML}
       </div>`
   } else if (readonly) {
+    const clickFn = !currentUser ? "mostrarModalRegistro()" : "mostrarToastNecesitas()"
+    const label   = !currentUser
+      ? `<span onclick="${clickFn}" style="font-size:12px;color:#2563eb;font-weight:700;cursor:pointer;">⚽ Registrate para predecir →</span>`
+      : `<span onclick="${clickFn}" style="font-size:12px;color:#7c3aed;font-weight:700;cursor:pointer;">🔒 Desbloqueá invitando amigos</span>`
     footer = `
       <div class="match-footer">
         <div class="match-venue">${partido.ciudad || ""}</div>
-        <span style="font-size:12px;color:#2563eb;font-weight:700;">Iniciá sesión para predecir</span>
+        ${label}
       </div>`
   } else {
     // Partido abierto: formulario
@@ -787,11 +1086,19 @@ function renderCard(partido, modo) {
         <span class="score-sep">-</span>
         <span class="score-num ${vwins ? "winner" : ""}">${gv}</span>
       </div>`
-  } else if (bloqueado || readonly) {
+  } else if (bloqueado) {
     scoreZone = `<div class="score-display">
       <span class="score-num">?</span>
       <span class="score-sep">-</span>
       <span class="score-num">?</span>
+    </div>`
+  } else if (readonly) {
+    // Invitado o sin refs: scores clickeables que abren modal
+    const clickFn = !currentUser ? "mostrarModalRegistro()" : "mostrarToastNecesitas()"
+    scoreZone = `<div class="score-ghost" onclick="${clickFn}" title="${!currentUser ? 'Registrate para predecir' : 'Necesitás 10 invitados'}">
+      <span class="score-ghost-num">?</span>
+      <span class="score-sep" style="color:#e2e8f0;">-</span>
+      <span class="score-ghost-num">?</span>
     </div>`
   } else {
     const gl = pred ? pred.goles_local   : ""
@@ -964,10 +1271,217 @@ async function renderRanking() {
 }
 
 /* ══════════════════════════════════
+   Modal registro
+══════════════════════════════════ */
+window.mostrarModalRegistro = function() {
+  document.getElementById("modalRegistro").style.display = "flex"
+}
+window.cerrarModalReg = function(e) {
+  if (e.target === document.getElementById("modalRegistro")) {
+    document.getElementById("modalRegistro").style.display = "none"
+  }
+}
+
+/* ══════════════════════════════════
+   Popup reglas / condiciones
+══════════════════════════════════ */
+window.abrirPopupReglas = function() {
+  document.getElementById("popupReglas").style.display = "flex"
+}
+window.cerrarPopupReglas = function(e) {
+  if (e.target === document.getElementById("popupReglas"))
+    document.getElementById("popupReglas").style.display = "none"
+}
+window.validarAceptar = function() {
+  const ok  = document.getElementById("checkTerminos").checked
+  const btn = document.getElementById("btnIngresarFixture")
+  if (ok) {
+    btn.disabled = false
+    btn.style.background = "linear-gradient(135deg,#15803d,#16a34a)"
+    btn.style.color = "white"
+    btn.style.cursor = "pointer"
+    btn.style.boxShadow = "0 4px 16px rgba(21,128,61,.35)"
+  } else {
+    btn.disabled = true
+    btn.style.background = "#e2e8f0"
+    btn.style.color = "#94a3b8"
+    btn.style.cursor = "not-allowed"
+    btn.style.boxShadow = "none"
+  }
+}
+window.ingresarAlFixture = function() {
+  if (!puedeJugar) {
+    // Aún no tiene 10 refs → cierra popup y muestra toast
+    document.getElementById("popupReglas").style.display = "none"
+    mostrarToastNecesitas()
+    return
+  }
+  // Tiene 10+ refs → oculta gate panel y muestra fixture completo
+  document.getElementById("popupReglas").style.display = "none"
+  document.getElementById("gatePanel").style.display = "none"
+  renderFixture()
+}
+
+/* ══════════════════════════════════
+   Toast "necesitás invitados"
+══════════════════════════════════ */
+window.mostrarToastNecesitas = function() {
+  let t = document.getElementById("toastNecesitas")
+  if (!t) {
+    t = document.createElement("div")
+    t.id = "toastNecesitas"
+    t.style.cssText = `
+      position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+      background:#1e1b4b;color:white;padding:12px 22px;border-radius:12px;
+      font-size:14px;font-weight:700;z-index:9998;white-space:nowrap;
+      box-shadow:0 8px 32px rgba(0,0,0,.4);border:1px solid rgba(250,204,21,.4);
+      animation:fadeIn .2s ease;
+    `
+    document.body.appendChild(t)
+  }
+  t.innerHTML = "🔒 Necesitás 10 amigos registrados · <a href='/' style='color:#fbbf24;'>Ver mi link →</a>"
+  t.style.display = "block"
+  clearTimeout(window._toastTimer)
+  window._toastTimer = setTimeout(() => { t.style.display = "none" }, 3000)
+}
+
+/* ══════════════════════════════════
+   Gate panel (logueado sin refs)
+══════════════════════════════════ */
+async function mostrarGatePanel(userId) {
+  const panel = document.getElementById("gatePanel")
+  if (!panel) return
+  panel.style.display = "block"
+
+  const refLink = `https://www.trabajoscerca.com.ar/?ref=${userId}`
+  const msg = encodeURIComponent(
+    `⚽ ¡Registrate en Trabajos Cerca y ayudame a participar en el Prode del Mundial 2026! 🏆\nGanás la chance de ganar una web gratis o $500.000 ARS si Argentina es campeón 🇦🇷\n👉 ${refLink}`
+  )
+
+  document.getElementById("gateLinkInput").value = refLink
+  document.getElementById("gateWA").href = `https://wa.me/?text=${msg}`
+  document.getElementById("gateFB").href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(refLink)}`
+  document.getElementById("gateX").href  = `https://twitter.com/intent/tweet?text=${msg}`
+
+  // Cargar contador
+  const { data: total } = await supabase.rpc("contar_referidos", { p_user_id: userId })
+  const n      = total ?? 0
+  const pct    = Math.min(100, Math.round((n / 10) * 100))
+  const faltan = Math.max(0, 10 - n)
+
+  document.getElementById("gateRefCount").textContent = `${n}/10`
+  document.getElementById("gateRefBar").style.width   = pct + "%"
+
+  const msgEl = document.getElementById("gateRefMsg")
+  if (n >= 10) {
+    document.getElementById("gateRefBar").style.background = "linear-gradient(90deg,#22c55e,#4ade80)"
+    msgEl.innerHTML = `
+      <div style="margin-top:12px;text-align:center;">
+        <div style="font-size:16px;font-weight:900;color:#4ade80;margin-bottom:10px;">
+          ✅ ¡Ya podés participar en el prode!
+        </div>
+        <a href="#tabsSection" onclick="document.getElementById('gatePanel').style.display='none';cambiarTab('fixture')" style="
+          display:inline-flex;align-items:center;gap:8px;
+          background:linear-gradient(135deg,#facc15,#f59e0b);
+          color:#1c1917;font-weight:900;font-size:15px;
+          padding:12px 28px;border-radius:12px;text-decoration:none;
+          box-shadow:0 4px 16px rgba(250,204,21,.45);">
+          ⚽ Ingresar al fixture y predecir →
+        </a>
+      </div>`
+    // Recargar página para actualizar puedeJugar
+    setTimeout(() => location.reload(), 500)
+  } else {
+    msgEl.innerHTML = `<span>Te faltan <strong style="color:#fbbf24;">${faltan} amigo${faltan !== 1 ? "s" : ""}</strong> para desbloquear el prode · Compartí tu link 👆</span>`
+  }
+}
+
+window.copiarGateLink = function() {
+  const v = document.getElementById("gateLinkInput").value
+  navigator.clipboard.writeText(v).then(() => {
+    const btn = event.target
+    const p   = btn.innerHTML
+    btn.innerHTML = "✅ Copiado!"
+    setTimeout(() => btn.innerHTML = p, 2000)
+  })
+}
+window.copiarGateIG = function() {
+  const v   = document.getElementById("gateLinkInput").value
+  const txt = `⚽ ¡Registrate en Trabajos Cerca y ayudame a participar en el Prode del Mundial 2026! 🏆\nGanás la chance de ganar una web gratis o $500.000 ARS si Argentina campeón 🇦🇷\n👉 ${v}`
+  navigator.clipboard.writeText(txt).then(() => {
+    const btn = event.target.closest("button")
+    const p   = btn.innerHTML
+    btn.innerHTML = "✅ ¡Copiado!"
+    setTimeout(() => btn.innerHTML = p, 3000)
+  })
+}
+
+/* ══════════════════════════════════
    Arranque
 ══════════════════════════════════ */
 init()
 </script>
+
+<!-- MODAL: REGISTRATE PARA PREDECIR -->
+<div id="modalRegistro" class="modal-reg-overlay" style="display:none;" onclick="cerrarModalReg(event)">
+  <div class="modal-reg-box">
+
+    <div class="modal-reg-header">
+      <button class="modal-reg-close" onclick="document.getElementById('modalRegistro').style.display='none'">×</button>
+      <div style="font-size:44px;margin-bottom:10px;">⚽🏆</div>
+      <h3 style="margin:0 0 6px;font-size:20px;font-weight:900;">¡Registrate gratis y participá!</h3>
+      <p style="margin:0;font-size:13px;opacity:.85;line-height:1.5;">
+        Predecí los 104 partidos del Mundial 2026 y ganá premios increíbles.
+      </p>
+    </div>
+
+    <!-- Premios mini -->
+    <div style="display:flex;gap:0;border-bottom:1px solid #f1f5f9;">
+      <div style="flex:1;padding:14px 16px;text-align:center;border-right:1px solid #f1f5f9;">
+        <div style="font-size:28px;">🌐</div>
+        <div style="font-size:11px;font-weight:800;color:#15803d;margin-top:4px;">1° LUGAR</div>
+        <div style="font-size:12px;font-weight:700;color:#1e293b;">Web Gratis</div>
+      </div>
+      <div style="flex:1;padding:14px 16px;text-align:center;border-right:1px solid #f1f5f9;">
+        <div style="font-size:28px;">🇦🇷</div>
+        <div style="font-size:11px;font-weight:800;color:#1d4ed8;margin-top:4px;">ARG CAMPEÓN</div>
+        <div style="font-size:12px;font-weight:700;color:#1e293b;">$500.000 ARS</div>
+      </div>
+      <div style="flex:1;padding:14px 16px;text-align:center;">
+        <div style="font-size:28px;">🆓</div>
+        <div style="font-size:11px;font-weight:800;color:#7c3aed;margin-top:4px;">PARTICIPAR</div>
+        <div style="font-size:12px;font-weight:700;color:#1e293b;">100% gratis</div>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div style="padding:22px 24px;display:flex;flex-direction:column;gap:10px;">
+      <a href="/registro.html?redirect=/mundial.html" style="
+        display:flex;align-items:center;justify-content:center;gap:10px;
+        background:linear-gradient(135deg,#15803d,#16a34a);
+        color:white;font-weight:800;font-size:15px;
+        padding:14px;border-radius:12px;text-decoration:none;
+        box-shadow:0 4px 16px rgba(21,128,61,.35);transition:transform .15s;"
+        onmouseover="this.style.transform='scale(1.02)'"
+        onmouseout="this.style.transform='scale(1)'">
+        <i class="fa-solid fa-user-plus"></i> Registrarme gratis
+      </a>
+      <a href="/login.html?redirect=/mundial.html" style="
+        display:flex;align-items:center;justify-content:center;gap:10px;
+        background:#f8fafc;color:#374151;font-weight:700;font-size:14px;
+        padding:12px;border-radius:12px;text-decoration:none;border:1.5px solid #e2e8f0;
+        transition:background .15s;"
+        onmouseover="this.style.background='#f1f5f9'"
+        onmouseout="this.style.background='#f8fafc'">
+        <i class="fa-solid fa-right-to-bracket"></i> Ya tengo cuenta — Iniciar sesión
+      </a>
+      <p style="text-align:center;font-size:11px;color:#94a3b8;margin:4px 0 0;">
+        Participación gratuita y sin obligación de compra · <a href="/terminos-mundial.html" style="color:#2563eb;">Ver bases →</a>
+      </p>
+    </div>
+
+  </div>
+</div>
 
 <script src="/notif_widget.js"></script>
 <script src="/push_widget.js"></script>

@@ -56,6 +56,12 @@ ALTER TABLE public.mundial_partidos     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mundial_predicciones ENABLE ROW LEVEL SECURITY;
 
 -- Equipos y partidos: lectura pública
+DROP POLICY IF EXISTS "mundial_equipos_public"  ON public.mundial_equipos;
+DROP POLICY IF EXISTS "mundial_partidos_public" ON public.mundial_partidos;
+DROP POLICY IF EXISTS "predicciones_select"     ON public.mundial_predicciones;
+DROP POLICY IF EXISTS "predicciones_insert"     ON public.mundial_predicciones;
+DROP POLICY IF EXISTS "predicciones_update"     ON public.mundial_predicciones;
+
 CREATE POLICY "mundial_equipos_public"
   ON public.mundial_equipos FOR SELECT USING (true);
 
@@ -107,7 +113,6 @@ CREATE OR REPLACE FUNCTION public.mundial_ranking()
 RETURNS TABLE (
   user_id        uuid,
   nombre         text,
-  avatar_url     text,
   total_puntos   bigint,
   exactos        bigint,
   tendencias     bigint,
@@ -118,14 +123,13 @@ AS $$
   SELECT
     mp.user_id,
     pr.nombre,
-    pr.avatar_url,
     COALESCE(SUM(mp.puntos_obtenidos), 0)                              AS total_puntos,
     COUNT(CASE WHEN mp.puntos_obtenidos = 3 THEN 1 END)               AS exactos,
     COUNT(CASE WHEN mp.puntos_obtenidos = 1 THEN 1 END)               AS tendencias,
     COUNT(mp.id)                                                       AS predicciones
   FROM public.mundial_predicciones mp
   JOIN public.perfiles pr ON pr.id = mp.user_id
-  GROUP BY mp.user_id, pr.nombre, pr.avatar_url
+  GROUP BY mp.user_id, pr.nombre
   ORDER BY total_puntos DESC, exactos DESC
   LIMIT 200;
 $$;

@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS public.referidos (
 ALTER TABLE public.referidos ENABLE ROW LEVEL SECURITY;
 
 -- El referidor puede ver sus propios referidos
+DROP POLICY IF EXISTS "referidos_select_own" ON public.referidos;
+DROP POLICY IF EXISTS "referidos_insert"     ON public.referidos;
+
 CREATE POLICY "referidos_select_own"
   ON public.referidos FOR SELECT
   USING (auth.uid() = referidor_id);

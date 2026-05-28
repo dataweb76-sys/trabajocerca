@@ -378,6 +378,46 @@ async function init(){
       <div id="msgCompartir" style="margin-top:10px;"></div>
     </div>
 
+    <!-- ── PRODE MUNDIAL 2026 ── -->
+    <div id="prodeCard" style="margin:20px 0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);border:1.5px solid rgba(250,204,21,.35);border-radius:18px;padding:20px 20px;overflow:hidden;position:relative;">
+      <div style="position:absolute;top:-20px;right:-20px;font-size:90px;opacity:.06;pointer-events:none;">⚽</div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="font-size:38px;flex-shrink:0;">⚽🏆</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:900;color:white;line-height:1.2;">Prode Mundial 2026</div>
+          <div id="prodeStatus" style="font-size:12px;color:rgba(255,255,255,.55);margin-top:3px;">Verificando...</div>
+        </div>
+        <a id="prodeBtn" href="/mundial.html" style="
+          display:inline-flex;align-items:center;gap:7px;
+          background:linear-gradient(135deg,#facc15,#f59e0b);
+          color:#1c1917;font-weight:800;font-size:13px;
+          padding:10px 18px;border-radius:12px;text-decoration:none;
+          white-space:nowrap;box-shadow:0 4px 16px rgba(250,204,21,.4);
+          flex-shrink:0;transition:transform .15s;
+        "
+        onmouseover="this.style.transform='scale(1.04)'"
+        onmouseout="this.style.transform='scale(1)'">
+          ⚽ Participar en el sorteo del mundial
+        </a>
+      </div>
+      <!-- Barra de progreso referidos -->
+      <div style="margin-top:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:6px;">
+          <span>Invitados registrados</span>
+          <span id="refCount">...</span>
+        </div>
+        <div style="background:rgba(255,255,255,.1);border-radius:99px;height:8px;overflow:hidden;">
+          <div id="refBar" style="height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#4ade80);border-radius:99px;transition:width .6s ease;"></div>
+        </div>
+        <div style="margin-top:8px;text-align:center;">
+          <span style="font-size:11px;color:rgba(255,255,255,.4);">
+            Necesitás 10 amigos registrados con tu link para desbloquear el prode •
+            <a href="/" style="color:#fbbf24;text-decoration:none;">Obtener link →</a>
+          </span>
+        </div>
+      </div>
+    </div>
+
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;">
 
     ${statsHtml}
@@ -568,6 +608,9 @@ async function init(){
       <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
     </button>
   `
+
+  // Cargar datos del prode en la card (async, no bloquea render)
+  cargarProdeCard(userId)
 
 }
 
@@ -857,5 +900,42 @@ window.cerrarSesion = async function(){
 
 function esc(v){ return (v || "").toString().replace(/"/g,"&quot;") }
 
+/* ── PRODE CARD: cargar referidos ── */
+async function cargarProdeCard(userId){
+  const card = document.getElementById("prodeCard")
+  if(!card) return
+
+  const { data: total } = await supabase.rpc("contar_referidos", { p_user_id: userId })
+  const n      = total ?? 0
+  const pct    = Math.min(100, Math.round((n / 10) * 100))
+  const faltan = Math.max(0, 10 - n)
+
+  // Barra
+  const bar = document.getElementById("refBar")
+  if(bar) bar.style.width = pct + "%"
+
+  const cnt = document.getElementById("refCount")
+  if(cnt) cnt.textContent = `${n}/10`
+
+  const status = document.getElementById("prodeStatus")
+  const btn    = document.getElementById("prodeBtn")
+
+  if(n >= 10){
+    if(status) status.innerHTML = `<span style="color:#4ade80;font-weight:700;">✅ ¡Desbloqueado! Ya podés predecir todos los partidos</span>`
+    if(bar)    bar.style.background = "linear-gradient(90deg,#22c55e,#4ade80)"
+    if(btn){
+      btn.style.animation = "pulse-glow 2s ease-in-out infinite"
+    }
+  } else {
+    if(status) status.innerHTML = `<span style="color:rgba(255,255,255,.5);">Te faltan <strong style="color:#fbbf24;">${faltan}</strong> invitado${faltan !== 1 ? "s" : ""} para desbloquear el prode</span>`
+    if(btn){
+      btn.href        = "/"
+      btn.innerHTML   = `🔗 Obtener mi link`
+      btn.style.background = "rgba(255,255,255,.15)"
+      btn.style.color = "white"
+      btn.style.boxShadow = "none"
+    }
+  }
+}
 
 init()
