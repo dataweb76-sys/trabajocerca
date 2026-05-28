@@ -240,11 +240,163 @@
       <a href="/buscador_trabajos.html" class="hero-buscar-btn">
         <span class="hb-ico">💼</span> Buscar Empleados
       </a>
+      <a href="/buscador_emprendimientos.html" class="hero-buscar-btn">
+        <span class="hb-ico">💡</span> Buscar Emprendimientos
+      </a>
+    </div>
+
+    <!-- Botones de acceso (se muestran/ocultan según estado de sesión) -->
+    <div id="heroAuthBtns" style="display:none;margin-top:20px;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button onclick="abrirPopupRegistroTipo()" style="
+        display:inline-flex;align-items:center;gap:8px;
+        background:linear-gradient(135deg,#22c55e,#16a34a);
+        color:white;font-weight:800;font-size:15px;
+        padding:12px 26px;border-radius:12px;border:none;cursor:pointer;
+        box-shadow:0 4px 14px rgba(22,163,74,.35);transition:transform .15s;"
+        onmouseover="this.style.transform='scale(1.03)'"
+        onmouseout="this.style.transform='scale(1)'">
+        <i class="fa-solid fa-user-plus"></i> Registrate
+      </button>
+      <a href="/login.html" style="
+        display:inline-flex;align-items:center;gap:8px;
+        background:rgba(255,255,255,.15);backdrop-filter:blur(6px);
+        color:white;font-weight:700;font-size:15px;
+        padding:12px 26px;border-radius:12px;
+        border:1.5px solid rgba(255,255,255,.4);text-decoration:none;
+        transition:background .15s;"
+        onmouseover="this.style.background='rgba(255,255,255,.25)'"
+        onmouseout="this.style.background='rgba(255,255,255,.15)'">
+        <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
+      </a>
+    </div>
+
+    <!-- Botón Mi Perfil (solo logueados) -->
+    <div id="heroPerfilBtn" style="display:none;margin-top:20px;text-align:center;">
+      <a href="/perfil.html" style="
+        display:inline-flex;align-items:center;gap:8px;
+        background:rgba(255,255,255,.15);backdrop-filter:blur(6px);
+        color:white;font-weight:800;font-size:15px;
+        padding:12px 26px;border-radius:12px;
+        border:1.5px solid rgba(255,255,255,.45);text-decoration:none;
+        transition:background .15s;"
+        onmouseover="this.style.background='rgba(255,255,255,.25)'"
+        onmouseout="this.style.background='rgba(255,255,255,.15)'">
+        <i class="fa-solid fa-user"></i> Mi Perfil
+      </a>
     </div>
 
   </div>
 </section>
 
+
+<!-- ══ POPUP: ELEGÍ CÓMO REGISTRARTE ══ -->
+<div id="popupRegistroTipo" style="
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);
+  z-index:9998;align-items:center;justify-content:center;padding:16px;overflow-y:auto;
+" onclick="if(event.target===this)document.getElementById('popupRegistroTipo').style.display='none'">
+  <div style="
+    background:white;border-radius:24px;max-width:500px;width:100%;
+    overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.5);animation:slideUp .3s ease;
+  ">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 60%,#0ea5e9 100%);padding:28px 24px 22px;text-align:center;color:white;position:relative;">
+      <button onclick="document.getElementById('popupRegistroTipo').style.display='none'"
+        style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.18);border:none;color:white;border-radius:50%;width:30px;height:30px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+      <div style="font-size:44px;margin-bottom:8px;">👋</div>
+      <h2 style="margin:0 0 6px;font-size:22px;font-weight:900;">¡Bienvenido/a a Trabajos Cerca!</h2>
+      <p style="margin:0;font-size:13px;color:rgba(255,255,255,.8);line-height:1.5;max-width:360px;margin:6px auto 0;">
+        La plataforma gratuita que conecta profesionales, trabajadores y empleadores de toda Argentina
+      </p>
+    </div>
+
+    <!-- Beneficios rápidos -->
+    <div style="display:flex;gap:0;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+      <div style="flex:1;padding:12px 8px;text-align:center;border-right:1px solid #e2e8f0;">
+        <div style="font-size:20px;">🔍</div>
+        <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-top:3px;">Buscadores</div>
+        <div style="font-size:10px;color:#64748b;">Clientes te encuentran</div>
+      </div>
+      <div style="flex:1;padding:12px 8px;text-align:center;border-right:1px solid #e2e8f0;">
+        <div style="font-size:20px;">💬</div>
+        <div style="font-size:11px;font-weight:700;color:#15803d;margin-top:3px;">WhatsApp directo</div>
+        <div style="font-size:10px;color:#64748b;">Sin intermediarios</div>
+      </div>
+      <div style="flex:1;padding:12px 8px;text-align:center;border-right:1px solid #e2e8f0;">
+        <div style="font-size:20px;">🗺️</div>
+        <div style="font-size:11px;font-weight:700;color:#7c3aed;margin-top:3px;">En tu zona</div>
+        <div style="font-size:10px;color:#64748b;">Por ciudad y barrio</div>
+      </div>
+      <div style="flex:1;padding:12px 8px;text-align:center;">
+        <div style="font-size:20px;">🆓</div>
+        <div style="font-size:11px;font-weight:700;color:#d97706;margin-top:3px;">100% gratis</div>
+        <div style="font-size:10px;color:#64748b;">Sin costo oculto</div>
+      </div>
+    </div>
+
+    <!-- 4 tipos de registro -->
+    <div style="padding:20px 22px 24px;">
+      <div style="font-size:12px;font-weight:700;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;text-align:center;">
+        ¿Cómo querés registrarte?
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+        <!-- 1. Oficio (activo) -->
+        <a href="/registro-oficio.html" style="
+          display:flex;flex-direction:column;align-items:center;gap:8px;
+          background:linear-gradient(135deg,#fff7ed,#fff);
+          border:2px solid #fed7aa;border-radius:16px;padding:18px 12px;
+          text-decoration:none;transition:transform .15s,box-shadow .15s;cursor:pointer;"
+          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(249,115,22,.2)'"
+          onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <span style="font-size:34px;">🔨</span>
+          <div style="font-weight:800;font-size:14px;color:#c2410c;text-align:center;line-height:1.3;">Ingresá tu Oficio</div>
+          <div style="font-size:11px;color:#64748b;text-align:center;line-height:1.4;">Plomero, electricista, albañil, peluquero y más</div>
+          <span style="background:#ea580c;color:white;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;margin-top:4px;">Registrarme →</span>
+        </a>
+
+        <!-- 2. CV (próximamente) -->
+        <div style="
+          display:flex;flex-direction:column;align-items:center;gap:8px;
+          background:#f8fafc;border:2px dashed #e2e8f0;border-radius:16px;padding:18px 12px;
+          opacity:.65;cursor:not-allowed;">
+          <span style="font-size:34px;">📄</span>
+          <div style="font-weight:800;font-size:14px;color:#475569;text-align:center;line-height:1.3;">Ingresá tu CV</div>
+          <div style="font-size:11px;color:#94a3b8;text-align:center;line-height:1.4;">Buscás empleo en relación de dependencia</div>
+          <span style="background:#e2e8f0;color:#94a3b8;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;margin-top:4px;">Próximamente</span>
+        </div>
+
+        <!-- 3. Profesión (próximamente) -->
+        <div style="
+          display:flex;flex-direction:column;align-items:center;gap:8px;
+          background:#f8fafc;border:2px dashed #e2e8f0;border-radius:16px;padding:18px 12px;
+          opacity:.65;cursor:not-allowed;">
+          <span style="font-size:34px;">🎓</span>
+          <div style="font-weight:800;font-size:14px;color:#475569;text-align:center;line-height:1.3;">Ingresá tu Profesión</div>
+          <div style="font-size:11px;color:#94a3b8;text-align:center;line-height:1.4;">Médico, abogado, contador, arquitecto</div>
+          <span style="background:#e2e8f0;color:#94a3b8;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;margin-top:4px;">Próximamente</span>
+        </div>
+
+        <!-- 4. Emprendimiento (próximamente) -->
+        <div style="
+          display:flex;flex-direction:column;align-items:center;gap:8px;
+          background:#f8fafc;border:2px dashed #e2e8f0;border-radius:16px;padding:18px 12px;
+          opacity:.65;cursor:not-allowed;">
+          <span style="font-size:34px;">💡</span>
+          <div style="font-weight:800;font-size:14px;color:#475569;text-align:center;line-height:1.3;">Ingresá tu Emprendimiento</div>
+          <div style="font-size:11px;color:#94a3b8;text-align:center;line-height:1.4;">Negocio propio, tienda online, marca</div>
+          <span style="background:#e2e8f0;color:#94a3b8;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;margin-top:4px;">Próximamente</span>
+        </div>
+
+      </div>
+
+      <p style="text-align:center;font-size:11px;color:#94a3b8;margin:14px 0 0;">
+        ¿Ya tenés cuenta? <a href="/login.html" style="color:#2563eb;font-weight:700;">Iniciá sesión →</a>
+      </p>
+    </div>
+  </div>
+</div>
 
 <!-- ══ POPUP PRODE MUNDIAL — aparece al ingresar ══ -->
 <style>
@@ -789,19 +941,29 @@ import { supabase } from "./supabase.js"
 async function cargarMenu(){
   const { data } = await supabase.auth.getUser()
   const menu = document.getElementById("menu")
+
   if(data.user){
+    // Logueado: mostrar navegación normal + ocultar botones auth del hero
     menu.innerHTML = `
       <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
       <a href="/mapa.html"><i class="fa-solid fa-map"></i> <span>Mapa</span></a>
       <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Mi perfil</span></a>
     `
+    document.getElementById("heroPerfilBtn").style.display = "flex"
+    document.getElementById("heroAuthBtns").style.display  = "none"
   } else {
+    // No logueado: solo Buscar en el topbar, mostrar auth en el hero
     menu.innerHTML = `
       <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
-      <a href="/login.html"><i class="fa-solid fa-right-to-bracket"></i> <span>Entrar</span></a>
-      <a href="javascript:void(0)" onclick="window._tcAbrirRegistro?.()"><i class="fa-solid fa-user-plus"></i> <span>Registrarse</span></a>
     `
+    document.getElementById("heroAuthBtns").style.display  = "flex"
+    document.getElementById("heroPerfilBtn").style.display = "none"
   }
+}
+
+window.abrirPopupRegistroTipo = function(){
+  document.getElementById("popupRegistroTipo").style.display = "flex"
+  document.body.style.overflow = "hidden"
 }
 
 window.irA = async function(url){
