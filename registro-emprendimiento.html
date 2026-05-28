@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#d97706">
+<title>Registrá tu Emprendimiento — Trabajos Cerca</title>
+<meta name="description" content="Registrá tu emprendimiento en Trabajos Cerca y llegá a clientes en tu ciudad, provincia o toda Argentina. Gastronomía, belleza, indumentaria y más.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body { background:#f8fafc; }
+
+.reg-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 0 80px;
+}
+
+/* Header */
+.reg-header {
+  background: linear-gradient(135deg, #d97706 0%, #92400e 100%);
+  padding: 32px 24px 28px;
+  text-align: center;
+  color: white;
+}
+.reg-header .reg-ico { font-size: 44px; margin-bottom: 10px; }
+.reg-header h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
+.reg-header p { font-size: 14px; opacity: .88; margin: 0; line-height: 1.5; }
+
+/* Beneficios */
+.reg-beneficios {
+  background: #fef3c7;
+  border-left: 4px solid #d97706;
+  margin: 20px 20px 0;
+  padding: 14px 16px;
+  border-radius: 0 10px 10px 0;
+}
+.reg-beneficios p { margin: 0 0 6px; font-size: 13.5px; color: #92400e; font-weight: 600; }
+.reg-beneficios ul { margin: 0; padding-left: 18px; }
+.reg-beneficios ul li { font-size: 13px; color: #b45309; margin-bottom: 4px; line-height: 1.4; }
+
+/* Secciones */
+.reg-seccion {
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  margin: 16px 16px 0;
+  padding: 20px 20px 16px;
+}
+.reg-seccion h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #d97706;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Campos */
+.campo { margin-bottom: 14px; }
+.campo label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
+.campo input,
+.campo select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 9px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #f8fafc;
+  box-sizing: border-box;
+  transition: border-color .2s;
+  color: #1e293b;
+}
+.campo input:focus,
+.campo select:focus { outline: none; border-color: #d97706; background: white; }
+
+/* Tel */
+.tel-wrap { display: flex; gap: 8px; align-items: center; }
+.tel-prefix {
+  background: #d97706;
+  color: white;
+  padding: 10px 13px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.tel-wrap input { flex: 1; }
+
+/* Pass eye */
+.pass-wrap { position: relative; }
+.pass-wrap input { padding-right: 42px; }
+.pass-eye {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 15px;
+}
+
+/* Radio display */
+.display-opts { display: flex; gap: 10px; flex-wrap: wrap; }
+.display-opt {
+  flex: 1;
+  min-width: 140px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #374151;
+  transition: all .15s;
+}
+.display-opt input[type=radio] { accent-color: #d97706; }
+.display-opt:has(input:checked) {
+  border-color: #d97706;
+  background: #fff7ed;
+  color: #92400e;
+}
+
+/* Categoría emprendimiento */
+.cat-emp-wrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.cat-emp-btn {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #374151;
+  background: #f8fafc;
+  transition: all .15s;
+  user-select: none;
+}
+.cat-emp-btn .cat-ico { font-size: 22px; display: block; margin-bottom: 4px; }
+.cat-emp-btn.activo {
+  border-color: #d97706;
+  background: #fff7ed;
+  color: #92400e;
+}
+
+/* Subcategorías checkboxes */
+#subEmpWrap { margin-top: 14px; display: none; }
+#subEmpWrap > label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+/* Alcance */
+.alcance-opts { display: flex; flex-direction: column; gap: 8px; }
+.alcance-opt {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  transition: all .15s;
+}
+.alcance-opt input[type=radio] { accent-color: #d97706; }
+.alcance-opt:has(input:checked) {
+  border-color: #d97706;
+  background: #fff7ed;
+}
+.alcance-opt .alc-ico { font-size: 20px; }
+.alcance-opt .alc-txt { line-height: 1.3; }
+.alcance-opt .alc-txt strong { display: block; font-size: 14px; color: #1e293b; }
+.alcance-opt .alc-txt small { color: #64748b; font-size: 12px; }
+
+/* Términos */
+.terminos-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.terminos-check input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  accent-color: #d97706;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.terminos-check a { color: #d97706; }
+
+/* Botones */
+.btn-registrar {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #d97706, #92400e);
+  color: white;
+  border: none;
+  border-radius: 11px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 18px;
+  transition: opacity .2s;
+  box-sizing: border-box;
+}
+.btn-registrar:hover { opacity: .92; }
+.btn-registrar:disabled { opacity: .6; cursor: not-allowed; }
+
+.separador {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.separador::before, .separador::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; }
+
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 11px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background .2s;
+}
+.btn-google:hover { background: #f8fafc; }
+.btn-google img { width: 20px; height: 20px; }
+
+.reg-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-top: 10px;
+  display: none;
+}
+
+.ya-cuenta {
+  text-align: center;
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 20px 16px 0;
+}
+.ya-cuenta a { color: #d97706; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="reg-wrap">
+
+  <!-- Header -->
+  <div class="reg-header">
+    <div class="reg-ico">💡</div>
+    <h1>Registrá tu Emprendimiento</h1>
+    <p>Mostrá lo que hacés, llegá a más clientes y hacé crecer tu negocio — todo desde Trabajos Cerca, gratis.</p>
+  </div>
+
+  <!-- Beneficios -->
+  <div class="reg-beneficios">
+    <p>¿Por qué registrar tu emprendimiento?</p>
+    <ul>
+      <li>🚀 Aparecé en búsquedas de tu ciudad, provincia o toda Argentina</li>
+      <li>📸 Mostrá fotos de tu local y tus productos/servicios</li>
+      <li>💬 Recibí consultas directamente por WhatsApp</li>
+      <li>⭐ Acumulá reseñas y construí tu reputación online</li>
+      <li>💸 100% gratis. Sin comisiones, sin contratos.</li>
+    </ul>
+  </div>
+
+  <form id="formEmp" novalidate>
+
+    <!-- Datos personales y del emprendimiento -->
+    <div class="reg-seccion">
+      <h2><i class="fa-solid fa-user"></i> Datos personales</h2>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="campo">
+          <label>Nombre *</label>
+          <input type="text" id="emNombre" placeholder="Ana" autocomplete="given-name" required>
+        </div>
+        <div class="campo">
+          <label>Apellido *</label>
+          <input type="text" id="emApellido" placeholder="Torres" autocomplete="family-name" required>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Nombre del emprendimiento *</label>
+        <input type="text" id="emNombreEmp" placeholder="Ej: Las Empanadas de Ana" required>
+      </div>
+
+      <div class="campo">
+        <label>¿Cómo querés aparecer en el buscador? *</label>
+        <div class="display-opts">
+          <label class="display-opt">
+            <input type="radio" name="emDisplay" value="personal" checked>
+            <span>Con mi nombre personal</span>
+          </label>
+          <label class="display-opt">
+            <input type="radio" name="emDisplay" value="emprendimiento">
+            <span>Con el nombre del emprendimiento</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Teléfono WhatsApp *</label>
+        <div class="tel-wrap">
+          <span class="tel-prefix">+549</span>
+          <input type="tel" id="emTel" placeholder="11 2345-6789" inputmode="numeric"
+            oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        </div>
+        <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
+          Sin el 0 del área ni el 15.
+        </small>
+      </div>
+
+      <div class="campo">
+        <label>Email *</label>
+        <input type="email" id="emEmail" placeholder="ana@email.com" autocomplete="email" required>
+      </div>
+
+      <div class="campo">
+        <label>Contraseña *</label>
+        <div class="pass-wrap">
+          <input type="password" id="emPass" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required>
+          <i class="fa-solid fa-eye pass-eye" id="eyePass"
+            onclick="togglePass('emPass','eyePass')"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categoría del emprendimiento -->
+    <div class="reg-seccion">
+      <h2><i class="fa-solid fa-store"></i> Rubro del emprendimiento</h2>
+
+      <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:10px;">
+        Elegí la categoría *
+      </label>
+      <div class="cat-emp-wrap" id="catEmpGrid"></div>
+
+      <div id="subEmpWrap">
+        <label>Tipos de productos/servicios * <small style="font-weight:400;color:#64748b;">— Tildá todos los que ofrecés</small></label>
+        <div id="subEmpCheckboxes"
+          style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:7px;"></div>
+      </div>
+    </div>
+
+    <!-- Ubicación -->
+    <div class="reg-seccion">
+      <h2><i class="fa-solid fa-location-dot"></i> Ubicación</h2>
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;">
+        <div class="campo">
+          <label>Provincia *</label>
+          <select id="emProvincia" onchange="cargarLocalidades('emProvincia','emLocalidad')" required>
+            <option value="">— Elegí —</option>
+            <option>Buenos Aires</option>
+            <option>Ciudad Autónoma de Buenos Aires</option>
+            <option>Catamarca</option>
+            <option>Chaco</option>
+            <option>Chubut</option>
+            <option>Córdoba</option>
+            <option>Corrientes</option>
+            <option>Entre Ríos</option>
+            <option>Formosa</option>
+            <option>Jujuy</option>
+            <option>La Pampa</option>
+            <option>La Rioja</option>
+            <option>Mendoza</option>
+            <option>Misiones</option>
+            <option>Neuquén</option>
+            <option>Río Negro</option>
+            <option>Salta</option>
+            <option>San Juan</option>
+            <option>San Luis</option>
+            <option>Santa Cruz</option>
+            <option>Santa Fe</option>
+            <option>Santiago del Estero</option>
+            <option>Tierra del Fuego</option>
+            <option>Tucumán</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Código postal</label>
+          <input type="text" id="emCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Localidad *</label>
+        <select id="emLocalidad" required>
+          <option value="">— Primero elegí provincia —</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Dirección <small style="font-weight:400;color:#64748b;">(opcional)</small></label>
+        <input type="text" id="emDireccion" placeholder="Ej: Av. Corrientes 1234, Piso 2">
+      </div>
+    </div>
+
+    <!-- Alcance -->
+    <div class="reg-seccion">
+      <h2><i class="fa-solid fa-globe"></i> ¿Dónde querés aparecer?</h2>
+
+      <div class="alcance-opts">
+        <label class="alcance-opt">
+          <input type="radio" name="emAlcance" value="ciudad" checked>
+          <span class="alc-ico">🏙️</span>
+          <span class="alc-txt">
+            <strong>En mi ciudad</strong>
+            <small>Solo aparecés en búsquedas de tu localidad</small>
+          </span>
+        </label>
+        <label class="alcance-opt">
+          <input type="radio" name="emAlcance" value="provincia">
+          <span class="alc-ico">🗺️</span>
+          <span class="alc-txt">
+            <strong>En toda la provincia</strong>
+            <small>Aparecés en toda tu provincia</small>
+          </span>
+        </label>
+        <label class="alcance-opt">
+          <input type="radio" name="emAlcance" value="argentina">
+          <span class="alc-ico">🇦🇷</span>
+          <span class="alc-txt">
+            <strong>En toda Argentina</strong>
+            <small>Enviás a todo el país o trabajás online</small>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Términos -->
+    <div class="reg-seccion" style="padding:16px 20px;">
+      <label class="terminos-check">
+        <input type="checkbox" id="emTerminos">
+        <span>Acepto los <a href="/terminos.html" target="_blank">términos y condiciones</a> y la
+          <a href="/privacidad.html" target="_blank">política de privacidad</a> de Trabajos Cerca.</span>
+      </label>
+    </div>
+
+    <!-- Acciones -->
+    <div class="reg-seccion" style="padding:16px 20px;">
+      <div id="regError" class="reg-error"></div>
+
+      <button type="submit" class="btn-registrar" id="btnRegistrar">
+        <i class="fa-solid fa-rocket"></i> Registrar mi emprendimiento
+      </button>
+
+      <div class="separador">o registrate con</div>
+
+      <button type="button" class="btn-google" id="btnGoogle" onclick="registrarGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continuar con Google
+      </button>
+    </div>
+
+  </form>
+
+  <p class="ya-cuenta">
+    ¿Ya tenés cuenta? <a href="/login.html">Iniciá sesión aquí</a>
+  </p>
+
+</div><!-- /reg-wrap -->
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPA_URL = 'https://kgymhstqfkqdpkkvtjow.supabase.co'
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtneW1oc3RxZmtxZHBra3Z0am93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0MDg1MzIsImV4cCI6MjA1Nzk4NDUzMn0.4WPIxLBFOWGHjSBDm8IXKL_4IrUGI_8ij3RRiYqoETo'
+const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY)
+
+/* ══════════════════════════════════════
+   Categorías de emprendimientos
+══════════════════════════════════════ */
+const EMPRENDIMIENTOS = {
+  'Gastronomía': {
+    ico: '🍔',
+    subs: ['Empanadas','Pizzas','Hamburguesas','Sushi','Tartas y quiches','Facturas y medialunas','Alfajores y dulces','Tortas y pasteles','Cupcakes y muffins','Comida árabe','Comida vegana/vegetariana','Catering','Menú del día','Milanesas','Asado y parrilla','Helados artesanales','Bebidas frías y jugos','Café y té']
+  },
+  'Belleza y Estética': {
+    ico: '💅',
+    subs: ['Peluquería a domicilio','Barbería a domicilio','Manicuria','Pedicuria','Depilación','Maquillaje artístico','Micropigmentación','Extensión de pestañas','Uñas acrílicas/gel','Estética facial','Masajes relajantes','Tratamientos corporales']
+  },
+  'Indumentaria y Moda': {
+    ico: '👗',
+    subs: ['Ropa de mujer','Ropa de hombre','Ropa infantil','Ropa deportiva','Calzado','Accesorios y bijouterie','Ropa de trabajo','Disfraces','Lencería','Trajes de baño']
+  },
+  'Artesanías y Manualidades': {
+    ico: '🎨',
+    subs: ['Tejidos y crochet','Macramé','Cerámica y alfarería','Cuero artesanal','Madera tallada','Velas aromáticas','Jabones artesanales','Papelería y cuadernos','Peluches y muñecos','Decoración del hogar','Joyería artesanal','Arte y pinturas']
+  },
+  'Tecnología y Digital': {
+    ico: '💻',
+    subs: ['Diseño gráfico','Desarrollo web','Redes sociales','Fotografía','Edición de video','Impresión 3D','Reparación de celulares','Reparación de computadoras','Clases de computación','Diseño de logos']
+  },
+  'Salud y Bienestar': {
+    ico: '🌿',
+    subs: ['Productos naturales y herboristería','Suplementos deportivos','Cosmética natural','Aromaterapia','Yoga y meditación','Entrenamiento personal','Alimentación saludable','Productos para bebés']
+  },
+  'Hogar y Decoración': {
+    ico: '🏡',
+    subs: ['Muebles artesanales','Plantas y jardín','Velas y difusores','Cuadros y arte','Textil del hogar','Almohadas y almohadones','Organizadores y cajas','Menaje y cocina']
+  },
+  'Mascotas': {
+    ico: '🐶',
+    subs: ['Accesorios para mascotas','Ropa para mascotas','Comida artesanal para mascotas','Juguetes para mascotas','Peluquería canina','Fotografía de mascotas']
+  },
+  'Educación y Cursos': {
+    ico: '📚',
+    subs: ['Clases particulares','Inglés u otros idiomas','Música e instrumentos','Arte y pintura','Costura y manualidades','Cocina y repostería','Yoga y pilates','Programación','Apoyo escolar']
+  },
+  'Eventos y Entretenimiento': {
+    ico: '🎉',
+    subs: ['Decoración de eventos','Tortas y mesa dulce','Animación infantil','Fotografía de eventos','Catering para fiestas','Dj y música','Alquiler de disfraces','Juegos y inflables']
+  },
+  'Servicios Profesionales': {
+    ico: '📋',
+    subs: ['Contabilidad para pymes','Asesoría legal','Marketing y publicidad','Traducciones','Coaching','Gestión de redes sociales','Diseño de presentaciones','Trámites y gestiones']
+  },
+  'Otro rubro': {
+    ico: '💡',
+    subs: []
+  }
+}
+
+let catSeleccionada = null
+
+/* ── Construir grid de categorías ── */
+;(function construirCategorias(){
+  const grid = document.getElementById('catEmpGrid')
+  Object.entries(EMPRENDIMIENTOS).forEach(([cat, val]) => {
+    const div = document.createElement('div')
+    div.className = 'cat-emp-btn'
+    div.dataset.cat = cat
+    div.innerHTML = `<span class="cat-ico">${val.ico}</span>${cat}`
+    div.addEventListener('click', () => seleccionarCat(cat, div))
+    grid.appendChild(div)
+  })
+})()
+
+function seleccionarCat(cat, el) {
+  document.querySelectorAll('.cat-emp-btn').forEach(b => b.classList.remove('activo'))
+  el.classList.add('activo')
+  catSeleccionada = cat
+  const subs = EMPRENDIMIENTOS[cat]?.subs || []
+  const wrap = document.getElementById('subEmpWrap')
+  const cbWrap = document.getElementById('subEmpCheckboxes')
+
+  if(subs.length === 0){ wrap.style.display = 'none'; cbWrap.innerHTML = ''; return }
+
+  cbWrap.innerHTML = subs.map(s => `
+    <label style="display:flex;align-items:center;gap:7px;padding:8px 11px;
+      border:1.5px solid #e2e8f0;border-radius:9px;cursor:pointer;background:white;
+      font-size:13px;font-weight:500;color:#374151;transition:all .15s;"
+      onmouseover="this.style.borderColor='#f59e0b'"
+      onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='#e2e8f0'">
+      <input type="checkbox" value="${s}" style="accent-color:#d97706;"
+        onchange="this.closest('label').style.borderColor=this.checked?'#d97706':'#e2e8f0';
+                  this.closest('label').style.background=this.checked?'#fffbeb':'white'">
+      ${s}
+    </label>`).join('')
+  wrap.style.display = 'block'
+}
+
+/* ── Obtener subtipos seleccionados ── */
+function getSubtipos(){
+  return [...document.querySelectorAll('#subEmpCheckboxes input[type=checkbox]:checked')]
+    .map(c => c.value)
+}
+
+/* ── GeoRef ── */
+window.cargarLocalidades = async function(provId, locId) {
+  const prov = document.getElementById(provId).value
+  const locSel = document.getElementById(locId)
+  locSel.innerHTML = '<option>Cargando...</option>'
+  if(!prov){ locSel.innerHTML = '<option value="">— Primero elegí provincia —</option>'; return }
+
+  try {
+    const url = `https://apis.datos.gob.ar/georef/api/municipios?provincia=${encodeURIComponent(prov)}&max=1000&campos=nombre&orden=nombre`
+    const res  = await fetch(url)
+    const json = await res.json()
+    const municipios = json.municipios || []
+    locSel.innerHTML = '<option value="">— Elegí tu localidad —</option>' +
+      municipios.map(m => `<option value="${m.nombre}">${m.nombre}</option>`).join('')
+  } catch(_){
+    locSel.innerHTML = '<option value="">Error al cargar. Ingresala manualmente</option>'
+  }
+}
+
+/* ── Toggle contraseña ── */
+window.togglePass = function(inputId, iconId) {
+  const inp = document.getElementById(inputId)
+  const ico = document.getElementById(iconId)
+  if(inp.type === 'password'){ inp.type = 'text'; ico.classList.replace('fa-eye','fa-eye-slash') }
+  else { inp.type = 'password'; ico.classList.replace('fa-eye-slash','fa-eye') }
+}
+
+/* ── Error ── */
+function mostrarError(msg){ const el = document.getElementById('regError'); el.textContent = msg; el.style.display = 'block' }
+function ocultarError(){ document.getElementById('regError').style.display = 'none' }
+
+/* ── Submit ── */
+document.getElementById('formEmp').addEventListener('submit', async e => {
+  e.preventDefault()
+  ocultarError()
+
+  const nombre      = document.getElementById('emNombre').value.trim()
+  const apellido    = document.getElementById('emApellido').value.trim()
+  const nombreEmp   = document.getElementById('emNombreEmp').value.trim()
+  const display     = document.querySelector('input[name=emDisplay]:checked')?.value || 'personal'
+  const tel         = document.getElementById('emTel').value.trim()
+  const email       = document.getElementById('emEmail').value.trim()
+  const pass        = document.getElementById('emPass').value
+  const provincia   = document.getElementById('emProvincia').value
+  const localidad   = document.getElementById('emLocalidad').value
+  const cp          = document.getElementById('emCP').value.trim()
+  const direccion   = document.getElementById('emDireccion').value.trim()
+  const alcance     = document.querySelector('input[name=emAlcance]:checked')?.value || 'ciudad'
+  const terminos    = document.getElementById('emTerminos').checked
+  const subtipos    = getSubtipos()
+
+  if(!nombre || !apellido)      return mostrarError('Por favor ingresá tu nombre y apellido.')
+  if(!nombreEmp)                return mostrarError('Ingresá el nombre de tu emprendimiento.')
+  if(!tel || tel.length < 8)    return mostrarError('Ingresá un número de WhatsApp válido.')
+  if(!email)                    return mostrarError('Ingresá tu email.')
+  if(pass.length < 6)           return mostrarError('La contraseña debe tener al menos 6 caracteres.')
+  if(!catSeleccionada)          return mostrarError('Elegí la categoría de tu emprendimiento.')
+  if(!provincia || !localidad)  return mostrarError('Completá tu provincia y localidad.')
+  if(!terminos)                 return mostrarError('Tenés que aceptar los términos y condiciones.')
+
+  const btn = document.getElementById('btnRegistrar')
+  btn.disabled = true
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...'
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password: pass,
+    options: {
+      data: {
+        nombre,
+        apellido,
+        telefono: '+549' + tel,
+        tipo_perfil: 'emprendimiento'
+      }
+    }
+  })
+
+  if(error){
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Registrar mi emprendimiento'
+    return mostrarError(traducirError(error.message))
+  }
+
+  if(data.user){
+    await supabase.from('profiles').upsert({
+      id: data.user.id,
+      nombre,
+      apellido,
+      nombre_emprendimiento: nombreEmp,
+      display_como: display,
+      telefono: '+549' + tel,
+      tipo_perfil: 'emprendimiento',
+      emprendimiento_categoria: catSeleccionada,
+      emprendimiento_subtipos: subtipos,
+      provincia,
+      localidad,
+      codigo_postal: cp,
+      direccion,
+      alcance
+    })
+  }
+
+  window.location.href = '/perfil_emprendimiento.html?nuevo=1'
+})
+
+/* ── Google ── */
+window.registrarGoogle = async function() {
+  ocultarError()
+  const btn = document.getElementById('btnGoogle')
+  btn.disabled = true
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Conectando...'
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + '/perfil_emprendimiento.html?nuevo=1',
+      queryParams: { prompt: 'select_account' }
+    }
+  })
+
+  if(error){
+    btn.disabled = false
+    btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:20px;height:20px"> Continuar con Google'
+    mostrarError('Error al conectar con Google. Intentá de nuevo.')
+  }
+}
+
+function traducirError(msg){
+  if(msg.includes('already registered') || msg.includes('already been registered'))
+    return 'Ya existe una cuenta con ese email. ¿Querés iniciar sesión?'
+  if(msg.includes('Invalid email')) return 'El email ingresado no es válido.'
+  if(msg.includes('Password should be')) return 'La contraseña debe tener al menos 6 caracteres.'
+  if(msg.includes('rate limit')) return 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.'
+  return 'Ocurrió un error. Por favor intentá de nuevo.'
+}
+</script>
+</body>
+</html>
