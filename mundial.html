@@ -462,16 +462,15 @@
 
   /* ── MOBILE: hero mínimo + fixture inmediato ── */
 
-  /* Hero ultra compacto */
+  /* Hero ultra compacto — sólo h1 visible */
   .mundial-hero {
-    padding: 14px 14px 20px;
+    padding: 12px 14px 12px;
   }
-  .sub-extra { display:none; }
-  .mundial-hero .badge-mundial { display:none; }
-  .mundial-hero h1 { font-size:20px; margin-bottom:4px; }
-  .mundial-hero .sub { font-size:12px; margin-bottom:10px; }
-  .premios-chips { gap:6px; }
-  .p-chip { font-size:11px; padding:6px 10px; }
+  .sub-extra                    { display:none; }
+  .mundial-hero .badge-mundial  { display:none; }
+  .mundial-hero h1              { font-size:19px; margin:0; line-height:1.2; }
+  .mundial-hero .sub            { display:none; }
+  .premios-chips                { display:none; }
 
   /* Ocultar TODO lo que está entre el hero y los tabs */
   #statsBar     { display:none !important; }
@@ -517,8 +516,8 @@
   .grupo-filter::-webkit-scrollbar { display:none; }
   .grupo-btn { flex-shrink:0; width:34px; height:34px; }
 
-  /* Tabs container sin padding extra */
-  #tabsContainer { padding:0 !important; }
+  /* Tabs container: sin padding NI margin extra */
+  #tabsContainer { padding:0 !important; margin:0 !important; min-height:unset !important; }
 
   /* Match grid */
   .match-grid { grid-template-columns:1fr; padding:0 12px 32px; margin-top:10px; }
