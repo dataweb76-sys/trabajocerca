@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#15803d">
+<title>Prode Mundial 2026 — Trabajos Cerca</title>
+<meta name="description" content="Participá del prode del Mundial 2026. Acertá resultados, ganá puntos y llevate una página web gratis. Premio especial si Argentina sale campeón.">
+<link rel="canonical" href="https://www.trabajoscerca.com.ar/mundial.html">
+<meta property="og:title" content="Prode Mundial 2026 — ¡Ganá una web gratis!">
+<meta property="og:description" content="Predecí los 104 partidos del Mundial 2026. Premio: página web gratis para el ganador. Premio especial Argentina campeón: $500.000.">
+<meta property="og:url" content="https://www.trabajoscerca.com.ar/mundial.html">
+<meta property="og:image" content="https://www.trabajoscerca.com.ar/og-image.png">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════
+   MUNDIAL 2026 — Estilos
+═══════════════════════════════════ */
+
+/* HERO */
+.mundial-hero {
+  background: linear-gradient(135deg, #064e3b 0%, #15803d 40%, #16a34a 70%, #065f46 100%);
+  color: white;
+  text-align: center;
+  padding: 50px 20px 70px;
+  position: relative;
+  overflow: hidden;
+}
+.mundial-hero::before {
+  content:"";
+  position:absolute;inset:0;
+  background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='40' cy='40' r='35' fill='none' stroke='%23fff' stroke-opacity='0.05' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
+}
+.mundial-hero .badge-mundial {
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+  border-radius:999px;padding:6px 18px;font-size:13px;font-weight:700;
+  margin-bottom:18px;backdrop-filter:blur(4px);position:relative;
+}
+.mundial-hero h1 {
+  font-size:clamp(26px,5vw,50px);font-weight:900;margin:0 0 12px;
+  line-height:1.15;position:relative;
+}
+.mundial-hero .sub {
+  font-size:clamp(14px,2.5vw,18px);opacity:.88;margin:0 0 32px;position:relative;
+}
+.premios-chips {
+  display:flex;justify-content:center;gap:12px;flex-wrap:wrap;position:relative;
+}
+.p-chip {
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  border-radius:12px;padding:12px 18px;font-size:14px;font-weight:700;
+  backdrop-filter:blur(6px);display:flex;align-items:center;gap:8px;
+}
+
+/* STATS BAR */
+.mundial-stats {
+  background:white;border-radius:18px;padding:22px 28px;
+  max-width:700px;margin:-36px auto 0;position:relative;z-index:10;
+  box-shadow:0 6px 32px rgba(21,128,61,.18);
+  display:flex;gap:0;
+}
+.stat-item {
+  flex:1;text-align:center;
+  border-right:1px solid #f1f5f9;
+}
+.stat-item:last-child { border-right:none; }
+.stat-num {
+  font-size:clamp(22px,4vw,34px);font-weight:900;color:#15803d;
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.stat-lbl { font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;margin-top:4px; }
+
+/* TABS */
+.mundial-tabs {
+  display:flex;gap:0;background:#f1f5f9;border-radius:14px;padding:4px;
+  max-width:700px;margin:32px auto 0;
+}
+.tab-btn {
+  flex:1;padding:11px 8px;border:none;background:transparent;cursor:pointer;
+  font-weight:700;font-size:14px;color:#64748b;border-radius:10px;
+  transition:background .2s,color .2s;display:flex;align-items:center;
+  justify-content:center;gap:6px;
+}
+.tab-btn.active { background:white;color:#15803d;box-shadow:0 2px 8px rgba(0,0,0,.08); }
+.tab-btn:hover:not(.active) { color:#374151; }
+
+/* FILTROS GRUPOS/FASES */
+.fase-filter {
+  display:flex;gap:6px;flex-wrap:wrap;max-width:900px;
+  margin:24px auto 0;padding:0 20px;justify-content:center;
+}
+.fase-btn {
+  padding:8px 16px;border-radius:9px;border:1.5px solid #e2e8f0;
+  background:white;cursor:pointer;font-size:13px;font-weight:600;
+  color:#64748b;transition:all .18s;
+}
+.fase-btn.active { background:#15803d;color:white;border-color:#15803d; }
+.fase-btn:hover:not(.active) { border-color:#15803d;color:#15803d; }
+
+.grupo-filter {
+  display:flex;gap:6px;flex-wrap:wrap;max-width:900px;
+  margin:14px auto 0;padding:0 20px;justify-content:center;
+}
+.grupo-btn {
+  width:38px;height:38px;border-radius:50%;border:1.5px solid #e2e8f0;
+  background:white;cursor:pointer;font-size:13px;font-weight:800;
+  color:#64748b;transition:all .18s;display:flex;align-items:center;justify-content:center;
+}
+.grupo-btn.active { background:#15803d;color:white;border-color:#15803d; }
+.grupo-btn:hover:not(.active) { border-color:#15803d;color:#15803d; }
+
+/* MATCH GRID */
+.match-grid {
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:14px;max-width:960px;margin:20px auto 0;padding:0 20px 40px;
+}
+
+/* MATCH CARD */
+.match-card {
+  background:white;border-radius:16px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,.07);
+  border:1.5px solid #f1f5f9;transition:box-shadow .2s,transform .15s;
+}
+.match-card:hover { box-shadow:0 6px 24px rgba(0,0,0,.11); }
+.match-card.locked { opacity:.85; }
+.match-card.completed { border-color:#bbf7d0; }
+
+.match-header {
+  background:#f8fafc;padding:10px 14px;border-bottom:1px solid #f1f5f9;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.match-phase-tag {
+  font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.5px;
+}
+.match-date-tag {
+  font-size:11px;color:#94a3b8;font-weight:600;
+}
+
+.match-body {
+  padding:16px 14px;
+  display:flex;align-items:center;gap:8px;
+}
+.team-side {
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.team-flag { font-size:28px;line-height:1; }
+.team-name { font-size:12px;font-weight:700;color:#374151;text-align:center; }
+
+.score-wrap {
+  display:flex;align-items:center;gap:4px;min-width:80px;justify-content:center;
+}
+.score-input {
+  width:36px;height:36px;text-align:center;font-size:18px;font-weight:900;
+  border:2px solid #e2e8f0;border-radius:8px;outline:none;
+  font-family:inherit;color:#1e293b;transition:border-color .2s;
+  -moz-appearance:textfield;
+}
+.score-input::-webkit-outer-spin-button,
+.score-input::-webkit-inner-spin-button { -webkit-appearance:none;margin:0; }
+.score-input:focus { border-color:#15803d; }
+.score-sep { font-size:20px;font-weight:900;color:#cbd5e1; }
+
+/* Score cuando está bloqueado */
+.score-display {
+  display:flex;align-items:center;gap:6px;
+}
+.score-num {
+  width:36px;height:36px;background:#f1f5f9;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:900;color:#475569;
+}
+.score-result {
+  display:flex;align-items:center;gap:6px;
+}
+.score-result .score-num.winner { background:#15803d;color:white; }
+
+.match-footer {
+  padding:10px 14px;border-top:1px solid #f1f5f9;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.match-venue { font-size:11px;color:#94a3b8;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+
+.btn-save-pred {
+  padding:7px 14px;background:#15803d;color:white;border:none;
+  border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;
+  transition:background .2s,transform .1s;white-space:nowrap;
+}
+.btn-save-pred:hover { background:#166534;transform:scale(1.03); }
+.btn-save-pred.saved { background:#22c55e; }
+.btn-save-pred.saving { background:#86efac;cursor:not-allowed; }
+.btn-save-pred:disabled { opacity:.5;cursor:not-allowed;transform:none; }
+
+/* Puntos obtenidos */
+.puntos-badge {
+  display:inline-flex;align-items:center;gap:4px;padding:4px 10px;
+  border-radius:20px;font-size:12px;font-weight:700;
+}
+.puntos-3 { background:#dcfce7;color:#15803d; }
+.puntos-1 { background:#fef9c3;color:#a16207; }
+.puntos-0 { background:#f1f5f9;color:#94a3b8; }
+
+.mi-pred {
+  font-size:11px;color:#64748b;
+  display:flex;align-items:center;gap:4px;
+}
+
+/* LOCK overlay */
+.lock-tag {
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;color:#94a3b8;font-weight:600;
+}
+
+/* SIN PREDICCIÓN */
+.no-pred-tag {
+  font-size:11px;color:#ef4444;font-weight:600;
+}
+
+/* ─── RANKING ─── */
+.ranking-wrap {
+  max-width:800px;margin:24px auto 40px;padding:0 20px;
+}
+.podio {
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:28px;
+}
+.podio-card {
+  background:white;border-radius:16px;padding:20px 14px;text-align:center;
+  box-shadow:0 3px 16px rgba(0,0,0,.08);border:2px solid #f1f5f9;
+}
+.podio-card.oro   { border-color:#facc15;background:linear-gradient(135deg,#fefce8,#fff); }
+.podio-card.plata { border-color:#cbd5e1; }
+.podio-card.bronce{ border-color:#d97706;background:linear-gradient(135deg,#fffbeb,#fff); }
+.podio-pos { font-size:32px;display:block;margin-bottom:6px; }
+.podio-nombre { font-size:14px;font-weight:700;color:#1e293b;margin-bottom:4px; }
+.podio-pts { font-size:22px;font-weight:900;color:#15803d; }
+.podio-pts-lbl { font-size:11px;color:#94a3b8;font-weight:600; }
+.podio-exactos { font-size:12px;color:#64748b;margin-top:4px; }
+
+.ranking-table {
+  background:white;border-radius:14px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,.07);
+}
+.ranking-table table {
+  width:100%;border-collapse:collapse;
+  font-size:14px;
+}
+.ranking-table th {
+  background:#f8fafc;padding:12px 16px;text-align:left;font-size:11px;
+  font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;
+  border-bottom:1px solid #f1f5f9;
+}
+.ranking-table td { padding:12px 16px;border-bottom:1px solid #f8fafc;color:#374151; }
+.ranking-table tr:last-child td { border-bottom:none; }
+.ranking-table tr:hover td { background:#f8fafc; }
+.rank-pos { font-weight:900;color:#94a3b8;width:36px; }
+.rank-nombre { font-weight:700;color:#1e293b; }
+.rank-pts { font-weight:900;color:#15803d;font-size:16px; }
+.rank-exactos { color:#6366f1;font-weight:700; }
+.mi-fila td { background:#f0fdf4 !important; }
+
+/* ─── PREMIOS ─── */
+.premios-wrap {
+  max-width:800px;margin:24px auto 40px;padding:0 20px;
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+}
+.premio-card {
+  background:white;border-radius:18px;padding:28px 22px;
+  box-shadow:0 3px 16px rgba(0,0,0,.08);border:2px solid #f1f5f9;
+}
+.premio-card.argentina {
+  grid-column:1/-1;
+  background:linear-gradient(135deg,#eff6ff,#dbeafe);
+  border-color:#93c5fd;
+}
+.premio-ico { font-size:44px;display:block;margin-bottom:12px; }
+.premio-titulo { font-size:18px;font-weight:800;color:#1e293b;margin:0 0 8px; }
+.premio-desc { font-size:14px;color:#64748b;margin:0 0 14px;line-height:1.6; }
+.premio-condicion {
+  background:#f8fafc;border-radius:10px;padding:12px 14px;
+  font-size:13px;color:#475569;line-height:1.6;
+}
+.premio-condicion strong { color:#1e293b; }
+.premio-monto {
+  font-size:28px;font-weight:900;color:#1d4ed8;margin:12px 0 8px;
+}
+
+/* ─── LOGIN PROMPT ─── */
+.login-prompt {
+  text-align:center;padding:40px 24px;max-width:500px;margin:0 auto;
+}
+.login-prompt .ico { font-size:48px;display:block;margin-bottom:16px; }
+.login-prompt h3 { font-size:20px;color:#1e293b;margin:0 0 10px; }
+.login-prompt p { font-size:14px;color:#64748b;margin:0 0 20px; }
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:600px){
+  .mundial-stats { flex-direction:column;gap:16px;padding:18px 20px; }
+  .stat-item { border-right:none;border-bottom:1px solid #f1f5f9;padding-bottom:14px; }
+  .stat-item:last-child { border-bottom:none;padding-bottom:0; }
+  .premios-wrap { grid-template-columns:1fr; }
+  .premios-wrap .premio-card.argentina { grid-column:1; }
+  .podio { grid-template-columns:1fr; }
+  .match-grid { grid-template-columns:1fr; }
+  .tab-btn span { display:none; }
+  .mundial-hero { padding:40px 16px 60px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/index.html"><i class="fa-solid fa-house"></i> <span>Inicio</span></a>
+    <a href="/mapa.html"><i class="fa-solid fa-map"></i> <span>Mapa</span></a>
+    <a href="/pedidos.html"><i class="fa-solid fa-clipboard-list"></i> <span>Pedidos</span></a>
+    <a href="/mensajes.html"><i class="fa-solid fa-comment-dots"></i> <span>Mensajes</span></a>
+    <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="mundial-hero">
+  <div class="badge-mundial">⚽ Prode Mundial 2026 — USA · México · Canadá</div>
+  <h1>Predecí, ganás puntos,<br>¡te llevás el premio!</h1>
+  <p class="sub">Acertá resultados de los 104 partidos del Mundial 2026.<br>Los mejores 3 ganan premios increíbles.</p>
+  <div class="premios-chips">
+    <div class="p-chip"><span>🥇</span> 1° — Página web gratis</div>
+    <div class="p-chip"><span>🏆</span> 3 pts resultado exacto · 1 pt tendencia</div>
+    <div class="p-chip"><span>🇦🇷</span> Premio especial Argentina campeón</div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="container" style="padding:0 16px;">
+  <div class="mundial-stats">
+    <div class="stat-item">
+      <div class="stat-num" id="stat-dias">--</div>
+      <div class="stat-lbl">Días para el inicio</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-participantes">--</div>
+      <div class="stat-lbl">Participantes</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-predicciones">--</div>
+      <div class="stat-lbl">Mis predicciones</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-pts">--</div>
+      <div class="stat-lbl">Mis puntos</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="container" style="padding:0 16px;">
+  <div class="mundial-tabs" id="mundialTabs">
+    <button class="tab-btn active" onclick="cambiarTab('fixture')" id="tab-fixture">
+      <i class="fa-solid fa-calendar-days"></i> <span>Fixture</span>
+    </button>
+    <button class="tab-btn" onclick="cambiarTab('ranking')" id="tab-ranking">
+      <i class="fa-solid fa-trophy"></i> <span>Ranking</span>
+    </button>
+    <button class="tab-btn" onclick="cambiarTab('premios')" id="tab-premios">
+      <i class="fa-solid fa-gift"></i> <span>Premios</span>
+    </button>
+  </div>
+</div>
+
+<!-- TAB: FIXTURE -->
+<div id="tabFixture">
+  <!-- Filtro de fase -->
+  <div class="fase-filter" id="faseFilter">
+    <button class="fase-btn active" onclick="filtrarFase('grupo')"    id="fb-grupo">Grupos</button>
+    <button class="fase-btn"        onclick="filtrarFase('octavos')"  id="fb-octavos">Octavos</button>
+    <button class="fase-btn"        onclick="filtrarFase('cuartos')"  id="fb-cuartos">Cuartos</button>
+    <button class="fase-btn"        onclick="filtrarFase('semis')"    id="fb-semis">Semis</button>
+    <button class="fase-btn"        onclick="filtrarFase('tercero')"  id="fb-tercero">3° Puesto</button>
+    <button class="fase-btn"        onclick="filtrarFase('final')"    id="fb-final">⭐ Final</button>
+  </div>
+
+  <!-- Filtro de grupo (solo para fase grupos) -->
+  <div class="grupo-filter" id="grupoFilter">
+    <button class="grupo-btn active" onclick="filtrarGrupo('A')" id="gb-A">A</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('B')" id="gb-B">B</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('C')" id="gb-C">C</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('D')" id="gb-D">D</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('E')" id="gb-E">E</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('F')" id="gb-F">F</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('G')" id="gb-G">G</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('H')" id="gb-H">H</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('I')" id="gb-I">I</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('J')" id="gb-J">J</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('K')" id="gb-K">K</button>
+    <button class="grupo-btn" onclick="filtrarGrupo('L')" id="gb-L">L</button>
+  </div>
+
+  <div class="match-grid" id="matchGrid">
+    <div style="grid-column:1/-1;text-align:center;padding:50px;color:#94a3b8;">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size:32px;display:block;margin-bottom:12px;"></i>
+      <p>Cargando fixture...</p>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: RANKING -->
+<div id="tabRanking" style="display:none;">
+  <div class="ranking-wrap">
+    <div class="podio" id="podio">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#94a3b8;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i>
+      </div>
+    </div>
+    <div class="ranking-table" id="rankingTable" style="display:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Jugador</th>
+            <th>Pts</th>
+            <th>Exactos</th>
+            <th>Tendencias</th>
+            <th>Predicciones</th>
+          </tr>
+        </thead>
+        <tbody id="rankingBody"></tbody>
+      </table>
+    </div>
+    <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:16px;">
+      El ranking se actualiza en tiempo real a medida que se ingresan resultados.
+    </p>
+  </div>
+</div>
+
+<!-- TAB: PREMIOS -->
+<div id="tabPremios" style="display:none;">
+  <div class="premios-wrap">
+
+    <div class="premio-card">
+      <span class="premio-ico">🥇</span>
+      <div class="premio-titulo">1° Lugar — Página Web Completa</div>
+      <div class="premio-desc">El jugador con más puntos al finalizar el mundial gana el diseño y desarrollo de una página web profesional completa.</div>
+      <div class="premio-condicion">
+        <strong>¿Qué incluye?</strong><br>
+        Diseño personalizado · Dominio por 1 año · Hosting incluido · Solo pagás base de datos si la necesitás
+      </div>
+    </div>
+
+    <div class="premio-card" style="border-color:#e0e7ff;">
+      <span class="premio-ico">🥈🥉</span>
+      <div class="premio-titulo">2° y 3° Lugar — Premio Sorpresa</div>
+      <div class="premio-desc">El segundo y tercer lugar recibirán premios especiales que anunciaremos próximamente.</div>
+      <div class="premio-condicion">
+        <strong>En juego:</strong><br>
+        A definir — seguí participando y acumulando puntos 👀
+      </div>
+    </div>
+
+    <div class="premio-card argentina">
+      <span class="premio-ico">🇦🇷⭐⭐⭐</span>
+      <div class="premio-titulo">Premio Especial — Argentina Campeón del Mundo</div>
+      <div class="premio-desc">
+        Si la Selección Argentina llega a la final <strong>y sale campeona</strong>, todos los participantes que hayan acertado el resultado exacto de <strong>3 o más partidos de Argentina</strong> reciben este premio.
+      </div>
+      <div class="premio-monto">$500.000 ARS</div>
+      <div class="premio-condicion">
+        <strong>Condiciones:</strong><br>
+        • Argentina debe llegar a la final Y ganar el mundial<br>
+        • Necesitás 3 o más resultados exactos (3 puntos c/u) de partidos de Argentina<br>
+        • Si hay más de un ganador, el premio se divide en partes iguales<br>
+        • Solo cuentan resultados exactos (3 pts), no tendencias (1 pt)
+      </div>
+    </div>
+
+    <div class="premio-card" style="grid-column:1/-1;background:#f8fafc;border-color:#e2e8f0;">
+      <span class="premio-ico">⚽</span>
+      <div class="premio-titulo">Sistema de puntuación</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:8px;">
+        <div style="text-align:center;padding:16px;background:white;border-radius:12px;">
+          <div style="font-size:28px;font-weight:900;color:#15803d;">3 pts</div>
+          <div style="font-size:13px;color:#64748b;margin-top:4px;">Resultado exacto<br><small>Ej: predecís 2-1, termina 2-1</small></div>
+        </div>
+        <div style="text-align:center;padding:16px;background:white;border-radius:12px;">
+          <div style="font-size:28px;font-weight:900;color:#a16207;">1 pt</div>
+          <div style="font-size:13px;color:#64748b;margin-top:4px;">Tendencia correcta<br><small>Ej: predecís victoria local, gana local</small></div>
+        </div>
+        <div style="text-align:center;padding:16px;background:white;border-radius:12px;">
+          <div style="font-size:28px;font-weight:900;color:#94a3b8;">0 pts</div>
+          <div style="font-size:13px;color:#64748b;margin-top:4px;">Sin acierto<br><small>Tampoco la tendencia</small></div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#64748b;margin:16px 0 0;text-align:center;">
+        Las predicciones se bloquean automáticamente cuando empieza cada partido.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from "/supabase.js"
+
+/* ══════════════════════════════════
+   Estado global
+══════════════════════════════════ */
+let PARTIDOS   = []       // todos los partidos
+let EQUIPOS    = {}       // id → equipo
+let MIS_PREDS  = {}       // partido_id → prediccion
+let currentUser = null
+let faseActual  = "grupo"
+let grupoActual = "A"
+
+const FASE_LABELS = {
+  grupo: "Grupo",
+  octavos: "Dieciseisavos",
+  cuartos: "Cuartos de Final",
+  semis: "Semifinal",
+  tercero: "Tercer Puesto",
+  final: "⭐ Final"
+}
+
+/* ══════════════════════════════════
+   Inicialización
+══════════════════════════════════ */
+async function init() {
+  // Días hasta el mundial
+  const inicio = new Date("2026-06-11T19:00:00Z")
+  const diff = inicio - new Date()
+  if (diff > 0) {
+    document.getElementById("stat-dias").textContent =
+      Math.ceil(diff / 86400000)
+  } else {
+    document.getElementById("stat-dias").textContent = "¡En curso!"
+    document.getElementById("stat-dias").style.fontSize = "18px"
+  }
+
+  // Usuario actual
+  const { data: { user } } = await supabase.auth.getUser()
+  currentUser = user
+
+  // Cargar datos en paralelo
+  const [equiposRes, partidosRes] = await Promise.all([
+    supabase.from("mundial_equipos").select("*"),
+    supabase.from("mundial_partidos").select("*").order("numero_partido")
+  ])
+
+  if (equiposRes.data) {
+    equiposRes.data.forEach(e => EQUIPOS[e.id] = e)
+  }
+  if (partidosRes.data) {
+    PARTIDOS = partidosRes.data
+  }
+
+  // Predicciones del usuario
+  if (currentUser) {
+    const { data: preds } = await supabase
+      .from("mundial_predicciones")
+      .select("*")
+      .eq("user_id", currentUser.id)
+
+    if (preds) {
+      preds.forEach(p => MIS_PREDS[p.partido_id] = p)
+    }
+
+    // Stats personales
+    const totalPreds = preds?.length ?? 0
+    const totalPts = preds?.reduce((s,p) => s + (p.puntos_obtenidos || 0), 0) ?? 0
+    document.getElementById("stat-predicciones").textContent = totalPreds
+    document.getElementById("stat-pts").textContent = totalPts
+  } else {
+    document.getElementById("stat-predicciones").textContent = "—"
+    document.getElementById("stat-pts").textContent = "—"
+  }
+
+  // Participantes (conteo total único de usuarios)
+  const { count } = await supabase
+    .from("mundial_predicciones")
+    .select("user_id", { count: "estimated", head: true })
+  document.getElementById("stat-participantes").textContent = count ?? 0
+
+  // Render inicial
+  renderFixture()
+}
+
+/* ══════════════════════════════════
+   Tabs
+══════════════════════════════════ */
+window.cambiarTab = function(tab) {
+  document.getElementById("tabFixture").style.display  = tab === "fixture"  ? "" : "none"
+  document.getElementById("tabRanking").style.display  = tab === "ranking"  ? "" : "none"
+  document.getElementById("tabPremios").style.display  = tab === "premios"  ? "" : "none"
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"))
+  document.getElementById("tab-" + tab).classList.add("active")
+  if (tab === "ranking") renderRanking()
+}
+
+/* ══════════════════════════════════
+   Filtros
+══════════════════════════════════ */
+window.filtrarFase = function(fase) {
+  faseActual = fase
+  document.querySelectorAll(".fase-btn").forEach(b => b.classList.remove("active"))
+  document.getElementById("fb-" + fase).classList.add("active")
+  document.getElementById("grupoFilter").style.display =
+    fase === "grupo" ? "flex" : "none"
+  renderFixture()
+}
+
+window.filtrarGrupo = function(g) {
+  grupoActual = g
+  document.querySelectorAll(".grupo-btn").forEach(b => b.classList.remove("active"))
+  document.getElementById("gb-" + g).classList.add("active")
+  renderFixture()
+}
+
+/* ══════════════════════════════════
+   Render Fixture
+══════════════════════════════════ */
+function renderFixture() {
+  const grid = document.getElementById("matchGrid")
+
+  let filtrados = PARTIDOS.filter(p => p.fase === faseActual)
+  if (faseActual === "grupo") {
+    filtrados = filtrados.filter(p => p.grupo === grupoActual)
+  }
+
+  if (!filtrados.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:#94a3b8;">
+      <i class="fa-solid fa-clock" style="font-size:32px;display:block;margin-bottom:12px;"></i>
+      <p>Los partidos de esta fase se cargan a medida que avanza el torneo.</p>
+    </div>`
+    return
+  }
+
+  if (!currentUser) {
+    // Mostrar fixture pero con aviso de login
+    grid.innerHTML = filtrados.map(p => renderCard(p, true)).join("") + `
+    <div style="grid-column:1/-1;background:#eff6ff;border:2px solid #bfdbfe;border-radius:14px;
+      padding:24px;text-align:center;">
+      <i class="fa-solid fa-lock" style="font-size:24px;color:#2563eb;margin-bottom:10px;display:block;"></i>
+      <strong style="color:#1e40af;">Iniciá sesión para guardar tus predicciones</strong><br>
+      <a href="/login.html?redirect=/mundial.html" style="color:#2563eb;font-weight:700;font-size:14px;text-decoration:none;">
+        Entrar → </a>
+    </div>`
+    return
+  }
+
+  grid.innerHTML = filtrados.map(p => renderCard(p, false)).join("")
+}
+
+function renderCard(partido, readonly) {
+  const now = new Date()
+  const kickoff = new Date(partido.fecha_inicio)
+  const bloqueado = now >= kickoff
+  const completado = partido.completado
+  const pred = MIS_PREDS[partido.id]
+
+  const local = partido.equipo_local_id ? EQUIPOS[partido.equipo_local_id] : null
+  const visit = partido.equipo_visitante_id ? EQUIPOS[partido.equipo_visitante_id] : null
+
+  const nombreLocal = local ? local.nombre : (partido.desc_local || "Por definir")
+  const nombreVisit = visit ? visit.nombre : (partido.desc_visitante || "Por definir")
+  const flagLocal   = local ? local.bandera : "🏳"
+  const flagVisit   = visit ? visit.bandera : "🏳"
+
+  const fechaStr = kickoff.toLocaleDateString("es-AR", {
+    weekday:"short", day:"numeric", month:"short"
+  })
+  const horaStr = kickoff.toLocaleTimeString("es-AR", {
+    hour:"2-digit", minute:"2-digit", timeZone:"America/Argentina/Buenos_Aires"
+  }) + " ART"
+
+  const faseTag = faseActual === "grupo"
+    ? `Grupo ${partido.grupo} · Jornada ${partido.jornada}`
+    : FASE_LABELS[partido.fase] || partido.fase
+
+  // FOOTER: botón o estado
+  let footer = ""
+  if (completado) {
+    // Partido terminado: mostramos puntos del usuario
+    let puntosHTML = ""
+    if (pred) {
+      const cls = pred.puntos_obtenidos === 3 ? "puntos-3" :
+                  pred.puntos_obtenidos === 1 ? "puntos-1" : "puntos-0"
+      const ico = pred.puntos_obtenidos === 3 ? "🎯" :
+                  pred.puntos_obtenidos === 1 ? "✅" : "❌"
+      puntosHTML = `<span class="puntos-badge ${cls}">${ico} ${pred.puntos_obtenidos} pt${pred.puntos_obtenidos !== 1 ? "s" : ""}</span>`
+    }
+    const miPredHTML = pred
+      ? `<span class="mi-pred">Tu pred: ${pred.goles_local}-${pred.goles_visitante}</span>`
+      : `<span class="no-pred-tag">Sin predicción</span>`
+    footer = `
+      <div class="match-footer">
+        <div class="match-venue" title="${partido.estadio || ""}">${partido.ciudad || ""}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+          ${puntosHTML}
+          ${miPredHTML}
+        </div>
+      </div>`
+  } else if (bloqueado) {
+    // Partido en juego / por jugarse (ya cerró predicción)
+    const miPredHTML = pred
+      ? `<span class="mi-pred"><i class="fa-solid fa-lock"></i> ${pred.goles_local}-${pred.goles_visitante}</span>`
+      : `<span class="no-pred-tag"><i class="fa-solid fa-lock"></i> Sin predicción</span>`
+    footer = `
+      <div class="match-footer">
+        <div class="match-venue">${partido.ciudad || ""}</div>
+        ${miPredHTML}
+      </div>`
+  } else if (readonly) {
+    footer = `
+      <div class="match-footer">
+        <div class="match-venue">${partido.ciudad || ""}</div>
+        <span style="font-size:12px;color:#2563eb;font-weight:700;">Iniciá sesión para predecir</span>
+      </div>`
+  } else {
+    // Partido abierto: formulario
+    const gl = pred ? pred.goles_local   : ""
+    const gv = pred ? pred.goles_visitante : ""
+    footer = `
+      <div class="match-footer">
+        <div class="match-venue">${partido.ciudad || ""}</div>
+        <button class="btn-save-pred ${pred ? "saved" : ""}"
+          id="btn-${partido.id}"
+          onclick="guardarPrediccion(${partido.id})">
+          ${pred ? "✅ Guardado" : "Guardar"}
+        </button>
+      </div>`
+  }
+
+  // Zona central: score o inputs
+  let scoreZone = ""
+  if (completado) {
+    const gl = partido.goles_local ?? "-"
+    const gv = partido.goles_visitante ?? "-"
+    const lwins = gl > gv, vwins = gv > gl
+    scoreZone = `
+      <div class="score-result">
+        <span class="score-num ${lwins ? "winner" : ""}">${gl}</span>
+        <span class="score-sep">-</span>
+        <span class="score-num ${vwins ? "winner" : ""}">${gv}</span>
+      </div>`
+  } else if (bloqueado || readonly) {
+    scoreZone = `<div class="score-display">
+      <span class="score-num">?</span>
+      <span class="score-sep">-</span>
+      <span class="score-num">?</span>
+    </div>`
+  } else {
+    const gl = pred ? pred.goles_local   : ""
+    const gv = pred ? pred.goles_visitante : ""
+    scoreZone = `
+      <div class="score-wrap">
+        <input type="number" class="score-input" id="gl-${partido.id}"
+          min="0" max="20" value="${gl}" placeholder="0"
+          onchange="marcaModificado(${partido.id})">
+        <span class="score-sep">-</span>
+        <input type="number" class="score-input" id="gv-${partido.id}"
+          min="0" max="20" value="${gv}" placeholder="0"
+          onchange="marcaModificado(${partido.id})">
+      </div>`
+  }
+
+  const statusTag = bloqueado && !completado
+    ? `<span class="lock-tag"><i class="fa-solid fa-lock"></i> Cerrado</span>`
+    : ""
+
+  return `
+  <div class="match-card ${bloqueado ? "locked" : ""} ${completado ? "completed" : ""}" id="card-${partido.id}">
+    <div class="match-header">
+      <span class="match-phase-tag">${faseTag}</span>
+      <span class="match-date-tag">${fechaStr} · ${horaStr} ${statusTag}</span>
+    </div>
+    <div class="match-body">
+      <div class="team-side">
+        <span class="team-flag">${flagLocal}</span>
+        <span class="team-name">${nombreLocal}</span>
+      </div>
+      ${scoreZone}
+      <div class="team-side">
+        <span class="team-flag">${flagVisit}</span>
+        <span class="team-name">${nombreVisit}</span>
+      </div>
+    </div>
+    ${footer}
+  </div>`
+}
+
+/* ══════════════════════════════════
+   Guardar predicción
+══════════════════════════════════ */
+window.marcaModificado = function(pid) {
+  const btn = document.getElementById("btn-" + pid)
+  if (btn) {
+    btn.classList.remove("saved")
+    btn.innerHTML = "Guardar"
+  }
+}
+
+window.guardarPrediccion = async function(pid) {
+  if (!currentUser) { window.location.href = "/login.html?redirect=/mundial.html"; return }
+
+  const glInput = document.getElementById("gl-" + pid)
+  const gvInput = document.getElementById("gv-" + pid)
+  const btn = document.getElementById("btn-" + pid)
+
+  let gl = parseInt(glInput?.value)
+  let gv = parseInt(gvInput?.value)
+
+  if (isNaN(gl) || isNaN(gv) || gl < 0 || gv < 0) {
+    glInput?.classList.add("error")
+    gvInput?.classList.add("error")
+    return
+  }
+  if (gl > 20) gl = 20
+  if (gv > 20) gv = 20
+
+  // Verificar que el partido no haya empezado
+  const partido = PARTIDOS.find(p => p.id === pid)
+  if (partido && new Date() >= new Date(partido.fecha_inicio)) {
+    btn.innerHTML = "🔒 Cerrado"
+    return
+  }
+
+  btn.disabled = true
+  btn.innerHTML = "Guardando..."
+  btn.classList.add("saving")
+
+  const { data, error } = await supabase
+    .from("mundial_predicciones")
+    .upsert({
+      user_id: currentUser.id,
+      partido_id: pid,
+      goles_local: gl,
+      goles_visitante: gv
+    }, { onConflict: "user_id,partido_id" })
+    .select()
+    .single()
+
+  btn.disabled = false
+  btn.classList.remove("saving")
+
+  if (error) {
+    btn.innerHTML = "❌ Error"
+    setTimeout(() => { btn.innerHTML = "Guardar" }, 2000)
+    return
+  }
+
+  // Actualizar cache local
+  MIS_PREDS[pid] = data || { partido_id: pid, goles_local: gl, goles_visitante: gv, puntos_obtenidos: 0 }
+
+  btn.innerHTML = "✅ Guardado"
+  btn.classList.add("saved")
+
+  // Actualizar contador
+  const totalPreds = Object.keys(MIS_PREDS).length
+  document.getElementById("stat-predicciones").textContent = totalPreds
+}
+
+/* ══════════════════════════════════
+   Ranking
+══════════════════════════════════ */
+async function renderRanking() {
+  const podio = document.getElementById("podio")
+  const table = document.getElementById("rankingTable")
+  const tbody = document.getElementById("rankingBody")
+
+  podio.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:#94a3b8;">
+    <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;"></i>
+  </div>`
+
+  const { data, error } = await supabase.rpc("mundial_ranking")
+  if (error || !data || !data.length) {
+    podio.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:#94a3b8;">
+      <i class="fa-solid fa-trophy" style="font-size:36px;display:block;margin-bottom:12px;"></i>
+      <p>El ranking aparece cuando haya partidos completados.</p>
+    </div>`
+    return
+  }
+
+  // Podio top 3
+  const top3 = data.slice(0, 3)
+  const clases = ["oro", "plata", "bronce"]
+  const emojis = ["🥇", "🥈", "🥉"]
+  podio.innerHTML = top3.map((u, i) => `
+    <div class="podio-card ${clases[i]}">
+      <span class="podio-pos">${emojis[i]}</span>
+      <div class="podio-nombre">${u.nombre || "Usuario"}</div>
+      <div class="podio-pts">${u.total_puntos}</div>
+      <div class="podio-pts-lbl">puntos</div>
+      <div class="podio-exactos">🎯 ${u.exactos} exactos · ✅ ${u.tendencias} tendencias</div>
+    </div>
+  `).join("")
+
+  // Tabla completa
+  tbody.innerHTML = data.map((u, i) => {
+    const esMio = currentUser && u.user_id === currentUser.id
+    return `<tr class="${esMio ? "mi-fila" : ""}">
+      <td class="rank-pos">${i + 1}</td>
+      <td class="rank-nombre">${u.nombre || "Usuario"} ${esMio ? "👤" : ""}</td>
+      <td class="rank-pts">${u.total_puntos}</td>
+      <td class="rank-exactos">🎯 ${u.exactos}</td>
+      <td>${u.tendencias}</td>
+      <td>${u.predicciones}</td>
+    </tr>`
+  }).join("")
+
+  table.style.display = "block"
+}
+
+/* ══════════════════════════════════
+   Arranque
+══════════════════════════════════ */
+init()
+</script>
+
+<script src="/notif_widget.js"></script>
+<script src="/push_widget.js"></script>
+<script src="/chat_widget.js"></script>
+<script src="/splash.js"></script>
+<script src="/analytics.js"></script>
+</body>
+</html>
