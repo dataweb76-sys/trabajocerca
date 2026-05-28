@@ -21,7 +21,13 @@
 
 /* HERO */
 .mundial-hero {
-  background: linear-gradient(135deg, #064e3b 0%, #15803d 40%, #16a34a 70%, #065f46 100%);
+  background:
+    linear-gradient(135deg,
+      rgba(6,78,59,0.82) 0%,
+      rgba(21,128,61,0.75) 40%,
+      rgba(22,164,74,0.70) 70%,
+      rgba(6,95,70,0.82) 100%),
+    url("mundial-bg.jpg") center center / cover no-repeat;
   color: white;
   text-align: center;
   padding: 50px 20px 70px;
@@ -31,7 +37,8 @@
 .mundial-hero::before {
   content:"";
   position:absolute;inset:0;
-  background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='40' cy='40' r='35' fill='none' stroke='%23fff' stroke-opacity='0.05' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
+  background: rgba(0,0,0,0.18);
+  pointer-events:none;
 }
 .mundial-hero .badge-mundial {
   display:inline-flex;align-items:center;gap:8px;
@@ -145,6 +152,7 @@
 }
 .team-side {
   flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
+  min-width:0;
 }
 .team-flag {
   font-size:28px;line-height:1;
@@ -152,6 +160,19 @@
   animation: flag-wave 2s ease-in-out infinite;
   transform-origin: bottom center;
 }
+/* Bandera imagen real */
+.team-flag-img {
+  width:44px;height:33px;
+  border-radius:5px;
+  object-fit:cover;
+  box-shadow:0 2px 8px rgba(0,0,0,.18);
+  border:1.5px solid rgba(0,0,0,.10);
+  display:block;
+  animation: flag-wave 2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+.match-card.locked  .team-flag-img,
+.match-card.completed .team-flag-img { animation-play-state:paused; }
 @keyframes flag-wave {
   0%,100% { transform: rotate(-6deg) scale(1);   }
   25%      { transform: rotate( 3deg) scale(1.06); }
@@ -849,6 +870,32 @@
 import { supabase } from "/supabase.js"
 
 /* ══════════════════════════════════
+   Mapeo FIFA 3-letras → ISO 2-letras (flagcdn.com)
+══════════════════════════════════ */
+const FIFA_TO_ISO = {
+  MEX:"mx", RSA:"za", KOR:"kr", CZE:"cz", CAN:"ca", BIH:"ba",
+  QAT:"qa", SUI:"ch", BRA:"br", MAR:"ma", HAI:"ht", SCO:"gb-sct",
+  USA:"us", PAR:"py", AUS:"au", TUR:"tr", GER:"de", CUW:"cw",
+  CIV:"ci", ECU:"ec", NED:"nl", JPN:"jp", TUN:"tn", SWE:"se",
+  BEL:"be", EGY:"eg", IRN:"ir", NZL:"nz", ESP:"es", CPV:"cv",
+  KSA:"sa", URU:"uy", FRA:"fr", SEN:"sn", IRQ:"iq", NOR:"no",
+  ARG:"ar", ALG:"dz", AUT:"at", JOR:"jo", POR:"pt", COD:"cd",
+  UZB:"uz", COL:"co", ENG:"gb-eng", CRO:"hr", GHA:"gh", PAN:"pa"
+}
+
+function flagImg(codigo, nombre, emoji) {
+  const iso = FIFA_TO_ISO[codigo]
+  if (!iso) return `<span class="team-flag">${emoji || "🏳"}</span>`
+  return `<img
+    class="team-flag-img"
+    src="https://flagcdn.com/w80/${iso}.png"
+    srcset="https://flagcdn.com/w160/${iso}.png 2x"
+    alt="${nombre}"
+    onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"
+  /><span class="team-flag" style="display:none">${emoji || "🏳"}</span>`
+}
+
+/* ══════════════════════════════════
    Estado global
 ══════════════════════════════════ */
 let PARTIDOS     = []     // todos los partidos
@@ -1034,8 +1081,8 @@ function renderCard(partido, modo) {
 
   const nombreLocal = local ? local.nombre : (partido.desc_local || "Por definir")
   const nombreVisit = visit ? visit.nombre : (partido.desc_visitante || "Por definir")
-  const flagLocal   = local ? local.bandera : "🏳"
-  const flagVisit   = visit ? visit.bandera : "🏳"
+  const flagLocal   = local ? flagImg(local.codigo, local.nombre, local.bandera) : `<span class="team-flag">🏳</span>`
+  const flagVisit   = visit ? flagImg(visit.codigo, visit.nombre, visit.bandera) : `<span class="team-flag">🏳</span>`
 
   const fechaStr = kickoff.toLocaleDateString("es-AR", {
     weekday:"short", day:"numeric", month:"short"
@@ -1167,12 +1214,12 @@ function renderCard(partido, modo) {
     </div>
     <div class="match-body">
       <div class="team-side">
-        <span class="team-flag">${flagLocal}</span>
+        ${flagLocal}
         <span class="team-name">${nombreLocal}</span>
       </div>
       ${scoreZone}
       <div class="team-side">
-        <span class="team-flag">${flagVisit}</span>
+        ${flagVisit}
         <span class="team-name">${nombreVisit}</span>
       </div>
     </div>
