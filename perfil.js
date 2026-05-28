@@ -378,35 +378,6 @@ async function init(){
       <div id="msgCompartir" style="margin-top:10px;"></div>
     </div>
 
-    <!-- ── BOTONES INSTAGRAM ── -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px;">
-
-      <!-- Invitar amigos (link de referido) -->
-      <button onclick="compartirInvitacionIG('${userId}')" style="
-        display:flex;align-items:center;justify-content:center;gap:8px;
-        background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
-        color:white;font-weight:700;font-size:13px;
-        padding:12px 10px;border-radius:12px;border:none;cursor:pointer;
-        transition:opacity .15s;box-shadow:0 4px 14px rgba(188,24,136,.3);"
-        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-        <i class="fa-brands fa-instagram"></i> Invitar amigos
-      </button>
-
-      <!-- Seguir @datawebdigital -->
-      <a href="https://www.instagram.com/datawebdigital/" target="_blank" style="
-        display:flex;align-items:center;justify-content:center;gap:8px;
-        background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
-        color:white;font-weight:700;font-size:13px;
-        padding:12px 10px;border-radius:12px;text-decoration:none;
-        transition:opacity .15s;box-shadow:0 4px 14px rgba(188,24,136,.3);
-        border:2px solid rgba(255,255,255,.25);"
-        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-        <i class="fa-brands fa-instagram"></i> Seguir @datawebdigital
-      </a>
-
-    </div>
-    <div id="msgInvIG" style="margin-bottom:16px;"></div>
-
     <!-- ── PRODE MUNDIAL 2026 ── -->
     <div id="prodeCard" style="margin:20px 0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);border:1.5px solid rgba(250,204,21,.35);border-radius:18px;padding:20px 20px;overflow:hidden;position:relative;">
       <div style="position:absolute;top:-20px;right:-20px;font-size:90px;opacity:.06;pointer-events:none;">⚽</div>
@@ -445,6 +416,39 @@ async function init(){
           </span>
         </div>
       </div>
+
+      <!-- ── Botones Instagram dentro del prode ── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+
+        <!-- Invitar amigos — se actualiza dinámicamente en cargarProdeCard -->
+        <div id="btnInvitarWrap">
+          <button onclick="compartirInvitacionIG('${userId}')" style="
+            width:100%;display:flex;align-items:center;justify-content:center;gap:7px;
+            background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+            color:white;font-weight:700;font-size:13px;
+            padding:11px 8px;border-radius:12px;border:none;cursor:pointer;
+            box-shadow:0 4px 14px rgba(188,24,136,.3);transition:opacity .15s;"
+            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            <i class="fa-brands fa-instagram"></i> Invitar amigos
+          </button>
+        </div>
+
+        <!-- Seguir @datawebdigital -->
+        <a href="https://www.instagram.com/datawebdigital/" target="_blank" style="
+          display:flex;align-items:center;justify-content:center;gap:7px;
+          background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+          color:white;font-weight:700;font-size:13px;
+          padding:11px 8px;border-radius:12px;text-decoration:none;
+          box-shadow:0 4px 14px rgba(188,24,136,.3);
+          border:2px solid rgba(255,255,255,.25);transition:opacity .15s;"
+          onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          <i class="fa-brands fa-instagram"></i> Seguir @datawebdigital
+        </a>
+
+      </div>
+      <div id="msgInvIG" style="margin-top:8px;"></div>
+
+    </div>
     </div>
 
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;">
@@ -980,20 +984,30 @@ async function cargarProdeCard(userId){
   const status = document.getElementById("prodeStatus")
   const btn    = document.getElementById("prodeBtn")
 
+  const invWrap = document.getElementById("btnInvitarWrap")
+
   if(n >= 10){
     if(status) status.innerHTML = `<span style="color:#4ade80;font-weight:700;">✅ ¡Desbloqueado! Ya podés predecir todos los partidos</span>`
     if(bar)    bar.style.background = "linear-gradient(90deg,#22c55e,#4ade80)"
-    if(btn){
-      btn.style.animation = "pulse-glow 2s ease-in-out infinite"
-    }
+    if(btn)    btn.style.animation = "pulse-glow 2s ease-in-out infinite"
+    // Reemplazar botón "Invitar amigos" por mensaje de éxito
+    if(invWrap) invWrap.innerHTML = `
+      <div style="
+        display:flex;align-items:center;justify-content:center;gap:7px;
+        background:linear-gradient(135deg,#14532d,#16a34a);
+        border:2px solid #4ade80;
+        color:white;font-weight:700;font-size:12px;
+        padding:11px 8px;border-radius:12px;text-align:center;line-height:1.3;">
+        ✅ Ya tenés completas<br>las invitaciones
+      </div>`
   } else {
     if(status) status.innerHTML = `<span style="color:rgba(255,255,255,.5);">Te faltan <strong style="color:#fbbf24;">${faltan}</strong> invitado${faltan !== 1 ? "s" : ""} para desbloquear el prode</span>`
     if(btn){
-      btn.href        = "/"
-      btn.innerHTML   = `🔗 Obtener mi link`
+      btn.href             = "/"
+      btn.innerHTML        = `🔗 Obtener mi link`
       btn.style.background = "rgba(255,255,255,.15)"
-      btn.style.color = "white"
-      btn.style.boxShadow = "none"
+      btn.style.color      = "white"
+      btn.style.boxShadow  = "none"
     }
   }
 }
