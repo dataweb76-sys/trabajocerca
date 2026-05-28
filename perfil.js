@@ -378,6 +378,35 @@ async function init(){
       <div id="msgCompartir" style="margin-top:10px;"></div>
     </div>
 
+    <!-- ── BOTONES INSTAGRAM ── -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px;">
+
+      <!-- Invitar amigos (link de referido) -->
+      <button onclick="compartirInvitacionIG('${userId}')" style="
+        display:flex;align-items:center;justify-content:center;gap:8px;
+        background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+        color:white;font-weight:700;font-size:13px;
+        padding:12px 10px;border-radius:12px;border:none;cursor:pointer;
+        transition:opacity .15s;box-shadow:0 4px 14px rgba(188,24,136,.3);"
+        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        <i class="fa-brands fa-instagram"></i> Invitar amigos
+      </button>
+
+      <!-- Seguir @datawebdigital -->
+      <a href="https://www.instagram.com/datawebdigital/" target="_blank" style="
+        display:flex;align-items:center;justify-content:center;gap:8px;
+        background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
+        color:white;font-weight:700;font-size:13px;
+        padding:12px 10px;border-radius:12px;text-decoration:none;
+        transition:opacity .15s;box-shadow:0 4px 14px rgba(188,24,136,.3);
+        border:2px solid rgba(255,255,255,.25);"
+        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        <i class="fa-brands fa-instagram"></i> Seguir @datawebdigital
+      </a>
+
+    </div>
+    <div id="msgInvIG" style="margin-bottom:16px;"></div>
+
     <!-- ── PRODE MUNDIAL 2026 ── -->
     <div id="prodeCard" style="margin:20px 0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);border:1.5px solid rgba(250,204,21,.35);border-radius:18px;padding:20px 20px;overflow:hidden;position:relative;">
       <div style="position:absolute;top:-20px;right:-20px;font-size:90px;opacity:.06;pointer-events:none;">⚽</div>
@@ -889,6 +918,37 @@ window.compartirRefNativo = function(url){
     navigator.share({ title: "Trabajos Cerca", text: "¡Unite a Trabajos Cerca y encontrá trabajo u oportunidades en tu zona!", url })
   } else {
     window.copiarRefLink(url)
+  }
+}
+
+/* ── COMPARTIR INVITACIÓN POR INSTAGRAM ── */
+window.compartirInvitacionIG = async function(userId) {
+  const refLink = `https://www.trabajoscerca.com.ar/?ref=${userId}`
+  const texto = `⚽ ¡Participá del Prode del Mundial 2026 en Trabajos Cerca!\nRegistrate con mi link, me ayudás a desbloquear el fixture y vos también podés ganar una web gratis o $500.000 ARS si Argentina es campeón 🇦🇷🏆\n👉 ${refLink}\n\n📸 Seguí a @datawebdigital para participar`
+
+  const msg = document.getElementById("msgInvIG")
+
+  // Intentar Web Share API (funciona en móvil mostrando Instagram y otras apps)
+  if (navigator.share) {
+    try {
+      await navigator.share({ text: texto, url: refLink })
+      return
+    } catch(e) { /* usuario canceló, caemos al clipboard */ }
+  }
+
+  // Fallback: copiar al portapapeles y abrir Instagram
+  try {
+    await navigator.clipboard.writeText(texto)
+    if (msg) {
+      msg.innerHTML = `<div style="background:#fdf2f8;border:1px solid #fbcfe8;border-radius:10px;padding:10px 14px;font-size:12px;color:#831843;line-height:1.6;">
+        ✅ <strong>¡Texto copiado!</strong> Ahora abrimos Instagram. Pegalo en tus stories, bio o DMs.<br>
+        <span style="color:#9d174d;font-size:11px;">Tu link ya está en el portapapeles 📋</span>
+      </div>`
+      setTimeout(() => { msg.innerHTML = "" }, 5000)
+    }
+    setTimeout(() => { window.open("https://www.instagram.com/", "_blank") }, 600)
+  } catch(e) {
+    if (msg) msg.innerHTML = `<div style="background:#fef2f2;border-radius:10px;padding:10px 14px;font-size:12px;color:#991b1b;">No se pudo copiar. Tu link: <strong>${refLink}</strong></div>`
   }
 }
 
