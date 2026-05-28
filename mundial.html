@@ -472,9 +472,13 @@
   .mundial-hero .sub            { display:none; }
   .premios-chips                { display:none; }
 
-  /* Ocultar TODO lo que está entre el hero y los tabs */
-  #statsBar     { display:none !important; }
   .prode-strip  { display:none !important; }
+
+  /* Stats compacto en mobile */
+  #statsBar { padding:0 12px; margin-bottom:16px; }
+  #metaBar  { display:none; }   /* ocultar barra meta en mobile para ahorrar espacio */
+  .stat-num { font-size:20px !important; }
+  .stat-lbl { font-size:10px !important; }
 
   /* Filtros de fase: scroll horizontal sin margen */
   .fase-filter {
@@ -627,42 +631,6 @@
   </div>
 </div>
 
-<!-- STATS BAR -->
-<div class="container" id="statsBar" style="padding:0 16px;">
-  <div class="mundial-stats">
-    <div class="stat-item">
-      <div class="stat-num" id="stat-dias">--</div>
-      <div class="stat-lbl">Días para el inicio</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="stat-participantes" style="color:#7c3aed;">--</div>
-      <div class="stat-lbl">Jugando el prode</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="stat-predicciones">--</div>
-      <div class="stat-lbl">Mis predicciones</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="stat-pts">--</div>
-      <div class="stat-lbl">Mis puntos</div>
-    </div>
-  </div>
-  <!-- Barra de progreso hacia 10.000 participantes -->
-  <div id="metaBar" style="max-width:700px;margin:12px auto 0;padding:0 4px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-      <span style="font-size:11px;font-weight:700;color:#7c3aed;">
-        🎯 Meta para que el sorteo sea válido: <strong>10.000 participantes</strong>
-      </span>
-      <span id="metaPct" style="font-size:11px;font-weight:700;color:#7c3aed;">0%</span>
-    </div>
-    <div style="background:#f1f5f9;border-radius:99px;height:7px;overflow:hidden;">
-      <div id="metaFill" style="height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:99px;transition:width .8s ease;"></div>
-    </div>
-    <p style="font-size:11px;color:#94a3b8;margin:5px 0 0;text-align:center;">
-      El sorteo se concreta cuando el total de participantes supere los 10.000 inscriptos en la plataforma.
-    </p>
-  </div>
-</div>
 
 
 <!-- MODAL: REGLAS Y CONDICIONES PARA PARTICIPAR -->
@@ -818,6 +786,63 @@
     <div class="accion-titulo">Premios</div>
     <div class="accion-sub">¿Qué podés ganar?</div>
   </button>
+
+</div>
+
+<!-- STATS + BOTÓN PERFIL -->
+<div id="statsBar" style="max-width:700px;margin:0 auto 24px;padding:0 20px;">
+
+  <!-- 4 stats en fila -->
+  <div style="
+    background:white;border-radius:16px;
+    box-shadow:0 2px 16px rgba(0,0,0,.08);
+    display:grid;grid-template-columns:repeat(4,1fr);
+    overflow:hidden;
+  ">
+    <div class="stat-item">
+      <div class="stat-num" id="stat-dias">--</div>
+      <div class="stat-lbl">Días inicio</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-participantes" style="color:#7c3aed;">--</div>
+      <div class="stat-lbl">Jugando</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-predicciones" style="color:#0369a1;">--</div>
+      <div class="stat-lbl">Mis pred.</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-pts" style="color:#b45309;">--</div>
+      <div class="stat-lbl">Mis puntos</div>
+    </div>
+  </div>
+
+  <!-- Barra meta 10k (oculta en mobile por defecto, visible en desktop) -->
+  <div id="metaBar" style="margin:10px 4px 0;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <span style="font-size:11px;font-weight:700;color:#7c3aed;">
+        🎯 Meta: <strong>10.000 participantes</strong>
+      </span>
+      <span id="metaPct" style="font-size:11px;font-weight:700;color:#7c3aed;">0%</span>
+    </div>
+    <div style="background:#f1f5f9;border-radius:99px;height:6px;overflow:hidden;">
+      <div id="metaFill" style="height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:99px;transition:width .8s ease;"></div>
+    </div>
+  </div>
+
+  <!-- Botón Ir al perfil -->
+  <a href="/perfil.html" style="
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin-top:12px;
+    background:linear-gradient(135deg,#1d4ed8,#2563eb);
+    color:white;font-weight:800;font-size:14px;
+    padding:12px 20px;border-radius:12px;text-decoration:none;
+    box-shadow:0 3px 12px rgba(29,78,216,.3);
+    transition:transform .15s;"
+    onmouseover="this.style.transform='scale(1.02)'"
+    onmouseout="this.style.transform='scale(1)'">
+    <i class="fa-solid fa-user"></i> Ir a mi perfil
+  </a>
 
 </div>
 
