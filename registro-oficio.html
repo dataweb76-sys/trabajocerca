@@ -692,12 +692,7 @@ window.generarOficioInputs = function() {
           ${catOpts}
         </select>
       </div>
-      <div class="campo-grupo" id="subWrap${i}" style="margin-top:10px;margin-bottom:0;display:none;">
-        <label>Tipo específico <span class="req">*</span></label>
-        <select id="ofSub${i}">
-          <option value="">— Seleccioná el tipo —</option>
-        </select>
-      </div>
+      <div id="subWrap${i}" style="margin-top:10px;display:none;"></div>
     `
     wrap.appendChild(div)
   }
@@ -706,13 +701,28 @@ window.generarOficioInputs = function() {
 window.cargarSubcategorias = function(i) {
   const cat     = document.getElementById(`ofCat${i}`).value
   const subWrap = document.getElementById(`subWrap${i}`)
-  const subSel  = document.getElementById(`ofSub${i}`)
 
-  if(!cat){ subWrap.style.display = "none"; return }
+  if(!cat){ subWrap.style.display = "none"; subWrap.innerHTML = ""; return }
 
   const subs = OFICIOS[cat] || []
-  subSel.innerHTML = `<option value="">— Seleccioná el tipo —</option>` +
-    subs.map(s => `<option value="${s}">${s}</option>`).join("")
+  subWrap.innerHTML = `
+    <label style="font-size:13px;font-weight:700;color:#374151;display:block;margin-bottom:8px;">
+      Tipos de trabajo <span style="color:#ef4444;">*</span>
+      <small style="color:#94a3b8;font-weight:400;"> — Tildá todos los que hacés</small>
+    </label>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:7px;" id="checksub${i}">
+      ${subs.map(s => `
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 11px;
+          background:white;border:1.5px solid #e2e8f0;border-radius:9px;cursor:pointer;
+          font-size:13px;transition:border-color .15s;" onmouseover="this.style.borderColor='#f97316'"
+          onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='#e2e8f0'">
+          <input type="checkbox" value="${s}"
+            style="width:16px;height:16px;accent-color:#ea580c;flex-shrink:0;"
+            onchange="this.closest('label').style.borderColor=this.checked?'#ea580c':'#e2e8f0';
+                      this.closest('label').style.background=this.checked?'#fff7ed':'white'">
+          ${s}
+        </label>`).join("")}
+    </div>`
   subWrap.style.display = "block"
 }
 
@@ -750,13 +760,13 @@ function getOficios() {
   const cant = parseInt(document.getElementById("ofCantOficios").value) || 0
   const result = []
   for(let i = 1; i <= cant; i++){
-    const catEl = document.getElementById(`ofCat${i}`)
-    const subEl = document.getElementById(`ofSub${i}`)
+    const catEl  = document.getElementById(`ofCat${i}`)
+    const subWrap = document.getElementById(`subWrap${i}`)
     if(!catEl) continue
-    result.push({
-      categoria: catEl.value,
-      subtipo: subEl ? subEl.value : ""
-    })
+    const checked = subWrap
+      ? [...subWrap.querySelectorAll("input[type=checkbox]:checked")].map(c => c.value)
+      : []
+    result.push({ categoria: catEl.value, subtipos: checked })
   }
   return result.filter(o => o.categoria)
 }
