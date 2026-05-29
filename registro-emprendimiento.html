@@ -423,6 +423,13 @@ body { background:#f8fafc; }
         <select id="emLocalidad" required>
           <option value="">— Primero completá el código postal —</option>
         </select>
+        <button type="button" id="btnCargarLoc"
+          onclick="cargarMunicipios(document.getElementById('emProvincia').value,'emLocalidad')"
+          style="margin-top:6px;font-size:12px;padding:5px 12px;border:1.5px solid #d97706;
+            border-radius:7px;background:white;color:#d97706;cursor:pointer;font-weight:600;
+            display:none;">
+          <i class="fa-solid fa-rotate-right"></i> Cargar localidades manualmente
+        </button>
       </div>
 
       <div class="campo">
@@ -573,7 +580,7 @@ function cpAProvincia(cp) {
   if(n>=4700&&n<=4799) return 'Catamarca'
   if(n>=4200&&n<=4399) return 'Santiago del Estero'
   if(n>=3800&&n<=3899) return 'Santiago del Estero'
-  if(n>=5400&&n<=5499) return 'San Juan'
+  if(n>=5300&&n<=5399) return 'San Juan'
   if(n>=4300&&n<=4399) return 'La Rioja'
   if(n>=3000&&n<=3099) return 'Santa Fe'
   if(n>=2000&&n<=2999) return 'Santa Fe'
@@ -583,11 +590,13 @@ function cpAProvincia(cp) {
   if(n>=3500&&n<=3599) return 'Chaco'
   if(n>=3600&&n<=3699) return 'Formosa'
   if(n>=3700&&n<=3799) return 'Chaco'
-  if(n>=6500&&n<=6599) return 'La Pampa'
-  if(n>=8600&&n<=8699) return 'La Pampa'
-  if(n>=8200&&n<=8399) return 'Neuquén'
+  if(n>=6300&&n<=6499) return 'La Pampa'
+  if(n>=6500&&n<=6699) return 'La Pampa'
+  if(n>=8600&&n<=8799) return 'La Pampa'
+  if(n>=8300&&n<=8399) return 'Neuquén'
+  if(n>=8200&&n<=8299) return 'Neuquén'
   if(n>=8100&&n<=8199) return 'Río Negro'
-  if(n>=8400&&n<=8499) return 'Río Negro'
+  if(n>=8400&&n<=8599) return 'Río Negro'
   if(n>=9000&&n<=9299) return 'Chubut'
   if(n>=9300&&n<=9499) return 'Santa Cruz'
   if(n>=9500&&n<=9999) return 'Tierra del Fuego'
@@ -600,7 +609,10 @@ window.detectarProvinciaCP = function(cp, provId, locId) {
   const prov = cpAProvincia(cp)
   const sel = document.getElementById(provId)
   sel.value = prov
-  cargarMunicipios(prov, locId)
+  // Mostrar botón de respaldo siempre que haya provincia seleccionada
+  const btn = document.getElementById('btnCargarLoc')
+  if(btn) btn.style.display = 'inline-block'
+  sel.dispatchEvent(new Event('change'))
 }
 
 /* ── Cargar municipios por provincia (GeoRef) ── */
