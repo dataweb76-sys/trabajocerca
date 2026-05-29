@@ -64,23 +64,33 @@ async function init(){
     ? `<img src="${data.foto}" class="dash-avatar">`
     : `<div class="dash-avatar-placeholder"><i class="fa-solid fa-user"></i></div>`
 
-  const badgeHtml = data.tipo === "profesional"
-    ? '<span class="badge badge-pro">🔨 Profesional</span>'
-    : data.tipo === "empleador"
-    ? '<span class="badge" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">🏢 Empleador</span>'
-    : '<span class="badge badge-work">📄 Busca trabajo</span>'
+  const _tipo = data.tipo || "profesional"
 
-  const accionPrincipal = data.tipo === "profesional"
-    ? `<a href="/perfil_servicio.html" class="btn btn-orange"><i class="fa-solid fa-tools"></i> Gestionar mi servicio</a>`
-    : data.tipo === "empleador"
-    ? `<a href="/buscador_trabajos.html" class="btn btn-success"><i class="fa-solid fa-users"></i> Buscar empleados</a>`
-    : `<a href="/perfil_cv.html" class="btn btn-success"><i class="fa-solid fa-file-lines"></i> Gestionar mi CV</a>`
+  const BADGE = {
+    oficio:         '<span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;">🔧 Oficio</span>',
+    profesional:    '<span class="badge badge-pro">👔 Profesional</span>',
+    empresa:        '<span class="badge" style="background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;">🏢 Empresa</span>',
+    emprendimiento: '<span class="badge" style="background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;">🚀 Emprendimiento</span>',
+    cv:             '<span class="badge badge-work">📄 Busca trabajo</span>',
+    empleador:      '<span class="badge" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">🏢 Empleador</span>'
+  }
+  const badgeHtml = BADGE[_tipo] || BADGE.profesional
+
+  const ACCION = {
+    oficio:         `<a href="/perfil_servicio.html" class="btn btn-orange"><i class="fa-solid fa-wrench"></i> Gestionar mi perfil de oficio</a>`,
+    profesional:    `<a href="/perfil_servicio.html" class="btn btn-orange"><i class="fa-solid fa-tools"></i> Gestionar mi servicio</a>`,
+    empresa:        `<a href="/perfil_servicio.html" class="btn btn-orange"><i class="fa-solid fa-building"></i> Gestionar mi empresa</a>`,
+    emprendimiento: `<a href="/perfil_servicio.html" class="btn btn-orange"><i class="fa-solid fa-rocket"></i> Gestionar mi emprendimiento</a>`,
+    cv:             `<a href="/perfil_cv.html"       class="btn btn-success"><i class="fa-solid fa-file-lines"></i> Gestionar mi CV</a>`,
+    empleador:      `<a href="/buscador_trabajos.html" class="btn btn-success"><i class="fa-solid fa-users"></i> Buscar empleados</a>`
+  }
+  const accionPrincipal = ACCION[_tipo] || ACCION.profesional
 
   /* ── Disponibilidad + Estadísticas + Trabajos realizados (solo profesionales) ── */
   let disponibleHtml = ""
   let statsHtml      = ""
   let trabajosHtml   = ""
-  if(data.tipo === "profesional"){
+  if(_tipo === "profesional" || _tipo === "oficio" || _tipo === "empresa" || _tipo === "emprendimiento"){
     const { data: srv } = await supabase
       .from("servicios").select("id,disponible,disponible_ahora").eq("usuario_id", userId).single()
     const isDisp      = srv?.disponible !== false
