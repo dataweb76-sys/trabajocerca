@@ -392,8 +392,7 @@ body { background:#f8fafc; }
 
       <div class="campo">
         <label>Código postal *</label>
-        <input type="text" id="emCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8" required
-          oninput="if(this.value.length>=4)obtenerLocalidades(this.value,'emProvincia','emLocalidad')">
+        <input type="text" id="emCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8" required>
         <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
           Al escribir tu CP la provincia se detecta sola y se cargan las localidades.
         </small>
@@ -411,7 +410,7 @@ body { background:#f8fafc; }
           <option value="">— Primero completá el código postal —</option>
         </select>
         <button type="button" id="btnCargarLoc"
-          onclick="obtenerLocalidades(document.getElementById('emCP').value,'emProvincia','emLocalidad')"
+          onclick="obtenerUbicacion(document.getElementById('emCP').value)"
           style="margin-top:6px;font-size:12px;padding:5px 12px;border:1.5px solid #d97706;
             border-radius:7px;background:white;color:#d97706;cursor:pointer;font-weight:600;
             display:none;">
@@ -557,36 +556,27 @@ function getSubtipos(){
     .map(c => c.value)
 }
 
-/* ── Obtener localidades por CP — igual que /registro (zippopotam.us) ── */
-window.obtenerLocalidades = async function(cp, provId, locId) {
-  cp = (cp || '').trim()
-  if(cp.length < 4) return
-  var locSel = document.getElementById(locId)
-  var provSel = document.getElementById(provId)
-  locSel.innerHTML = '<option value="">Cargando...</option>'
+/* ── Ubicación — copia exacta de app.js ── */
+async function obtenerUbicacion(codigo) {
+  codigo = codigo.trim()
+  if(codigo.length < 4) return
   try {
-    var res = await fetch('https://api.zippopotam.us/ar/' + cp)
-    if(!res.ok) throw new Error('not found')
-    var data = await res.json()
-    var places = data.places || []
-    if(!places.length) throw new Error('empty')
-    provSel.value = places[0]['state']
-    locSel.innerHTML = '<option value="">Elegí tu localidad</option>'
-    places.forEach(function(place) {
-      var opt = document.createElement('option')
+    const res = await fetch('https://api.zippopotam.us/ar/' + codigo)
+    if(!res.ok) return
+    const data = await res.json()
+    const select = document.getElementById('emLocalidad')
+    select.innerHTML = '<option value="">Seleccione localidad</option>'
+    data.places.forEach(place => {
+      const opt = document.createElement('option')
       opt.value = place['place name']
       opt.textContent = place['place name']
-      locSel.appendChild(opt)
+      select.appendChild(opt)
     })
-    if(places.length === 1) locSel.value = places[0]['place name']
-    var btn = document.getElementById('btnCargarLoc')
-    if(btn) btn.style.display = 'none'
-  } catch(e) {
-    locSel.innerHTML = '<option value="">CP no encontrado — elegí provincia manualmente</option>'
-    var btn2 = document.getElementById('btnCargarLoc')
-    if(btn2) btn2.style.display = 'inline-block'
-  }
+    document.getElementById('emProvincia').value = data.places[0]['state']
+    if(data.places.length === 1) select.value = data.places[0]['place name']
+  } catch(err) { console.error(err) }
 }
+document.getElementById('emCP').addEventListener('input', e => obtenerUbicacion(e.target.value))
 
 /* ── Cargar ciudades por provincia (fallback manual) ── */
 window.cargarMunicipios = function(prov, locId) {
