@@ -1,498 +1,924 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2563eb">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Trabajos Cerca">
-<title>Mi servicio — Trabajos Cerca</title>
-<link rel="stylesheet" href="style.css">
+<title>Completar perfil — Trabajos Cerca</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<style>
+/* ══════════════════════════════════════════
+   BASE
+══════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:#1e293b;padding-bottom:80px;}
+
+/* Topbar */
+.topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 16px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-logo{display:flex;align-items:center;gap:8px;}
+.topbar-logo img{width:32px;height:32px;border-radius:8px;}
+.topbar-logo span{font-size:16px;font-weight:800;color:#1e293b;}
+.topbar-back{display:flex;align-items:center;gap:6px;color:#2563eb;font-size:14px;font-weight:600;text-decoration:none;}
+.topbar-back:hover{color:#1d4ed8;}
+
+/* Contenedor */
+.wrap{max-width:680px;margin:0 auto;padding:20px 16px 0;}
+
+/* Guía banners */
+.guia-banner{
+  background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;
+  transition:background .15s;margin-bottom:10px;
+}
+.guia-banner:hover{background:#dbeafe;}
+.guia-banner .guia-txt strong{display:block;font-size:14px;font-weight:700;color:#1e40af;}
+.guia-banner .guia-txt span{font-size:12px;color:#475569;}
+.guia-banner i.chevron{margin-left:auto;color:#93c5fd;flex-shrink:0;}
+
+/* Secciones del formulario */
+.seccion{background:#fff;border-radius:14px;border:1px solid #e2e8f0;padding:20px;margin-top:14px;}
+.seccion h3{font-size:15px;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f1f5f9;}
+.seccion h3 i{font-size:16px;}
+
+/* Labels e inputs */
+label.lbl{display:block;font-size:13px;font-weight:600;color:#374151;margin:12px 0 5px;}
+label.lbl:first-child{margin-top:0;}
+input[type=text],input[type=tel],input[type=email],input[type=number],select,textarea{
+  width:100%;padding:10px 13px;border:1.5px solid #e2e8f0;border-radius:9px;
+  font-size:14px;color:#1e293b;background:#f8fafc;outline:none;
+  font-family:inherit;transition:border-color .15s,background .15s;
+}
+input:focus,select:focus,textarea:focus{border-color:#2563eb;background:#fff;box-shadow:0 0 0 3px #bfdbfe44;}
+textarea{resize:vertical;min-height:90px;}
+select{cursor:pointer;}
+.fila-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* Prefijo teléfono */
+.tel-wrap{display:flex;align-items:stretch;gap:0;}
+.tel-prefix{
+  background:#f1f5f9;border:1.5px solid #e2e8f0;border-right:none;
+  border-radius:9px 0 0 9px;padding:10px 12px;font-size:14px;font-weight:700;
+  color:#475569;white-space:nowrap;display:flex;align-items:center;
+}
+.tel-wrap input{border-radius:0 9px 9px 0!important;}
+
+/* Checkboxes y radios */
+.check-group{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.check-item,.radio-item{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:#374151;}
+.check-item input[type=checkbox],.radio-item input[type=radio]{width:18px;height:18px;min-width:18px;accent-color:#2563eb;cursor:pointer;}
+.checks-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px;}
+@media(max-width:480px){.checks-grid{grid-template-columns:1fr;}}
+
+/* Chips de horario */
+.horario-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;}
+.chip{
+  padding:6px 12px;border:1.5px solid #e2e8f0;border-radius:20px;
+  font-size:12px;font-weight:600;color:#475569;cursor:pointer;
+  background:#f8fafc;transition:all .15s;white-space:nowrap;
+}
+.chip:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff;}
+
+/* Foto */
+.foto-area{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.foto-circle{
+  width:84px;height:84px;border-radius:50%;background:#dbeafe;
+  display:flex;align-items:center;justify-content:center;font-size:32px;color:#2563eb;
+  overflow:hidden;flex-shrink:0;border:3px solid #e2e8f0;
+}
+.foto-circle img{width:100%;height:100%;object-fit:cover;}
+.btn-foto{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 16px;
+  border:1.5px solid #2563eb;border-radius:9px;color:#2563eb;
+  font-size:13px;font-weight:600;cursor:pointer;background:#fff;
+  transition:background .15s;
+}
+.btn-foto:hover{background:#eff6ff;}
+
+/* Selector de tipo */
+.tipo-select-wrap{background:#fff;border-radius:14px;border:1.5px solid #2563eb;padding:18px 20px;margin-top:14px;}
+.tipo-select-wrap label{font-size:14px;font-weight:700;color:#1e293b;display:block;margin-bottom:8px;}
+.tipo-select-wrap select{font-size:15px;font-weight:600;color:#1e293b;background:#f8fafc;}
+
+/* Subcategorías vacías */
+.subs-placeholder{color:#94a3b8;font-size:13px;padding:6px 0;}
+
+/* Botones */
+.btn-guardar{
+  width:100%;padding:14px;background:#2563eb;color:#fff;
+  border:none;border-radius:11px;font-size:16px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:6px;transition:background .15s;
+}
+.btn-guardar:hover:not(:disabled){background:#1d4ed8;}
+.btn-guardar:disabled{opacity:.6;cursor:not-allowed;}
+
+/* Mensajes */
+.msg{border-radius:9px;padding:12px 14px;font-size:13px;margin-bottom:12px;display:none;line-height:1.5;}
+.msg.ok   {background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;}
+.msg.err  {background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;}
+
+/* Sección pendiente */
+.pendiente{text-align:center;padding:30px 20px;color:#94a3b8;}
+.pendiente i{font-size:36px;margin-bottom:10px;display:block;}
+.pendiente strong{display:block;font-size:15px;color:#475569;margin-bottom:4px;}
+
+/* ══════════════════════════════════════════
+   MODALES
+══════════════════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;
+  display:none;align-items:flex-start;justify-content:center;padding:20px 12px;overflow-y:auto;
+}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:#fff;border-radius:18px;width:100%;max-width:540px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;
+  margin:auto;animation:slideUp .2s ease;
+}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-close{
+  position:absolute;top:14px;right:14px;background:#f1f5f9;border:none;
+  width:30px;height:30px;border-radius:50%;font-size:18px;cursor:pointer;
+  color:#64748b;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;z-index:2;line-height:1;
+}
+.modal-close:hover{background:#e2e8f0;}
+.modal-body{padding:24px 22px;}
+.modal-body h2{font-size:20px;font-weight:800;margin-bottom:6px;}
+.modal-body .sub{font-size:13px;color:#64748b;margin-bottom:18px;}
+
+/* Tabs en modal guía */
+.modal-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.mtab{
+  padding:7px 13px;border-radius:20px;font-size:12px;font-weight:700;
+  border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;cursor:pointer;
+  transition:all .15s;
+}
+.mtab.activo{border-color:#2563eb;background:#eff6ff;color:#2563eb;}
+.tab-panel{display:none;}
+.tab-panel.activo{display:block;}
+
+/* Cards en modal */
+.info-card{
+  background:#f8fafc;border-radius:10px;padding:13px 14px;
+  margin-bottom:10px;border-left:4px solid #2563eb;
+}
+.info-card.verde {border-left-color:#059669;background:#f0fdf4;}
+.info-card.naranja{border-left-color:#d97706;background:#fffbeb;}
+.info-card.violeta{border-left-color:#7c3aed;background:#faf5ff;}
+.info-card.rojo   {border-left-color:#dc2626;background:#fef2f2;}
+.info-card strong{display:block;font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px;}
+.info-card p{font-size:12px;color:#475569;line-height:1.5;margin:0;}
+.info-card ul{font-size:12px;color:#475569;line-height:1.8;margin:4px 0 0 14px;}
+
+/* Footer modal */
+.modal-footer{
+  border-top:1px solid #f1f5f9;padding:14px 22px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+.modal-footer a{color:#2563eb;font-size:13px;font-weight:600;text-decoration:none;}
+.modal-footer a:hover{text-decoration:underline;}
+
+/* ══ MODAL SCORING ══ */
+.scoring-item{
+  background:#f8fafc;border-radius:10px;padding:13px 14px;
+  display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;
+}
+.scoring-item span.ico{font-size:26px;flex-shrink:0;}
+.scoring-item strong{display:block;font-size:13px;font-weight:700;color:#1e293b;margin-bottom:3px;}
+.scoring-item p{font-size:12px;color:#475569;line-height:1.5;margin:0;}
+
+@media(max-width:420px){
+  .fila-2{grid-template-columns:1fr;}
+  .modal-tabs{gap:4px;}
+  .mtab{font-size:11px;padding:6px 10px;}
+}
+</style>
 </head>
 <body>
 
-<header class="topbar">
-  <div class="logo">
-    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <img src="/icon-192.png" alt="TC">
+    <span>Trabajos Cerca</span>
   </div>
-  <nav>
-    <a href="/perfil.html"><i class="fa-solid fa-arrow-left"></i> <span>Mi perfil</span></a>
-  </nav>
-</header>
+  <a href="/perfil.html" class="topbar-back">
+    <i class="fa-solid fa-arrow-left"></i> Mi perfil
+  </a>
+</div>
 
-<div class="container" style="max-width:700px;">
+<div class="wrap">
 
-  <h2><i class="fa-solid fa-tools" style="color:#f97316"></i> Mi servicio / Oficio</h2>
+  <!-- GUÍA 1: Cómo conseguir más clientes -->
+  <div class="guia-banner" onclick="abrirScoring()">
+    <i class="fa-solid fa-trophy" style="color:#f59e0b;font-size:20px;flex-shrink:0;"></i>
+    <div class="guia-txt">
+      <strong>Guía: cómo conseguir más clientes</strong>
+      <span>Conocé el sistema de puntaje y cómo aparecer primero en las búsquedas</span>
+    </div>
+    <i class="fa-solid fa-chevron-right chevron"></i>
+  </div>
 
-  <!-- GUÍA DE LA PÁGINA -->
+  <!-- GUÍA 2: Cómo completar tu perfil -->
   <div class="guia-banner" onclick="abrirGuia()">
     <i class="fa-solid fa-circle-info" style="color:#2563eb;font-size:20px;flex-shrink:0;"></i>
-    <div style="flex:1;">
-      <strong style="color:#1e40af;">Guía: cómo conseguir más clientes</strong>
-      <p style="margin:2px 0 0;font-size:13px;color:#475569;">Conocé el sistema de puntaje y cómo aparecer primero en las búsquedas</p>
+    <div class="guia-txt">
+      <strong>Guía: datos importantes para que te encuentren</strong>
+      <span>Qué información necesita cada tipo de perfil y cómo completarla</span>
     </div>
-    <i class="fa-solid fa-chevron-right" style="color:#94a3b8;"></i>
-  </div>
-
-  <div id="msgNuevo" style="display:none" class="alerta alerta-ok">
-    <i class="fa-solid fa-check-circle"></i> ¡Cuenta creada! Completá tu perfil para que los clientes te encuentren.
+    <i class="fa-solid fa-chevron-right chevron"></i>
   </div>
 
   <!-- FOTO DE PERFIL -->
-  <div class="cv-section">
-    <h3><i class="fa-solid fa-camera"></i> Foto de perfil</h3>
-    <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
-      <div id="fotoPreview" style="width:90px;height:90px;border-radius:50%;background:#dbeafe;
-        display:flex;align-items:center;justify-content:center;font-size:36px;color:#2563eb;
-        overflow:hidden;flex-shrink:0;border:3px solid #e2e8f0;">
+  <div class="seccion">
+    <h3><i class="fa-solid fa-camera" style="color:#2563eb;"></i> Foto de perfil</h3>
+    <div class="foto-area">
+      <div class="foto-circle" id="fotoCircle">
         <i class="fa-solid fa-user"></i>
       </div>
       <div>
-        <p style="margin:0 0 10px; font-size:14px; color:#64748b;">
-          Tu foto aparece en los resultados de búsqueda. Usá una foto clara y profesional.
-        </p>
-        <label for="inputFoto" class="btn btn-outline btn-sm" style="cursor:pointer; display:inline-flex;">
+        <p style="font-size:13px;color:#64748b;margin-bottom:10px;">Tu foto aparece en los resultados de búsqueda. Usá una foto clara y profesional.</p>
+        <label class="btn-foto" for="inputFoto">
           <i class="fa-solid fa-upload"></i> Subir foto
         </label>
-        <input type="file" id="inputFoto" accept="image/*" style="display:none" onchange="subirFoto(this)">
-        <div id="msgFoto" style="margin-top:8px; font-size:13px;"></div>
+        <input type="file" id="inputFoto" accept="image/*" style="display:none" onchange="previsualizarFoto(this)">
+        <div id="msgFoto" style="font-size:12px;margin-top:6px;color:#64748b;"></div>
       </div>
     </div>
   </div>
 
-  <!-- CATEGORÍA Y SERVICIOS -->
-  <div class="cv-section">
-    <h3><i class="fa-solid fa-briefcase"></i> Categoría y servicios</h3>
+  <!-- SELECTOR DE TIPO -->
+  <div class="tipo-select-wrap">
+    <label for="selectorTipo"><i class="fa-solid fa-list" style="margin-right:6px;color:#2563eb;"></i>¿Cómo querés aparecer en Trabajos Cerca?</label>
+    <select id="selectorTipo" onchange="cambiarTipo(this.value)">
+      <option value="">— Elegí una opción —</option>
+      <option value="oficio">🔧 Como oficio (plomero, electricista, carpintero...)</option>
+      <option value="profesional">👔 Como profesional (médico, abogado, contador...)</option>
+      <option value="cv">📄 Busco empleo — publicar mi CV</option>
+      <option value="empresa">🏢 Busco empleados — soy empresa o comercio</option>
+      <option value="emprendimiento">🚀 Tengo un emprendimiento</option>
+    </select>
+  </div>
 
-    <label>Categoría principal *</label>
-    <select id="categoria" onchange="actualizarCheckboxes()">
-      <option value="">Seleccioná una categoría</option>
-      <optgroup label="── Oficios y construcción ──">
+  <!-- ══════════ FORM OFICIO ══════════ -->
+  <div id="formOficio" style="display:none;">
+
+    <!-- Categoría y subcategorías -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-wrench" style="color:#d97706;"></i> Oficio y especialidades</h3>
+
+      <label class="lbl">Categoría / Oficio *</label>
+      <select id="ofCategoria" onchange="cargarSubcategorias()">
+        <option value="">— Seleccioná tu oficio —</option>
         <option>Albañilería</option>
         <option>Plomería</option>
         <option>Gasista</option>
-        <option>Electricista</option>
+        <option>Electricidad</option>
         <option>Carpintería</option>
         <option>Pintura</option>
-        <option>Jardinería</option>
         <option>Herrería</option>
         <option>Cerrajería</option>
+        <option>Jardinería</option>
         <option>Limpieza</option>
         <option>Mudanzas / Fletes</option>
-        <option>Refrigeración / Aire acondicionado</option>
-        <option>Informática / Reparaciones</option>
-        <option>Gastronomía</option>
-        <option>Carnicero / Carnicería</option>
-        <option>Cadetería</option>
-        <option>Gestoría</option>
-        <option>Mecánico Automotriz</option>
+        <option>Refrigeración / Aire Acondicionado</option>
+        <option>Informática / Tecnología</option>
+        <option>Mecánica Automotriz</option>
         <option>Tapicería</option>
-        <option>Instalaciones Fotovoltaicas</option>
-        <option>Estampería Textil</option>
-      </optgroup>
-      <optgroup label="── Profesionales ──">
-        <option>Médico / Clínica</option>
-        <option>Odontólogo</option>
-        <option>Psicólogo / Terapia</option>
-        <option>Kinesiólogo</option>
-        <option>Nutricionista</option>
-        <option>Veterinario</option>
-        <option>Arquitecto</option>
-        <option>Abogado</option>
-        <option>Contador / Impositivo</option>
-        <option>Diseñador Gráfico</option>
-        <option>Fotógrafo</option>
-        <option>Profesor Particular</option>
+        <option>Techos e Impermeabilización</option>
+        <option>Soldadura</option>
+        <option>Cadetería / Delivery</option>
+        <option>Fotografía / Video</option>
         <option>Peluquería / Estética</option>
-      </optgroup>
-      <optgroup label="──────────────────────">
-        <option>Otro</option>
-      </optgroup>
-    </select>
+        <option>Costura / Modistería</option>
+        <option>Gastronomía / Catering</option>
+        <option>Mecánica del Hogar</option>
+        <option>Otro oficio</option>
+      </select>
 
-    <label>¿Qué servicios ofrecés? <span style="color:#94a3b8; font-weight:400;">(marcá todos los que aplican)</span></label>
-    <div id="checksServicios">
-      <p style="color:#94a3b8; font-size:14px; margin:6px 0;">Seleccioná primero la categoría</p>
-    </div>
-
-    <label style="margin-top:14px;">Título de tu anuncio *</label>
-    <input id="titulo" placeholder="Ej: Plomero matriculado con 10 años de experiencia">
-
-    <label>Descripción / Información adicional</label>
-    <textarea id="descripcion" rows="4"
-      placeholder="Contá más sobre tu trabajo: garantías, materiales, zona de cobertura, formas de pago..."></textarea>
-  </div>
-
-  <!-- HORARIOS -->
-  <div class="cv-section">
-    <h3><i class="fa-solid fa-clock"></i> Horarios de disponibilidad</h3>
-    <label>¿Cuándo estás disponible?</label>
-    <input id="horarios" placeholder="Ej: Lunes a Viernes de 8 a 18hs · Sábados de 9 a 13hs">
-    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:2px;">
-      <button type="button" class="btn btn-outline btn-sm" onclick="setHorario('Lunes a Viernes de 8 a 18hs')">Lun–Vie 8–18</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="setHorario('Lunes a Sábado de 8 a 18hs')">Lun–Sáb 8–18</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="setHorario('Lunes a Domingo, las 24hs')">24/7</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="setHorario('A acordar con el cliente')">A acordar</button>
-    </div>
-  </div>
-
-  <!-- UBICACIÓN -->
-  <div class="cv-section">
-    <h3><i class="fa-solid fa-location-dot"></i> Ubicación</h3>
-    <p style="color:#64748b; font-size:13px; margin:-4px 0 14px;">
-      La ciudad se muestra públicamente. La dirección exacta es privada y solo se usa para el mapa.
-    </p>
-
-    <label>Código Postal</label>
-    <input id="cp_servicio" placeholder="Ej: 1900" oninput="autocompletarCP(this.value)">
-
-    <label>Localidad / Ciudad *</label>
-    <select id="localidad_servicio" onchange="actualizarMapaDesdeSelect()">
-      <option value="">Ingresá el código postal primero</option>
-    </select>
-
-    <label>Provincia</label>
-    <input id="provincia_servicio" readonly placeholder="Se completa automático">
-
-    <label>Dirección exacta <span style="color:#94a3b8; font-weight:400;">(privada, mejora la ubicación en el mapa)</span></label>
-    <input id="direccion_exacta" placeholder="Ej: Av. San Martín 1234, piso 2">
-
-    <div id="mapServicio"></div>
-    <p style="font-size:12px; color:#94a3b8; margin-top:6px;">
-      <i class="fa-solid fa-info-circle"></i> También podés hacer clic en el mapa para ajustar la posición.
-    </p>
-  </div>
-
-  <!-- VISIBILIDAD EN EL BUSCADOR -->
-  <div class="cv-section" style="background:#faf5ff;border:1.5px solid #e9d5ff;">
-    <h3><i class="fa-solid fa-eye" style="color:#7c3aed;"></i> Visibilidad en el buscador</h3>
-    <p style="color:#64748b;font-size:13px;margin:-4px 0 16px;">
-      Controlá cómo aparecés en el buscador y qué datos son públicos.
-    </p>
-
-    <label>
-      <i class="fa-solid fa-building" style="color:#7c3aed;margin-right:4px;"></i>
-      Nombre de Empresa o Negocio
-      <span style="font-size:11px;color:#94a3b8;font-weight:400;"> (opcional)</span>
-    </label>
-    <input id="srv-empresa" placeholder="Ej: Plomería García, Taller El Maestro, Estudio López">
-
-    <label style="margin-top:12px;">Aparecer en el perfil público como</label>
-    <div class="radio-group" style="margin-bottom:14px;">
-      <label class="radio-opt">
-        <input type="radio" name="srvMostrarComo" value="personal" checked>
-        <span class="radio-custom"></span>
-        Mi nombre personal
-      </label>
-      <label class="radio-opt">
-        <input type="radio" name="srvMostrarComo" value="empresa">
-        <span class="radio-custom"></span>
-        Nombre de empresa / negocio
-      </label>
-    </div>
-
-    <div class="check-fila" style="margin-bottom:0;">
-      <label class="check-opt">
-        <input type="checkbox" id="srv-mostrar-tel" checked>
-        <span class="check-custom"></span>
-        Mostrar mi teléfono/WhatsApp en el perfil público
-      </label>
-    </div>
-  </div>
-
-  <div id="msg"></div>
-
-  <button class="btn btn-orange" onclick="guardarServicio()">
-    <i class="fa-solid fa-save"></i> Guardar y publicar
-  </button>
-
-  <!-- TRABAJOS REALIZADOS -->
-  <div class="cv-section" id="seccionPortfolio" style="margin-top:20px;">
-    <h3><i class="fa-solid fa-images" style="color:#f97316"></i> Trabajos realizados</h3>
-    <p style="color:#64748b;font-size:13px;margin:-4px 0 14px;">
-      Mostrá fotos de tus trabajos para que los clientes vean la calidad de tu trabajo.
-    </p>
-    <div id="listaPortfolio">
-      <div style="text-align:center;color:#94a3b8;padding:14px;"><i class="fa-solid fa-spinner fa-spin"></i></div>
-    </div>
-    <button type="button" class="btn btn-outline" id="btnAgregarTrabajo" onclick="clickAgregarTrabajo()" style="margin-top:12px;width:100%;">
-      <i class="fa-solid fa-plus"></i> Agregar trabajo realizado
-    </button>
-  </div>
-
-  <!-- FORM AGREGAR TRABAJO (oculto por defecto) -->
-  <div class="cv-section" id="formPortfolioSec" style="display:none;margin-top:0;border-top:none;border-radius:0 0 16px 16px;">
-    <h3 style="margin-top:0;"><i class="fa-solid fa-pen-to-square" style="color:#f97316"></i> Nuevo trabajo</h3>
-    <label>Título del trabajo *</label>
-    <input id="ptTitulo" placeholder="Ej: Instalación eléctrica completa en vivienda">
-    <label>Descripción</label>
-    <textarea id="ptDesc" rows="3" placeholder="Breve descripción del trabajo realizado..."></textarea>
-    <label>Fotos (hasta 3)</label>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 4px;">
-      <div>
-        <div class="foto-upload-box" id="prevPt1" onclick="document.getElementById('inputPt1').click()">
-          <i class="fa-solid fa-camera"></i>
-        </div>
-        <input type="file" id="inputPt1" accept="image/*" style="display:none" onchange="prevFotoPt(this,1)">
-      </div>
-      <div>
-        <div class="foto-upload-box" id="prevPt2" onclick="document.getElementById('inputPt2').click()">
-          <i class="fa-solid fa-camera"></i>
-        </div>
-        <input type="file" id="inputPt2" accept="image/*" style="display:none" onchange="prevFotoPt(this,2)">
-      </div>
-      <div>
-        <div class="foto-upload-box" id="prevPt3" onclick="document.getElementById('inputPt3').click()">
-          <i class="fa-solid fa-camera"></i>
-        </div>
-        <input type="file" id="inputPt3" accept="image/*" style="display:none" onchange="prevFotoPt(this,3)">
+      <label class="lbl">¿Qué trabajos hacés? <span style="color:#94a3b8;font-weight:400;">(marcá todos los que aplican)</span></label>
+      <div id="subsContainer">
+        <p class="subs-placeholder">Seleccioná primero la categoría</p>
       </div>
     </div>
-    <p style="font-size:12px;color:#94a3b8;margin:4px 0 12px;">Hacé clic en cada cuadro para subir una foto</p>
-    <div id="msgPt"></div>
-    <div style="display:flex;gap:10px;margin-top:10px;">
-      <button type="button" class="btn btn-orange" onclick="guardarPortfolio()">
-        <i class="fa-solid fa-save"></i> Guardar
-      </button>
-      <button type="button" class="btn btn-outline" onclick="cerrarFormPortfolio()">
-        Cancelar
-      </button>
-    </div>
-  </div>
 
-</div>
+    <!-- Zona de trabajo -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-location-dot" style="color:#dc2626;"></i> Zona de trabajo</h3>
+      <p style="font-size:13px;color:#64748b;margin:-6px 0 14px;">La ciudad se muestra en tu perfil público. La dirección exacta es privada.</p>
 
-<!-- MODAL GUÍA -->
-<div class="modal-overlay" id="modalGuia" onclick="if(event.target===this){cerrarGuia()}">
-  <div class="modal-box" style="max-width:520px;">
-    <button class="modal-close" onclick="cerrarGuia()">×</button>
-    <div class="modal-content">
-      <div style="text-align:center;margin-bottom:20px;">
-        <div style="font-size:48px;margin-bottom:8px;">🏆</div>
-        <h2 style="margin:0 0 6px;font-size:22px;">Sistema de puntaje</h2>
-        <p style="color:#64748b;font-size:14px;margin:0;">Así funciona el ranking de Trabajos Cerca</p>
-      </div>
+      <label class="lbl">Código Postal *</label>
+      <input type="text" id="ofCP" placeholder="Ej: 1900" oninput="buscarCPOficio(this.value)">
+      <div id="ofCPFeedback" style="font-size:12px;margin-top:4px;display:none;"></div>
 
-      <div style="display:flex;flex-direction:column;gap:14px;">
-
-        <div style="background:#eff6ff;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-          <span style="font-size:24px;">⭐</span>
-          <div>
-            <strong style="font-size:14px;color:#1e40af;">Cómo funciona el puntaje</strong>
-            <p style="font-size:13px;color:#475569;margin:4px 0 0;line-height:1.5;">
-              Cada cliente que te califica suma puntos directamente a tu perfil.<br>
-              Si te califican con <strong>1</strong> sumás 1 punto. Con <strong>10</strong> sumás 10 puntos.<br>
-              Tu posición en el buscador depende de tu <strong>puntaje total acumulado</strong>.
-            </p>
-          </div>
-        </div>
-
-        <div style="background:#f0fdf4;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-          <span style="font-size:24px;">📈</span>
-          <div>
-            <strong style="font-size:14px;color:#166534;">Más puntaje = más visibilidad</strong>
-            <p style="font-size:13px;color:#475569;margin:4px 0 0;line-height:1.5;">
-              Los perfiles con mayor puntaje aparecen <strong>primero en las búsquedas</strong>.<br>
-              Cuanto más arriba aparecés, más personas ven tu perfil y más clientes conseguís.
-            </p>
-          </div>
-        </div>
-
-        <div style="background:#fffbeb;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-          <span style="font-size:24px;">💬</span>
-          <div>
-            <strong style="font-size:14px;color:#92400e;">Pedile a tus clientes que te califiquen</strong>
-            <p style="font-size:13px;color:#475569;margin:4px 0 0;line-height:1.5;">
-              Después de terminar un trabajo, decile a tu cliente:<br>
-              <em style="color:#1e293b;">"¿Me podés calificar en Trabajos Cerca? Me ayudás a conseguir más clientes."</em><br>
-              Es rápido — solo eligen un número del 1 al 10 y listo.
-            </p>
-          </div>
-        </div>
-
-        <div style="background:#fdf4ff;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
-          <span style="font-size:24px;">👑</span>
-          <div>
-            <strong style="font-size:14px;color:#7e22ce;">Perfiles Destacados</strong>
-            <p style="font-size:13px;color:#475569;margin:4px 0 0;line-height:1.5;">
-              Los perfiles <strong>Destacados</strong> aparecen siempre primero, antes del ranking por puntaje.<br>
-              Para conseguir el badge Destacado, consultá nuestros planes en la sección de trabajos realizados.
-            </p>
-          </div>
-        </div>
-
-      </div>
-
-      <p style="text-align:center;font-size:13px;color:#64748b;margin:16px 0 0;">
-        ¿Dudas? Escribinos a <a href="https://wa.me/542954320639" target="_blank" style="color:#2563eb;">WhatsApp</a>
-      </p>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL PLANES -->
-<div class="modal-overlay" id="modalPlanes" onclick="cerrarPlanesClick(event)">
-  <div class="modal-box" style="max-width:500px;">
-    <button class="modal-close" onclick="cerrarPlanes()">×</button>
-
-    <!-- Cabecera -->
-    <div style="background:linear-gradient(135deg,#f97316,#ea580c);padding:22px 24px 18px;text-align:center;border-radius:16px 16px 0 0;">
-      <div style="font-size:38px;margin-bottom:6px;">📸</div>
-      <h2 style="margin:0 0 4px;font-size:20px;font-weight:900;color:white;">Fotos de Trabajos Realizados</h2>
-      <p style="margin:0;color:rgba(255,255,255,.88);font-size:13px;line-height:1.4;">
-        Mostrá tu trabajo real y conseguí más clientes.<br>Abonás una vez por mes.
-      </p>
-    </div>
-
-    <!-- PASO 1: Elegir plan -->
-    <div id="pasoEleccion" style="padding:20px 22px 24px;">
-
-      <!-- Planes: columna única, más compactos -->
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
-
-        <!-- Plan 1 trabajo -->
-        <div style="border:2px solid #e2e8f0;border-radius:13px;padding:14px 16px;display:flex;align-items:center;gap:14px;background:white;cursor:pointer;transition:border-color .15s;"
-             onclick="window.elegirPlan('p1')"
-             onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0'">
-          <div style="text-align:center;min-width:70px;">
-            <p style="margin:0;font-size:22px;font-weight:900;color:#1e293b;line-height:1;">$10.000</p>
-            <p style="margin:0;font-size:10px;color:#94a3b8;font-weight:600;">/ mes</p>
-          </div>
-          <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
-              <span style="background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">BÁSICO</span>
-              <strong style="font-size:14px;color:#1e293b;">1 trabajo realizado</strong>
-            </div>
-            <p style="margin:0;font-size:12px;color:#64748b;">Hasta 3 fotos por trabajo · Visible en tu perfil público</p>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;font-size:13px;"></i>
-        </div>
-
-        <!-- Plan 2 trabajos -->
-        <div style="border:2px solid #7c3aed;border-radius:13px;padding:14px 16px;display:flex;align-items:center;gap:14px;background:#faf5ff;cursor:pointer;transition:border-color .15s;"
-             onclick="window.elegirPlan('p2')"
-             onmouseover="this.style.borderColor='#6d28d9'" onmouseout="this.style.borderColor='#7c3aed'">
-          <div style="text-align:center;min-width:70px;">
-            <p style="margin:0;font-size:22px;font-weight:900;color:#1e293b;line-height:1;">$15.000</p>
-            <p style="margin:0;font-size:10px;color:#94a3b8;font-weight:600;">/ mes</p>
-          </div>
-          <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
-              <span style="background:#ede9fe;color:#7c3aed;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;">ESTÁNDAR</span>
-              <strong style="font-size:14px;color:#1e293b;">2 trabajos realizados</strong>
-            </div>
-            <p style="margin:0;font-size:12px;color:#64748b;">Hasta 3 fotos por trabajo · Visible en tu perfil público</p>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;font-size:13px;"></i>
-        </div>
-
-        <!-- Plan 5 trabajos -->
-        <div style="border:2px solid #f97316;border-radius:13px;padding:14px 16px;display:flex;align-items:center;gap:14px;background:#fff7ed;cursor:pointer;transition:border-color .15s;"
-             onclick="window.elegirPlan('p3')"
-             onmouseover="this.style.borderColor='#ea580c'" onmouseout="this.style.borderColor='#f97316'">
-          <div style="text-align:center;min-width:70px;">
-            <p style="margin:0;font-size:22px;font-weight:900;color:#1e293b;line-height:1;">$30.000</p>
-            <p style="margin:0;font-size:10px;color:#94a3b8;font-weight:600;">/ mes</p>
-          </div>
-          <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
-              <span style="background:#ffedd5;color:#ea580c;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;"><i class="fa-solid fa-crown" style="font-size:9px;"></i> PRO</span>
-              <strong style="font-size:14px;color:#1e293b;">5 trabajos realizados</strong>
-            </div>
-            <p style="margin:0;font-size:12px;color:#64748b;">Hasta 3 fotos por trabajo · Badge <strong>Destacado</strong> incluido</p>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;font-size:13px;"></i>
-        </div>
-
-      </div>
-
-      <p style="text-align:center;font-size:12px;color:#94a3b8;margin:0;">
-        <i class="fa-solid fa-shield-halved" style="font-size:10px;"></i>
-        Tocá el plan para ver cómo pagar · Activamos tu cuenta en 24hs
-      </p>
-    </div>
-
-    <!-- PASO 2: Pagar -->
-    <div id="pasoPago" style="display:none;padding:20px 22px 24px;">
-
-      <!-- Resumen del plan elegido -->
-      <div id="resumePlan" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:11px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
-        <i class="fa-solid fa-images" style="color:#f97316;font-size:18px;flex-shrink:0;"></i>
+      <div class="fila-2" style="margin-top:12px;">
         <div>
-          <p style="margin:0;font-size:13px;font-weight:700;color:#1e293b;" id="resumeLabel">—</p>
-          <p style="margin:0;font-size:12px;color:#64748b;" id="resumeSub">—</p>
+          <label class="lbl">Ciudad / Localidad *</label>
+          <input type="text" id="ofLocalidad" placeholder="Ej: La Plata">
+        </div>
+        <div>
+          <label class="lbl">Provincia</label>
+          <input type="text" id="ofProvincia" placeholder="Se completa automático">
         </div>
       </div>
 
-      <!-- Opciones de pago -->
-      <p style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.07em;margin:0 0 10px;">¿Cómo querés pagar?</p>
-      <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:18px;">
+      <label class="lbl">Dirección <span style="color:#94a3b8;font-weight:400;">(opcional — privada)</span></label>
+      <input type="text" id="ofDireccion" placeholder="Ej: Av. San Martín 1234">
 
-        <!-- MercadoPago -->
-        <button id="btnMP" onclick="window.pagarMP()" style="
-          display:flex;align-items:center;gap:12px;padding:13px 16px;
-          background:#009ee3;color:white;border:none;border-radius:11px;
-          font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
-          transition:opacity .15s;width:100%;text-align:left;">
-          <span style="font-size:20px;">💳</span>
-          <div>
-            <div>Pagar por MercadoPago</div>
-            <div style="font-size:11px;font-weight:500;opacity:.9;">Se abre el link de pago — abonás el monto del plan</div>
-          </div>
-        </button>
-
-        <!-- WhatsApp -->
-        <button id="btnWA" onclick="window.contactarWA()" style="
-          display:flex;align-items:center;gap:12px;padding:13px 16px;
-          background:#25d366;color:white;border:none;border-radius:11px;
-          font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
-          transition:opacity .15s;width:100%;text-align:left;">
-          <i class="fa-brands fa-whatsapp" style="font-size:22px;"></i>
-          <div>
-            <div>Contactar por WhatsApp</div>
-            <div style="font-size:11px;font-weight:500;opacity:.9;">Hablá con nosotros y coordinamos el pago</div>
-          </div>
-        </button>
-
-      </div>
-
-      <!-- Confirmar -->
-      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:11px;padding:13px 16px;margin-bottom:14px;">
-        <p style="margin:0 0 8px;font-size:13px;color:#166534;font-weight:600;">
-          <i class="fa-solid fa-circle-check"></i> ¿Ya realizaste el pago?
-        </p>
-        <p style="margin:0 0 10px;font-size:12px;color:#475569;line-height:1.5;">
-          Hacé clic abajo para avisarnos. Revisamos y activamos tu cuenta en menos de 24 horas.
-        </p>
-        <button onclick="window.confirmarSolicitud()" style="
-          display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
-          padding:11px;background:#16a34a;color:white;border:none;border-radius:9px;
-          font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
-          <i class="fa-solid fa-paper-plane"></i> Ya pagué — Avisanos
-        </button>
-      </div>
-
-      <div id="msgSolicitud" style="min-height:6px;"></div>
-
-      <button onclick="window.volverEleccion()" style="
-        background:none;border:none;color:#64748b;font-size:13px;
-        cursor:pointer;font-family:inherit;padding:4px 0;display:flex;align-items:center;gap:5px;">
-        <i class="fa-solid fa-arrow-left" style="font-size:11px;"></i> Elegir otro plan
-      </button>
+      <label class="lbl">Radio / Zona de cobertura</label>
+      <input type="text" id="ofRadio" placeholder="Ej: Todo La Plata y alrededores hasta 30km">
     </div>
 
+    <!-- Datos adicionales -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-clipboard-list" style="color:#2563eb;"></i> Datos adicionales</h3>
+
+      <div class="check-group" style="margin-bottom:14px;">
+        <label class="check-item">
+          <input type="checkbox" id="ofPresupuesto">
+          <span>Realizó presupuestos sin costo</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="ofFactura">
+          <span>Emite factura / comprobante</span>
+        </label>
+        <label class="check-item">
+          <input type="checkbox" id="ofVehiculo">
+          <span>Dispone de vehículo propio</span>
+        </label>
+      </div>
+
+      <label class="lbl">Matrícula / Habilitación <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+      <input type="text" id="ofMatricula" placeholder="Ej: Gasista Mat. 12345 / Electricista habilitado">
+
+      <label class="lbl" style="margin-top:12px;">Descripción / Presentación *</label>
+      <textarea id="ofDescripcion" rows="4" placeholder="Contá sobre tu experiencia, tipo de trabajos que hacés, garantías, formas de pago..."></textarea>
+    </div>
+
+    <!-- Disponibilidad horaria -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-clock" style="color:#059669;"></i> Disponibilidad horaria</h3>
+      <input type="text" id="ofHorario" placeholder="Ej: Lunes a Viernes de 8 a 18hs · Sábados de 9 a 13hs">
+      <div class="horario-chips">
+        <span class="chip" onclick="setHorario('Lunes a Viernes de 8 a 18hs')">Lun–Vie 8–18</span>
+        <span class="chip" onclick="setHorario('Lunes a Sábado de 8 a 18hs')">Lun–Sáb 8–18</span>
+        <span class="chip" onclick="setHorario('Lunes a Sábado de 8 a 20hs')">Lun–Sáb 8–20</span>
+        <span class="chip" onclick="setHorario('Lunes a Domingo disponible')">Lun–Dom</span>
+        <span class="chip" onclick="setHorario('Las 24 horas, todos los días')">24/7</span>
+        <span class="chip" onclick="setHorario('A acordar con el cliente')">A acordar</span>
+      </div>
+    </div>
+
+    <!-- Contacto y visibilidad -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-eye" style="color:#7c3aed;"></i> Contacto y visibilidad</h3>
+
+      <label class="lbl">Teléfono / WhatsApp *</label>
+      <div class="tel-wrap">
+        <span class="tel-prefix">+549</span>
+        <input type="tel" id="ofTelefono" placeholder="Ej: 2214561234 (sin 0 ni 15)">
+      </div>
+      <p style="font-size:12px;color:#94a3b8;margin-top:4px;">Sin el 0 inicial ni el 15. Solo el número de área + número.</p>
+
+      <label class="lbl" style="margin-top:14px;">¿Cómo aparecés en el buscador?</label>
+      <div class="check-group">
+        <label class="radio-item">
+          <input type="radio" name="ofMostrarComo" value="personal" checked>
+          <span>Con mi nombre personal</span>
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="ofMostrarComo" value="empresa">
+          <span>Con el nombre de mi negocio o empresa</span>
+        </label>
+      </div>
+
+      <div id="ofNombreEmpresaWrap" style="display:none;margin-top:10px;">
+        <label class="lbl">Nombre del negocio / empresa</label>
+        <input type="text" id="ofNombreEmpresa" placeholder="Ej: Plomería García, Electricidad del Sur">
+      </div>
+
+      <div class="check-group" style="margin-top:14px;">
+        <label class="check-item">
+          <input type="checkbox" id="ofMostrarTel" checked>
+          <span>Mostrar mi teléfono en el perfil público</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Mensajes y botón -->
+    <div id="msgOficio" class="msg" style="margin-top:14px;"></div>
+    <button class="btn-guardar" id="btnGuardar" onclick="guardarOficio()">
+      <i class="fa-solid fa-save"></i> Guardar y publicar perfil
+    </button>
+
+  </div><!-- fin formOficio -->
+
+  <!-- ══ PLACEHOLDERS OTROS TIPOS ══ -->
+  <div id="formProfesional" style="display:none;">
+    <div class="seccion"><div class="pendiente"><i class="fa-solid fa-user-tie" style="color:#7c3aed;"></i><strong>Perfil Profesional</strong><span>Próximamente — en construcción</span></div></div>
+  </div>
+  <div id="formCV" style="display:none;">
+    <div class="seccion"><div class="pendiente"><i class="fa-solid fa-file-lines" style="color:#dc2626;"></i><strong>Busco Empleo / CV</strong><span>Próximamente — en construcción</span></div></div>
+  </div>
+  <div id="formEmpresa" style="display:none;">
+    <div class="seccion"><div class="pendiente"><i class="fa-solid fa-building" style="color:#0369a1;"></i><strong>Empresa / Comercio</strong><span>Próximamente — en construcción</span></div></div>
+  </div>
+  <div id="formEmprendimiento" style="display:none;">
+    <div class="seccion"><div class="pendiente"><i class="fa-solid fa-rocket" style="color:#059669;"></i><strong>Emprendimiento</strong><span>Próximamente — en construcción</span></div></div>
+  </div>
+
+</div><!-- fin wrap -->
+
+
+<!-- ══════════════════════════════════════════
+     MODAL: GUÍA DE DATOS IMPORTANTES
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalGuia" onclick="if(event.target===this)cerrarGuia()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="cerrarGuia()">×</button>
+    <div class="modal-body">
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="font-size:40px;margin-bottom:6px;">📋</div>
+        <h2>Datos importantes para cada perfil</h2>
+        <p class="sub">Hacé clic en tu tipo de perfil para ver qué información necesitás completar.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="modal-tabs">
+        <button class="mtab activo" onclick="verTab('oficio')">🔧 Oficio</button>
+        <button class="mtab" onclick="verTab('profesional')">👔 Profesional</button>
+        <button class="mtab" onclick="verTab('cv')">📄 Busco trabajo</button>
+        <button class="mtab" onclick="verTab('empresa')">🏢 Empresa</button>
+        <button class="mtab" onclick="verTab('emprendimiento')">🚀 Emprendimiento</button>
+      </div>
+
+      <!-- Panel Oficio -->
+      <div class="tab-panel activo" id="tab-oficio">
+        <div class="info-card naranja">
+          <strong>🔧 Si tenés un oficio (plomero, electricista, albañil...)</strong>
+          <ul>
+            <li>Nombre y apellido (cómo te van a ver los clientes)</li>
+            <li>Categoría de oficio y especialidades</li>
+            <li>Código postal y ciudad donde trabajás</li>
+            <li>Zona de cobertura (hasta dónde llegás)</li>
+            <li>Si hacés presupuestos sin costo</li>
+            <li>Matrícula habilitante (si tenés — suma confianza)</li>
+            <li>Descripción: experiencia, garantías, formas de pago</li>
+            <li>Horario de disponibilidad</li>
+            <li>WhatsApp de contacto</li>
+          </ul>
+        </div>
+        <div class="info-card verde">
+          <strong>Ejemplo: Juan, albañil especializado en pisos</strong>
+          <p>Categoría: Albañilería → Especialidades: Pisos y revestimientos, Remodelaciones · Zona: La Plata y alrededores hasta 20km · Presupuesto: Sí · Descripción: "15 años de experiencia, materiales y mano de obra, trabajos garantizados." · Horario: Lun–Sáb 7–17hs</p>
+        </div>
+      </div>
+
+      <!-- Panel Profesional -->
+      <div class="tab-panel" id="tab-profesional">
+        <div class="info-card violeta">
+          <strong>👔 Si sos profesional universitario</strong>
+          <ul>
+            <li>Nombre, apellido y título profesional</li>
+            <li>Especialidad (si tenés más de una)</li>
+            <li>Matrícula profesional (muy importante para la confianza)</li>
+            <li>Si sos abogado: especialidad (civil, laboral, penal...)</li>
+            <li>Si sos médico: especialidad (clínico, pediatra, traumatólogo...)</li>
+            <li>Zona donde atendés y si hacés visitas a domicilio</li>
+            <li>Horarios de atención</li>
+            <li>Teléfono y/o consultorio</li>
+          </ul>
+        </div>
+        <div class="info-card verde">
+          <strong>Ejemplo: Dra. María, odontóloga</strong>
+          <p>Título: Odontóloga · Especialidad: Odontología general y estética · Matrícula: 12345 · Zona: San Justo, La Matanza · Horario: Mar, Jue y Sáb de 9 a 13hs</p>
+        </div>
+      </div>
+
+      <!-- Panel CV -->
+      <div class="tab-panel" id="tab-cv">
+        <div class="info-card rojo">
+          <strong>📄 Si buscás trabajo</strong>
+          <ul>
+            <li>Nombre, apellido y foto profesional</li>
+            <li>Puesto o área a la que aspirás</li>
+            <li>Resumen profesional (2-3 frases sobre vos)</li>
+            <li>Experiencia laboral (empresa, puesto, período)</li>
+            <li>Estudios y formación</li>
+            <li>Habilidades y conocimientos</li>
+            <li>Ciudad y disponibilidad para trabajar</li>
+            <li>Modalidad: presencial, remoto, o ambos</li>
+            <li>Posibilidad de subir el CV en PDF</li>
+          </ul>
+        </div>
+        <div class="info-card verde">
+          <strong>Ejemplo: Lucas, empleado de comercio</strong>
+          <p>Puesto buscado: Vendedor o repositor · Experiencia: 3 años en supermercado · Ciudad: Quilmes · Disponibilidad: inmediata · Modalidad: presencial</p>
+        </div>
+      </div>
+
+      <!-- Panel Empresa -->
+      <div class="tab-panel" id="tab-empresa">
+        <div class="info-card" style="border-left-color:#0369a1;background:#e0f2fe;">
+          <strong>🏢 Si sos empresa o comercio y buscás empleados</strong>
+          <ul>
+            <li>Nombre de la empresa o comercio</li>
+            <li>Rubro / sector de la empresa</li>
+            <li>Breve descripción del negocio</li>
+            <li>Ciudad donde está ubicada</li>
+            <li>Puesto que necesitás cubrir</li>
+            <li>Perfil del empleado (área, experiencia, género si aplica)</li>
+            <li>Jornada laboral y condiciones</li>
+            <li>Cómo contactarse (teléfono o email)</li>
+          </ul>
+        </div>
+        <div class="info-card verde">
+          <strong>Ejemplo: Ferretería El Clavo busca empleado</strong>
+          <p>Empresa: Ferretería El Clavo · Rubro: comercio · Puesto: Vendedor/a de mostrador · Zona: Lanús · Jornada: Part-time mañana · Requisito: experiencia en atención al cliente</p>
+        </div>
+      </div>
+
+      <!-- Panel Emprendimiento -->
+      <div class="tab-panel" id="tab-emprendimiento">
+        <div class="info-card verde">
+          <strong>🚀 Si tenés un emprendimiento</strong>
+          <ul>
+            <li>Nombre del emprendimiento</li>
+            <li>Rubro principal (gastronomía, indumentaria, cosmética...)</li>
+            <li>Sub-rubros (qué productos o servicios específicos ofrecés)</li>
+            <li>Descripción del emprendimiento</li>
+            <li>Ciudad y zona de entrega o servicio</li>
+            <li>Redes sociales (Instagram especialmente)</li>
+            <li>Teléfono / WhatsApp para pedidos</li>
+            <li>Fotos del producto o servicio</li>
+          </ul>
+        </div>
+        <div class="info-card naranja">
+          <strong>Ejemplo: Empanadas Caseras de Laura</strong>
+          <p>Nombre: Empanadas de Laura · Rubro: Gastronomía · Sub-rubro: Empanadas artesanales, minutas · Ciudad: Morón · Entrega: zona Morón y Haedo · Instagram: @empanadasdelaura</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <span style="font-size:13px;color:#64748b;">¿Necesitás ayuda para completar tu perfil?</span>
+      <a href="https://wa.me/542954320639" target="_blank"><i class="fa-brands fa-whatsapp"></i> Escribinos</a>
+    </div>
   </div>
 </div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script type="module" src="/perfil_servicio.js?v=2"></script>
-<script src="/notif_widget.js"></script>
-<script src="/push_widget.js"></script>
-<script src="/chat_widget.js"></script>
-<script src="/splash.js"></script>
+
+<!-- ══════════════════════════════════════════
+     MODAL: SISTEMA DE PUNTAJE
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalScoring" onclick="if(event.target===this)cerrarScoring()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="cerrarScoring()">×</button>
+    <div class="modal-body">
+      <div style="text-align:center;margin-bottom:18px;">
+        <div style="font-size:42px;margin-bottom:8px;">🏆</div>
+        <h2>Sistema de puntaje</h2>
+        <p class="sub">Así funciona el ranking de Trabajos Cerca</p>
+      </div>
+      <div class="scoring-item" style="background:#eff6ff;">
+        <span class="ico">⭐</span>
+        <div><strong>Cómo funciona el puntaje</strong>
+        <p>Cada cliente que te califica suma puntos a tu perfil. Si te califican con <strong>1</strong> sumás 1 punto, con <strong>10</strong> sumás 10 puntos. Tu posición en el buscador depende de tu puntaje total acumulado.</p></div>
+      </div>
+      <div class="scoring-item" style="background:#f0fdf4;">
+        <span class="ico">📈</span>
+        <div><strong>Más puntaje = más visibilidad</strong>
+        <p>Los perfiles con mayor puntaje aparecen primero en las búsquedas. Cuanto más arriba aparecés, más personas ven tu perfil y más clientes conseguís.</p></div>
+      </div>
+      <div class="scoring-item" style="background:#fffbeb;">
+        <span class="ico">💬</span>
+        <div><strong>Pedile a tus clientes que te califiquen</strong>
+        <p>Después de cada trabajo deciles: <em>"¿Me podés calificar en Trabajos Cerca? Me ayudás a conseguir más clientes."</em> Solo eligen un número del 1 al 10.</p></div>
+      </div>
+      <div class="scoring-item" style="background:#fdf4ff;">
+        <span class="ico">👑</span>
+        <div><strong>Perfiles Destacados</strong>
+        <p>Los perfiles <strong>Destacados</strong> aparecen siempre primero, antes del ranking por puntaje. Para obtener el badge Destacado consultá los planes disponibles.</p></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span style="font-size:13px;color:#64748b;">¿Dudas sobre el sistema?</span>
+      <a href="https://wa.me/542954320639" target="_blank"><i class="fa-brands fa-whatsapp"></i> Consultanos</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* ── Supabase ── */
+const SUPA_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+const supa = window.supabase.createClient(SUPA_URL, SUPA_KEY)
+
+var currentUser = null
+
+/* ════════════════════════════
+   SUBCATEGORÍAS POR OFICIO
+════════════════════════════ */
+const SUBCATS = {
+  'Albañilería':              ['Construcción nueva','Remodelaciones','Pisos y revestimientos','Paredes y mampostería','Techos y azoteas','Impermeabilización','Escaleras','Reparaciones generales'],
+  'Plomería':                 ['Destapes','Instalaciones nuevas','Reparación de pérdidas','Calefón y termotanques','Conexiones de gas','Reparaciones generales'],
+  'Gasista':                  ['Instalación de gasoducto','Calefones y termotanques','Estufas y cocinas','Calderas y radiadores','Verificación de instalaciones'],
+  'Electricidad':             ['Instalaciones nuevas','Tableros eléctricos','Iluminación y luminarias','Reparaciones','Domótica','Instalaciones industriales'],
+  'Carpintería':              ['Muebles a medida','Puertas y ventanas','Placares y closets','Deck y pergolados','Escaleras de madera','Reparaciones'],
+  'Pintura':                  ['Pintura interior','Pintura exterior','Enduido y revoques finos','Empapelado','Impermeabilización','Pintura decorativa / texturada'],
+  'Herrería':                 ['Rejas y portones','Puertas de hierro','Estructuras metálicas','Escaleras de hierro','Reparaciones y soldaduras'],
+  'Cerrajería':               ['Apertura de puertas','Cambio de cerraduras','Puertas blindadas','Cajas fuertes','Copiado de llaves'],
+  'Jardinería':               ['Diseño de jardines','Mantenimiento de jardines','Poda de árboles','Sistemas de riego','Césped natural y artificial'],
+  'Limpieza':                 ['Casas y departamentos','Oficinas y comercios','Limpieza post obra','Tapizados y alfombras','Vidrios en altura'],
+  'Mudanzas / Fletes':        ['Mudanzas locales','Mudanzas larga distancia','Fletes y traslados','Embalaje profesional'],
+  'Refrigeración / Aire Acondicionado': ['Instalación de split','Mantenimiento y limpieza','Reparación de equipos','Aire central','Cámaras frigoríficas'],
+  'Informática / Tecnología': ['Reparación de PC y notebook','Reparación de celulares y tablets','Instalación de redes','Soporte técnico','Cámaras de seguridad'],
+  'Mecánica Automotriz':      ['Service general','Reparación de motor','Frenos y suspensión','Electricidad del auto','Chapería y pintura'],
+  'Tapicería':                ['Tapizado de autos','Tapizado de muebles','Cortinados y persianas','Reparaciones'],
+  'Techos e Impermeabilización': ['Tejas cerámicas y calcáreas','Chapa y zinc','Membrana líquida y asfáltica','Policarbonato','Impermeabilización de terrazas'],
+  'Soldadura':                ['Soldadura MIG / TIG','Estructuras metálicas','Portones y rejas','Aluminio','Acero inoxidable'],
+  'Cadetería / Delivery':     ['Mensajería en moto','Paquetería y encomiendas','Delivery de comida','Trámites y diligencias'],
+  'Fotografía / Video':       ['Eventos sociales','Fotografía corporativa','Video y edición','Retratos y book'],
+  'Peluquería / Estética':    ['Corte y peinado','Coloración y mechas','Manicura y pedicura','Cejas y pestañas','Depilación'],
+  'Costura / Modistería':     ['Arreglos de ropa','Ropa a medida','Uniformes','Bordados'],
+  'Gastronomía / Catering':   ['Catering para eventos','Comida por encargo','Repostería y tortas','Servicio de mesa y mozos'],
+  'Mecánica del Hogar':       ['Arreglo de electrodomésticos','Instalación de artefactos','Climatización','Sanitarios'],
+  'Otro oficio':              ['Otro (descripción libre)']
+}
+
+function cargarSubcategorias() {
+  var cat  = document.getElementById('ofCategoria').value
+  var cont = document.getElementById('subsContainer')
+  if(!cat || !SUBCATS[cat]) {
+    cont.innerHTML = '<p class="subs-placeholder">Seleccioná primero la categoría</p>'
+    return
+  }
+  var html = '<div class="checks-grid">'
+  SUBCATS[cat].forEach(function(sub) {
+    html += '<label class="check-item"><input type="checkbox" name="ofSub" value="'+sub+'"> <span>'+sub+'</span></label>'
+  })
+  html += '</div>'
+  cont.innerHTML = html
+}
+
+/* ════════════════════════════
+   CÓDIGO POSTAL
+════════════════════════════ */
+var _lastCP = ''
+async function buscarCPOficio(cp) {
+  cp = (cp||'').trim()
+  if(cp === _lastCP || cp.length < 4) return
+  _lastCP = cp
+  var fb = document.getElementById('ofCPFeedback')
+  fb.textContent = 'Buscando...'; fb.style.display = 'block'; fb.style.color = '#2563eb'
+  try {
+    var res  = await fetch('https://api.zippopotam.us/ar/' + cp)
+    if(!res.ok){ fb.textContent = 'CP no encontrado. Escribí la ciudad manualmente.'; fb.style.color='#b91c1c'; return }
+    var data = await res.json()
+    var pl   = data.places || []
+    if(!pl.length){ fb.textContent = 'Sin resultados. Escribí la ciudad manualmente.'; fb.style.color='#b91c1c'; return }
+    document.getElementById('ofProvincia').value = pl[0]['state']
+    document.getElementById('ofLocalidad').value  = pl[0]['place name']
+    fb.textContent = '✓ Localidad cargada'; fb.style.color = '#166534'
+    setTimeout(function(){ fb.style.display='none' }, 3000)
+  } catch(e) {
+    fb.textContent = 'Error de red. Escribí la ciudad manualmente.'; fb.style.color='#b91c1c'
+  }
+}
+
+/* ════════════════════════════
+   HORARIO RÁPIDO
+════════════════════════════ */
+function setHorario(val) {
+  document.getElementById('ofHorario').value = val
+}
+
+/* ════════════════════════════
+   MOSTRAR/OCULTAR NOMBRE EMPRESA
+════════════════════════════ */
+document.addEventListener('change', function(e) {
+  if(e.target.name === 'ofMostrarComo') {
+    document.getElementById('ofNombreEmpresaWrap').style.display =
+      e.target.value === 'empresa' ? 'block' : 'none'
+  }
+})
+
+/* ════════════════════════════
+   CAMBIAR TIPO
+════════════════════════════ */
+function cambiarTipo(tipo) {
+  var forms = ['Oficio','Profesional','CV','Empresa','Emprendimiento']
+  forms.forEach(function(f){ document.getElementById('form'+f).style.display = 'none' })
+  if(tipo === 'oficio')          document.getElementById('formOficio').style.display = 'block'
+  else if(tipo === 'profesional')document.getElementById('formProfesional').style.display = 'block'
+  else if(tipo === 'cv')         document.getElementById('formCV').style.display = 'block'
+  else if(tipo === 'empresa')    document.getElementById('formEmpresa').style.display = 'block'
+  else if(tipo === 'emprendimiento')document.getElementById('formEmprendimiento').style.display = 'block'
+
+  document.getElementById('selectorTipo').scrollIntoView({ behavior:'smooth', block:'start' })
+}
+
+/* ════════════════════════════
+   FOTO PREVIEW
+════════════════════════════ */
+function previsualizarFoto(input) {
+  if(!input.files || !input.files[0]) return
+  var reader = new FileReader()
+  reader.onload = function(e) {
+    var c = document.getElementById('fotoCircle')
+    c.innerHTML = '<img src="'+e.target.result+'" alt="Foto">'
+  }
+  reader.readAsDataURL(input.files[0])
+  document.getElementById('msgFoto').textContent = 'Foto seleccionada. Guardá el perfil para subirla.'
+}
+
+/* ════════════════════════════
+   GUARDAR OFICIO
+════════════════════════════ */
+async function guardarOficio() {
+  var btn    = document.getElementById('btnGuardar')
+  var msgEl  = document.getElementById('msgOficio')
+  msgEl.className = 'msg'; msgEl.style.display = 'none'
+
+  var categoria  = document.getElementById('ofCategoria').value
+  var localidad  = document.getElementById('ofLocalidad').value.trim()
+  var telefono   = document.getElementById('ofTelefono').value.trim()
+  var descripcion= document.getElementById('ofDescripcion').value.trim()
+
+  if(!categoria)   return mostrarMsgOficio('err','Seleccioná la categoría de tu oficio.')
+  if(!localidad)   return mostrarMsgOficio('err','Ingresá tu ciudad o código postal.')
+  if(!telefono)    return mostrarMsgOficio('err','Ingresá tu número de WhatsApp.')
+  if(!descripcion) return mostrarMsgOficio('err','Escribí una descripción de tu oficio.')
+
+  btn.disabled = true
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
+
+  // Subcategorías seleccionadas
+  var subs = Array.from(document.querySelectorAll('input[name="ofSub"]:checked')).map(function(c){return c.value})
+
+  // Visibilidad
+  var mostrarComo = document.querySelector('input[name="ofMostrarComo"]:checked')?.value || 'personal'
+  var nomEmpresa  = document.getElementById('ofNombreEmpresa').value.trim()
+  var mostrarTel  = document.getElementById('ofMostrarTel').checked
+
+  // Datos extra (guardados en descripcion extendida)
+  var presupuesto = document.getElementById('ofPresupuesto').checked
+  var factura     = document.getElementById('ofFactura').checked
+  var vehiculo    = document.getElementById('ofVehiculo').checked
+  var matricula   = document.getElementById('ofMatricula').value.trim()
+  var radio       = document.getElementById('ofRadio').value.trim()
+  var horario     = document.getElementById('ofHorario').value.trim()
+
+  // Descripcion enriquecida (incluye campos sin columna propia)
+  var descFull = descripcion
+  if(horario)   descFull += '\n⏰ Disponibilidad: ' + horario
+  if(matricula) descFull += '\n📋 Matrícula: ' + matricula
+  if(radio)     descFull += '\n📍 Zona de cobertura: ' + radio
+  var extras = []
+  if(presupuesto) extras.push('Presupuesto sin costo')
+  if(factura)     extras.push('Emite factura')
+  if(vehiculo)    extras.push('Vehículo propio')
+  if(extras.length) descFull += '\n✅ ' + extras.join(' · ')
+
+  var payload = {
+    tipo:              'oficio',
+    profesion_universitaria: categoria,
+    empresa_sector:    subs.join(', ') || null,
+    empresa_descripcion: descFull || null,
+    movil:             '+549' + telefono,
+    direccion:         document.getElementById('ofDireccion').value.trim() || null,
+    codigo_postal:     document.getElementById('ofCP').value.trim() || null,
+    localidad:         localidad,
+    provincia:         document.getElementById('ofProvincia').value.trim() || null,
+    nombre_empresa:    nomEmpresa || null,
+    mostrar_como:      mostrarComo,
+    mostrar_telefono:  mostrarTel
+  }
+
+  var res = await supa.from('perfiles').update(payload).eq('id', currentUser.id)
+
+  if(res.error) {
+    mostrarMsgOficio('err', 'Error al guardar: ' + res.error.message)
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar y publicar perfil'
+    return
+  }
+
+  mostrarMsgOficio('ok', '✅ Perfil guardado y publicado correctamente.')
+  btn.disabled = false
+  btn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar y publicar perfil'
+  btn.style.background = '#059669'
+  setTimeout(function(){ btn.style.background = ''; }, 3000)
+
+  // Subir foto si se seleccionó
+  var fotoInput = document.getElementById('inputFoto')
+  if(fotoInput.files && fotoInput.files[0]) {
+    subirFoto(fotoInput.files[0])
+  }
+}
+
+function mostrarMsgOficio(tipo, msg) {
+  var el = document.getElementById('msgOficio')
+  el.textContent = msg
+  el.className = 'msg ' + tipo
+  el.style.display = 'block'
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' })
+}
+
+/* ════════════════════════════
+   SUBIR FOTO
+════════════════════════════ */
+async function subirFoto(file) {
+  if(!currentUser) return
+  var ext  = file.name.split('.').pop()
+  var path = 'avatars/' + currentUser.id + '.' + ext
+  var upRes = await supa.storage.from('fotos').upload(path, file, { upsert: true })
+  if(upRes.error){ console.warn('foto upload:', upRes.error.message); return }
+  var { data: urlData } = supa.storage.from('fotos').getPublicUrl(path)
+  await supa.from('perfiles').update({ foto: urlData.publicUrl }).eq('id', currentUser.id)
+}
+
+/* ════════════════════════════
+   MODALES
+════════════════════════════ */
+function abrirGuia()    { document.getElementById('modalGuia').classList.add('open') }
+function cerrarGuia()   { document.getElementById('modalGuia').classList.remove('open') }
+function abrirScoring() { document.getElementById('modalScoring').classList.add('open') }
+function cerrarScoring(){ document.getElementById('modalScoring').classList.remove('open') }
+
+function verTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('activo') })
+  document.querySelectorAll('.mtab').forEach(function(t){ t.classList.remove('activo') })
+  document.getElementById('tab-'+id).classList.add('activo')
+  event.target.classList.add('activo')
+}
+
+/* ════════════════════════════
+   INIT: CARGAR PERFIL EXISTENTE
+════════════════════════════ */
+async function init() {
+  var sesRes  = await supa.auth.getSession()
+  var session = sesRes.data?.session
+  if(!session){ window.location.href = '/login.html'; return }
+  currentUser = session.user
+
+  var perfilRes = await supa.from('perfiles')
+    .select('tipo,profesion_universitaria,empresa_sector,empresa_descripcion,movil,direccion,codigo_postal,localidad,provincia,nombre_empresa,mostrar_como,mostrar_telefono,foto')
+    .eq('id', currentUser.id)
+    .maybeSingle()
+
+  var p = perfilRes.data
+  if(!p) return
+
+  // Precargar foto
+  if(p.foto) {
+    document.getElementById('fotoCircle').innerHTML = '<img src="'+p.foto+'" alt="Foto">'
+  }
+
+  // Precargar tipo
+  if(p.tipo) {
+    document.getElementById('selectorTipo').value = p.tipo
+    cambiarTipo(p.tipo)
+  }
+
+  // Precargar oficio
+  if(p.tipo === 'oficio') {
+    if(p.profesion_universitaria) {
+      document.getElementById('ofCategoria').value = p.profesion_universitaria
+      cargarSubcategorias()
+      // Marcar subcategorías
+      if(p.empresa_sector) {
+        var savedSubs = p.empresa_sector.split(', ')
+        setTimeout(function(){
+          document.querySelectorAll('input[name="ofSub"]').forEach(function(cb){
+            cb.checked = savedSubs.includes(cb.value)
+          })
+        }, 50)
+      }
+    }
+    if(p.empresa_descripcion) document.getElementById('ofDescripcion').value = p.empresa_descripcion
+    if(p.movil) document.getElementById('ofTelefono').value = p.movil.replace('+549','')
+    if(p.direccion) document.getElementById('ofDireccion').value = p.direccion
+    if(p.codigo_postal) document.getElementById('ofCP').value = p.codigo_postal
+    if(p.localidad)  document.getElementById('ofLocalidad').value = p.localidad
+    if(p.provincia)  document.getElementById('ofProvincia').value = p.provincia
+    if(p.nombre_empresa) document.getElementById('ofNombreEmpresa').value = p.nombre_empresa
+    if(p.mostrar_como) {
+      var r = document.querySelector('input[name="ofMostrarComo"][value="'+p.mostrar_como+'"]')
+      if(r){ r.checked = true; if(p.mostrar_como==='empresa') document.getElementById('ofNombreEmpresaWrap').style.display='block' }
+    }
+    document.getElementById('ofMostrarTel').checked = p.mostrar_telefono !== false
+  }
+}
+
+init()
+</script>
 </body>
 </html>
