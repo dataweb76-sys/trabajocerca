@@ -750,6 +750,13 @@ function traducirError(msg){
   if(msg.includes('rate limit')) return 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.'
   return 'Ocurrió un error. Por favor intentá de nuevo.'
 }
+
+/* ── Auto-recarga cuando el SW actualiza la versión ── */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message', e => {
+    if(e.data?.type === 'SW_UPDATED') window.location.reload()
+  })
+}
 </script>
 </body>
 </html>
