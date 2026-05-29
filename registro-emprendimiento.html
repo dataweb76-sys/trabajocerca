@@ -400,34 +400,9 @@ body { background:#f8fafc; }
       </div>
 
       <div class="campo">
-        <label>Provincia *</label>
-        <select id="emProvincia" onchange="cargarMunicipios(this.value,'emLocalidad')" required>
-          <option value="">— Se detecta por CP o elegí manualmente —</option>
-          <option>Buenos Aires</option>
-          <option>Ciudad Autónoma de Buenos Aires</option>
-          <option>Catamarca</option>
-          <option>Chaco</option>
-          <option>Chubut</option>
-          <option>Córdoba</option>
-          <option>Corrientes</option>
-          <option>Entre Ríos</option>
-          <option>Formosa</option>
-          <option>Jujuy</option>
-          <option>La Pampa</option>
-          <option>La Rioja</option>
-          <option>Mendoza</option>
-          <option>Misiones</option>
-          <option>Neuquén</option>
-          <option>Río Negro</option>
-          <option>Salta</option>
-          <option>San Juan</option>
-          <option>San Luis</option>
-          <option>Santa Cruz</option>
-          <option>Santa Fe</option>
-          <option>Santiago del Estero</option>
-          <option>Tierra del Fuego</option>
-          <option>Tucumán</option>
-        </select>
+        <label>Provincia</label>
+        <input type="text" id="emProvincia" readonly placeholder="Se completa automático con el CP"
+          style="background:#f1f5f9;color:#475569;cursor:default;">
       </div>
 
       <div class="campo">
@@ -436,7 +411,7 @@ body { background:#f8fafc; }
           <option value="">— Primero completá el código postal —</option>
         </select>
         <button type="button" id="btnCargarLoc"
-          onclick="cargarMunicipios(document.getElementById('emProvincia').value,'emLocalidad')"
+          onclick="obtenerLocalidades(document.getElementById('emCP').value,'emProvincia','emLocalidad')"
           style="margin-top:6px;font-size:12px;padding:5px 12px;border:1.5px solid #d97706;
             border-radius:7px;background:white;color:#d97706;cursor:pointer;font-weight:600;
             display:none;">
