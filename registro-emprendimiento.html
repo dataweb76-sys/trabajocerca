@@ -556,27 +556,39 @@ function getSubtipos(){
     .map(c => c.value)
 }
 
-/* ── Ubicación — copia exacta de app.js ── */
+/* ── Ubicación ── */
 async function obtenerUbicacion(codigo) {
-  codigo = codigo.trim()
+  codigo = (codigo || '').trim()
   if(codigo.length < 4) return
+  const locSel = document.getElementById('emLocalidad')
+  const provInp = document.getElementById('emProvincia')
+  locSel.innerHTML = '<option value="">Cargando...</option>'
   try {
     const res = await fetch('https://api.zippopotam.us/ar/' + codigo)
-    if(!res.ok) return
+    if(!res.ok){ locSel.innerHTML = '<option value="">CP no encontrado</option>'; return }
     const data = await res.json()
-    const select = document.getElementById('emLocalidad')
-    select.innerHTML = '<option value="">Seleccione localidad</option>'
-    data.places.forEach(place => {
+    const places = data.places || []
+    if(!places.length){ locSel.innerHTML = '<option value="">Sin resultados</option>'; return }
+    locSel.innerHTML = '<option value="">— Elegí tu localidad —</option>'
+    places.forEach(p => {
       const opt = document.createElement('option')
-      opt.value = place['place name']
-      opt.textContent = place['place name']
-      select.appendChild(opt)
+      opt.value = p['place name']
+      opt.textContent = p['place name']
+      locSel.appendChild(opt)
     })
-    document.getElementById('emProvincia').value = data.places[0]['state']
-    if(data.places.length === 1) select.value = data.places[0]['place name']
-  } catch(err) { console.error(err) }
+    provInp.value = places[0]['state']
+    if(places.length === 1) locSel.value = places[0]['place name']
+  } catch(err) {
+    console.error('ubicacion:', err)
+    locSel.innerHTML = '<option value="">Error — intentá de nuevo</option>'
+  }
 }
-document.getElementById('emCP').addEventListener('input', e => obtenerUbicacion(e.target.value))
+;(function(){
+  var cpEl = document.getElementById('emCP')
+  cpEl.addEventListener('input',  function(){ obtenerUbicacion(this.value) })
+  cpEl.addEventListener('change', function(){ obtenerUbicacion(this.value) })
+  cpEl.addEventListener('blur',   function(){ obtenerUbicacion(this.value) })
+})()
 
 /* ── Cargar ciudades por provincia (fallback manual) ── */
 window.cargarMunicipios = function(prov, locId) {
