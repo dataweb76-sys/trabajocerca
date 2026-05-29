@@ -326,6 +326,7 @@ body { background:#f8fafc; }
     <!-- Acciones -->
     <div class="reg-seccion" style="padding:16px 20px;">
       <div id="regError" class="reg-error"></div>
+      <div id="regOk" class="reg-ok" style="display:none;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;border-radius:8px;padding:14px 16px;margin-top:10px;font-size:14px;line-height:1.5;text-align:center;"></div>
 
       <button type="submit" class="btn-registrar" id="btnRegistrar">
         <i class="fa-solid fa-paper-plane"></i> Crear mi cuenta
@@ -370,14 +371,22 @@ window.togglePass = function(inputId, iconId) {
   }
 }
 
-/* ── Mostrar error ── */
+/* ── Mostrar mensajes ── */
 function mostrarError(msg) {
   const el = document.getElementById('regError')
   el.textContent = msg
   el.style.display = 'block'
+  document.getElementById('regOk').style.display = 'none'
+}
+function mostrarOk(msg) {
+  const el = document.getElementById('regOk')
+  el.textContent = msg
+  el.style.display = 'block'
+  document.getElementById('regError').style.display = 'none'
 }
 function ocultarError() {
   document.getElementById('regError').style.display = 'none'
+  document.getElementById('regOk').style.display = 'none'
 }
 
 /* ── Registro con email ── */
@@ -421,18 +430,26 @@ document.getElementById('formCV').addEventListener('submit', async e => {
     return mostrarError(traducirError(error.message))
   }
 
-  // Guardar teléfono en profiles si existe el user
-  if(data.user){
-    await supabase.from('perfiles').upsert({
+  const sesionOk = !!(data?.session)
+
+  if(data?.user?.id){
+    const upsertRes = await supabase.from('perfiles').upsert({
       id: data.user.id,
       nombre,
       apellido,
       telefono: '+549' + tel,
       tipo_perfil: 'cv'
     })
+    if(upsertRes.error) console.warn('upsert perfiles:', upsertRes.error.message)
   }
 
-  window.location.href = '/perfil_cv.html?nuevo=1'
+  if(sesionOk){
+    window.location.href = '/perfil_cv.html?nuevo=1'
+  } else {
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Crear mi cuenta'
+    mostrarOk('¡Registro recibido! Revisá tu casilla de correo y hacé clic en el enlace de confirmación para activar tu cuenta.')
+  }
 })
 
 /* ── Registro con Google ── */
