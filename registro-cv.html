@@ -423,7 +423,7 @@ document.getElementById('formCV').addEventListener('submit', async e => {
 
   // Guardar teléfono en profiles si existe el user
   if(data.user){
-    await supabase.from('profiles').upsert({
+    await supabase.from('perfiles').upsert({
       id: data.user.id,
       nombre,
       apellido,

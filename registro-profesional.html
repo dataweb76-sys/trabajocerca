@@ -366,34 +366,49 @@ body { background:#f8fafc; }
 
       <div class="campo">
         <label>Código postal *</label>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="prCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8" required
-            style="flex:0 0 130px;"
-            onkeyup="if(this.value.length>=4)buscarPorCP(this.value,'prLocalidad','prProvincia')">
-          <button type="button"
-            onclick="buscarPorCP(document.getElementById('prCP').value,'prLocalidad','prProvincia')"
-            style="padding:10px 16px;background:#7c3aed;color:white;border:none;border-radius:9px;
-              font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">
-            <i class="fa-solid fa-magnifying-glass"></i> Buscar
-          </button>
-        </div>
+        <input type="text" id="prCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8" required
+          oninput="if(this.value.length>=4)detectarProvinciaCP(this.value,'prProvincia','prLocalidad')">
         <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
-          Ingresá tu CP y se cargarán las localidades de esa zona automáticamente.
+          Al escribir tu CP la provincia se detecta sola y se cargan las localidades.
         </small>
       </div>
 
       <div class="campo">
-        <label>Localidad / Ciudad *</label>
-        <select id="prLocalidad" required
-          onchange="autoProvFromSelect(this,'prProvincia')">
-          <option value="">— Primero ingresá tu código postal —</option>
+        <label>Provincia *</label>
+        <select id="prProvincia" onchange="cargarMunicipios(this.value,'prLocalidad')" required>
+          <option value="">— Se detecta por CP o elegí manualmente —</option>
+          <option>Buenos Aires</option>
+          <option>Ciudad Autónoma de Buenos Aires</option>
+          <option>Catamarca</option>
+          <option>Chaco</option>
+          <option>Chubut</option>
+          <option>Córdoba</option>
+          <option>Corrientes</option>
+          <option>Entre Ríos</option>
+          <option>Formosa</option>
+          <option>Jujuy</option>
+          <option>La Pampa</option>
+          <option>La Rioja</option>
+          <option>Mendoza</option>
+          <option>Misiones</option>
+          <option>Neuquén</option>
+          <option>Río Negro</option>
+          <option>Salta</option>
+          <option>San Juan</option>
+          <option>San Luis</option>
+          <option>Santa Cruz</option>
+          <option>Santa Fe</option>
+          <option>Santiago del Estero</option>
+          <option>Tierra del Fuego</option>
+          <option>Tucumán</option>
         </select>
       </div>
 
       <div class="campo">
-        <label>Provincia</label>
-        <input type="text" id="prProvincia" placeholder="Se completa automáticamente al elegir localidad"
-          readonly style="background:#f1f5f9;color:#475569;cursor:default;">
+        <label>Localidad / Ciudad *</label>
+        <select id="prLocalidad" required>
+          <option value="">— Primero completá el código postal —</option>
+        </select>
       </div>
     </div>
 
@@ -501,33 +516,69 @@ window.cargarSubcategoriasProf = function() {
   wrap.style.display = 'block'
 }
 
-/* ── GeoRef: buscar localidades por CP ── */
-window.buscarPorCP = async function(cp, locId, provId) {
+/* ── CP → Provincia (tabla de rangos) ── */
+function cpAProvincia(cp) {
+  const n = parseInt(cp) || 0
+  if(n>=1000&&n<=1999) return 'Ciudad Autónoma de Buenos Aires'
+  if(n>=5000&&n<=5499) return 'Córdoba'
+  if(n>=5800&&n<=5999) return 'Córdoba'
+  if(n>=5500&&n<=5599) return 'Mendoza'
+  if(n>=5600&&n<=5799) return 'San Luis'
+  if(n>=4000&&n<=4199) return 'Tucumán'
+  if(n>=4400&&n<=4449) return 'Salta'
+  if(n>=4450&&n<=4699) return 'Jujuy'
+  if(n>=4700&&n<=4799) return 'Catamarca'
+  if(n>=4200&&n<=4399) return 'Santiago del Estero'
+  if(n>=3800&&n<=3899) return 'Santiago del Estero'
+  if(n>=5400&&n<=5499) return 'San Juan'
+  if(n>=4300&&n<=4399) return 'La Rioja'
+  if(n>=3000&&n<=3099) return 'Santa Fe'
+  if(n>=2000&&n<=2999) return 'Santa Fe'
+  if(n>=3100&&n<=3299) return 'Entre Ríos'
+  if(n>=3300&&n<=3399) return 'Misiones'
+  if(n>=3400&&n<=3499) return 'Corrientes'
+  if(n>=3500&&n<=3599) return 'Chaco'
+  if(n>=3600&&n<=3699) return 'Formosa'
+  if(n>=3700&&n<=3799) return 'Chaco'
+  if(n>=6500&&n<=6599) return 'La Pampa'
+  if(n>=8600&&n<=8699) return 'La Pampa'
+  if(n>=8200&&n<=8399) return 'Neuquén'
+  if(n>=8100&&n<=8199) return 'Río Negro'
+  if(n>=8400&&n<=8499) return 'Río Negro'
+  if(n>=9000&&n<=9299) return 'Chubut'
+  if(n>=9300&&n<=9499) return 'Santa Cruz'
+  if(n>=9500&&n<=9999) return 'Tierra del Fuego'
+  return 'Buenos Aires'
+}
+
+/* ── Auto-detectar provincia por CP ── */
+window.detectarProvinciaCP = function(cp, provId, locId) {
   if(!cp || cp.length < 4) return
+  const prov = cpAProvincia(cp)
+  const sel = document.getElementById(provId)
+  sel.value = prov
+  cargarMunicipios(prov, locId)
+}
+
+/* ── Cargar municipios por provincia (GeoRef) ── */
+window.cargarMunicipios = async function(prov, locId) {
+  if(!prov) return
   const locSel = document.getElementById(locId)
-  locSel.innerHTML = '<option>Buscando...</option>'
+  locSel.innerHTML = '<option>Cargando localidades...</option>'
   try {
-    const url = `https://apis.datos.gob.ar/georef/api/localidades?codigo_postal=${cp}&max=200&campos=nombre,provincia&orden=nombre`
+    const url = `https://apis.datos.gob.ar/georef/api/municipios?provincia=${encodeURIComponent(prov)}&max=1000&campos=nombre&orden=nombre`
     const res  = await fetch(url)
     const json = await res.json()
-    const locs = json.localidades || []
-    if(!locs.length){
-      locSel.innerHTML = '<option value="">Sin resultados para ese CP. Probá otro.</option>'
+    const municipios = json.municipios || []
+    if(!municipios.length){
+      locSel.innerHTML = '<option value="">Sin resultados. Elegí la provincia manualmente.</option>'
       return
     }
     locSel.innerHTML = '<option value="">— Elegí tu localidad / ciudad —</option>' +
-      locs.map(l => `<option value="${l.nombre}" data-prov="${l.provincia.nombre}">${l.nombre}</option>`).join('')
-    // Auto-fill province from first result
-    if(provId) document.getElementById(provId).value = locs[0].provincia.nombre
-  } catch(_) {
-    locSel.innerHTML = '<option value="">Error al buscar. Intentá de nuevo.</option>'
+      municipios.map(m => `<option value="${m.nombre}">${m.nombre}</option>`).join('')
+  } catch(_){
+    locSel.innerHTML = '<option value="">Error al cargar. Intentá de nuevo.</option>'
   }
-}
-
-/* ── Sincronizar provincia al cambiar localidad ── */
-window.autoProvFromSelect = function(sel, provId) {
-  const opt = sel.options[sel.selectedIndex]
-  if(opt && opt.dataset.prov) document.getElementById(provId).value = opt.dataset.prov
 }
 
 /* ── Horario ── */
@@ -584,8 +635,7 @@ document.getElementById('formProf').addEventListener('submit', async e => {
   if(!email)                    return mostrarError('Ingresá tu email.')
   if(pass.length < 6)           return mostrarError('La contraseña debe tener al menos 6 caracteres.')
   if(!categoria)                return mostrarError('Elegí tu categoría profesional.')
-  if(!localidad)  return mostrarError('Ingresá tu código postal y elegí tu localidad.')
-  if(!provincia)  return mostrarError('Seleccioná una localidad para completar la provincia.')
+  if(!provincia || !localidad)  return mostrarError('Ingresá tu código postal y elegí provincia y localidad.')
   if(!terminos)                 return mostrarError('Tenés que aceptar los términos y condiciones.')
 
   const dias = [...document.querySelectorAll('.dia-chip.activo')].map(d => d.dataset.dia)
@@ -614,7 +664,7 @@ document.getElementById('formProf').addEventListener('submit', async e => {
   }
 
   if(data.user){
-    await supabase.from('profiles').upsert({
+    await supabase.from('perfiles').upsert({
       id: data.user.id,
       nombre,
       apellido,
