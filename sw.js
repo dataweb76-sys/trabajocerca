@@ -4,7 +4,7 @@
    - Manejo de Push Notifications
 ══════════════════════════════════════════════ */
 
-const CACHE_NAME = 'tc-v20'
+const CACHE_NAME = 'tc-v21'
 const CACHE_STATIC = ['/index.html', '/style.css', '/logo.png']
 
 /* ── Instalación ── */
