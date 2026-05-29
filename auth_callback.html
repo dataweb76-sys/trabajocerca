@@ -73,24 +73,16 @@ async function init() {
     var apellido = partes.slice(1).join(' ') || ''
 
     await supa.from('perfiles').upsert({
-      id:      user.id,
-      nombre:  nombre,
+      id:       user.id,
+      nombre:   nombre,
       apellido: apellido,
-      email:   user.email
+      email:    user.email
     })
-
-    window.location.href = '/elegir-tipo.html'
-    return
   }
 
-  if(!perfilRes.data.tipo) {
-    // Tiene perfil pero sin tipo
-    window.location.href = '/elegir-tipo.html'
-    return
-  }
-
-  // Usuario completo → perfil
-  window.location.href = '/perfil.html'
+  // Siempre ir a perfil_servicio para que elija/confirme su tipo
+  // sin pisar datos existentes
+  window.location.href = '/perfil_servicio.html'
 }
 
 init()

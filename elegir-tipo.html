@@ -297,14 +297,14 @@ async function init() {
   }
   currentUser = session.user
 
-  // Si ya tiene tipo asignado, ir directo al perfil
-  var perfilRes = await supa.from('perfiles').select('tipo').eq('id', currentUser.id).maybeSingle()
-  if(perfilRes.data?.tipo) {
+  // Si ya tiene perfil (con o sin tipo), ir al perfil — no pisar datos existentes
+  var perfilRes = await supa.from('perfiles').select('id').eq('id', currentUser.id).maybeSingle()
+  if(perfilRes.data) {
     window.location.href = '/perfil.html'
     return
   }
 
-  // Mostrar selector
+  // Solo llega acá un usuario sin perfil en absoluto
   document.getElementById('cargando').style.display   = 'none'
   document.getElementById('contenido').style.display  = 'block'
 }
