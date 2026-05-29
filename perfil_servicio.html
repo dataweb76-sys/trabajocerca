@@ -713,14 +713,19 @@ document.addEventListener('change', function(e) {
 /* ════════════════════════════
    CAMBIAR TIPO
 ════════════════════════════ */
-function cambiarTipo(tipo) {
+async function cambiarTipo(tipo) {
   var forms = ['Oficio','Profesional','CV','Empresa','Emprendimiento']
   forms.forEach(function(f){ document.getElementById('form'+f).style.display = 'none' })
-  if(tipo === 'oficio')          document.getElementById('formOficio').style.display = 'block'
-  else if(tipo === 'profesional')document.getElementById('formProfesional').style.display = 'block'
-  else if(tipo === 'cv')         document.getElementById('formCV').style.display = 'block'
-  else if(tipo === 'empresa')    document.getElementById('formEmpresa').style.display = 'block'
+  if(tipo === 'oficio')             document.getElementById('formOficio').style.display = 'block'
+  else if(tipo === 'profesional')   document.getElementById('formProfesional').style.display = 'block'
+  else if(tipo === 'cv')            document.getElementById('formCV').style.display = 'block'
+  else if(tipo === 'empresa')       document.getElementById('formEmpresa').style.display = 'block'
   else if(tipo === 'emprendimiento')document.getElementById('formEmprendimiento').style.display = 'block'
+
+  // Guardar el tipo en la DB al instante
+  if(currentUser && tipo) {
+    await supa.from('perfiles').update({ tipo: tipo }).eq('id', currentUser.id)
+  }
 
   document.getElementById('selectorTipo').scrollIntoView({ behavior:'smooth', block:'start' })
 }
