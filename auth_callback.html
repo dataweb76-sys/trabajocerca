@@ -8,254 +8,51 @@
 <title>Ingresando — Trabajos Cerca</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
-
-.wrap {
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #f1f5f9;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  gap: 16px;
   padding: 24px;
   text-align: center;
 }
-
-/* Spinner */
+.logo { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.logo img { width: 44px; height: 44px; border-radius: 12px; }
+.logo span { font-size: 20px; font-weight: 800; color: #1e293b; }
 .spinner {
-  width: 52px; height: 52px;
+  width: 48px; height: 48px;
   border-radius: 50%;
   border: 4px solid #e2e8f0;
   border-top-color: #2563eb;
   animation: spin .8s linear infinite;
-  margin: 0 auto 20px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.spinner-titulo { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
-.spinner-sub    { font-size: 14px; color: #64748b; }
-
-/* Card completar tipo */
-.card {
-  width: 100%;
-  max-width: 500px;
-  background: #fff;
-  border-radius: 16px;
-  padding: 28px 24px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.1);
-  text-align: left;
-  display: none;
-}
-.card h2 { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
-.card .sub { font-size: 14px; color: #64748b; margin-bottom: 20px; }
-
-/* Info Google */
-.google-info {
-  background: #eff6ff;
-  border-radius: 10px;
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.google-info img { width: 38px; height: 38px; border-radius: 50%; display: none; }
-.google-info strong { display: block; font-size: 14px; color: #1e293b; }
-.google-info span   { font-size: 12px; color: #64748b; }
-
-/* Tipo grid */
-.tipo-label { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
-.tipo-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 7px;
-  margin-bottom: 20px;
-}
-.tipo-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 4px 10px;
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: 600;
-  color: #64748b;
-  text-align: center;
-  transition: all .15s;
-  line-height: 1.2;
-}
-.tipo-btn i { font-size: 20px; }
-.tipo-btn:hover { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }
-.tipo-btn.activo { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; box-shadow: 0 0 0 3px #bfdbfe; }
-
-/* Botón */
-.btn-ok {
-  width: 100%;
-  padding: 13px;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: background .15s;
-}
-.btn-ok:hover:not(:disabled) { background: #1d4ed8; }
-.btn-ok:disabled { opacity: .6; cursor: not-allowed; }
-
-.msg-error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 13px;
-  margin-bottom: 12px;
-  display: none;
-}
-
-@media (max-width: 380px) {
-  .tipo-grid { grid-template-columns: repeat(3, 1fr); }
-}
+p { font-size: 15px; color: #64748b; }
 </style>
 </head>
 <body>
-
-<div class="wrap">
-
-  <!-- Estado cargando -->
-  <div id="estadoCargando">
-    <div class="spinner"></div>
-    <p class="spinner-titulo">Verificando cuenta...</p>
-    <p class="spinner-sub">Un momento, estamos confirmando tu ingreso</p>
-  </div>
-
-  <!-- Card para elegir tipo (usuario nuevo) -->
-  <div class="card" id="cardTipo">
-    <h2>¡Ya casi! ¿Cómo usarás Trabajos Cerca?</h2>
-    <p class="sub">Elegí tu tipo de perfil. Después podés completar todos los datos.</p>
-
-    <div class="google-info">
-      <img id="gFoto" src="" alt="">
-      <div>
-        <strong id="gNombre"></strong>
-        <span id="gEmail"></span>
-      </div>
-    </div>
-
-    <p class="tipo-label">Seleccioná una opción</p>
-    <div class="tipo-grid" id="tipoGrid">
-      <button class="tipo-btn" data-tipo="oficio" onclick="elegirTipo('oficio')">
-        <i class="fa-solid fa-wrench"></i>Oficio
-      </button>
-      <button class="tipo-btn" data-tipo="profesional" onclick="elegirTipo('profesional')">
-        <i class="fa-solid fa-user-tie"></i>Profesional
-      </button>
-      <button class="tipo-btn" data-tipo="empresa" onclick="elegirTipo('empresa')">
-        <i class="fa-solid fa-building"></i>Empresa
-      </button>
-      <button class="tipo-btn" data-tipo="emprendimiento" onclick="elegirTipo('emprendimiento')">
-        <i class="fa-solid fa-rocket"></i>Emprendimiento
-      </button>
-      <button class="tipo-btn" data-tipo="cv" onclick="elegirTipo('cv')">
-        <i class="fa-solid fa-file-lines"></i>Busco trabajo
-      </button>
-    </div>
-
-    <div class="msg-error" id="msgErr"></div>
-
-    <button class="btn-ok" id="btnOk" onclick="confirmarTipo()">
-      <i class="fa-solid fa-arrow-right"></i>
-      Continuar
-    </button>
-  </div>
-
+<div class="logo">
+  <img src="/icon-192.png" alt="Trabajos Cerca">
+  <span>Trabajos Cerca</span>
 </div>
+<div class="spinner"></div>
+<p>Verificando tu cuenta...</p>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 const SUPA_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
 const supa = window.supabase.createClient(SUPA_URL, SUPA_KEY)
 
-var tipoSeleccionado = null
-var currentUser      = null
-
-function elegirTipo(tipo) {
-  tipoSeleccionado = tipo
-  document.querySelectorAll('.tipo-btn').forEach(function(b) {
-    b.classList.toggle('activo', b.dataset.tipo === tipo)
-  })
-  document.getElementById('msgErr').style.display = 'none'
-}
-
-async function confirmarTipo() {
-  if(!tipoSeleccionado) {
-    var err = document.getElementById('msgErr')
-    err.textContent = 'Elegí cómo vas a usar Trabajos Cerca.'
-    err.style.display = 'block'
-    return
-  }
-
-  var btn = document.getElementById('btnOk')
-  btn.disabled = true
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
-
-  var meta = currentUser.user_metadata || {}
-  var nombreCompleto = (meta.full_name || meta.name || '').trim().split(' ')
-  var nombre   = nombreCompleto[0] || ''
-  var apellido = nombreCompleto.slice(1).join(' ') || ''
-
-  var res = await supa.from('perfiles').upsert({
-    id:       currentUser.id,
-    nombre:   nombre,
-    apellido: apellido,
-    email:    currentUser.email,
-    tipo:     tipoSeleccionado
-  })
-
-  if(res.error && res.error.code !== '23505') {
-    var err = document.getElementById('msgErr')
-    err.textContent = 'Error al guardar. Intentá de nuevo.'
-    err.style.display = 'block'
-    btn.disabled = false
-    btn.innerHTML = '<i class="fa-solid fa-arrow-right"></i> Continuar'
-    return
-  }
-
-  // Referidos
-  var ref = localStorage.getItem('tc_ref')
-  if(ref && ref !== currentUser.id) {
-    try {
-      var ya = await supa.from('referidos').select('id').eq('referido_id', currentUser.id).maybeSingle()
-      if(!ya.data) {
-        await supa.from('referidos').insert({ referidor_id: ref, referido_id: currentUser.id })
-        var rp = await supa.from('perfiles').select('puntos_referidos').eq('id', ref).single()
-        var pts = (rp.data?.puntos_referidos || 0) + 1
-        await supa.from('perfiles').update({ puntos_referidos: pts }).eq('id', ref)
-      }
-      localStorage.removeItem('tc_ref')
-    } catch(e) { console.warn('referido:', e) }
-  }
-
-  localStorage.removeItem('tc_tipo')
-  window.location.href = '/perfil.html'
-}
-
 async function init() {
-  // Dar tiempo a Supabase para procesar el hash OAuth
+  // Esperar a que Supabase procese el hash OAuth
   await new Promise(function(r) { setTimeout(r, 1000) })
 
-  var sesRes = await supa.auth.getSession()
+  var sesRes  = await supa.auth.getSession()
   var session = sesRes.data?.session
 
   if(!session) {
@@ -263,34 +60,37 @@ async function init() {
     return
   }
 
-  currentUser = session.user
+  var user = session.user
 
-  // Verificar si ya tiene perfil
-  var perfilRes = await supa.from('perfiles').select('id').eq('id', currentUser.id).maybeSingle()
+  // Guardar datos básicos de Google si no tiene perfil
+  var perfilRes = await supa.from('perfiles').select('id, tipo').eq('id', user.id).maybeSingle()
 
-  if(perfilRes.data) {
-    // Usuario existente → ir al perfil
-    window.location.href = '/perfil.html'
+  if(!perfilRes.data) {
+    // Usuario nuevo de Google — crear perfil básico
+    var meta     = user.user_metadata || {}
+    var partes   = (meta.full_name || meta.name || '').trim().split(' ')
+    var nombre   = partes[0] || ''
+    var apellido = partes.slice(1).join(' ') || ''
+
+    await supa.from('perfiles').upsert({
+      id:      user.id,
+      nombre:  nombre,
+      apellido: apellido,
+      email:   user.email
+    })
+
+    window.location.href = '/elegir-tipo.html'
     return
   }
 
-  // Usuario nuevo → mostrar selector de tipo
-  document.getElementById('estadoCargando').style.display = 'none'
-  document.getElementById('cardTipo').style.display       = 'block'
-
-  // Info de Google
-  var meta = currentUser.user_metadata || {}
-  if(meta.avatar_url) {
-    var foto = document.getElementById('gFoto')
-    foto.src = meta.avatar_url
-    foto.style.display = 'block'
+  if(!perfilRes.data.tipo) {
+    // Tiene perfil pero sin tipo
+    window.location.href = '/elegir-tipo.html'
+    return
   }
-  document.getElementById('gNombre').textContent = meta.full_name || meta.name || ''
-  document.getElementById('gEmail').textContent  = currentUser.email
 
-  // Si guardó el tipo antes del OAuth
-  var tipoGuardado = localStorage.getItem('tc_tipo')
-  if(tipoGuardado) elegirTipo(tipoGuardado)
+  // Usuario completo → perfil
+  window.location.href = '/perfil.html'
 }
 
 init()

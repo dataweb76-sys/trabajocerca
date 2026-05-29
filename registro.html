@@ -4,108 +4,174 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#2563eb">
-<title>Crear cuenta — Trabajos Cerca</title>
-<meta name="description" content="Registrate gratis en Trabajos Cerca y conectá con oportunidades laborales en tu zona.">
-<link rel="stylesheet" href="style.css">
+<meta name="theme-color" content="#1d4ed8">
+<title>Registrate gratis — Trabajos Cerca</title>
+<meta name="description" content="Registrate gratis en Trabajos Cerca. Conseguí trabajo, publicá tus servicios y conectá con oportunidades en tu zona.">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8fafc; color: #1e293b; }
 
-/* ── Header ── */
-.reg-header {
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-  padding: 28px 20px 24px;
+/* ══ HERO ══ */
+.hero {
+  background: linear-gradient(145deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%);
+  padding: 40px 20px 48px;
   text-align: center;
   color: #fff;
+  position: relative;
+  overflow: hidden;
 }
-.reg-header img { width: 48px; height: 48px; margin-bottom: 10px; border-radius: 12px; }
-.reg-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-.reg-header p  { font-size: 13px; opacity: .85; }
-
-/* ── Contenedor ── */
-.reg-wrap {
-  max-width: 560px;
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  position: relative;
+}
+.hero-logo img {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.3);
+}
+.hero-logo span {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -.3px;
+}
+.hero h1 {
+  font-size: clamp(22px, 5vw, 32px);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  position: relative;
+}
+.hero h1 em {
+  font-style: normal;
+  color: #fbbf24;
+}
+.hero p {
+  font-size: 15px;
+  opacity: .9;
+  max-width: 480px;
   margin: 0 auto;
+  line-height: 1.6;
+  position: relative;
+}
+
+/* ══ BENEFICIOS ══ */
+.beneficios-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 16px 0;
+}
+.beneficios-titulo {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+.beneficios-sub {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+.beneficios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.ben-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 18px;
+  border: 1.5px solid #e2e8f0;
+  transition: box-shadow .2s, border-color .2s;
+  cursor: default;
+}
+.ben-card:hover {
+  box-shadow: 0 4px 18px rgba(0,0,0,.08);
+  border-color: #bfdbfe;
+}
+.ben-card-ico {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+.ben-card-ico.oficio        { background: #fef3c7; color: #d97706; }
+.ben-card-ico.profesional   { background: #ede9fe; color: #7c3aed; }
+.ben-card-ico.empresa       { background: #e0f2fe; color: #0369a1; }
+.ben-card-ico.emprendimiento{ background: #d1fae5; color: #059669; }
+.ben-card-ico.cv            { background: #fee2e2; color: #dc2626; }
+.ben-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+.ben-card p {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+/* Sorteos banner */
+.sorteos-banner {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 0;
+}
+.sorteos-banner i { font-size: 28px; color: #fff; flex-shrink: 0; }
+.sorteos-banner div { flex: 1; }
+.sorteos-banner strong { display: block; font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+.sorteos-banner span { font-size: 13px; color: #451a03; opacity: .85; line-height: 1.4; }
+
+/* ══ FORMULARIO ══ */
+.form-wrap {
+  max-width: 480px;
+  margin: 32px auto 0;
   padding: 0 16px 80px;
 }
-
-/* ── Selector de tipo ── */
-.tipo-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  margin: 24px 0 10px;
-}
-.tipo-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-}
-.tipo-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 14px 6px 12px;
-  background: #fff;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all .18s;
-  font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
-  line-height: 1.2;
+.form-titulo {
   text-align: center;
-  user-select: none;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 6px;
 }
-.tipo-btn i { font-size: 22px; }
-.tipo-btn:hover { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }
-.tipo-btn.activo {
-  border-color: #2563eb;
-  background: #eff6ff;
-  color: #1d4ed8;
-  box-shadow: 0 0 0 3px #bfdbfe;
+.form-sub {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 20px;
 }
-.tipo-btn.activo i { color: #2563eb; }
 
-/* Iconos por tipo */
-.tipo-btn[data-tipo="oficio"]        i { color: #d97706; }
-.tipo-btn[data-tipo="profesional"]   i { color: #7c3aed; }
-.tipo-btn[data-tipo="empresa"]       i { color: #0369a1; }
-.tipo-btn[data-tipo="emprendimiento"]i { color: #059669; }
-.tipo-btn[data-tipo="cv"]            i { color: #dc2626; }
-
-/* Descripción del tipo seleccionado */
-.tipo-desc {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 12px 16px;
-  margin-top: 10px;
-  font-size: 13px;
-  color: #475569;
-  line-height: 1.5;
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-.tipo-desc i { color: #2563eb; margin-top: 2px; flex-shrink: 0; }
-
-/* ── Tarjeta del formulario ── */
-.reg-card {
+.form-card {
   background: #fff;
   border-radius: 16px;
   padding: 24px 20px;
-  margin-top: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  border: 1px solid #e2e8f0;
 }
 
-/* ── Google ── */
+/* Google */
 .btn-google {
   display: flex;
   align-items: center;
@@ -120,13 +186,12 @@ body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; min-
   font-weight: 600;
   color: #1e293b;
   cursor: pointer;
-  transition: background .15s, border-color .15s;
+  transition: all .15s;
   margin-bottom: 18px;
 }
-.btn-google:hover { background: #f8fafc; border-color: #cbd5e1; }
+.btn-google:hover { background: #f8fafc; border-color: #94a3b8; }
 .btn-google img { width: 20px; height: 20px; }
 
-/* ── Divisor ── */
 .divisor {
   display: flex;
   align-items: center;
@@ -134,23 +199,15 @@ body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; min-
   margin-bottom: 18px;
   color: #94a3b8;
   font-size: 12px;
-}
-.divisor::before, .divisor::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: #e2e8f0;
-}
-
-/* ── Campos ── */
-.campo { margin-bottom: 14px; }
-.campo label {
-  display: block;
-  font-size: 13px;
   font-weight: 600;
-  color: #374151;
-  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
 }
+.divisor::before, .divisor::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
+
+/* Campos */
+.campo { margin-bottom: 14px; }
+.campo label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
 .campo input {
   width: 100%;
   padding: 11px 14px;
@@ -159,54 +216,31 @@ body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; min-
   font-size: 15px;
   color: #1e293b;
   background: #f8fafc;
-  transition: border-color .15s, box-shadow .15s;
   outline: none;
+  transition: border-color .15s, background .15s;
 }
-.campo input:focus {
-  border-color: #2563eb;
-  background: #fff;
-  box-shadow: 0 0 0 3px #bfdbfe55;
-}
+.campo input:focus { border-color: #2563eb; background: #fff; box-shadow: 0 0 0 3px #bfdbfe44; }
 .fila-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
 .pass-wrap { position: relative; }
 .pass-wrap input { padding-right: 44px; }
-.pass-toggle {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #94a3b8;
-  font-size: 15px;
-  padding: 4px;
+.pass-ojo {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 15px; padding: 4px;
 }
-.pass-toggle:hover { color: #475569; }
+.pass-ojo:hover { color: #475569; }
 
-/* ── Términos ── */
-.terminos-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 16px 0;
-  font-size: 13px;
-  color: #475569;
-  line-height: 1.5;
+/* Términos */
+.terminos {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin: 16px 0; font-size: 13px; color: #475569; line-height: 1.5;
 }
-.terminos-row input[type=checkbox] {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  margin-top: 2px;
-  accent-color: #2563eb;
-  cursor: pointer;
-}
-.terminos-row a { color: #2563eb; text-decoration: none; font-weight: 500; }
-.terminos-row a:hover { text-decoration: underline; }
+.terminos input[type=checkbox] { width: 18px; height: 18px; min-width: 18px; margin-top: 2px; accent-color: #2563eb; cursor: pointer; }
+.terminos a { color: #2563eb; text-decoration: none; font-weight: 500; }
+.terminos a:hover { text-decoration: underline; }
 
-/* ── Botón principal ── */
-.btn-registrar {
+/* Botón submit */
+.btn-reg {
   width: 100%;
   padding: 14px;
   background: #2563eb;
@@ -216,272 +250,188 @@ body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; min-
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
   transition: background .15s, transform .1s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
 }
-.btn-registrar:hover:not(:disabled) { background: #1d4ed8; }
-.btn-registrar:active:not(:disabled) { transform: scale(.98); }
-.btn-registrar:disabled { opacity: .6; cursor: not-allowed; }
+.btn-reg:hover:not(:disabled) { background: #1d4ed8; }
+.btn-reg:active:not(:disabled) { transform: scale(.98); }
+.btn-reg:disabled { opacity: .6; cursor: not-allowed; }
 
-/* ── Mensajes ── */
-.msg-error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #b91c1c;
-  border-radius: 9px;
-  padding: 12px 14px;
-  font-size: 13px;
-  margin-bottom: 14px;
-  display: none;
-}
-.msg-ok {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #166534;
-  border-radius: 9px;
-  padding: 12px 14px;
-  font-size: 13px;
-  margin-bottom: 14px;
-  display: none;
-  line-height: 1.5;
-}
+/* Mensajes */
+.msg { border-radius: 9px; padding: 12px 14px; font-size: 13px; margin-bottom: 14px; display: none; line-height: 1.5; }
+.msg.error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+.msg.ok    { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
 
-/* ── Link login ── */
-.link-login {
-  text-align: center;
-  margin-top: 18px;
-  font-size: 13px;
-  color: #64748b;
-}
+.link-login { text-align: center; margin-top: 18px; font-size: 13px; color: #64748b; }
 .link-login a { color: #2563eb; font-weight: 600; text-decoration: none; }
 .link-login a:hover { text-decoration: underline; }
 
-/* ── Responsive ── */
 @media (max-width: 420px) {
-  .tipo-grid { grid-template-columns: repeat(3, 1fr); }
-  .tipo-btn  { font-size: 10px; padding: 12px 4px 10px; }
-  .tipo-btn i{ font-size: 20px; }
-  .fila-2    { grid-template-columns: 1fr; }
+  .fila-2 { grid-template-columns: 1fr; }
+  .beneficios-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
-<div class="reg-header">
-  <img src="/icon-192.png" alt="Trabajos Cerca">
-  <h1>Crear cuenta gratis</h1>
-  <p>Conectá con oportunidades laborales en tu zona</p>
+<!-- ══ HERO ══ -->
+<div class="hero">
+  <div class="hero-logo">
+    <img src="/icon-192.png" alt="Trabajos Cerca">
+    <span>Trabajos Cerca</span>
+  </div>
+  <h1>Todo lo que necesitás,<br><em>cerca tuyo</em></h1>
+  <p>La plataforma gratuita que conecta a personas, profesionales, comercios y empresas de tu zona.</p>
 </div>
 
-<div class="reg-wrap">
+<!-- ══ BENEFICIOS ══ -->
+<div class="beneficios-wrap">
+  <h2 class="beneficios-titulo">¿Por qué registrarte?</h2>
+  <p class="beneficios-sub">Trabajos Cerca es 100% gratis. Elegís cómo querés usar la plataforma.</p>
 
-  <!-- Selector de tipo -->
-  <p class="tipo-label">¿Cómo querés registrarte?</p>
-  <div class="tipo-grid">
-    <button class="tipo-btn" data-tipo="oficio" onclick="elegirTipo('oficio')">
-      <i class="fa-solid fa-wrench"></i>
-      Oficio
-    </button>
-    <button class="tipo-btn" data-tipo="profesional" onclick="elegirTipo('profesional')">
-      <i class="fa-solid fa-user-tie"></i>
-      Profesional
-    </button>
-    <button class="tipo-btn" data-tipo="empresa" onclick="elegirTipo('empresa')">
-      <i class="fa-solid fa-building"></i>
-      Empresa
-    </button>
-    <button class="tipo-btn" data-tipo="emprendimiento" onclick="elegirTipo('emprendimiento')">
-      <i class="fa-solid fa-rocket"></i>
-      Emprendimiento
-    </button>
-    <button class="tipo-btn" data-tipo="cv" onclick="elegirTipo('cv')">
-      <i class="fa-solid fa-file-lines"></i>
-      Busco trabajo
-    </button>
+  <div class="beneficios-grid">
+
+    <div class="ben-card">
+      <div class="ben-card-ico oficio"><i class="fa-solid fa-wrench"></i></div>
+      <h3>Tenés un oficio</h3>
+      <p>Plomero, electricista, carpintero, pintor... Registrate y llegá a los vecinos de tu zona que necesiten tus servicios. Ellos te buscan, vos aparecés.</p>
+    </div>
+
+    <div class="ben-card">
+      <div class="ben-card-ico profesional"><i class="fa-solid fa-user-tie"></i></div>
+      <h3>Sos profesional</h3>
+      <p>Contador, arquitecto, abogado, médico, psicólogo... Conseguí clientes de tu rubro cerca tuyo. Si alguien está construyendo, que te encuentre a vos.</p>
+    </div>
+
+    <div class="ben-card">
+      <div class="ben-card-ico cv"><i class="fa-solid fa-file-lines"></i></div>
+      <h3>Buscás trabajo</h3>
+      <p>Cargá tu CV y dejá que empresas y comercios de tu zona te encuentren. Sin complicaciones, sin intermediarios.</p>
+    </div>
+
+    <div class="ben-card">
+      <div class="ben-card-ico emprendimiento"><i class="fa-solid fa-rocket"></i></div>
+      <h3>Tenés un emprendimiento</h3>
+      <p>Mostrá qué vendés o qué ofrecés a toda tu comunidad. Hacé crecer tu emprendimiento con clientes que están a pocas cuadras.</p>
+    </div>
+
+    <div class="ben-card">
+      <div class="ben-card-ico empresa"><i class="fa-solid fa-building"></i></div>
+      <h3>Sos empresa o comercio</h3>
+      <p>Publicá tus puestos disponibles y encontrá el candidato ideal entre los vecinos de la zona. Rápido, gratuito y sin burocracia.</p>
+    </div>
+
   </div>
 
-  <div class="tipo-desc" id="tipoDesc">
-    <i class="fa-solid fa-circle-info"></i>
-    <span id="tipoDescTxt">Elegí cómo querés registrarte para empezar.</span>
+  <!-- Sorteos -->
+  <div class="sorteos-banner">
+    <i class="fa-solid fa-gift"></i>
+    <div>
+      <strong>🎁 ¡Participás en todos los sorteos!</strong>
+      <span>Al registrarte, quedás automáticamente inscripto en todos los sorteos y promociones de Trabajos Cerca. ¡Es gratis participar!</span>
+    </div>
   </div>
+</div>
 
-  <!-- Formulario -->
-  <div class="reg-card">
+<!-- ══ FORMULARIO ══ -->
+<div class="form-wrap">
+  <h2 class="form-titulo">Creá tu cuenta gratis</h2>
+  <p class="form-sub">Solo te pedimos los datos básicos. Después elegís cómo usarla.</p>
 
-    <button class="btn-google" onclick="registrarGoogle()">
+  <div class="form-card">
+
+    <button class="btn-google" onclick="registrarGoogle()" type="button">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
       Continuar con Google
     </button>
 
     <div class="divisor">o con tu email</div>
 
-    <div id="msgError" class="msg-error"></div>
-    <div id="msgOk"    class="msg-ok"></div>
+    <div id="msgError" class="msg error"></div>
+    <div id="msgOk"    class="msg ok"></div>
 
     <form id="formReg" novalidate>
       <div class="fila-2">
         <div class="campo">
           <label for="rNombre">Nombre</label>
-          <input type="text" id="rNombre" placeholder="Juan" autocomplete="given-name" required>
+          <input type="text" id="rNombre" placeholder="Juan" autocomplete="given-name">
         </div>
         <div class="campo">
           <label for="rApellido">Apellido</label>
-          <input type="text" id="rApellido" placeholder="García" autocomplete="family-name" required>
+          <input type="text" id="rApellido" placeholder="García" autocomplete="family-name">
         </div>
       </div>
-
       <div class="campo">
         <label for="rEmail">Email</label>
-        <input type="email" id="rEmail" placeholder="juan@email.com" autocomplete="email" required>
+        <input type="email" id="rEmail" placeholder="juan@email.com" autocomplete="email">
       </div>
-
       <div class="campo">
         <label for="rPass">Contraseña</label>
         <div class="pass-wrap">
-          <input type="password" id="rPass" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required>
-          <button type="button" class="pass-toggle" onclick="togglePass()">
+          <input type="password" id="rPass" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <button type="button" class="pass-ojo" onclick="togglePass()">
             <i class="fa-solid fa-eye" id="passIco"></i>
           </button>
         </div>
       </div>
-
-      <div class="terminos-row">
+      <div class="terminos">
         <input type="checkbox" id="rTerminos">
         <label for="rTerminos">
           Acepto los <a href="/terminos.html" target="_blank">Términos y Condiciones</a>
           y la <a href="/privacidad.html" target="_blank">Política de Privacidad</a>
         </label>
       </div>
-
-      <button type="submit" class="btn-registrar" id="btnReg">
+      <button type="submit" class="btn-reg" id="btnReg">
         <i class="fa-solid fa-user-plus"></i>
-        Crear mi cuenta
+        Registrarme gratis
       </button>
     </form>
   </div>
 
   <p class="link-login">¿Ya tenés cuenta? <a href="/login.html">Iniciá sesión</a></p>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-/* ══════════════════════════════════════════
-   CONFIG SUPABASE
-══════════════════════════════════════════ */
 const SUPA_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
 const supa = window.supabase.createClient(SUPA_URL, SUPA_KEY)
 
-/* ══════════════════════════════════════════
-   SELECTOR DE TIPO
-══════════════════════════════════════════ */
-const DESCRIPCIONES = {
-  oficio:         'Plomero, electricista, carpintero, pintor y otros oficios. Mostrá tus servicios a vecinos que te necesitan.',
-  profesional:    'Contador, abogado, médico, psicólogo y otros profesionales. Publicá tu perfil y sumá clientes.',
-  empresa:        'Empresa o comercio que busca empleados. Publicá ofertas laborales y encontrá candidatos cerca tuyo.',
-  emprendimiento: 'Negocio propio, marca personal o startup. Hacete conocer en tu zona.',
-  cv:             'Buscás trabajo o nuevas oportunidades. Cargá tu CV y que los empleadores te encuentren.'
-}
-
-var tipoSeleccionado = null
-
-// Pre-seleccionar si viene por URL (?tipo=xxx)
-;(function(){
-  var t = new URLSearchParams(location.search).get('tipo')
-  if(t && DESCRIPCIONES[t]) elegirTipo(t)
-})()
-
-function elegirTipo(tipo) {
-  tipoSeleccionado = tipo
-  document.querySelectorAll('.tipo-btn').forEach(function(b){
-    b.classList.toggle('activo', b.dataset.tipo === tipo)
-  })
-  document.getElementById('tipoDescTxt').textContent = DESCRIPCIONES[tipo]
-  // Guardar para el callback de Google
-  localStorage.setItem('tc_tipo', tipo)
-}
-
-/* ══════════════════════════════════════════
-   MENSAJES
-══════════════════════════════════════════ */
 function mostrarError(msg) {
-  var e = document.getElementById('msgError')
-  var o = document.getElementById('msgOk')
-  e.textContent = msg; e.style.display = 'block'
-  o.style.display = 'none'
+  var e = document.getElementById('msgError'), o = document.getElementById('msgOk')
+  e.innerHTML = msg; e.style.display = 'block'; o.style.display = 'none'
   e.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 }
 function mostrarOk(msg) {
-  var e = document.getElementById('msgError')
-  var o = document.getElementById('msgOk')
-  o.innerHTML = msg; o.style.display = 'block'
-  e.style.display = 'none'
+  var e = document.getElementById('msgError'), o = document.getElementById('msgOk')
+  o.innerHTML = msg; o.style.display = 'block'; e.style.display = 'none'
   o.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 }
-function limpiarMsg() {
+function limpiar() {
   document.getElementById('msgError').style.display = 'none'
   document.getElementById('msgOk').style.display    = 'none'
 }
 
-/* ══════════════════════════════════════════
-   TOGGLE CONTRASEÑA
-══════════════════════════════════════════ */
 function togglePass() {
-  var inp = document.getElementById('rPass')
-  var ico = document.getElementById('passIco')
-  if(inp.type === 'password') {
-    inp.type = 'text'
-    ico.classList.replace('fa-eye', 'fa-eye-slash')
-  } else {
-    inp.type = 'password'
-    ico.classList.replace('fa-eye-slash', 'fa-eye')
-  }
+  var i = document.getElementById('rPass'), ico = document.getElementById('passIco')
+  i.type = i.type === 'password' ? 'text' : 'password'
+  ico.classList.toggle('fa-eye', i.type === 'password')
+  ico.classList.toggle('fa-eye-slash', i.type === 'text')
 }
 
-/* ══════════════════════════════════════════
-   TRADUCIR ERRORES SUPABASE
-══════════════════════════════════════════ */
 function traducirError(msg) {
-  if(!msg) return 'Ocurrió un error. Por favor intentá de nuevo.'
+  if(!msg) return 'Ocurrió un error. Intentá de nuevo.'
   if(msg.includes('already registered') || msg.includes('already been registered'))
     return 'Ya existe una cuenta con ese email. ¿Querés <a href="/login.html">iniciar sesión</a>?'
-  if(msg.includes('Invalid email'))      return 'El email ingresado no es válido.'
+  if(msg.includes('Invalid email'))      return 'El email no es válido.'
   if(msg.includes('Password should be')) return 'La contraseña debe tener al menos 6 caracteres.'
-  if(msg.includes('rate limit'))         return 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.'
-  if(msg.includes('User already registered')) return 'Ya existe una cuenta con ese email.'
+  if(msg.includes('rate limit'))         return 'Demasiados intentos. Esperá unos minutos.'
   return 'Error: ' + msg
 }
 
-/* ══════════════════════════════════════════
-   GUARDAR PERFIL BÁSICO
-══════════════════════════════════════════ */
-async function guardarPerfil(userId, nombre, apellido, email, tipo) {
-  var res = await supa.from('perfiles').upsert({
-    id:       userId,
-    nombre:   nombre,
-    apellido: apellido,
-    email:    email,
-    tipo:     tipo
-  })
-  if(res.error) console.warn('guardarPerfil error:', res.error.message)
-}
-
-/* ══════════════════════════════════════════
-   REGISTRO CON EMAIL
-══════════════════════════════════════════ */
 document.getElementById('formReg').addEventListener('submit', async function(e) {
   e.preventDefault()
-  limpiarMsg()
-
-  if(!tipoSeleccionado) {
-    mostrarError('Elegí cómo querés registrarte (oficio, profesional, empresa, etc.).')
-    document.querySelector('.tipo-grid').scrollIntoView({ behavior: 'smooth' })
-    return
-  }
+  limpiar()
 
   var nombre   = document.getElementById('rNombre').value.trim()
   var apellido = document.getElementById('rApellido').value.trim()
@@ -489,62 +439,47 @@ document.getElementById('formReg').addEventListener('submit', async function(e) 
   var pass     = document.getElementById('rPass').value
   var terminos = document.getElementById('rTerminos').checked
 
-  if(!nombre)          return mostrarError('Ingresá tu nombre.')
-  if(!apellido)        return mostrarError('Ingresá tu apellido.')
-  if(!email)           return mostrarError('Ingresá tu email.')
-  if(pass.length < 6)  return mostrarError('La contraseña debe tener al menos 6 caracteres.')
-  if(!terminos)        return mostrarError('Tenés que aceptar los Términos y Condiciones.')
+  if(!nombre)         return mostrarError('Ingresá tu nombre.')
+  if(!apellido)       return mostrarError('Ingresá tu apellido.')
+  if(!email)          return mostrarError('Ingresá tu email.')
+  if(pass.length < 6) return mostrarError('La contraseña debe tener al menos 6 caracteres.')
+  if(!terminos)       return mostrarError('Tenés que aceptar los Términos y Condiciones.')
 
   var btn = document.getElementById('btnReg')
   btn.disabled = true
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...'
 
   var res = await supa.auth.signUp({
-    email:    email,
+    email: email,
     password: pass,
-    options: {
-      data: { nombre: nombre, apellido: apellido, tipo: tipoSeleccionado }
-    }
+    options: { data: { nombre: nombre, apellido: apellido } }
   })
 
   if(res.error) {
     btn.disabled = false
-    btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Crear mi cuenta'
+    btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Registrarme gratis'
     mostrarError(traducirError(res.error.message))
     return
   }
 
   var userId = res.data?.user?.id
-
   if(userId) {
-    await guardarPerfil(userId, nombre, apellido, email, tipoSeleccionado)
+    await supa.from('perfiles').upsert({ id: userId, nombre: nombre, apellido: apellido, email: email })
   }
 
   if(res.data?.session) {
-    // Sesión activa → ir directo al perfil
-    window.location.href = '/perfil.html'
+    window.location.href = '/elegir-tipo.html'
   } else {
-    // Necesita confirmar email
     mostrarOk(
-      '<i class="fa-solid fa-envelope" style="margin-right:6px"></i>' +
+      '<strong><i class="fa-solid fa-envelope" style="margin-right:6px"></i>¡Listo!</strong><br>' +
       'Revisá tu correo <strong>' + email + '</strong> y hacé clic en el enlace para activar tu cuenta.'
     )
     btn.disabled = false
-    btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Crear mi cuenta'
+    btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Registrarme gratis'
   }
 })
 
-/* ══════════════════════════════════════════
-   REGISTRO CON GOOGLE
-══════════════════════════════════════════ */
 async function registrarGoogle() {
-  if(!tipoSeleccionado) {
-    mostrarError('Primero elegí cómo querés registrarte.')
-    document.querySelector('.tipo-grid').scrollIntoView({ behavior: 'smooth' })
-    return
-  }
-  localStorage.setItem('tc_tipo', tipoSeleccionado)
-
   var res = await supa.auth.signInWithOAuth({
     provider: 'google',
     options: {
@@ -553,17 +488,6 @@ async function registrarGoogle() {
     }
   })
   if(res.error) mostrarError('Error al conectar con Google. Intentá de nuevo.')
-}
-
-/* ══════════════════════════════════════════
-   SERVICE WORKER
-══════════════════════════════════════════ */
-if('serviceWorker' in navigator) {
-  navigator.serviceWorker.addEventListener('message', function(e) {
-    if(e.data && e.data.type === 'SW_UPDATED') {
-      // No recargar en la página de registro para no perder datos
-    }
-  })
 }
 </script>
 </body>
