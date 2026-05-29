@@ -1,299 +1,299 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2563eb">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Trabajos Cerca">
 <title>Ingresando — Trabajos Cerca</title>
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-  .callback-wrap {
-    min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    flex-direction: column; padding: 24px; text-align: center;
-  }
-  .callback-logo { height: 54px; margin-bottom: 20px; }
-  .callback-spinner {
-    width: 52px; height: 52px; border-radius: 50%;
-    border: 4px solid #e2e8f0; border-top-color: #7c3aed;
-    animation: spin .8s linear infinite; margin: 0 auto 18px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .callback-titulo { font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
-  .callback-sub { font-size: 14px; color: #64748b; margin-bottom: 32px; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
 
-  /* Formulario de completar perfil */
-  #form-completar {
-    width: 100%; max-width: 480px; background: white;
-    border-radius: 20px; padding: 32px 28px;
-    box-shadow: 0 4px 24px rgba(0,0,0,.1);
-    text-align: left; display: none;
-  }
-  #form-completar h2 {
-    font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 6px;
-  }
-  #form-completar p {
-    font-size: 13px; color: #64748b; margin-bottom: 20px;
-  }
-  .tipo-cards-mini {
-    display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 20px;
-  }
-  .tc-mini {
-    border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px 6px;
-    text-align: center; cursor: pointer; transition: all .15s;
-  }
-  .tc-mini:hover { border-color: #7c3aed; background: #faf5ff; }
-  .tc-mini.active { border-color: #7c3aed; background: #f5f3ff; }
-  .tc-mini .ico { font-size: 22px; margin-bottom: 4px; }
-  .tc-mini span { font-size: 11px; font-weight: 700; color: #374151; display: block; }
+.wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 24px;
+  text-align: center;
+}
+
+/* Spinner */
+.spinner {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  border: 4px solid #e2e8f0;
+  border-top-color: #2563eb;
+  animation: spin .8s linear infinite;
+  margin: 0 auto 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner-titulo { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+.spinner-sub    { font-size: 14px; color: #64748b; }
+
+/* Card completar tipo */
+.card {
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.1);
+  text-align: left;
+  display: none;
+}
+.card h2 { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+.card .sub { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+
+/* Info Google */
+.google-info {
+  background: #eff6ff;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.google-info img { width: 38px; height: 38px; border-radius: 50%; display: none; }
+.google-info strong { display: block; font-size: 14px; color: #1e293b; }
+.google-info span   { font-size: 12px; color: #64748b; }
+
+/* Tipo grid */
+.tipo-label { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
+.tipo-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+  margin-bottom: 20px;
+}
+.tipo-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 4px 10px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+  transition: all .15s;
+  line-height: 1.2;
+}
+.tipo-btn i { font-size: 20px; }
+.tipo-btn:hover { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }
+.tipo-btn.activo { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; box-shadow: 0 0 0 3px #bfdbfe; }
+
+/* Botón */
+.btn-ok {
+  width: 100%;
+  padding: 13px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background .15s;
+}
+.btn-ok:hover:not(:disabled) { background: #1d4ed8; }
+.btn-ok:disabled { opacity: .6; cursor: not-allowed; }
+
+.msg-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  display: none;
+}
+
+@media (max-width: 380px) {
+  .tipo-grid { grid-template-columns: repeat(3, 1fr); }
+}
 </style>
 </head>
 <body>
 
-<div class="callback-wrap">
-  <img src="logo.png" alt="Trabajos Cerca" class="callback-logo">
+<div class="wrap">
 
-  <!-- Estado: cargando -->
-  <div id="estado-cargando">
-    <div class="callback-spinner"></div>
-    <p class="callback-titulo">Verificando cuenta...</p>
-    <p class="callback-sub">Un momento, estamos confirmando tu ingreso con Google</p>
+  <!-- Estado cargando -->
+  <div id="estadoCargando">
+    <div class="spinner"></div>
+    <p class="spinner-titulo">Verificando cuenta...</p>
+    <p class="spinner-sub">Un momento, estamos confirmando tu ingreso</p>
   </div>
 
-  <!-- Formulario para usuario nuevo -->
-  <div id="form-completar">
-    <h2>¡Casi listo! 🎉</h2>
-    <p>Completá estos datos para terminar tu registro en Trabajos Cerca</p>
+  <!-- Card para elegir tipo (usuario nuevo) -->
+  <div class="card" id="cardTipo">
+    <h2>¡Ya casi! ¿Cómo usarás Trabajos Cerca?</h2>
+    <p class="sub">Elegí tu tipo de perfil. Después podés completar todos los datos.</p>
 
-    <div style="background:#eff6ff;border-radius:12px;padding:12px 14px;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
-      <img id="google-foto" src="" style="width:38px;height:38px;border-radius:50%;display:none;">
+    <div class="google-info">
+      <img id="gFoto" src="" alt="">
       <div>
-        <strong id="google-nombre" style="display:block;font-size:14px;color:#1e293b;"></strong>
-        <span id="google-email" style="font-size:12px;color:#64748b;"></span>
+        <strong id="gNombre"></strong>
+        <span id="gEmail"></span>
       </div>
     </div>
 
-    <label style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:8px;">
-      ¿Qué querés hacer en Trabajos Cerca?
-    </label>
-    <div class="tipo-cards-mini" id="tipo-cards-mini">
-      <div class="tc-mini active" id="tc-pro" onclick="elegirTipoG('profesional')">
-        <div class="ico">🔨</div><span>Ofrezco servicios</span>
-      </div>
-      <div class="tc-mini" id="tc-work" onclick="elegirTipoG('trabajador')">
-        <div class="ico">📄</div><span>Busco trabajo</span>
-      </div>
-      <div class="tc-mini" id="tc-emp" onclick="elegirTipoG('empleador')">
-        <div class="ico">🏢</div><span>Busco personal</span>
-      </div>
+    <p class="tipo-label">Seleccioná una opción</p>
+    <div class="tipo-grid" id="tipoGrid">
+      <button class="tipo-btn" data-tipo="oficio" onclick="elegirTipo('oficio')">
+        <i class="fa-solid fa-wrench"></i>Oficio
+      </button>
+      <button class="tipo-btn" data-tipo="profesional" onclick="elegirTipo('profesional')">
+        <i class="fa-solid fa-user-tie"></i>Profesional
+      </button>
+      <button class="tipo-btn" data-tipo="empresa" onclick="elegirTipo('empresa')">
+        <i class="fa-solid fa-building"></i>Empresa
+      </button>
+      <button class="tipo-btn" data-tipo="emprendimiento" onclick="elegirTipo('emprendimiento')">
+        <i class="fa-solid fa-rocket"></i>Emprendimiento
+      </button>
+      <button class="tipo-btn" data-tipo="cv" onclick="elegirTipo('cv')">
+        <i class="fa-solid fa-file-lines"></i>Busco trabajo
+      </button>
     </div>
 
-    <div class="grid-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <div>
-        <label>Nombre *</label>
-        <input id="g-nombre" placeholder="Juan">
-      </div>
-      <div>
-        <label>Apellido *</label>
-        <input id="g-apellido" placeholder="García">
-      </div>
-    </div>
+    <div class="msg-error" id="msgErr"></div>
 
-    <label>Móvil / WhatsApp</label>
-    <input id="g-movil" placeholder="Ej: 1123456789" type="tel" style="margin-bottom:12px;">
-
-    <label>Código Postal *</label>
-    <input id="g-cp" placeholder="Ej: 1900" type="text" style="margin-bottom:12px;">
-
-    <label>Localidad *</label>
-    <select id="g-localidad" style="margin-bottom:12px;">
-      <option value="">Ingresá el código postal primero</option>
-    </select>
-
-    <label>Provincia</label>
-    <input id="g-provincia" readonly placeholder="Se completa automático" style="margin-bottom:16px;">
-
-    <div id="g-msg"></div>
-
-    <button class="btn btn-primary" onclick="guardarPerfilGoogle()" style="font-size:16px;">
-      Ingresar a Trabajos Cerca <i class="fa-solid fa-arrow-right"></i>
+    <button class="btn-ok" id="btnOk" onclick="confirmarTipo()">
+      <i class="fa-solid fa-arrow-right"></i>
+      Continuar
     </button>
   </div>
+
 </div>
 
-<script type="module">
-import { supabase } from "./supabase.js"
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPA_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+const supa = window.supabase.createClient(SUPA_URL, SUPA_KEY)
 
-/* ── Crédito de referido ── */
-async function creditarReferido(nuevoUserId){
-  const ref = localStorage.getItem('tc_ref')
-  if(!ref || ref === nuevoUserId) return
-  try {
-    const { data: ya } = await supabase.from("referidos").select("id").eq("referido_id", nuevoUserId).maybeSingle()
-    if(ya) return
-    await supabase.from("referidos").insert({ referidor_id: ref, referido_id: nuevoUserId })
-    const { data: rp } = await supabase.from("perfiles").select("puntos_referidos").eq("id", ref).single()
-    const pts = (rp?.puntos_referidos || 0) + 1
-    await supabase.from("perfiles").update({ puntos_referidos: pts }).eq("id", ref)
-    await supabase.from("notificaciones").insert({
-      usuario_id: ref, tipo: "sistema",
-      titulo: "🎉 ¡Ganaste 1 punto de referido!",
-      cuerpo: "Alguien se registró con tu link de invitación. ¡Seguí compartiendo!",
-      url: "/perfil.html"
-    })
-    localStorage.removeItem('tc_ref')
-  } catch(e){ console.warn("creditarReferido:", e) }
+var tipoSeleccionado = null
+var currentUser      = null
+
+function elegirTipo(tipo) {
+  tipoSeleccionado = tipo
+  document.querySelectorAll('.tipo-btn').forEach(function(b) {
+    b.classList.toggle('activo', b.dataset.tipo === tipo)
+  })
+  document.getElementById('msgErr').style.display = 'none'
 }
 
-let tipoGoogle = "profesional"
+async function confirmarTipo() {
+  if(!tipoSeleccionado) {
+    var err = document.getElementById('msgErr')
+    err.textContent = 'Elegí cómo vas a usar Trabajos Cerca.'
+    err.style.display = 'block'
+    return
+  }
 
-window.elegirTipoG = function(t){
-  tipoGoogle = t
-  document.getElementById("tc-pro").classList.toggle("active", t === "profesional")
-  document.getElementById("tc-work").classList.toggle("active", t === "trabajador")
-  document.getElementById("tc-emp").classList.toggle("active", t === "empleador")
-}
-
-// Autocompletar ubicación
-document.getElementById("g-cp").addEventListener("input", async e => {
-  const cp = e.target.value.trim()
-  if(cp.length < 4) return
-  try {
-    const res = await fetch(`https://api.zippopotam.us/ar/${cp}`)
-    if(!res.ok) return
-    const data = await res.json()
-    const sel = document.getElementById("g-localidad")
-    sel.innerHTML = '<option value="">Seleccioná</option>'
-    data.places.forEach(p => {
-      const o = document.createElement("option")
-      o.value = p["place name"]; o.textContent = p["place name"]
-      sel.appendChild(o)
-    })
-    document.getElementById("g-provincia").value = data.places[0]["state"]
-    if(data.places.length === 1) sel.value = data.places[0]["place name"]
-  } catch(err){ console.error(err) }
-})
-
-async function obtenerCoordenadas(ciudad, provincia){
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(ciudad)}&state=${encodeURIComponent(provincia)}&country=Argentina&format=json&limit=1`
-    const res = await fetch(url)
-    const data = await res.json()
-    if(!data.length) return { lat: null, lng: null }
-    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
-  } catch { return { lat: null, lng: null } }
-}
-
-window.guardarPerfilGoogle = async function(){
-  const nombre   = document.getElementById("g-nombre").value.trim()
-  const apellido = document.getElementById("g-apellido").value.trim()
-  const movil    = document.getElementById("g-movil").value.trim()
-  const cp       = document.getElementById("g-cp").value.trim()
-  const localidad= document.getElementById("g-localidad").value
-  const provincia= document.getElementById("g-provincia").value
-  const msg      = document.getElementById("g-msg")
-
-  if(!nombre || !apellido){ msg.innerHTML = '<div class="alerta alerta-err">Completá nombre y apellido</div>'; return }
-  if(!localidad){ msg.innerHTML = '<div class="alerta alerta-err">Ingresá tu código postal y elegí tu localidad</div>'; return }
-
-  const btn = document.querySelector("#form-completar .btn-primary")
+  var btn = document.getElementById('btnOk')
   btn.disabled = true
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if(!user){ window.location.href = "/login.html"; return }
+  var meta = currentUser.user_metadata || {}
+  var nombreCompleto = (meta.full_name || meta.name || '').trim().split(' ')
+  var nombre   = nombreCompleto[0] || ''
+  var apellido = nombreCompleto.slice(1).join(' ') || ''
 
-  const coords = await obtenerCoordenadas(localidad, provincia)
-
-  const { error } = await supabase.from("perfiles").insert({
-    id: user.id,
-    nombre, apellido,
-    email: user.email,
-    movil,
-    codigo_postal: cp,
-    localidad, provincia,
-    pais: "Argentina",
-    lat: coords.lat,
-    lng: coords.lng,
-    tipo: tipoGoogle
+  var res = await supa.from('perfiles').upsert({
+    id:       currentUser.id,
+    nombre:   nombre,
+    apellido: apellido,
+    email:    currentUser.email,
+    tipo:     tipoSeleccionado
   })
 
-  if(error && error.code !== "23505"){ // 23505 = ya existe (duplicate key)
-    msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+  if(res.error && res.error.code !== '23505') {
+    var err = document.getElementById('msgErr')
+    err.textContent = 'Error al guardar. Intentá de nuevo.'
+    err.style.display = 'block'
     btn.disabled = false
-    btn.innerHTML = 'Ingresar a Trabajos Cerca <i class="fa-solid fa-arrow-right"></i>'
+    btn.innerHTML = '<i class="fa-solid fa-arrow-right"></i> Continuar'
     return
   }
 
-  await creditarReferido(user.id)
-  localStorage.removeItem("googleTipo")
+  // Referidos
+  var ref = localStorage.getItem('tc_ref')
+  if(ref && ref !== currentUser.id) {
+    try {
+      var ya = await supa.from('referidos').select('id').eq('referido_id', currentUser.id).maybeSingle()
+      if(!ya.data) {
+        await supa.from('referidos').insert({ referidor_id: ref, referido_id: currentUser.id })
+        var rp = await supa.from('perfiles').select('puntos_referidos').eq('id', ref).single()
+        var pts = (rp.data?.puntos_referidos || 0) + 1
+        await supa.from('perfiles').update({ puntos_referidos: pts }).eq('id', ref)
+      }
+      localStorage.removeItem('tc_ref')
+    } catch(e) { console.warn('referido:', e) }
+  }
 
-  if(tipoGoogle === "profesional")     window.location.href = "/perfil_servicio.html?nuevo=1"
-  else if(tipoGoogle === "empleador")  window.location.href = "/perfil.html?nueva_empresa=1"
-  else                                  window.location.href = "/perfil_cv.html?nuevo=1"
+  localStorage.removeItem('tc_tipo')
+  window.location.href = '/perfil.html'
 }
 
-// ── Al cargar: verificar sesión ──
-async function init(){
-  // Esperar a que Supabase procese el hash OAuth de la URL
-  await new Promise(r => setTimeout(r, 800))
+async function init() {
+  // Dar tiempo a Supabase para procesar el hash OAuth
+  await new Promise(function(r) { setTimeout(r, 1000) })
 
-  const { data: { session } } = await supabase.auth.getSession()
+  var sesRes = await supa.auth.getSession()
+  var session = sesRes.data?.session
 
-  if(!session){
-    // Si no hay sesión después de esperar, algo falló
-    window.location.href = "/login.html"
+  if(!session) {
+    window.location.href = '/login.html'
     return
   }
 
-  const user = session.user
+  currentUser = session.user
 
-  // Ver si ya tiene perfil
-  const { data: perfil } = await supabase
-    .from("perfiles")
-    .select("id, tipo")
-    .eq("id", user.id)
-    .maybeSingle()
+  // Verificar si ya tiene perfil
+  var perfilRes = await supa.from('perfiles').select('id').eq('id', currentUser.id).maybeSingle()
 
-  if(perfil){
-    // Usuario existente → ir directo al perfil
-    window.location.href = "/perfil.html"
+  if(perfilRes.data) {
+    // Usuario existente → ir al perfil
+    window.location.href = '/perfil.html'
     return
   }
 
-  // Usuario nuevo → mostrar formulario de completar datos
-  document.getElementById("estado-cargando").style.display = "none"
-  document.getElementById("form-completar").style.display = "block"
+  // Usuario nuevo → mostrar selector de tipo
+  document.getElementById('estadoCargando').style.display = 'none'
+  document.getElementById('cardTipo').style.display       = 'block'
 
-  // Pre-llenar nombre desde datos de Google
-  const meta = user.user_metadata || {}
-  const nombreCompleto = (meta.full_name || meta.name || "").split(" ")
-  if(nombreCompleto.length >= 2){
-    document.getElementById("g-nombre").value   = nombreCompleto[0]
-    document.getElementById("g-apellido").value = nombreCompleto.slice(1).join(" ")
-  } else if(nombreCompleto[0]){
-    document.getElementById("g-nombre").value = nombreCompleto[0]
+  // Info de Google
+  var meta = currentUser.user_metadata || {}
+  if(meta.avatar_url) {
+    var foto = document.getElementById('gFoto')
+    foto.src = meta.avatar_url
+    foto.style.display = 'block'
   }
+  document.getElementById('gNombre').textContent = meta.full_name || meta.name || ''
+  document.getElementById('gEmail').textContent  = currentUser.email
 
-  // Mostrar foto y email de Google
-  if(meta.avatar_url){
-    const foto = document.getElementById("google-foto")
-    foto.src = meta.avatar_url; foto.style.display = "block"
-  }
-  document.getElementById("google-nombre").textContent = meta.full_name || meta.name || ""
-  document.getElementById("google-email").textContent  = user.email
-
-  // Si venía desde registro con tipo elegido
-  const tipoGuardado = localStorage.getItem("googleTipo")
-  if(tipoGuardado) window.elegirTipoG(tipoGuardado)
+  // Si guardó el tipo antes del OAuth
+  var tipoGuardado = localStorage.getItem('tc_tipo')
+  if(tipoGuardado) elegirTipo(tipoGuardado)
 }
 
 init()
 </script>
-
 </body>
 </html>
