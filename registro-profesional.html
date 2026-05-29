@@ -563,13 +563,12 @@ function cpAProvincia(cp) {
 /* ── Auto-detectar provincia por CP ── */
 window.detectarProvinciaCP = function(cp, provId, locId) {
   if(!cp || cp.length < 4) return
-  const prov = cpAProvincia(cp)
-  const sel = document.getElementById(provId)
+  var prov = cpAProvincia(cp)
+  var sel = document.getElementById(provId)
   sel.value = prov
-  // Mostrar botón de respaldo siempre que haya provincia seleccionada
-  const btn = document.getElementById('btnCargarLoc')
+  var btn = document.getElementById('btnCargarLoc')
   if(btn) btn.style.display = 'inline-block'
-  sel.dispatchEvent(new Event('change'))
+  cargarMunicipios(prov, locId)
 }
 
 /* ── Ciudades por provincia (lista interna, sin API) ── */

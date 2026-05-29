@@ -356,7 +356,7 @@ body { background:#f8fafc; }
 
       <div class="campo">
         <label>Categoría *</label>
-        <select id="emCategoria" onchange="seleccionarCatEmp(this.value)" required>
+        <select id="emCategoria" onchange="seleccionarCatEmp()" required>
           <option value="">— Elegí el rubro de tu emprendimiento —</option>
           <option value="Gastronomía">🍔 Gastronomía</option>
           <option value="Fletes y Mudanzas">🚚 Fletes y Mudanzas</option>
@@ -523,48 +523,55 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY)
 
 /* ══════════════════════════════════════
-   Categorías de emprendimientos
+   Subcategorías por índice de posición
+   (evita comparación de strings con tildes)
 ══════════════════════════════════════ */
-const EMPRENDIMIENTOS = {
-  'Gastronomía':              ['Empanadas','Pizzas','Hamburguesas','Sushi','Tartas y quiches','Facturas y medialunas','Alfajores y dulces','Tortas y pasteles','Cupcakes y muffins','Comida árabe','Comida vegana/vegetariana','Catering','Menú del día','Milanesas','Asado y parrilla','Helados artesanales','Bebidas frías y jugos','Café y té','Sandwiches','Lomitos','Sándwich de bondiola','Pollo frito','Comida peruana','Comida mexicana','Waffles y crepes'],
-  'Fletes y Mudanzas':        ['Flete local','Flete provincial','Flete a todo el país','Mudanza chica','Mudanza grande','Carga liviana','Carga pesada','Transporte de animales','Transporte de vehículos','Mensajería','Distribución de mercadería','Viajes compartidos'],
-  'Tienda y Comercio':        ['Electrodomésticos','Electrónica y tecnología','Ropa y calzado','Alimentos no perecederos','Bebidas','Artículos del hogar','Juguetes','Libros y papelería','Artículos de limpieza','Cosmética y perfumería','Ferretería','Repuestos','Artículos deportivos','Muebles','Colchones','Iluminación','Material de construcción'],
-  'Belleza y Estética':       ['Peluquería a domicilio','Barbería a domicilio','Manicuria','Pedicuria','Depilación','Maquillaje artístico','Micropigmentación','Extensión de pestañas','Uñas acrílicas/gel','Estética facial','Masajes relajantes','Tratamientos corporales','Bronceado','Cejas y pestañas'],
-  'Indumentaria y Moda':      ['Ropa de mujer','Ropa de hombre','Ropa infantil','Ropa deportiva','Calzado','Accesorios y bijouterie','Ropa de trabajo','Disfraces','Lencería','Trajes de baño','Indumentaria de cuero','Ropa de tela artesanal'],
-  'Artesanías y Manualidades':['Tejidos y crochet','Macramé','Cerámica y alfarería','Cuero artesanal','Madera tallada','Velas aromáticas','Jabones artesanales','Papelería y cuadernos','Peluches y muñecos','Decoración del hogar','Joyería artesanal','Arte y pinturas','Origami','Bordados'],
-  'Salud y Bienestar':        ['Productos naturales y herboristería','Suplementos deportivos','Cosmética natural','Aromaterapia','Yoga y meditación','Entrenamiento personal','Alimentación saludable','Productos para bebés','Remedios caseros','CBD y cannabis medicinal'],
-  'Tecnología y Digital':     ['Diseño gráfico','Desarrollo web','Redes sociales','Fotografía','Edición de video','Impresión 3D','Reparación de celulares','Reparación de computadoras','Clases de computación','Diseño de logos','Streaming y contenido digital','NFTs y arte digital'],
-  'Hogar y Decoración':       ['Muebles artesanales','Plantas y jardín','Velas y difusores','Cuadros y arte','Textil del hogar','Almohadas y almohadones','Organizadores y cajas','Menaje y cocina','Iluminación decorativa','Cuadros y pinturas'],
-  'Mascotas':                 ['Accesorios para mascotas','Ropa para mascotas','Comida artesanal para mascotas','Juguetes para mascotas','Peluquería canina','Fotografía de mascotas','Guardería de mascotas','Paseos de perros'],
-  'Educación y Cursos':       ['Clases particulares','Inglés u otros idiomas','Música e instrumentos','Arte y pintura','Costura y manualidades','Cocina y repostería','Yoga y pilates','Programación','Apoyo escolar','Cursos online','Talleres presenciales','Capacitaciones laborales'],
-  'Eventos y Entretenimiento':['Decoración de eventos','Tortas y mesa dulce','Animación infantil','Fotografía de eventos','Catering para fiestas','DJ y música en vivo','Alquiler de disfraces','Juegos e inflables','Video y edición de eventos','Ceremonias y rituales'],
-  'Construcción y Refacciones':['Materiales de construcción','Herramientas','Pinturas y revestimientos','Aberturas y ventanas','Cerámicos y pisos','Sanitarios y griferías','Materiales eléctricos','Materiales de plomería'],
-  'Automotores':              ['Repuestos de autos','Repuestos de motos','Accesorios para autos','Aceites y lubricantes','Llantas y neumáticos','Audio y alarmas','Limpieza de autos','Cubiertas'],
-  'Servicios Profesionales':  ['Contabilidad para pymes','Asesoría legal','Marketing y publicidad','Traducciones','Coaching','Gestión de redes sociales','Diseño de presentaciones','Trámites y gestiones','Seguros','Asesorías financieras'],
-  'Otro rubro':               []
-}
+const SUBCATEGORIAS = [
+  [],
+  ['Empanadas','Pizzas','Hamburguesas','Sushi','Tartas y quiches','Facturas y medialunas','Alfajores y dulces','Tortas y pasteles','Cupcakes y muffins','Comida vegana','Catering','Menu del dia','Milanesas','Asado y parrilla','Helados artesanales','Bebidas frias y jugos','Cafe y te','Sandwiches','Lomitos','Pollo frito','Comida peruana','Comida mexicana','Waffles y crepes'],
+  ['Flete local','Flete provincial','Flete nacional','Mudanza chica','Mudanza grande','Carga liviana','Carga pesada','Transporte de animales','Transporte de vehiculos','Mensajeria','Distribucion de mercaderia','Viajes compartidos'],
+  ['Electrodomesticos','Electronica y tecnologia','Ropa y calzado','Alimentos','Bebidas','Articulos del hogar','Juguetes','Libreria y papeleria','Limpieza','Cosmetica','Ferreteria','Repuestos','Articulos deportivos','Muebles','Colchones','Iluminacion'],
+  ['Peluqueria a domicilio','Barberia a domicilio','Manicuria','Pedicuria','Depilacion','Maquillaje artistico','Micropigmentacion','Extension de pestanas','Unas acrilicas/gel','Estetica facial','Masajes relajantes','Tratamientos corporales','Bronceado','Cejas y pestanas'],
+  ['Ropa de mujer','Ropa de hombre','Ropa infantil','Ropa deportiva','Calzado','Accesorios y bijouterie','Ropa de trabajo','Disfraces','Lenceria','Trajes de bano','Indumentaria de cuero'],
+  ['Tejidos y crochet','Macrame','Ceramica y alfareria','Cuero artesanal','Madera tallada','Velas aromaticas','Jabones artesanales','Papeleria y cuadernos','Peluches y munecas','Decoracion del hogar','Joyeria artesanal','Arte y pinturas','Origami','Bordados'],
+  ['Productos naturales','Suplementos deportivos','Cosmetica natural','Aromaterapia','Yoga y meditacion','Entrenamiento personal','Alimentacion saludable','Productos para bebes','Remedios caseros'],
+  ['Diseno grafico','Desarrollo web','Redes sociales','Fotografia','Edicion de video','Impresion 3D','Reparacion de celulares','Reparacion de computadoras','Clases de computacion','Diseno de logos','Streaming y contenido digital'],
+  ['Muebles artesanales','Plantas y jardin','Velas y difusores','Cuadros y arte','Textil del hogar','Almohadas y almohadones','Organizadores y cajas','Menaje y cocina','Iluminacion decorativa'],
+  ['Accesorios para mascotas','Ropa para mascotas','Comida artesanal para mascotas','Juguetes para mascotas','Peluqueria canina','Fotografia de mascotas','Guarderia de mascotas','Paseos de perros'],
+  ['Clases particulares','Ingles u otros idiomas','Musica e instrumentos','Arte y pintura','Costura y manualidades','Cocina y reposteria','Yoga y pilates','Programacion','Apoyo escolar','Cursos online','Talleres presenciales'],
+  ['Decoracion de eventos','Tortas y mesa dulce','Animacion infantil','Fotografia de eventos','Catering para fiestas','DJ y musica en vivo','Alquiler de disfraces','Juegos e inflables','Video y edicion de eventos'],
+  ['Materiales de construccion','Herramientas','Pinturas y revestimientos','Aberturas y ventanas','Ceramicos y pisos','Sanitarios y griferias','Materiales electricos','Materiales de plomeria'],
+  ['Repuestos de autos','Repuestos de motos','Accesorios para autos','Aceites y lubricantes','Llantas y neumaticos','Audio y alarmas','Limpieza de autos','Cubiertas'],
+  ['Contabilidad para pymes','Asesoria legal','Marketing y publicidad','Traducciones','Coaching','Gestion de redes sociales','Tramites y gestiones','Seguros','Asesorias financieras'],
+  []
+]
 
-/* ── Selector de categoría (dropdown) ── */
-window.seleccionarCatEmp = function(cat) {
-  const subs   = EMPRENDIMIENTOS[cat] || []
+/* ── Selector de categoria — usa selectedIndex, sin comparacion de strings ── */
+window.seleccionarCatEmp = function() {
+  const sel    = document.getElementById('emCategoria')
+  const idx    = sel.selectedIndex
+  const subs   = SUBCATEGORIAS[idx] || []
   const wrap   = document.getElementById('subEmpWrap')
   const cbWrap = document.getElementById('subEmpCheckboxes')
 
   cbWrap.innerHTML = ''
 
-  if(!cat || subs.length === 0){
+  if(idx === 0 || subs.length === 0){
     wrap.style.display = 'none'
     return
   }
 
-  cbWrap.innerHTML = subs.map(s => {
-    const id = 'sub_' + s.replace(/[^a-zA-Z0-9]/g,'_')
-    return `<label class="sub-chip" id="lbl_${id}">
-      <input type="checkbox" value="${s}" id="${id}"
-        onchange="document.getElementById('lbl_${id}').classList.toggle('activo',this.checked)">
-      ${s}
-    </label>`
-  }).join('')
+  subs.forEach(function(s){
+    var lbl = document.createElement('label')
+    lbl.className = 'sub-chip'
+    var cb = document.createElement('input')
+    cb.type = 'checkbox'
+    cb.value = s
+    cb.onchange = function(){ lbl.classList.toggle('activo', this.checked) }
+    lbl.appendChild(cb)
+    lbl.appendChild(document.createTextNode(' ' + s))
+    cbWrap.appendChild(lbl)
+  })
 
   wrap.style.display = 'block'
 }
@@ -615,13 +622,12 @@ function cpAProvincia(cp) {
 /* ── Auto-detectar provincia por CP ── */
 window.detectarProvinciaCP = function(cp, provId, locId) {
   if(!cp || cp.length < 4) return
-  const prov = cpAProvincia(cp)
-  const sel = document.getElementById(provId)
+  var prov = cpAProvincia(cp)
+  var sel = document.getElementById(provId)
   sel.value = prov
-  // Mostrar botón de respaldo siempre que haya provincia seleccionada
-  const btn = document.getElementById('btnCargarLoc')
+  var btn = document.getElementById('btnCargarLoc')
   if(btn) btn.style.display = 'inline-block'
-  sel.dispatchEvent(new Event('change'))
+  cargarMunicipios(prov, locId)
 }
 
 /* ── Ciudades por provincia (lista interna, sin API) ── */
