@@ -246,6 +246,15 @@ body { background:#f8fafc; }
   margin-top: 10px;
   display: none;
 }
+.reg-ok {
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-top: 10px;
+  display: none;
+}
 
 .ya-cuenta {
   text-align: center;
@@ -391,31 +400,22 @@ body { background:#f8fafc; }
       <h2><i class="fa-solid fa-location-dot"></i> Ubicación</h2>
 
       <div class="campo">
-        <label>Código postal *</label>
-        <input type="text" id="emCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8" required>
-        <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
-          Al escribir tu CP la provincia se detecta sola y se cargan las localidades.
-        </small>
+        <label>Código postal</label>
+        <input type="text" id="emCP" placeholder="Ej: 6300" inputmode="numeric" maxlength="8">
+        <div id="emCPFeedback" style="font-size:12px;margin-top:4px;display:none;color:#d97706;"></div>
       </div>
 
       <div class="campo">
         <label>Provincia</label>
-        <input type="text" id="emProvincia" readonly placeholder="Se completa automático con el CP"
-          style="background:#f1f5f9;color:#475569;cursor:default;">
+        <input type="text" id="emProvincia" placeholder="Ej: La Pampa">
       </div>
 
       <div class="campo">
         <label>Localidad / Ciudad *</label>
-        <select id="emLocalidad" required>
-          <option value="">— Primero completá el código postal —</option>
-        </select>
-        <button type="button" id="btnCargarLoc"
-          onclick="obtenerUbicacion(document.getElementById('emCP').value)"
-          style="margin-top:6px;font-size:12px;padding:5px 12px;border:1.5px solid #d97706;
-            border-radius:7px;background:white;color:#d97706;cursor:pointer;font-weight:600;
-            display:none;">
-          <i class="fa-solid fa-rotate-right"></i> Cargar localidades manualmente
-        </button>
+        <input type="text" id="emLocalidad" placeholder="Ej: Santa Rosa" required>
+        <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
+          Se completa automático con el CP, o escribí tu ciudad directamente.
+        </small>
       </div>
 
       <div class="campo">
@@ -468,6 +468,7 @@ body { background:#f8fafc; }
     <!-- Acciones -->
     <div class="reg-seccion" style="padding:16px 20px;">
       <div id="regError" class="reg-error"></div>
+      <div id="regOk" class="reg-ok"></div>
 
       <button type="submit" class="btn-registrar" id="btnRegistrar">
         <i class="fa-solid fa-rocket"></i> Registrar mi emprendimiento
@@ -556,189 +557,141 @@ function getSubtipos(){
     .map(c => c.value)
 }
 
-/* ── Ubicación ── */
-async function obtenerUbicacion(codigo) {
+/* ── Ubicación por CP ── */
+var _lastCPem = ''
+async function buscarCP(codigo) {
   codigo = (codigo || '').trim()
+  if(codigo === _lastCPem) return
+  _lastCPem = codigo
   if(codigo.length < 4) return
-  const locSel = document.getElementById('emLocalidad')
-  const provInp = document.getElementById('emProvincia')
-  locSel.innerHTML = '<option value="">Cargando...</option>'
+  var fb = document.getElementById('emCPFeedback')
+  fb.textContent = 'Buscando...'; fb.style.display = 'block'; fb.style.color = '#d97706'
   try {
-    const res = await fetch('https://api.zippopotam.us/ar/' + codigo)
-    if(!res.ok){ locSel.innerHTML = '<option value="">CP no encontrado</option>'; return }
-    const data = await res.json()
-    const places = data.places || []
-    if(!places.length){ locSel.innerHTML = '<option value="">Sin resultados</option>'; return }
-    locSel.innerHTML = '<option value="">— Elegí tu localidad —</option>'
-    places.forEach(p => {
-      const opt = document.createElement('option')
-      opt.value = p['place name']
-      opt.textContent = p['place name']
-      locSel.appendChild(opt)
-    })
-    provInp.value = places[0]['state']
-    if(places.length === 1) locSel.value = places[0]['place name']
+    var res = await fetch('https://api.zippopotam.us/ar/' + codigo)
+    if(!res.ok){ fb.textContent = 'CP no encontrado. Escribí tu ciudad manualmente.'; fb.style.color='#b91c1c'; return }
+    var data = await res.json()
+    var places = data.places || []
+    if(!places.length){ fb.textContent = 'Sin resultados. Escribí tu ciudad manualmente.'; fb.style.color='#b91c1c'; return }
+    document.getElementById('emProvincia').value = places[0]['state']
+    document.getElementById('emLocalidad').value  = places[0]['place name']
+    fb.textContent = '✓ Localidad cargada'; fb.style.color = '#166534'
+    setTimeout(function(){ fb.style.display = 'none' }, 3000)
   } catch(err) {
-    console.error('ubicacion:', err)
-    locSel.innerHTML = '<option value="">Error — intentá de nuevo</option>'
+    fb.textContent = 'Error de red. Escribí tu ciudad manualmente.'; fb.style.color='#b91c1c'
   }
 }
-;(function(){
-  var cpEl = document.getElementById('emCP')
-  cpEl.addEventListener('input',  function(){ obtenerUbicacion(this.value) })
-  cpEl.addEventListener('change', function(){ obtenerUbicacion(this.value) })
-  cpEl.addEventListener('blur',   function(){ obtenerUbicacion(this.value) })
-})()
 
-/* ── Cargar ciudades por provincia (fallback manual) ── */
-window.cargarMunicipios = function(prov, locId) {
-  if(!prov) return
-  var ciudades = {
-    'Buenos Aires':['Adrogué','Avellaneda','Azul','Bahía Blanca','Balcarce','Berazategui','Bernal','Bragado','Campana','Cañuelas','Chacabuco','Chascomús','Chivilcoy','Coronel Suárez','Escobar','Ezeiza','Florencio Varela','Florida','Hurlingham','Ituzaingó','José C. Paz','Junín','La Plata','Lanús','Lomas de Zamora','Luján','Mar del Plata','Mercedes','Merlo','Monte Grande','Moreno','Morón','Necochea','9 de Julio','Olavarría','Pergamino','Pilar','Pinamar','Quilmes','Ramos Mejía','San Fernando','San Isidro','San Martín','San Miguel','San Nicolás','San Pedro','San Vicente','Tandil','Tigre','Tres Arroyos','Vicente López','Villa Gesell','Zárate'],
-    'Ciudad Autónoma de Buenos Aires':['Almagro','Balvanera','Barracas','Belgrano','Boedo','Caballito','Chacarita','Colegiales','Constitución','Flores','La Boca','Liniers','Montserrat','Palermo','Recoleta','Retiro','Saavedra','San Telmo','Villa Crespo','Villa Devoto','Villa Lugano','Villa Urquiza'],
-    'Catamarca':['Andalgalá','Belén','Fiambalá','Recreo','San Fernando del Valle de Catamarca','Santa María','Tinogasta'],
-    'Chaco':['Barranqueras','Charata','Las Breñas','Presidencia Roque Sáenz Peña','Quitilipi','Resistencia','Villa Ángela'],
-    'Chubut':['Comodoro Rivadavia','Esquel','Gaiman','Puerto Madryn','Rawson','Sarmiento','Trelew'],
-    'Córdoba':['Alta Gracia','Bell Ville','Córdoba','Cruz del Eje','Jesús María','La Calera','Marcos Juárez','Río Ceballos','Río Cuarto','Río Tercero','San Francisco','Villa Carlos Paz','Villa Dolores','Villa María'],
-    'Corrientes':['Bella Vista','Corrientes','Curuzú Cuatiá','Goya','Ituzaingó','Mercedes','Monte Caseros','Paso de los Libres','Santo Tomé'],
-    'Entre Ríos':['Colón','Concordia','Diamante','Gualeguay','Gualeguaychú','Nogoyá','Paraná','Victoria','Villaguay'],
-    'Formosa':['Clorinda','El Colorado','Formosa','Las Lomitas','Pirané'],
-    'Jujuy':['Humahuaca','La Quiaca','Ledesma','Palpalá','Perico','San Pedro de Jujuy','San Salvador de Jujuy','Tilcara'],
-    'La Pampa':['Eduardo Castex','General Acha','General Pico','Guatraché','Macachín','Quemú Quemú','Realicó','Santa Rosa','Toay','Victorica'],
-    'La Rioja':['Aimogasta','Chamical','Chilecito','La Rioja','Villa Unión'],
-    'Mendoza':['General Alvear','Godoy Cruz','Guaymallén','Las Heras','Luján de Cuyo','Maipú','Malargüe','Mendoza','San Martín','San Rafael','Tupungato'],
-    'Misiones':['Apóstoles','Eldorado','Oberá','Posadas','Puerto Iguazú'],
-    'Neuquén':['Chos Malal','Cutral-Có','Junín de los Andes','Neuquén','Plottier','San Martín de los Andes','Villa La Angostura','Zapala'],
-    'Río Negro':['Bariloche','Catriel','Cipolletti','El Bolsón','General Roca','Viedma'],
-    'Salta':['Cafayate','General Güemes','Metán','Orán','Salta','Tartagal'],
-    'San Juan':['Caucete','Chimbas','Jáchal','Rawson','San Juan','Santa Lucía'],
-    'San Luis':['Merlo','San Luis','Villa Mercedes'],
-    'Santa Cruz':['El Calafate','Caleta Olivia','Puerto Deseado','Río Gallegos','Río Turbio'],
-    'Santa Fe':['Cañada de Gómez','Casilda','Esperanza','Rafaela','Reconquista','Rosario','Santa Fe','Venado Tuerto','Villa Constitución'],
-    'Santiago del Estero':['Añatuya','Frías','La Banda','Santiago del Estero','Termas de Río Hondo'],
-    'Tierra del Fuego':['Río Grande','Tolhuin','Ushuaia'],
-    'Tucumán':['Aguilares','Banda del Río Salí','Concepción','Monteros','San Miguel de Tucumán','Tafí Viejo','Yerba Buena']
-  }
-  var locSel = document.getElementById(locId)
-  var lista = (ciudades[prov] || []).sort(function(a,b){ return a.localeCompare(b,'es') })
-  if(!lista.length){
-    locSel.innerHTML = '<option value="">Sin ciudades — escribí en Dirección</option>'
-    return
-  }
-  locSel.innerHTML = '<option value="">Elegí tu localidad / ciudad</option>'
-  lista.forEach(function(c){
-    var o = document.createElement('option')
-    o.value = c; o.textContent = c
-    locSel.appendChild(o)
-  })
-  var btn = document.getElementById('btnCargarLoc')
-  if(btn) btn.style.display = 'none'
-}
+;(function(){
+  var el = document.getElementById('emCP')
+  el.addEventListener('input',  function(){ buscarCP(this.value) })
+  el.addEventListener('change', function(){ buscarCP(this.value) })
+  el.addEventListener('blur',   function(){ buscarCP(this.value) })
+})()
 
 /* ── Toggle contraseña ── */
 window.togglePass = function(inputId, iconId) {
-  const inp = document.getElementById(inputId)
-  const ico = document.getElementById(iconId)
+  var inp = document.getElementById(inputId)
+  var ico = document.getElementById(iconId)
   if(inp.type === 'password'){ inp.type = 'text'; ico.classList.replace('fa-eye','fa-eye-slash') }
   else { inp.type = 'password'; ico.classList.replace('fa-eye-slash','fa-eye') }
 }
 
-/* ── Error ── */
-function mostrarError(msg){ const el = document.getElementById('regError'); el.textContent = msg; el.style.display = 'block' }
-function ocultarError(){ document.getElementById('regError').style.display = 'none' }
+/* ── Mensajes ── */
+function mostrarError(msg){ var el=document.getElementById('regError'); el.textContent=msg; el.style.display='block' }
+function ocultarError(){ document.getElementById('regError').style.display='none' }
 
 /* ── Submit ── */
-document.getElementById('formEmp').addEventListener('submit', async e => {
+document.getElementById('formEmp').addEventListener('submit', async function(e) {
   e.preventDefault()
   ocultarError()
 
-  const nombre      = document.getElementById('emNombre').value.trim()
-  const apellido    = document.getElementById('emApellido').value.trim()
-  const nombreEmp   = document.getElementById('emNombreEmp').value.trim()
-  const display     = document.querySelector('input[name=emDisplay]:checked')?.value || 'personal'
-  const tel         = document.getElementById('emTel').value.trim()
-  const email       = document.getElementById('emEmail').value.trim()
-  const pass        = document.getElementById('emPass').value
-  const provincia   = document.getElementById('emProvincia').value
-  const localidad   = document.getElementById('emLocalidad').value
-  const cp          = document.getElementById('emCP').value.trim()
-  const direccion   = document.getElementById('emDireccion').value.trim()
-  const alcance     = document.querySelector('input[name=emAlcance]:checked')?.value || 'ciudad'
-  const terminos    = document.getElementById('emTerminos').checked
-  const subtipos    = getSubtipos()
+  var nombre    = document.getElementById('emNombre').value.trim()
+  var apellido  = document.getElementById('emApellido').value.trim()
+  var nombreEmp = document.getElementById('emNombreEmp').value.trim()
+  var display   = (document.querySelector('input[name=emDisplay]:checked') || {}).value || 'personal'
+  var tel       = document.getElementById('emTel').value.trim()
+  var email     = document.getElementById('emEmail').value.trim()
+  var pass      = document.getElementById('emPass').value
+  var provincia = document.getElementById('emProvincia').value.trim()
+  var localidad = document.getElementById('emLocalidad').value.trim()
+  var cp        = document.getElementById('emCP').value.trim()
+  var direccion = document.getElementById('emDireccion').value.trim()
+  var alcance   = (document.querySelector('input[name=emAlcance]:checked') || {}).value || 'ciudad'
+  var terminos  = document.getElementById('emTerminos').checked
+  var subtipos  = getSubtipos()
+  var categoria = document.getElementById('emCategoria').value
 
-  if(!nombre || !apellido)      return mostrarError('Por favor ingresá tu nombre y apellido.')
-  if(!nombreEmp)                return mostrarError('Ingresá el nombre de tu emprendimiento.')
-  if(!tel || tel.length < 8)    return mostrarError('Ingresá un número de WhatsApp válido.')
-  if(!email)                    return mostrarError('Ingresá tu email.')
-  if(pass.length < 6)           return mostrarError('La contraseña debe tener al menos 6 caracteres.')
-  const catSeleccionada = document.getElementById('emCategoria').value
-  if(!catSeleccionada)          return mostrarError('Elegí la categoría de tu emprendimiento.')
-  if(!localidad)                return mostrarError('Ingresá tu código postal y elegí tu localidad.')
-  if(!provincia)                return mostrarError('Seleccioná una localidad para completar la provincia.')
-  if(!terminos)                 return mostrarError('Tenés que aceptar los términos y condiciones.')
+  if(!nombre || !apellido)    return mostrarError('Por favor ingresá tu nombre y apellido.')
+  if(!nombreEmp)              return mostrarError('Ingresá el nombre de tu emprendimiento.')
+  if(!tel || tel.length < 8)  return mostrarError('Ingresá un número de WhatsApp válido (sin 0 ni 15).')
+  if(!email)                  return mostrarError('Ingresá tu email.')
+  if(pass.length < 6)         return mostrarError('La contraseña debe tener al menos 6 caracteres.')
+  if(!categoria)              return mostrarError('Elegí la categoría de tu emprendimiento.')
+  if(!localidad)              return mostrarError('Ingresá tu ciudad o completá el código postal.')
+  if(!terminos)               return mostrarError('Tenés que aceptar los términos y condiciones.')
 
-  const btn = document.getElementById('btnRegistrar')
+  var btn = document.getElementById('btnRegistrar')
   btn.disabled = true
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...'
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
+  var signUpRes = await supabase.auth.signUp({
+    email: email,
     password: pass,
     options: {
       data: {
-        nombre,
-        apellido,
+        nombre: nombre,
+        apellido: apellido,
         telefono: '+549' + tel,
         tipo_perfil: 'emprendimiento'
       }
     }
   })
 
-  if(error){
+  if(signUpRes.error){
     btn.disabled = false
     btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Registrar mi emprendimiento'
-    return mostrarError(traducirError(error.message))
+    return mostrarError(traducirError(signUpRes.error.message))
   }
 
-  if(data.user){
+  if(signUpRes.data && signUpRes.data.user){
     await supabase.from('perfiles').upsert({
-      id: data.user.id,
-      nombre,
-      apellido,
+      id: signUpRes.data.user.id,
+      nombre: nombre,
+      apellido: apellido,
       nombre_emprendimiento: nombreEmp,
       display_como: display,
       telefono: '+549' + tel,
       tipo_perfil: 'emprendimiento',
-      emprendimiento_categoria: document.getElementById('emCategoria').value,
+      emprendimiento_categoria: categoria,
       emprendimiento_subtipos: subtipos,
-      provincia,
-      localidad,
+      provincia: provincia,
+      localidad: localidad,
       codigo_postal: cp,
-      direccion,
-      alcance
+      direccion: direccion,
+      alcance: alcance
     })
+    window.location.href = '/perfil.html'
+  } else {
+    mostrarError('¡Registro exitoso! Te enviamos un email de confirmación. Revisá tu bandeja de entrada.')
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Registrar mi emprendimiento'
   }
-
-  window.location.href = '/perfil_emprendimiento.html?nuevo=1'
 })
 
 /* ── Google ── */
 window.registrarGoogle = async function() {
   ocultarError()
-  const btn = document.getElementById('btnGoogle')
+  var btn = document.getElementById('btnGoogle')
   btn.disabled = true
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Conectando...'
-
-  const { error } = await supabase.auth.signInWithOAuth({
+  var res = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/perfil_emprendimiento.html?nuevo=1',
+      redirectTo: window.location.origin + '/perfil.html',
       queryParams: { prompt: 'select_account' }
     }
   })
-
-  if(error){
+  if(res.error){
     btn.disabled = false
     btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:20px;height:20px"> Continuar con Google'
     mostrarError('Error al conectar con Google. Intentá de nuevo.')
@@ -748,16 +701,15 @@ window.registrarGoogle = async function() {
 function traducirError(msg){
   if(msg.includes('already registered') || msg.includes('already been registered'))
     return 'Ya existe una cuenta con ese email. ¿Querés iniciar sesión?'
-  if(msg.includes('Invalid email')) return 'El email ingresado no es válido.'
+  if(msg.includes('Invalid email'))      return 'El email ingresado no es válido.'
   if(msg.includes('Password should be')) return 'La contraseña debe tener al menos 6 caracteres.'
-  if(msg.includes('rate limit')) return 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.'
-  return 'Ocurrió un error. Por favor intentá de nuevo.'
+  if(msg.includes('rate limit'))         return 'Demasiados intentos. Esperá unos minutos.'
+  return 'Ocurrió un error (' + msg + '). Por favor intentá de nuevo.'
 }
 
-/* ── Auto-recarga cuando el SW actualiza la versión ── */
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.addEventListener('message', e => {
-    if(e.data?.type === 'SW_UPDATED') window.location.reload()
+  navigator.serviceWorker.addEventListener('message', function(e){
+    if(e.data && e.data.type === 'SW_UPDATED') window.location.reload()
   })
 }
 </script>

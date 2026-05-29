@@ -6,252 +6,142 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#7c3aed">
 <title>Registrá tu Profesión — Trabajos Cerca</title>
-<meta name="description" content="Registrate como profesional en Trabajos Cerca y recibí clientes en tu zona. Médicos, abogados, contadores, arquitectos y más.">
+<meta name="description" content="Registrate como profesional en Trabajos Cerca y recibí consultas de clientes en tu zona. Médicos, abogados, contadores, arquitectos y más.">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 body { background:#f8fafc; }
-
-.reg-wrap {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 0 0 80px;
-}
+.reg-wrap { max-width:680px; margin:0 auto; padding:0 0 80px; }
 
 .reg-header {
-  background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%);
-  padding: 32px 24px 28px;
-  text-align: center;
-  color: white;
+  background: linear-gradient(135deg,#7c3aed 0%,#4c1d95 100%);
+  padding:32px 24px 28px; text-align:center; color:white;
 }
-.reg-header .reg-ico { font-size: 44px; margin-bottom: 10px; }
-.reg-header h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
-.reg-header p { font-size: 14px; opacity: .88; margin: 0; line-height: 1.5; }
+.reg-header .reg-ico { font-size:44px; margin-bottom:10px; }
+.reg-header h1 { font-size:22px; font-weight:700; margin:0 0 6px; }
+.reg-header p  { font-size:14px; opacity:.88; margin:0; line-height:1.5; }
 
 .reg-beneficios {
-  background: #ede9fe;
-  border-left: 4px solid #7c3aed;
-  margin: 20px 20px 0;
-  padding: 14px 16px;
-  border-radius: 0 10px 10px 0;
+  background:#ede9fe; border-left:4px solid #7c3aed;
+  margin:20px 20px 0; padding:14px 16px; border-radius:0 10px 10px 0;
 }
-.reg-beneficios p { margin: 0 0 6px; font-size: 13.5px; color: #4c1d95; font-weight: 600; }
-.reg-beneficios ul { margin: 0; padding-left: 18px; }
-.reg-beneficios ul li { font-size: 13px; color: #6d28d9; margin-bottom: 4px; line-height: 1.4; }
+.reg-beneficios p  { margin:0 0 6px; font-size:13.5px; color:#4c1d95; font-weight:600; }
+.reg-beneficios ul { margin:0; padding-left:18px; }
+.reg-beneficios ul li { font-size:13px; color:#6d28d9; margin-bottom:4px; line-height:1.4; }
 
 .reg-seccion {
-  background: white;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.06);
-  margin: 16px 16px 0;
-  padding: 20px 20px 16px;
+  background:white; border-radius:14px;
+  box-shadow:0 2px 12px rgba(0,0,0,.06);
+  margin:16px 16px 0; padding:20px 20px 16px;
 }
 .reg-seccion h2 {
-  font-size: 15px;
-  font-weight: 700;
-  color: #7c3aed;
-  margin: 0 0 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-size:15px; font-weight:700; color:#7c3aed;
+  margin:0 0 16px; display:flex; align-items:center; gap:8px;
 }
 
-.campo { margin-bottom: 14px; }
-.campo label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
-.campo input,
-.campo select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 9px;
-  font-size: 14px;
-  font-family: inherit;
-  background: #f8fafc;
-  box-sizing: border-box;
-  transition: border-color .2s;
-  color: #1e293b;
+.campo { margin-bottom:14px; }
+.campo label { display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:5px; }
+.campo input, .campo select {
+  width:100%; padding:10px 12px; border:1.5px solid #e2e8f0;
+  border-radius:9px; font-size:14px; font-family:inherit;
+  background:#f8fafc; box-sizing:border-box; transition:border-color .2s; color:#1e293b;
 }
-.campo input:focus,
-.campo select:focus { outline: none; border-color: #7c3aed; background: white; }
+.campo input:focus, .campo select:focus { outline:none; border-color:#7c3aed; background:white; }
 
-.tel-wrap { display: flex; gap: 8px; align-items: center; }
+.tel-wrap { display:flex; gap:8px; align-items:center; }
 .tel-prefix {
-  background: #7c3aed;
-  color: white;
-  padding: 10px 13px;
-  border-radius: 9px;
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-  flex-shrink: 0;
+  background:#7c3aed; color:white; padding:10px 13px; border-radius:9px;
+  font-size:14px; font-weight:700; white-space:nowrap; flex-shrink:0;
 }
-.tel-wrap input { flex: 1; }
+.tel-wrap input { flex:1; }
 
-.pass-wrap { position: relative; }
-.pass-wrap input { padding-right: 42px; }
+.pass-wrap { position:relative; }
+.pass-wrap input { padding-right:42px; }
 .pass-eye {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: #94a3b8;
-  font-size: 15px;
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  cursor:pointer; color:#94a3b8; font-size:15px;
 }
 
-/* Selector profesión */
-.prof-select-wrap {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-@media(max-width:500px){ .prof-select-wrap { grid-template-columns: 1fr; } }
-
-/* Subcategoria dropdown */
-#subProfWrap { margin-top: 12px; display: none; }
-#subProfWrap label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
+#subProfWrap { margin-top:12px; display:none; }
+#subProfWrap label { display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:5px; }
 #subProfWrap select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 9px;
-  font-size: 14px;
-  font-family: inherit;
-  background: #f8fafc;
-  box-sizing: border-box;
-  color: #1e293b;
+  width:100%; padding:10px 12px; border:1.5px solid #e2e8f0;
+  border-radius:9px; font-size:14px; font-family:inherit;
+  background:#f8fafc; box-sizing:border-box; color:#1e293b;
 }
-#subProfWrap select:focus { outline: none; border-color: #7c3aed; background: white; }
+#subProfWrap select:focus { outline:none; border-color:#7c3aed; background:white; }
 
-/* Horario */
 .dias-grid {
-  display: grid;
-  grid-template-columns: repeat(7,1fr);
-  gap: 5px;
-  margin-bottom: 12px;
+  display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:12px;
 }
 .dia-chip {
-  padding: 7px 4px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
-  cursor: pointer;
-  transition: all .15s;
-  user-select: none;
+  padding:7px 4px; border:1.5px solid #e2e8f0; border-radius:8px;
+  text-align:center; font-size:11px; font-weight:600; color:#64748b;
+  cursor:pointer; transition:all .15s; user-select:none;
 }
-.dia-chip.activo {
-  background: #7c3aed;
-  border-color: #7c3aed;
-  color: white;
-}
-.hora-wrap { display: flex; gap: 10px; align-items: center; }
-.hora-wrap label { font-size: 13px; font-weight: 600; color: #374151; white-space: nowrap; }
+.dia-chip.activo { background:#7c3aed; border-color:#7c3aed; color:white; }
+.hora-wrap { display:flex; gap:10px; align-items:center; }
+.hora-wrap label { font-size:13px; font-weight:600; color:#374151; white-space:nowrap; }
 .hora-wrap select {
-  flex: 1;
-  padding: 9px 10px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 9px;
-  font-size: 13px;
-  background: #f8fafc;
-  color: #1e293b;
+  flex:1; padding:9px 10px; border:1.5px solid #e2e8f0;
+  border-radius:9px; font-size:13px; background:#f8fafc; color:#1e293b;
 }
 
 .terminos-check {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 13px;
-  color: #475569;
-  line-height: 1.5;
-  cursor: pointer;
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:13px; color:#475569; line-height:1.5; cursor:pointer;
 }
 .terminos-check input[type=checkbox] {
-  width: 18px;
-  height: 18px;
-  accent-color: #7c3aed;
-  flex-shrink: 0;
-  margin-top: 1px;
+  width:18px; height:18px; accent-color:#7c3aed; flex-shrink:0; margin-top:1px;
 }
-.terminos-check a { color: #7c3aed; }
+.terminos-check a { color:#7c3aed; }
 
 .btn-registrar {
-  display: block;
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #7c3aed, #4c1d95);
-  color: white;
-  border: none;
-  border-radius: 11px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 18px;
-  transition: opacity .2s;
-  box-sizing: border-box;
+  display:block; width:100%; padding:14px;
+  background:linear-gradient(135deg,#7c3aed,#4c1d95);
+  color:white; border:none; border-radius:11px;
+  font-size:16px; font-weight:700; cursor:pointer;
+  margin-top:18px; transition:opacity .2s; box-sizing:border-box;
 }
-.btn-registrar:hover { opacity: .92; }
-.btn-registrar:disabled { opacity: .6; cursor: not-allowed; }
+.btn-registrar:hover { opacity:.92; }
+.btn-registrar:disabled { opacity:.6; cursor:not-allowed; }
 
 .separador {
-  text-align: center;
-  color: #94a3b8;
-  font-size: 13px;
-  margin: 14px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  text-align:center; color:#94a3b8; font-size:13px;
+  margin:14px 0; display:flex; align-items:center; gap:10px;
 }
-.separador::before,
-.separador::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; }
+.separador::before,.separador::after { content:""; flex:1; height:1px; background:#e2e8f0; }
 
 .btn-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 12px;
-  background: white;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 11px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #374151;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: background .2s;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  width:100%; padding:12px; background:white; border:1.5px solid #e2e8f0;
+  border-radius:11px; font-size:15px; font-weight:600; color:#374151;
+  cursor:pointer; box-sizing:border-box; transition:background .2s;
 }
-.btn-google:hover { background: #f8fafc; }
-.btn-google img { width: 20px; height: 20px; }
+.btn-google:hover { background:#f8fafc; }
+.btn-google img { width:20px; height:20px; }
 
 .reg-error {
-  background: #fee2e2;
-  color: #b91c1c;
-  border-radius: 9px;
-  padding: 10px 14px;
-  font-size: 13px;
-  margin-top: 10px;
-  display: none;
+  background:#fee2e2; color:#b91c1c; border-radius:9px;
+  padding:10px 14px; font-size:13px; margin-top:10px; display:none;
+}
+.reg-ok {
+  background:#dcfce7; color:#166534; border-radius:9px;
+  padding:10px 14px; font-size:13px; margin-top:10px; display:none;
 }
 
-.ya-cuenta {
-  text-align: center;
-  font-size: 13.5px;
-  color: #64748b;
-  margin: 20px 16px 0;
-}
-.ya-cuenta a { color: #7c3aed; font-weight: 600; }
+.ya-cuenta { text-align:center; font-size:13.5px; color:#64748b; margin:20px 16px 0; }
+.ya-cuenta a { color:#7c3aed; font-weight:600; }
+
+/* CP feedback */
+.cp-feedback { font-size:12px; margin-top:4px; display:none; color:#6d28d9; }
 </style>
 </head>
 <body>
 
 <div class="reg-wrap">
 
-  <!-- Navbar -->
   <nav style="background:white;border-bottom:1px solid #e2e8f0;padding:0 20px;display:flex;align-items:center;height:52px;">
     <a href="/index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#1e293b;">
       <img src="/logo.png" alt="Trabajos Cerca" style="height:34px;object-fit:contain;">
@@ -259,19 +149,17 @@ body { background:#f8fafc; }
     </a>
   </nav>
 
-  <!-- Header -->
   <div class="reg-header">
     <div class="reg-ico">🎓</div>
     <h1>Registrá tu Profesión en Trabajos Cerca</h1>
     <p>Mostrá tus credenciales y recibí consultas de clientes que buscan tu especialidad en tu zona.</p>
   </div>
 
-  <!-- Beneficios -->
   <div class="reg-beneficios">
     <p>¿Por qué registrarte?</p>
     <ul>
       <li>✅ Clientes de tu zona te encuentran por especialidad</li>
-      <li>✅ Perfil profesional completo con tu matrícula y experiencia</li>
+      <li>✅ Perfil profesional completo con tu matrícula</li>
       <li>✅ Destacate frente a otros profesionales del área</li>
       <li>✅ 100% gratis, sin comisiones</li>
     </ul>
@@ -301,9 +189,7 @@ body { background:#f8fafc; }
           <input type="tel" id="prTel" placeholder="11 2345-6789" inputmode="numeric"
             oninput="this.value=this.value.replace(/[^0-9]/g,'')">
         </div>
-        <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
-          Sin el 0 del área ni el 15.
-        </small>
+        <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">Sin el 0 del área ni el 15.</small>
       </div>
 
       <div class="campo">
@@ -315,8 +201,7 @@ body { background:#f8fafc; }
         <label>Contraseña *</label>
         <div class="pass-wrap">
           <input type="password" id="prPass" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required>
-          <i class="fa-solid fa-eye pass-eye" id="eyePass"
-            onclick="togglePass('prPass','eyePass')"></i>
+          <i class="fa-solid fa-eye pass-eye" id="eyePass" onclick="togglePass('prPass','eyePass')"></i>
         </div>
       </div>
     </div>
@@ -365,31 +250,22 @@ body { background:#f8fafc; }
       <h2><i class="fa-solid fa-location-dot"></i> Tu ubicación</h2>
 
       <div class="campo">
-        <label>Código postal *</label>
-        <input type="text" id="prCP" placeholder="Ej: 1414" inputmode="numeric" maxlength="8" required>
-        <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
-          Al escribir tu CP la provincia se detecta sola y se cargan las localidades.
-        </small>
+        <label>Código postal</label>
+        <input type="text" id="prCP" placeholder="Ej: 6300" inputmode="numeric" maxlength="8">
+        <div class="cp-feedback" id="prCPFeedback"></div>
       </div>
 
       <div class="campo">
         <label>Provincia</label>
-        <input type="text" id="prProvincia" readonly placeholder="Se completa automático con el CP"
-          style="background:#f1f5f9;color:#475569;cursor:default;">
+        <input type="text" id="prProvincia" placeholder="Ej: La Pampa">
       </div>
 
       <div class="campo">
         <label>Localidad / Ciudad *</label>
-        <select id="prLocalidad" required>
-          <option value="">— Primero completá el código postal —</option>
-        </select>
-        <button type="button" id="btnCargarLoc"
-          onclick="obtenerUbicacion(document.getElementById('prCP').value)"
-          style="margin-top:6px;font-size:12px;padding:5px 12px;border:1.5px solid #7c3aed;
-            border-radius:7px;background:white;color:#7c3aed;cursor:pointer;font-weight:600;
-            display:none;">
-          <i class="fa-solid fa-rotate-right"></i> Cargar localidades manualmente
-        </button>
+        <input type="text" id="prLocalidad" placeholder="Ej: Santa Rosa" required>
+        <small style="color:#64748b;font-size:12px;margin-top:4px;display:block;">
+          Se completa automático con el CP, o escribí tu ciudad directamente.
+        </small>
       </div>
     </div>
 
@@ -398,18 +274,17 @@ body { background:#f8fafc; }
       <h2><i class="fa-solid fa-clock"></i> Horario de atención</h2>
 
       <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:8px;">
-        Días disponibles
+        Días disponibles <small style="font-weight:400;color:#64748b;">(opcional)</small>
       </label>
       <div class="dias-grid" id="diasGrid">
-        <div class="dia-chip" data-dia="Lunes"    onclick="toggleDia(this)">Lun</div>
-        <div class="dia-chip" data-dia="Martes"   onclick="toggleDia(this)">Mar</div>
+        <div class="dia-chip" data-dia="Lunes"     onclick="toggleDia(this)">Lun</div>
+        <div class="dia-chip" data-dia="Martes"    onclick="toggleDia(this)">Mar</div>
         <div class="dia-chip" data-dia="Miércoles" onclick="toggleDia(this)">Mié</div>
-        <div class="dia-chip" data-dia="Jueves"   onclick="toggleDia(this)">Jue</div>
-        <div class="dia-chip" data-dia="Viernes"  onclick="toggleDia(this)">Vie</div>
-        <div class="dia-chip" data-dia="Sábado"   onclick="toggleDia(this)">Sáb</div>
-        <div class="dia-chip" data-dia="Domingo"  onclick="toggleDia(this)">Dom</div>
+        <div class="dia-chip" data-dia="Jueves"    onclick="toggleDia(this)">Jue</div>
+        <div class="dia-chip" data-dia="Viernes"   onclick="toggleDia(this)">Vie</div>
+        <div class="dia-chip" data-dia="Sábado"    onclick="toggleDia(this)">Sáb</div>
+        <div class="dia-chip" data-dia="Domingo"   onclick="toggleDia(this)">Dom</div>
       </div>
-
       <div class="hora-wrap">
         <label>Desde</label>
         <select id="prDesde"></select>
@@ -430,6 +305,7 @@ body { background:#f8fafc; }
     <!-- Acciones -->
     <div class="reg-seccion" style="padding:16px 20px;">
       <div id="regError" class="reg-error"></div>
+      <div id="regOk" class="reg-ok"></div>
 
       <button type="submit" class="btn-registrar" id="btnRegistrar">
         <i class="fa-solid fa-paper-plane"></i> Crear mi perfil profesional
@@ -445,12 +321,9 @@ body { background:#f8fafc; }
 
   </form>
 
-  <p class="ya-cuenta">
-    ¿Ya tenés cuenta? <a href="/login.html">Iniciá sesión aquí</a>
-  </p>
+  <p class="ya-cuenta">¿Ya tenés cuenta? <a href="/login.html">Iniciá sesión aquí</a></p>
 
-</div><!-- /reg-wrap -->
-
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -458,244 +331,191 @@ const SUPA_URL = 'https://kgymhstqfkqdpkkvtjow.supabase.co'
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtneW1oc3RxZmtxZHBra3Z0am93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0MDg1MzIsImV4cCI6MjA1Nzk4NDUzMn0.4WPIxLBFOWGHjSBDm8IXKL_4IrUGI_8ij3RRiYqoETo'
 const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY)
 
-/* ── Subcategorías por profesión ── */
+/* ── Subcategorías ── */
 const PROFESIONES = {
-  'Medicina':         ['Clínica médica','Pediatría','Cardiología','Dermatología','Ginecología','Traumatología','Neurología','Oftalmología','Psiquiatría','Oncología','Endocrinología','Urología','Cirugía general','Medicina familiar','Otra especialidad'],
-  'Odontología':      ['Odontología general','Ortodoncia','Implantología','Endodoncia','Periodoncia','Odontopediatría','Cirugía maxilofacial','Odontología estética'],
-  'Psicología':       ['Psicología clínica','Psicología infantil','Psicología laboral','Psicología de pareja','Neuropsicología','Psicología forense','Orientación vocacional'],
-  'Nutrición':        ['Nutrición clínica','Nutrición deportiva','Nutrición pediátrica','Nutrición oncológica','Coaching nutricional'],
-  'Kinesiología':     ['Kinesiología traumatológica','Kinesiología neurológica','Kinesiología deportiva','Kinesiología respiratoria','Rehabilitación postquirúrgica'],
-  'Fonoaudiología':   ['Trastornos del lenguaje','Dislexia','Voz profesional','Deglución','Audiología'],
-  'Farmacia':         ['Farmacia comunitaria','Farmacia clínica','Dermofarmacia','Nutrición farmacéutica'],
-  'Enfermería':       ['Enfermería clínica','Enfermería domiciliaria','Enfermería pediátrica','Enfermería de urgencias','Cuidados paliativos'],
-  'Veterinaria':      ['Pequeños animales','Animales de granja','Animales exóticos','Etología','Cirugía veterinaria'],
-  'Derecho':          ['Derecho civil','Derecho penal','Derecho laboral','Derecho de familia','Derecho comercial','Derecho tributario','Derecho inmobiliario','Derecho de extranjería'],
-  'Contabilidad':     ['Contabilidad general','Impuestos y AFIP','Auditoría','Costos y presupuestos','Contabilidad de pymes','Liquidación de sueldos'],
-  'Arquitectura':     ['Arquitectura residencial','Arquitectura comercial','Diseño de interiores','Planificación urbana','Dirección de obra','Paisajismo'],
-  'Ingeniería':       ['Ingeniería civil','Ingeniería mecánica','Ingeniería eléctrica','Ingeniería en sistemas','Ingeniería industrial','Ingeniería ambiental','Ing. química'],
-  'Diseño':           ['Diseño gráfico','Diseño web/UX','Diseño de moda','Diseño editorial','Diseño industrial','Diseño de interiores','Animación y multimedia'],
-  'Informática':      ['Desarrollo web','Desarrollo mobile','Ciberseguridad','Redes y servidores','Soporte técnico','Data science / IA','DevOps','QA / Testing'],
-  'Educación':        ['Educación primaria','Educación secundaria','Educación especial','Idiomas','Música','Matemáticas y ciencias','Apoyo escolar','Tutoría universitaria'],
-  'Economía':         ['Economía empresarial','Finanzas personales','Análisis financiero','Consultoría económica','Investigación económica'],
-  'Comunicación':     ['Periodismo','Relaciones públicas','Marketing digital','Community manager','Producción audiovisual','Locución','Fotografía profesional'],
-  'Trabajo Social':   ['Atención a la familia','Adultos mayores','Niñez y adolescencia','Violencia familiar','Inclusión social'],
-  'Otra':             []
+  'Medicina':['Clínica médica','Pediatría','Cardiología','Dermatología','Ginecología','Traumatología','Neurología','Oftalmología','Psiquiatría','Oncología','Endocrinología','Urología','Cirugía general','Medicina familiar','Otra especialidad'],
+  'Odontología':['Odontología general','Ortodoncia','Implantología','Endodoncia','Periodoncia','Odontopediatría','Cirugía maxilofacial','Odontología estética'],
+  'Psicología':['Psicología clínica','Psicología infantil','Psicología laboral','Psicología de pareja','Neuropsicología','Psicología forense','Orientación vocacional'],
+  'Nutrición':['Nutrición clínica','Nutrición deportiva','Nutrición pediátrica','Nutrición oncológica','Coaching nutricional'],
+  'Kinesiología':['Kinesiología traumatológica','Kinesiología neurológica','Kinesiología deportiva','Kinesiología respiratoria','Rehabilitación postquirúrgica'],
+  'Fonoaudiología':['Trastornos del lenguaje','Dislexia','Voz profesional','Deglución','Audiología'],
+  'Farmacia':['Farmacia comunitaria','Farmacia clínica','Dermofarmacia','Nutrición farmacéutica'],
+  'Enfermería':['Enfermería clínica','Enfermería domiciliaria','Enfermería pediátrica','Enfermería de urgencias','Cuidados paliativos'],
+  'Veterinaria':['Pequeños animales','Animales de granja','Animales exóticos','Etología','Cirugía veterinaria'],
+  'Derecho':['Derecho civil','Derecho penal','Derecho laboral','Derecho de familia','Derecho comercial','Derecho tributario','Derecho inmobiliario','Derecho de extranjería'],
+  'Contabilidad':['Contabilidad general','Impuestos y AFIP','Auditoría','Costos y presupuestos','Contabilidad de pymes','Liquidación de sueldos'],
+  'Arquitectura':['Arquitectura residencial','Arquitectura comercial','Diseño de interiores','Planificación urbana','Dirección de obra','Paisajismo'],
+  'Ingeniería':['Ingeniería civil','Ingeniería mecánica','Ingeniería eléctrica','Ingeniería en sistemas','Ingeniería industrial','Ingeniería ambiental','Ing. química'],
+  'Diseño':['Diseño gráfico','Diseño web/UX','Diseño de moda','Diseño editorial','Diseño industrial','Diseño de interiores','Animación y multimedia'],
+  'Informática':['Desarrollo web','Desarrollo mobile','Ciberseguridad','Redes y servidores','Soporte técnico','Data science / IA','DevOps','QA / Testing'],
+  'Educación':['Educación primaria','Educación secundaria','Educación especial','Idiomas','Música','Matemáticas y ciencias','Apoyo escolar','Tutoría universitaria'],
+  'Economía':['Economía empresarial','Finanzas personales','Análisis financiero','Consultoría económica','Investigación económica'],
+  'Comunicación':['Periodismo','Relaciones públicas','Marketing digital','Community manager','Producción audiovisual','Locución','Fotografía profesional'],
+  'Trabajo Social':['Atención a la familia','Adultos mayores','Niñez y adolescencia','Violencia familiar','Inclusión social'],
+  'Otra':[]
 }
 
 window.cargarSubcategoriasProf = function() {
-  const cat = document.getElementById('prCategoria').value
+  const cat  = document.getElementById('prCategoria').value
   const wrap = document.getElementById('subProfWrap')
   const subs = PROFESIONES[cat] || []
-  if(!cat || subs.length === 0){ wrap.style.display = 'none'; wrap.innerHTML = ''; return }
-
-  wrap.innerHTML = `
-    <label>Especialidad *</label>
-    <select id="prSubcategoria" required>
-      <option value="">— Elegí tu especialidad —</option>
-      ${subs.map(s => `<option value="${s}">${s}</option>`).join('')}
-    </select>`
+  if(!cat || !subs.length){ wrap.style.display = 'none'; wrap.innerHTML = ''; return }
+  wrap.innerHTML = '<label>Especialidad</label>' +
+    '<select id="prSubcategoria"><option value="">— Elegí tu especialidad (opcional) —</option>' +
+    subs.map(s => '<option value="' + s + '">' + s + '</option>').join('') + '</select>'
   wrap.style.display = 'block'
 }
 
-/* ── Ubicación ── */
-async function obtenerUbicacion(codigo) {
+/* ── Ubicación por CP ── */
+var _lastCP = ''
+async function buscarCP(codigo) {
   codigo = (codigo || '').trim()
+  if(codigo === _lastCP) return
+  _lastCP = codigo
   if(codigo.length < 4) return
-  const locSel = document.getElementById('prLocalidad')
-  const provInp = document.getElementById('prProvincia')
-  locSel.innerHTML = '<option value="">Cargando...</option>'
+  var fb = document.getElementById('prCPFeedback')
+  fb.textContent = 'Buscando...'; fb.style.display = 'block'; fb.style.color = '#6d28d9'
   try {
-    const res = await fetch('https://api.zippopotam.us/ar/' + codigo)
-    if(!res.ok){ locSel.innerHTML = '<option value="">CP no encontrado</option>'; return }
-    const data = await res.json()
-    const places = data.places || []
-    if(!places.length){ locSel.innerHTML = '<option value="">Sin resultados</option>'; return }
-    locSel.innerHTML = '<option value="">— Elegí tu localidad —</option>'
-    places.forEach(p => {
-      const opt = document.createElement('option')
-      opt.value = p['place name']
-      opt.textContent = p['place name']
-      locSel.appendChild(opt)
-    })
-    provInp.value = places[0]['state']
-    if(places.length === 1) locSel.value = places[0]['place name']
+    var res = await fetch('https://api.zippopotam.us/ar/' + codigo)
+    if(!res.ok){ fb.textContent = 'CP no encontrado. Escribí tu ciudad manualmente.'; fb.style.color='#b91c1c'; return }
+    var data = await res.json()
+    var places = data.places || []
+    if(!places.length){ fb.textContent = 'Sin resultados. Escribí tu ciudad manualmente.'; fb.style.color='#b91c1c'; return }
+    document.getElementById('prProvincia').value = places[0]['state']
+    document.getElementById('prLocalidad').value  = places[0]['place name']
+    fb.textContent = '✓ Localidad cargada'; fb.style.color = '#166534'
+    setTimeout(function(){ fb.style.display = 'none' }, 3000)
   } catch(err) {
-    console.error('ubicacion:', err)
-    locSel.innerHTML = '<option value="">Error — intentá de nuevo</option>'
+    fb.textContent = 'Error de red. Escribí tu ciudad manualmente.'; fb.style.color='#b91c1c'
   }
 }
-;(function(){
-  var cpEl = document.getElementById('prCP')
-  cpEl.addEventListener('input',  function(){ obtenerUbicacion(this.value) })
-  cpEl.addEventListener('change', function(){ obtenerUbicacion(this.value) })
-  cpEl.addEventListener('blur',   function(){ obtenerUbicacion(this.value) })
-})()
 
-/* ── Cargar ciudades por provincia (fallback manual) ── */
-window.cargarMunicipios = function(prov, locId) {
-  if(!prov) return
-  var ciudades = {
-    'Buenos Aires':['Adrogué','Avellaneda','Azul','Bahía Blanca','Balcarce','Berazategui','Bernal','Bragado','Campana','Cañuelas','Chacabuco','Chascomús','Chivilcoy','Coronel Suárez','Escobar','Ezeiza','Florencio Varela','Florida','Hurlingham','Ituzaingó','José C. Paz','Junín','La Plata','Lanús','Lomas de Zamora','Luján','Mar del Plata','Mercedes','Merlo','Monte Grande','Moreno','Morón','Necochea','9 de Julio','Olavarría','Pergamino','Pilar','Pinamar','Quilmes','Ramos Mejía','San Fernando','San Isidro','San Martín','San Miguel','San Nicolás','San Pedro','San Vicente','Tandil','Tigre','Tres Arroyos','Vicente López','Villa Gesell','Zárate'],
-    'Ciudad Autónoma de Buenos Aires':['Almagro','Balvanera','Barracas','Belgrano','Boedo','Caballito','Chacarita','Colegiales','Constitución','Flores','La Boca','Liniers','Montserrat','Palermo','Recoleta','Retiro','Saavedra','San Telmo','Villa Crespo','Villa Devoto','Villa Lugano','Villa Urquiza'],
-    'Catamarca':['Andalgalá','Belén','Fiambalá','Recreo','San Fernando del Valle de Catamarca','Santa María','Tinogasta'],
-    'Chaco':['Barranqueras','Charata','Las Breñas','Presidencia Roque Sáenz Peña','Quitilipi','Resistencia','Villa Ángela'],
-    'Chubut':['Comodoro Rivadavia','Esquel','Gaiman','Puerto Madryn','Rawson','Sarmiento','Trelew'],
-    'Córdoba':['Alta Gracia','Bell Ville','Córdoba','Cruz del Eje','Jesús María','La Calera','Marcos Juárez','Río Ceballos','Río Cuarto','Río Tercero','San Francisco','Villa Carlos Paz','Villa Dolores','Villa María'],
-    'Corrientes':['Bella Vista','Corrientes','Curuzú Cuatiá','Goya','Ituzaingó','Mercedes','Monte Caseros','Paso de los Libres','Santo Tomé'],
-    'Entre Ríos':['Colón','Concordia','Diamante','Gualeguay','Gualeguaychú','Nogoyá','Paraná','Victoria','Villaguay'],
-    'Formosa':['Clorinda','El Colorado','Formosa','Las Lomitas','Pirané'],
-    'Jujuy':['Humahuaca','La Quiaca','Ledesma','Palpalá','Perico','San Pedro de Jujuy','San Salvador de Jujuy','Tilcara'],
-    'La Pampa':['Eduardo Castex','General Acha','General Pico','Guatraché','Macachín','Quemú Quemú','Realicó','Santa Rosa','Toay','Victorica'],
-    'La Rioja':['Aimogasta','Chamical','Chilecito','La Rioja','Villa Unión'],
-    'Mendoza':['General Alvear','Godoy Cruz','Guaymallén','Las Heras','Luján de Cuyo','Maipú','Malargüe','Mendoza','San Martín','San Rafael','Tupungato'],
-    'Misiones':['Apóstoles','Eldorado','Oberá','Posadas','Puerto Iguazú'],
-    'Neuquén':['Chos Malal','Cutral-Có','Junín de los Andes','Neuquén','Plottier','San Martín de los Andes','Villa La Angostura','Zapala'],
-    'Río Negro':['Bariloche','Catriel','Cipolletti','El Bolsón','General Roca','Viedma'],
-    'Salta':['Cafayate','General Güemes','Metán','Orán','Salta','Tartagal'],
-    'San Juan':['Caucete','Chimbas','Jáchal','Rawson','San Juan','Santa Lucía'],
-    'San Luis':['Merlo','San Luis','Villa Mercedes'],
-    'Santa Cruz':['El Calafate','Caleta Olivia','Puerto Deseado','Río Gallegos','Río Turbio'],
-    'Santa Fe':['Cañada de Gómez','Casilda','Esperanza','Rafaela','Reconquista','Rosario','Santa Fe','Venado Tuerto','Villa Constitución'],
-    'Santiago del Estero':['Añatuya','Frías','La Banda','Santiago del Estero','Termas de Río Hondo'],
-    'Tierra del Fuego':['Río Grande','Tolhuin','Ushuaia'],
-    'Tucumán':['Aguilares','Banda del Río Salí','Concepción','Monteros','San Miguel de Tucumán','Tafí Viejo','Yerba Buena']
-  }
-  var locSel = document.getElementById(locId)
-  var lista = (ciudades[prov] || []).sort(function(a,b){ return a.localeCompare(b,'es') })
-  if(!lista.length){
-    locSel.innerHTML = '<option value="">Sin ciudades — escribí en Dirección</option>'
-    return
-  }
-  locSel.innerHTML = '<option value="">Elegí tu localidad / ciudad</option>'
-  lista.forEach(function(c){
-    var o = document.createElement('option')
-    o.value = c; o.textContent = c
-    locSel.appendChild(o)
-  })
-  var btn = document.getElementById('btnCargarLoc')
-  if(btn) btn.style.display = 'none'
-}
+;(function(){
+  var el = document.getElementById('prCP')
+  el.addEventListener('input',  function(){ buscarCP(this.value) })
+  el.addEventListener('change', function(){ buscarCP(this.value) })
+  el.addEventListener('blur',   function(){ buscarCP(this.value) })
+})()
 
 /* ── Horario ── */
 function toggleDia(el){ el.classList.toggle('activo') }
 
-;(function poblarHoras(){
-  const horas = []
-  for(let h = 7; h <= 23; h++){
-    horas.push(`${String(h).padStart(2,'0')}:00`)
-    if(h < 23) horas.push(`${String(h).padStart(2,'0')}:30`)
+;(function(){
+  var horas = []
+  for(var h=7; h<=23; h++){
+    horas.push((h<10?'0':'')+h+':00')
+    if(h<23) horas.push((h<10?'0':'')+h+':30')
   }
   horas.push('00:00')
-  const desde = document.getElementById('prDesde')
-  const hasta = document.getElementById('prHasta')
-  horas.forEach(h => {
-    desde.add(new Option(h, h))
-    hasta.add(new Option(h, h))
-  })
-  desde.value = '09:00'
-  hasta.value = '18:00'
+  var desde = document.getElementById('prDesde')
+  var hasta  = document.getElementById('prHasta')
+  horas.forEach(function(h){ desde.add(new Option(h,h)); hasta.add(new Option(h,h)) })
+  desde.value = '09:00'; hasta.value = '18:00'
 })()
 
 /* ── Toggle contraseña ── */
 window.togglePass = function(inputId, iconId) {
-  const inp = document.getElementById(inputId)
-  const ico = document.getElementById(iconId)
+  var inp = document.getElementById(inputId)
+  var ico = document.getElementById(iconId)
   if(inp.type === 'password'){ inp.type = 'text'; ico.classList.replace('fa-eye','fa-eye-slash') }
   else { inp.type = 'password'; ico.classList.replace('fa-eye-slash','fa-eye') }
 }
 
-/* ── Error ── */
-function mostrarError(msg){ const el = document.getElementById('regError'); el.textContent = msg; el.style.display = 'block' }
-function ocultarError(){ document.getElementById('regError').style.display = 'none' }
+/* ── Mensajes ── */
+function mostrarError(msg){ var el=document.getElementById('regError'); el.textContent=msg; el.style.display='block'; document.getElementById('regOk').style.display='none' }
+function mostrarOk(msg)   { var el=document.getElementById('regOk');    el.textContent=msg; el.style.display='block'; document.getElementById('regError').style.display='none' }
+function ocultarMsgs()    { document.getElementById('regError').style.display='none'; document.getElementById('regOk').style.display='none' }
 
 /* ── Submit ── */
-document.getElementById('formProf').addEventListener('submit', async e => {
+document.getElementById('formProf').addEventListener('submit', async function(e) {
   e.preventDefault()
-  ocultarError()
+  ocultarMsgs()
 
-  const nombre   = document.getElementById('prNombre').value.trim()
-  const apellido = document.getElementById('prApellido').value.trim()
-  const tel      = document.getElementById('prTel').value.trim()
-  const email    = document.getElementById('prEmail').value.trim()
-  const pass     = document.getElementById('prPass').value
-  const categoria = document.getElementById('prCategoria').value
-  const subEl    = document.getElementById('prSubcategoria')
-  const subcategoria = subEl ? subEl.value : ''
-  const provincia = document.getElementById('prProvincia').value
-  const localidad = document.getElementById('prLocalidad').value
-  const terminos = document.getElementById('prTerminos').checked
+  var nombre     = document.getElementById('prNombre').value.trim()
+  var apellido   = document.getElementById('prApellido').value.trim()
+  var tel        = document.getElementById('prTel').value.trim()
+  var email      = document.getElementById('prEmail').value.trim()
+  var pass       = document.getElementById('prPass').value
+  var categoria  = document.getElementById('prCategoria').value
+  var subEl      = document.getElementById('prSubcategoria')
+  var subcategoria = subEl ? subEl.value : ''
+  var provincia  = document.getElementById('prProvincia').value.trim()
+  var localidad  = document.getElementById('prLocalidad').value.trim()
+  var terminos   = document.getElementById('prTerminos').checked
 
-  if(!nombre || !apellido)      return mostrarError('Por favor ingresá tu nombre y apellido.')
-  if(!tel || tel.length < 8)    return mostrarError('Ingresá un número de WhatsApp válido.')
-  if(!email)                    return mostrarError('Ingresá tu email.')
-  if(pass.length < 6)           return mostrarError('La contraseña debe tener al menos 6 caracteres.')
-  if(!categoria)                return mostrarError('Elegí tu categoría profesional.')
-  if(!provincia || !localidad)  return mostrarError('Ingresá tu código postal y elegí provincia y localidad.')
-  if(!terminos)                 return mostrarError('Tenés que aceptar los términos y condiciones.')
+  if(!nombre || !apellido)    return mostrarError('Por favor ingresá tu nombre y apellido.')
+  if(!tel || tel.length < 8)  return mostrarError('Ingresá un número de WhatsApp válido (sin 0 ni 15).')
+  if(!email)                  return mostrarError('Ingresá tu email.')
+  if(pass.length < 6)         return mostrarError('La contraseña debe tener al menos 6 caracteres.')
+  if(!categoria)              return mostrarError('Elegí tu categoría profesional.')
+  if(!localidad)              return mostrarError('Ingresá tu ciudad o completá el código postal.')
+  if(!terminos)               return mostrarError('Tenés que aceptar los términos y condiciones.')
 
-  const dias = [...document.querySelectorAll('.dia-chip.activo')].map(d => d.dataset.dia)
+  var dias = Array.from(document.querySelectorAll('.dia-chip.activo')).map(function(d){ return d.dataset.dia })
 
-  const btn = document.getElementById('btnRegistrar')
+  var btn = document.getElementById('btnRegistrar')
   btn.disabled = true
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registrando...'
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
+  var signUpRes = await supabase.auth.signUp({
+    email: email,
     password: pass,
     options: {
       data: {
-        nombre,
-        apellido,
+        nombre: nombre,
+        apellido: apellido,
         telefono: '+549' + tel,
         tipo_perfil: 'profesional'
       }
     }
   })
 
-  if(error){
+  if(signUpRes.error){
     btn.disabled = false
     btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Crear mi perfil profesional'
-    return mostrarError(traducirError(error.message))
+    return mostrarError(traducirError(signUpRes.error.message))
   }
 
-  if(data.user){
+  if(signUpRes.data && signUpRes.data.user){
     await supabase.from('perfiles').upsert({
-      id: data.user.id,
-      nombre,
-      apellido,
+      id: signUpRes.data.user.id,
+      nombre: nombre,
+      apellido: apellido,
       telefono: '+549' + tel,
       tipo_perfil: 'profesional',
       profesion_categoria: categoria,
       profesion_subcategoria: subcategoria,
       matricula: document.getElementById('prMatricula').value.trim(),
-      provincia,
-      localidad,
+      provincia: provincia,
+      localidad: localidad,
       codigo_postal: document.getElementById('prCP').value.trim(),
       horario_dias: dias,
       horario_desde: document.getElementById('prDesde').value,
       horario_hasta: document.getElementById('prHasta').value
     })
+    window.location.href = '/perfil.html'
+  } else {
+    /* Supabase envió email de confirmación */
+    mostrarOk('¡Registro exitoso! Te enviamos un email de confirmación. Revisá tu bandeja de entrada.')
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Crear mi perfil profesional'
   }
-
-  window.location.href = '/perfil_profesional.html?nuevo=1'
 })
 
 /* ── Google ── */
 window.registrarGoogle = async function() {
-  ocultarError()
-  const btn = document.getElementById('btnGoogle')
+  ocultarMsgs()
+  var btn = document.getElementById('btnGoogle')
   btn.disabled = true
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Conectando...'
-
-  const { error } = await supabase.auth.signInWithOAuth({
+  var res = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/perfil_profesional.html?nuevo=1',
+      redirectTo: window.location.origin + '/perfil.html',
       queryParams: { prompt: 'select_account' }
     }
   })
-
-  if(error){
+  if(res.error){
     btn.disabled = false
     btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:20px;height:20px"> Continuar con Google'
     mostrarError('Error al conectar con Google. Intentá de nuevo.')
@@ -705,16 +525,15 @@ window.registrarGoogle = async function() {
 function traducirError(msg){
   if(msg.includes('already registered') || msg.includes('already been registered'))
     return 'Ya existe una cuenta con ese email. ¿Querés iniciar sesión?'
-  if(msg.includes('Invalid email')) return 'El email ingresado no es válido.'
-  if(msg.includes('Password should be')) return 'La contraseña debe tener al menos 6 caracteres.'
-  if(msg.includes('rate limit')) return 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.'
-  return 'Ocurrió un error. Por favor intentá de nuevo.'
+  if(msg.includes('Invalid email'))         return 'El email ingresado no es válido.'
+  if(msg.includes('Password should be'))    return 'La contraseña debe tener al menos 6 caracteres.'
+  if(msg.includes('rate limit'))            return 'Demasiados intentos. Esperá unos minutos.'
+  return 'Ocurrió un error (' + msg + '). Por favor intentá de nuevo.'
 }
 
-/* ── Auto-recarga cuando el SW actualiza la versión ── */
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.addEventListener('message', e => {
-    if(e.data?.type === 'SW_UPDATED') window.location.reload()
+  navigator.serviceWorker.addEventListener('message', function(e){
+    if(e.data && e.data.type === 'SW_UPDATED') window.location.reload()
   })
 }
 </script>
