@@ -259,7 +259,12 @@ window.buscar = async function(){
   if(TIPO === "profesional"){
     data = data.filter(d => esProfesionalUni(d))
   } else {
-    data = data.filter(d => !esProfesionalUni(d))
+    // Buscador de oficios: excluir empresa, emprendimiento, cv y profesionales universitarios
+    data = data.filter(d => {
+      const tipo = d.perfiles?.tipo
+      if(tipo === "empresa" || tipo === "emprendimiento" || tipo === "cv") return false
+      return !esProfesionalUni(d)
+    })
   }
 
   if(!data?.length){
