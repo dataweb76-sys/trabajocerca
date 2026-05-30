@@ -529,7 +529,7 @@
    3 BOTONES DE ACCIÓN
 ════════════════════════════════════ */
 #accionesBar {
-  display:flex; gap:14px;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:10px;
   max-width:700px; margin:28px auto;
   padding:0 20px;
 }
@@ -595,7 +595,7 @@
 
 /* Mobile overrides */
 @media(max-width:600px){
-  #accionesBar      { gap:8px; margin:14px auto; padding:0 12px; }
+  #accionesBar      { grid-template-columns:repeat(2,1fr); gap:8px; margin:14px auto; padding:0 12px; }
   .accion-btn       { padding:14px 8px; border-radius:14px; }
   .accion-ico       { font-size:26px; }
   .accion-titulo    { font-size:13px; }
@@ -668,41 +668,30 @@
           </div>
         </div>
 
+        <!-- Compartir en redes -->
         <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#eff6ff;border-radius:12px;border-left:3px solid #3b82f6;">
           <span style="font-size:20px;flex-shrink:0;">2️⃣</span>
-          <div>
-            <div style="font-weight:800;font-size:13px;color:#1d4ed8;">Invitar mínimo 10 personas</div>
-            <div style="font-size:12px;color:#64748b;margin-top:2px;">Compartí tu link personal y necesitás que <strong>al menos 10 personas se registren</strong> a través de él. Podés ver tu contador en tu perfil.</div>
+          <div style="flex:1;">
+            <div style="font-weight:800;font-size:13px;color:#1d4ed8;">Compartir la página en Instagram o Facebook</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px;margin-bottom:8px;">Publicá Trabajos Cerca en tus redes para que más personas se sumen al prode.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <a href="https://www.instagram.com/" target="_blank"
+                onclick="localStorage.setItem('tc_compartido','1');marcarCompartidoReglas()"
+                style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);color:white;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;text-decoration:none;">
+                <i class="fa-brands fa-instagram"></i> Compartir en IG
+              </a>
+              <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ftrabajos cerca.com.ar%2Fmundial.html" target="_blank"
+                onclick="localStorage.setItem('tc_compartido','1');marcarCompartidoReglas()"
+                style="display:inline-flex;align-items:center;gap:6px;background:#1877f2;color:white;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;text-decoration:none;">
+                <i class="fa-brands fa-facebook"></i> Compartir en FB
+              </a>
+            </div>
           </div>
         </div>
 
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#fefce8;border-radius:12px;border-left:3px solid #facc15;">
-          <span style="font-size:20px;flex-shrink:0;">3️⃣</span>
-          <div>
-            <div style="font-weight:800;font-size:13px;color:#a16207;">Predecir los 104 partidos</div>
-            <div style="font-size:12px;color:#64748b;margin-top:2px;"><strong>3 pts</strong> por resultado exacto · <strong>1 pt</strong> por tendencia correcta. Las predicciones se bloquean <strong>1 hora antes</strong> de cada partido.</div>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#f5f3ff;border-radius:12px;border-left:3px solid #7c3aed;">
-          <span style="font-size:20px;flex-shrink:0;">👥</span>
-          <div>
-            <div style="font-weight:800;font-size:13px;color:#7c3aed;">Meta de 10.000 participantes</div>
-            <div style="font-size:12px;color:#64748b;margin-top:2px;">Para que el sorteo sea válido, la plataforma debe superar los <strong>10.000 participantes registrados</strong> en total. El contador se muestra en tiempo real en esta página.</div>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#fff7ed;border-radius:12px;border-left:3px solid #f97316;">
-          <span style="font-size:20px;flex-shrink:0;">🇦🇷</span>
-          <div>
-            <div style="font-weight:800;font-size:13px;color:#c2410c;">Premio especial Argentina Campeón</div>
-            <div style="font-size:12px;color:#64748b;margin-top:2px;">Si Argentina sale campeón, ganás <strong>$500.000 ARS</strong> si tenés 3 o más resultados exactos de partidos de Argentina.</div>
-          </div>
-        </div>
-
-        <!-- Instagram -->
+        <!-- Instagram seguir -->
         <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#fdf2f8;border-radius:12px;border-left:3px solid #ec4899;">
-          <span style="font-size:20px;flex-shrink:0;">📸</span>
+          <span style="font-size:20px;flex-shrink:0;">3️⃣</span>
           <div style="flex:1;">
             <div style="font-weight:800;font-size:13px;color:#9d174d;">Seguir a @datawebdigital en Instagram</div>
             <div style="font-size:12px;color:#64748b;margin-top:2px;margin-bottom:8px;">Seguí nuestra cuenta para estar al tanto de los resultados, ganadores y novedades del prode.</div>
@@ -716,10 +705,45 @@
           </div>
         </div>
 
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#fefce8;border-radius:12px;border-left:3px solid #facc15;">
+          <span style="font-size:20px;flex-shrink:0;">4️⃣</span>
+          <div>
+            <div style="font-weight:800;font-size:13px;color:#a16207;">Predecir los partidos del Mundial</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px;"><strong>3 pts</strong> por resultado exacto · <strong>1 pt</strong> por tendencia correcta. Las predicciones se bloquean <strong>1 hora antes</strong> de cada partido.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#f5f3ff;border-radius:12px;border-left:3px solid #7c3aed;">
+          <span style="font-size:20px;flex-shrink:0;">👥</span>
+          <div>
+            <div style="font-weight:800;font-size:13px;color:#7c3aed;">Mínimo 100 participantes para premios</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px;">Para que los premios sean válidos, el prode debe tener al menos <strong>100 participantes</strong>. El contador se muestra en esta página en tiempo real.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#fff7ed;border-radius:12px;border-left:3px solid #f97316;">
+          <span style="font-size:20px;flex-shrink:0;">🇦🇷</span>
+          <div>
+            <div style="font-weight:800;font-size:13px;color:#c2410c;">Premio especial Argentina Campeón</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px;">Si Argentina sale campeón, ganás <strong>$500.000 ARS</strong> si tenés 3 o más resultados exactos de partidos de Argentina.</div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Checkboxes -->
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+
+        <!-- Compartido confirm -->
+        <div style="background:#eff6ff;border-radius:12px;padding:12px 14px;border:1.5px solid #bfdbfe;">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+            <input type="checkbox" id="checkCompartido" onchange="validarAceptar()" style="
+              margin-top:2px;width:18px;height:18px;cursor:pointer;accent-color:#3b82f6;flex-shrink:0;">
+            <span style="font-size:12px;color:#374151;line-height:1.6;">
+              ✅ Ya compartí la página en Instagram o Facebook
+            </span>
+          </label>
+        </div>
 
         <!-- Instagram confirm -->
         <div style="background:#fdf2f8;border-radius:12px;padding:12px 14px;border:1.5px solid #fbcfe8;">
@@ -739,14 +763,14 @@
               margin-top:2px;width:18px;height:18px;cursor:pointer;accent-color:#15803d;flex-shrink:0;">
             <span style="font-size:12px;color:#374151;line-height:1.6;">
               Acepto las <a href="/terminos-mundial.html" target="_blank" style="color:#2563eb;font-weight:700;">bases y condiciones del Prode Mundial 2026</a>.
-              Participación gratuita · 10 invitados requeridos · Meta de 10.000 participantes para validez del sorteo.
+              Participación gratuita · Premios válidos con 100+ participantes.
             </span>
           </label>
         </div>
 
       </div>
 
-      <!-- Botón ingresar (se activa cuando ambos checkboxes están marcados) -->
+      <!-- Botón ingresar (se activa cuando todos los checkboxes están marcados) -->
       <button id="btnIngresarFixture" disabled onclick="ingresarAlFixture()" style="
         width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
         background:#e2e8f0;color:#94a3b8;font-weight:800;font-size:15px;
@@ -762,7 +786,7 @@
 </div>
 
 <!-- ══════════════════════════════════
-     3 BOTONES DE ACCIÓN
+     BOTONES DE ACCIÓN
 ══════════════════════════════════ -->
 <div id="accionesBar">
 
@@ -785,6 +809,13 @@
     <div class="accion-ico">🎁</div>
     <div class="accion-titulo">Premios</div>
     <div class="accion-sub">¿Qué podés ganar?</div>
+  </button>
+
+  <button class="accion-btn" onclick="abrirPopupReglas()"
+    style="background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);border:1.5px solid rgba(250,204,21,.35);">
+    <div class="accion-ico">📋</div>
+    <div class="accion-titulo">Reglas</div>
+    <div class="accion-sub">Cómo participar</div>
   </button>
 
 </div>
@@ -817,11 +848,11 @@
     </div>
   </div>
 
-  <!-- Barra meta 10k (oculta en mobile por defecto, visible en desktop) -->
+  <!-- Barra meta 100 participantes mínimos para premios -->
   <div id="metaBar" style="margin:10px 4px 0;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
       <span style="font-size:11px;font-weight:700;color:#7c3aed;">
-        🎯 Meta: <strong>10.000 participantes</strong>
+        🎯 Meta mínima: <strong>100 participantes</strong> para habilitar premios
       </span>
       <span id="metaPct" style="font-size:11px;font-weight:700;color:#7c3aed;">0%</span>
     </div>
@@ -1146,14 +1177,10 @@ async function init() {
     PARTIDOS = partidosRes.data
   }
 
-  // Verificar si puede jugar y contar referidos
+  // Verificar si puede jugar: compartió en redes + siguió @datawebdigital (localStorage)
   if (currentUser) {
-    const [puedeRes, refsRes] = await Promise.all([
-      supabase.rpc("puede_participar_mundial", { p_user_id: currentUser.id }),
-      supabase.rpc("contar_referidos", { p_user_id: currentUser.id })
-    ])
-    puedeJugar = puedeRes.data === true
-    nRefs      = refsRes.data ?? 0
+    puedeJugar = !!(localStorage.getItem('tc_compartido') && localStorage.getItem('tc_ig_seguido'))
+    nRefs = 0 // ya no se usa para desbloqueo
   }
 
   // Predicciones del usuario
@@ -1187,14 +1214,15 @@ async function init() {
   const nJugadores = totalJugadores ?? 0
   document.getElementById("stat-participantes").textContent = nJugadores.toLocaleString("es-AR")
 
-  // Barra meta 10.000 participantes del sorteo
-  const pct10k = Math.min(100, Math.round((nJugadores / 10000) * 100))
-  document.getElementById("metaPct").textContent = pct10k + "%"
-  document.getElementById("metaFill").style.width = Math.max(pct10k, 0.5) + "%"
-  if (nJugadores >= 10000) {
+  // Barra meta 100 participantes mínimos para premios
+  const META_MIN = 100
+  const pct100 = Math.min(100, Math.round((nJugadores / META_MIN) * 100))
+  document.getElementById("metaPct").textContent = `${nJugadores}/${META_MIN}`
+  document.getElementById("metaFill").style.width = Math.max(pct100, 1) + "%"
+  if (nJugadores >= META_MIN) {
     document.getElementById("metaFill").style.background = "linear-gradient(90deg,#22c55e,#4ade80)"
-    document.getElementById("metaBar").querySelector("p").innerHTML =
-      `✅ <strong style="color:#15803d;">¡Meta alcanzada! El sorteo es válido.</strong>`
+    document.getElementById("metaPct").textContent = "✅ ¡Meta alcanzada!"
+    document.getElementById("metaPct").style.color = "#15803d"
   }
 
   // Render inicial
@@ -1567,17 +1595,29 @@ window.cerrarModalReg = function(e) {
    Popup reglas / condiciones
 ══════════════════════════════════ */
 window.abrirPopupReglas = function() {
-  document.getElementById("popupReglas").style.display = "flex"
+  const popup = document.getElementById("popupReglas")
+  if (!popup) return
+  popup.style.display = "flex"
+  // Pre-marcar checkboxes si ya completó los pasos
+  const cbComp = document.getElementById("checkCompartido")
+  const cbIG   = document.getElementById("checkInstagram")
+  if (cbComp && localStorage.getItem('tc_compartido')) { cbComp.checked = true }
+  if (cbIG   && localStorage.getItem('tc_ig_seguido'))  { cbIG.checked   = true }
+  validarAceptar()
 }
 window.cerrarPopupReglas = function(e) {
   if (e.target === document.getElementById("popupReglas"))
     document.getElementById("popupReglas").style.display = "none"
 }
 window.validarAceptar = function() {
+  const okComp = document.getElementById("checkCompartido")?.checked
   const okIG   = document.getElementById("checkInstagram")?.checked
   const okTerm = document.getElementById("checkTerminos")?.checked
   const btn    = document.getElementById("btnIngresarFixture")
-  if (okIG && okTerm) {
+  if (okComp && okIG && okTerm) {
+    // Guardar en localStorage
+    localStorage.setItem('tc_compartido', '1')
+    localStorage.setItem('tc_ig_seguido', '1')
     btn.disabled = false
     btn.style.background = "linear-gradient(135deg,#15803d,#16a34a)"
     btn.style.color = "white"
@@ -1592,12 +1632,20 @@ window.validarAceptar = function() {
   }
 }
 
-// Marca el checkbox de Instagram automáticamente cuando hacen click en "Seguir"
+// Marca checkboxes automáticamente cuando hacen click en los botones
 window.marcarInstagram = function() {
+  localStorage.setItem('tc_ig_seguido', '1')
   setTimeout(() => {
     const cb = document.getElementById("checkInstagram")
     if (cb) { cb.checked = true; validarAceptar() }
   }, 1500)
+}
+window.marcarCompartidoReglas = function() {
+  localStorage.setItem('tc_compartido', '1')
+  setTimeout(() => {
+    const cb = document.getElementById("checkCompartido")
+    if (cb) { cb.checked = true; validarAceptar() }
+  }, 800)
 }
 window.ingresarAlFixture = function() {
   document.getElementById("popupReglas").style.display = "none"
@@ -1613,25 +1661,34 @@ window.ingresarAlFixture = function() {
    Modal "todavía no podés predecir"
 ══════════════════════════════════ */
 window.mostrarToastNecesitas = window.mostrarModalNoPuede = function() {
-  const faltan     = Math.max(0, 10 - nRefs)
-  const faltanRefs = nRefs < 10
-  // Si tiene 10 refs pero no puede jugar → problema de Instagram
-  const faltaIG    = !puedeJugar && nRefs >= 10
+  const compartido = !!localStorage.getItem('tc_compartido')
+  const igSeguido  = !!localStorage.getItem('tc_ig_seguido')
 
   let items = ""
 
-  // — Requisito: 10 invitados —
-  if (faltanRefs) {
+  // — Requisito 1: Compartir en redes —
+  if (!compartido) {
     items += `
       <div class="no-puede-item" style="background:#fef2f2;border:1.5px solid #fecaca;">
         <span style="font-size:22px;flex-shrink:0;">❌</span>
-        <div>
+        <div style="flex:1;">
           <div style="font-weight:800;font-size:14px;color:#b91c1c;">
-            Invitados registrados: ${nRefs}/10
+            Compartir la página en Instagram o Facebook
           </div>
-          <div style="font-size:12px;color:#64748b;margin-top:3px;">
-            Te faltan <strong>${faltan} amigo${faltan !== 1 ? "s" : ""}</strong> que se registren
-            con tu link personal. Lo encontrás en tu perfil.
+          <div style="font-size:12px;color:#64748b;margin-top:4px;margin-bottom:8px;">
+            Publicá Trabajos Cerca en tus redes para que otros se sumen.
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="https://www.instagram.com/" target="_blank"
+              onclick="localStorage.setItem('tc_compartido','1');setTimeout(()=>location.reload(),1000)"
+              style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);color:white;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;text-decoration:none;">
+              <i class="fa-brands fa-instagram"></i> Compartir en IG
+            </a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ftrabajos cerca.com.ar%2Fmundial.html" target="_blank"
+              onclick="localStorage.setItem('tc_compartido','1');setTimeout(()=>location.reload(),1000)"
+              style="display:inline-flex;align-items:center;gap:6px;background:#1877f2;color:white;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;text-decoration:none;">
+              <i class="fa-brands fa-facebook"></i> Compartir en FB
+            </a>
           </div>
         </div>
       </div>`
@@ -1640,23 +1697,36 @@ window.mostrarToastNecesitas = window.mostrarModalNoPuede = function() {
       <div class="no-puede-item" style="background:#f0fdf4;border:1.5px solid #bbf7d0;">
         <span style="font-size:22px;flex-shrink:0;">✅</span>
         <div>
-          <div style="font-weight:800;font-size:14px;color:#15803d;">Invitados: 10/10 completado</div>
+          <div style="font-weight:800;font-size:14px;color:#15803d;">Compartido en redes ✓</div>
         </div>
       </div>`
   }
 
-  // — Requisito: Instagram —
-  if (faltaIG) {
+  // — Requisito 2: Seguir @datawebdigital —
+  if (!igSeguido) {
     items += `
       <div class="no-puede-item" style="background:#fdf4ff;border:1.5px solid #f0abfc;">
         <span style="font-size:22px;flex-shrink:0;">❌</span>
-        <div>
+        <div style="flex:1;">
           <div style="font-weight:800;font-size:14px;color:#7e22ce;">
             Seguir @datawebdigital en Instagram
           </div>
-          <div style="font-size:12px;color:#64748b;margin-top:3px;">
-            Seguí nuestra cuenta de Instagram para completar los requisitos.
+          <div style="font-size:12px;color:#64748b;margin-top:4px;margin-bottom:8px;">
+            Para estar al tanto de los resultados y ganadores del prode.
           </div>
+          <a href="https://www.instagram.com/datawebdigital/" target="_blank"
+            onclick="localStorage.setItem('tc_ig_seguido','1');setTimeout(()=>location.reload(),1500)"
+            style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);color:white;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;text-decoration:none;">
+            <i class="fa-brands fa-instagram"></i> Seguir @datawebdigital
+          </a>
+        </div>
+      </div>`
+  } else {
+    items += `
+      <div class="no-puede-item" style="background:#f0fdf4;border:1.5px solid #bbf7d0;">
+        <span style="font-size:22px;flex-shrink:0;">✅</span>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:#15803d;">Siguiendo @datawebdigital ✓</div>
         </div>
       </div>`
   }

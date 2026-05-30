@@ -442,9 +442,10 @@ window.confirmarSolicitudT = async function(){
     return
   }
   msgEl.innerHTML = '<span style="font-size:13px;color:#64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Enviando solicitud...</span>'
+  const planNombre = { p1: 'basico', p2: 'estandar', p3: 'pro' }[planKey] || planKey
   const { error } = await supabase.from("solicitudes_portfolio").insert({
     usuario_id: uid,
-    plan:       planKey,
+    plan:       planNombre,
     cantidad:   plan.cantidad,
     precio:     plan.precio,
     estado:     "pendiente"

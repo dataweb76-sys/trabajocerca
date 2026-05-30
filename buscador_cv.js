@@ -310,14 +310,25 @@ window.buscar = async function(){
           <p style="margin:4px 0 0;font-size:13px;color:#64748b;"><i class="fa-solid fa-location-dot"></i> ${p.localidad||""}${p.provincia?", "+p.provincia:""}</p>
           ${item.disponibilidad?`<p style="margin:2px 0 0;font-size:12px;color:#2563eb;"><i class="fa-solid fa-clock"></i> ${DISP[item.disponibilidad]||item.disponibilidad}</p>`:""}
           ${habs?`<div style="margin-top:5px;">${habs}</div>`:""}
+          ${item.cv_archivo
+            ? `<p style="margin:4px 0 0;font-size:12px;color:#16a34a;font-weight:700;"><i class="fa-solid fa-file-lines"></i> CV adjunto</p>`
+            : `<p style="margin:4px 0 0;font-size:12px;color:#94a3b8;"><i class="fa-solid fa-file-lines"></i> Sin CV adjunto</p>`}
         </div>
       </div>
       <div class="card-actions" style="margin-top:14px;">
         <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();this.closest('.card').click()">
           <i class="fa-solid fa-eye"></i> Ver perfil
         </button>
+        ${item.cv_archivo
+          ? `<a href="${item.cv_archivo}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+              class="btn btn-sm" style="background:#16a34a;color:white;display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+              <i class="fa-solid fa-file-lines"></i> Ver CV</a>`
+          : `<button class="btn btn-sm" disabled
+              style="background:#f1f5f9;color:#94a3b8;cursor:not-allowed;display:inline-flex;align-items:center;gap:6px;border:1px solid #e2e8f0;"
+              title="Este candidato no adjuntó su CV">
+              <i class="fa-solid fa-file-lines"></i> Sin CV</button>`}
         ${wa?`<a href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
-          class="btn btn-sm" style="background:#25D366;color:white;display:inline-flex;align-items:center;gap:6px;">
+          class="btn btn-sm" style="background:#25D366;color:white;display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
           <i class="fa-brands fa-whatsapp"></i> WhatsApp</a>`:""}
       </div>`
 
@@ -325,4 +336,5 @@ window.buscar = async function(){
   })
 }
 
-buscar()
+/* buscar() se llama desde verificarAccesoEmpresa() solo si el usuario es empresa */
+window._cvBuscarDisponible = true

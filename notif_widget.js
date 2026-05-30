@@ -85,15 +85,17 @@
   @media(max-width: 400px){
     #notif-panel { width: calc(100vw - 24px); right: -50px; }
   }
+  /* ── Overrides para navbar unificada oscura ── */
+  .tnav-right #notif-bell-wrap { display:inline-flex; align-items:center; }
+  .tnav-right #notif-bell { color: rgba(255,255,255,.82); border-radius:8px; }
+  .tnav-right #notif-bell:hover { color:white; background:rgba(255,255,255,.18); }
+  .tnav-right #notif-badge { border-color: #1e3a8a; }
   `
   const styleEl = document.createElement("style")
   styleEl.textContent = css
   document.head.appendChild(styleEl)
 
   /* ══════ HTML ══════ */
-  const nav = document.querySelector(".topbar nav")
-  if(!nav) return
-
   const wrap = document.createElement("div")
   wrap.id = "notif-bell-wrap"
   wrap.innerHTML = `
@@ -114,8 +116,25 @@
       </div>
     </div>`
 
-  // Insertar antes del primer <a> del nav
-  nav.insertBefore(wrap, nav.firstChild)
+  /* ── Soporte para navbar unificada (tnav-right) y nav clásico ── */
+  function montarBell(){
+    const tnavRight = document.querySelector(".tnav-right")
+    const legacyNav = document.querySelector(".topbar nav")
+    if(!tnavRight && !legacyNav){ setTimeout(montarBell, 150); return }
+    if(tnavRight){
+      // Insertar antes del botón ⚽ (btn-prode) o antes del btn-salir
+      const prodeBtn = tnavRight.querySelector(".btn-prode")
+      if(prodeBtn) tnavRight.insertBefore(wrap, prodeBtn)
+      else tnavRight.appendChild(wrap)
+    } else {
+      legacyNav.insertBefore(wrap, legacyNav.firstChild)
+    }
+  }
+
+  if(document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", montarBell)
+  else
+    montarBell()
 
   // Cerrar al clickear afuera
   document.addEventListener("click", e => {

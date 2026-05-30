@@ -184,7 +184,8 @@ async function init(){
         </div>
       </div>`
 
-    /* ── Trabajos realizados ── */
+    /* ── Trabajos realizados (solo tipo oficio) ── */
+    if(_tipo === "oficio") {
     const planNivel  = data.plan_nivel || 0
     const maxTrab    = planNivel >= 3 ? 5 : planNivel === 2 ? 2 : planNivel === 1 ? 1 : 0
 
@@ -238,6 +239,7 @@ async function init(){
         </a>
       </div>`
     }
+    } // fin if(_tipo === "oficio")
   }
 
   /* ── Referidos ── */
@@ -389,74 +391,88 @@ async function init(){
     </div>
 
     <!-- ── PRODE MUNDIAL 2026 ── -->
-    <div id="prodeCard" style="margin:20px 0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);border:1.5px solid rgba(250,204,21,.35);border-radius:18px;padding:20px 20px;overflow:hidden;position:relative;">
+    <div id="prodeCard" style="margin:20px 0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);border:1.5px solid rgba(250,204,21,.35);border-radius:18px;padding:20px;overflow:hidden;position:relative;">
       <div style="position:absolute;top:-20px;right:-20px;font-size:90px;opacity:.06;pointer-events:none;">⚽</div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <div style="font-size:38px;flex-shrink:0;">⚽🏆</div>
+
+      <!-- Encabezado -->
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+        <div style="font-size:36px;flex-shrink:0;">⚽🏆</div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:15px;font-weight:900;color:white;line-height:1.2;">Prode Mundial 2026</div>
           <div id="prodeStatus" style="font-size:12px;color:rgba(255,255,255,.55);margin-top:3px;">Verificando...</div>
         </div>
-        <a id="prodeBtn" href="/mundial.html" style="
-          display:inline-flex;align-items:center;gap:7px;
-          background:linear-gradient(135deg,#facc15,#f59e0b);
-          color:#1c1917;font-weight:800;font-size:13px;
-          padding:10px 18px;border-radius:12px;text-decoration:none;
-          white-space:nowrap;box-shadow:0 4px 16px rgba(250,204,21,.4);
-          flex-shrink:0;transition:transform .15s;
-        "
-        onmouseover="this.style.transform='scale(1.04)'"
-        onmouseout="this.style.transform='scale(1)'">
-          ⚽ Participar en el sorteo del mundial
+        <button onclick="window._abrirReglasMundial()" style="
+          background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
+          color:rgba(255,255,255,.9);font-size:12px;font-weight:700;
+          padding:7px 13px;border-radius:9px;cursor:pointer;flex-shrink:0;
+          transition:background .15s;"
+          onmouseover="this.style.background='rgba(255,255,255,.22)'"
+          onmouseout="this.style.background='rgba(255,255,255,.12)'">
+          📋 Reglas
+        </button>
+      </div>
+
+      <!-- Requisitos -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+
+        <!-- Paso 1: Compartir -->
+        <div id="req1Box" style="background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.13);border-radius:12px;padding:11px 13px;transition:all .3s;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div id="req1Check" style="font-size:16px;flex-shrink:0;">📲</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:700;color:white;">1. Compartí la página en redes</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:1px;">Publicá Trabajos Cerca en tu Instagram o Facebook</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+              <a href="https://www.instagram.com/" target="_blank" onclick="window._marcarCompartido()"
+                style="display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);color:white;font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;text-decoration:none;">
+                <i class="fa-brands fa-instagram"></i> IG
+              </a>
+              <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ftrabajos cerca.com.ar%2Fmundial.html" target="_blank" onclick="window._marcarCompartido()"
+                style="display:inline-flex;align-items:center;gap:5px;background:#1877f2;color:white;font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;text-decoration:none;">
+                <i class="fa-brands fa-facebook"></i> FB
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 2: Seguir IG -->
+        <div id="req2Box" style="background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.13);border-radius:12px;padding:11px 13px;transition:all .3s;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div id="req2Check" style="font-size:16px;flex-shrink:0;">📸</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:700;color:white;">2. Seguí @datawebdigital en Instagram</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:1px;">Para enterarte de resultados y ganadores</div>
+            </div>
+            <a href="https://www.instagram.com/datawebdigital/" target="_blank" onclick="window._marcarIGSeguido()"
+              style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);color:white;font-size:12px;font-weight:700;padding:8px 12px;border-radius:9px;text-decoration:none;flex-shrink:0;">
+              <i class="fa-brands fa-instagram"></i> Seguir
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Mensaje éxito (aparece cuando ambos requisitos están completos) -->
+      <div id="prodeSuccess" style="display:none;background:linear-gradient(135deg,rgba(20,83,45,.9),rgba(22,101,52,.85));border:2px solid #4ade80;border-radius:14px;padding:16px;text-align:center;margin-bottom:12px;">
+        <div style="font-size:28px;margin-bottom:6px;">🎉</div>
+        <div style="font-size:15px;font-weight:900;color:white;margin-bottom:4px;">¡Ya podés llenar el fixture del mundial!</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:14px;">Mucha suerte en el Prode 2026 🏆⚽</div>
+        <a href="/mundial.html"
+          style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#facc15,#f59e0b);color:#1c1917;font-weight:900;font-size:14px;padding:12px 26px;border-radius:12px;text-decoration:none;box-shadow:0 4px 18px rgba(250,204,21,.45);transition:transform .15s;"
+          onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+          ⚽ Ir al fixture →
         </a>
       </div>
-      <!-- Barra de progreso referidos -->
-      <div style="margin-top:14px;">
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:6px;">
-          <span>Invitados registrados</span>
-          <span id="refCount">...</span>
-        </div>
-        <div style="background:rgba(255,255,255,.1);border-radius:99px;height:8px;overflow:hidden;">
-          <div id="refBar" style="height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#4ade80);border-radius:99px;transition:width .6s ease;"></div>
-        </div>
-        <div style="margin-top:8px;text-align:center;">
-          <span style="font-size:11px;color:rgba(255,255,255,.4);">
-            Necesitás 10 amigos registrados con tu link para desbloquear el prode •
-            <a href="/" style="color:#fbbf24;text-decoration:none;">Obtener link →</a>
-          </span>
-        </div>
-      </div>
 
-      <!-- ── Botones Instagram dentro del prode ── -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
-
-        <!-- Invitar amigos — se actualiza dinámicamente en cargarProdeCard -->
-        <div id="btnInvitarWrap">
-          <button onclick="compartirInvitacionIG('${userId}')" style="
-            width:100%;display:flex;align-items:center;justify-content:center;gap:7px;
-            background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
-            color:white;font-weight:700;font-size:13px;
-            padding:11px 8px;border-radius:12px;border:none;cursor:pointer;
-            box-shadow:0 4px 14px rgba(188,24,136,.3);transition:opacity .15s;"
-            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-            <i class="fa-brands fa-instagram"></i> Invitar amigos
-          </button>
-        </div>
-
-        <!-- Seguir @datawebdigital -->
-        <a href="https://www.instagram.com/datawebdigital/" target="_blank" style="
-          display:flex;align-items:center;justify-content:center;gap:7px;
-          background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
-          color:white;font-weight:700;font-size:13px;
-          padding:11px 8px;border-radius:12px;text-decoration:none;
-          box-shadow:0 4px 14px rgba(188,24,136,.3);
-          border:2px solid rgba(255,255,255,.25);transition:opacity .15s;"
-          onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-          <i class="fa-brands fa-instagram"></i> Seguir @datawebdigital
+      <!-- Botón ver prode (cuando aún no completó requisitos) -->
+      <div id="prodeBtnWrap">
+        <a href="/mundial.html"
+          style="display:flex;align-items:center;justify-content:center;gap:7px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);font-weight:700;font-size:13px;padding:11px;border-radius:12px;text-decoration:none;border:1px solid rgba(255,255,255,.2);transition:background .15s;"
+          onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
+          🏆 Ver el prode del mundial →
         </a>
-
       </div>
-      <div id="msgInvIG" style="margin-top:8px;"></div>
 
     </div>
     </div>
@@ -600,6 +616,50 @@ async function init(){
           Mostrar mi teléfono/WhatsApp en el perfil público
         </label>
       </div>
+
+      <div class="check-fila" style="margin-top:12px;border-top:1px solid #e9d5ff;padding-top:12px;margin-bottom:0;">
+        <label class="check-opt">
+          <input type="checkbox" id="toggleMostrarMapa" ${localStorage.getItem('tc_mapa_on')==='1'?'checked':''}
+            onchange="this.checked?localStorage.setItem('tc_mapa_on','1'):localStorage.removeItem('tc_mapa_on');document.getElementById('mapaOnMsg').style.display=this.checked?'flex':'none'">
+          <span class="check-custom"></span>
+          Mostrar enlace a Google Maps en el buscador
+        </label>
+        <div id="mapaOnMsg" style="display:${localStorage.getItem('tc_mapa_on')==='1'?'flex':'none'};align-items:center;gap:6px;font-size:12px;color:#6d28d9;margin-top:6px;padding:8px 10px;background:rgba(109,40,217,.08);border-radius:8px;">
+          <i class="fa-solid fa-map-location-dot"></i>
+          <span>Activado — cada resultado mostrará "Ver en mapa" con la ubicación en Google Maps</span>
+        </div>
+      </div>
+
+      <div class="check-fila" style="margin-top:12px;border-top:1px solid #e9d5ff;padding-top:12px;margin-bottom:0;">
+        <label class="check-opt">
+          <input type="checkbox" id="toggleRecibirMsgs" ${localStorage.getItem('tc_recibir_msgs')==='0'?'':'checked'}
+            onchange="this.checked?localStorage.removeItem('tc_recibir_msgs'):localStorage.setItem('tc_recibir_msgs','0');document.getElementById('msgsOffMsg').style.display=this.checked?'none':'flex'">
+          <span class="check-custom"></span>
+          Recibir mensajes de otros usuarios
+        </label>
+        <div id="msgsOffMsg" style="display:${localStorage.getItem('tc_recibir_msgs')==='0'?'flex':'none'};align-items:center;gap:6px;font-size:12px;color:#dc2626;margin-top:6px;padding:8px 10px;background:rgba(220,38,38,.07);border-radius:8px;">
+          <i class="fa-solid fa-comment-slash"></i>
+          <span>Mensajes desactivados en este dispositivo — otros usuarios no verán el botón de mensaje en tu perfil</span>
+        </div>
+      </div>
+
+      <div class="check-fila" style="margin-top:12px;border-top:1px solid #e9d5ff;padding-top:12px;margin-bottom:0;">
+        <label class="check-opt">
+          <input type="checkbox" id="toggleAparecerMapa" ${localStorage.getItem('tc_en_mapa')==='0'?'':'checked'}
+            onchange="this.checked?localStorage.removeItem('tc_en_mapa'):localStorage.setItem('tc_en_mapa','0');document.getElementById('mapaOffMsg').style.display=this.checked?'none':'flex'">
+          <span class="check-custom"></span>
+          Aparecer en el mapa de profesionales
+        </label>
+        <div id="mapaOffMsg" style="display:${localStorage.getItem('tc_en_mapa')==='0'?'flex':'none'};align-items:center;gap:6px;font-size:12px;color:#dc2626;margin-top:6px;padding:8px 10px;background:rgba(220,38,38,.07);border-radius:8px;">
+          <i class="fa-solid fa-map-pin"></i>
+          <span>Tu perfil no aparecerá en el mapa de profesionales en este dispositivo</span>
+        </div>
+        <p style="font-size:11px;color:#94a3b8;margin:6px 0 0;padding-left:2px;">
+          <i class="fa-solid fa-circle-info" style="margin-right:3px;"></i>
+          Para configurar tu ubicación en el mapa, completá tu dirección en
+          <a href="/perfil_servicio.html" style="color:#2563eb;">tu perfil de servicio</a>.
+        </p>
+      </div>
     </div>
 
     <div id="msgPerfil" style="margin-top:14px;"></div>
@@ -647,6 +707,11 @@ async function init(){
 
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
 
+    ${data.email === 'datawebgames@gmail.com' ? `
+    <a href="/admin.html" class="btn" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+      <i class="fa-solid fa-shield-halved"></i> Panel de Administración
+    </a>
+    ` : ""}
     <button class="btn btn-outline" onclick="cerrarSesion()" style="color:#ef4444;border-color:#ef4444;">
       <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
     </button>
@@ -654,6 +719,9 @@ async function init(){
 
   // Cargar datos del prode en la card (async, no bloquea render)
   cargarProdeCard(userId)
+
+  // Chatbox de preguntas frecuentes
+  montarFAQChat()
 
 }
 
@@ -974,52 +1042,207 @@ window.cerrarSesion = async function(){
 
 function esc(v){ return (v || "").toString().replace(/"/g,"&quot;") }
 
-/* ── PRODE CARD: cargar referidos ── */
-async function cargarProdeCard(userId){
-  const card = document.getElementById("prodeCard")
-  if(!card) return
+/* ── PRODE CARD: verificar requisitos (localStorage) ── */
+function cargarProdeCard(userId){
+  const compartido = !!localStorage.getItem('tc_compartido')
+  const igSeguido  = !!localStorage.getItem('tc_ig_seguido')
+  const ambos      = compartido && igSeguido
 
-  const { data: total } = await supabase.rpc("contar_referidos", { p_user_id: userId })
-  const n      = total ?? 0
-  const pct    = Math.min(100, Math.round((n / 10) * 100))
-  const faltan = Math.max(0, 10 - n)
-
-  // Barra
-  const bar = document.getElementById("refBar")
-  if(bar) bar.style.width = pct + "%"
-
-  const cnt = document.getElementById("refCount")
-  if(cnt) cnt.textContent = `${n}/10`
-
+  // Status text
   const status = document.getElementById("prodeStatus")
-  const btn    = document.getElementById("prodeBtn")
-
-  const invWrap = document.getElementById("btnInvitarWrap")
-
-  if(n >= 10){
-    if(status) status.innerHTML = `<span style="color:#4ade80;font-weight:700;">✅ ¡Desbloqueado! Ya podés predecir todos los partidos</span>`
-    if(bar)    bar.style.background = "linear-gradient(90deg,#22c55e,#4ade80)"
-    if(btn)    btn.style.animation = "pulse-glow 2s ease-in-out infinite"
-    // Reemplazar botón "Invitar amigos" por mensaje de éxito
-    if(invWrap) invWrap.innerHTML = `
-      <div style="
-        display:flex;align-items:center;justify-content:center;gap:7px;
-        background:linear-gradient(135deg,#14532d,#16a34a);
-        border:2px solid #4ade80;
-        color:white;font-weight:700;font-size:12px;
-        padding:11px 8px;border-radius:12px;text-align:center;line-height:1.3;">
-        ✅ Ya tenés completas<br>las invitaciones
-      </div>`
-  } else {
-    if(status) status.innerHTML = `<span style="color:rgba(255,255,255,.5);">Te faltan <strong style="color:#fbbf24;">${faltan}</strong> invitado${faltan !== 1 ? "s" : ""} para desbloquear el prode</span>`
-    if(btn){
-      btn.href             = "/"
-      btn.innerHTML        = `🔗 Obtener mi link`
-      btn.style.background = "rgba(255,255,255,.15)"
-      btn.style.color      = "white"
-      btn.style.boxShadow  = "none"
+  if(status){
+    if(ambos){
+      status.innerHTML = `<span style="color:#4ade80;font-weight:700;">✅ ¡Requisitos cumplidos! Podés predecir</span>`
+    } else {
+      const p = (!compartido ? 1 : 0) + (!igSeguido ? 1 : 0)
+      status.innerHTML = `<span style="color:rgba(255,255,255,.5);">Completá ${p} requisito${p!==1?"s":""} para desbloquear el fixture</span>`
     }
   }
+
+  // Marcar req1 (compartido)
+  const req1Box   = document.getElementById("req1Box")
+  const req1Check = document.getElementById("req1Check")
+  if(req1Box && compartido){
+    req1Box.style.borderColor = "rgba(74,222,128,.55)"
+    req1Box.style.background  = "rgba(74,222,128,.1)"
+    if(req1Check) req1Check.textContent = "✅"
+  }
+
+  // Marcar req2 (IG seguido)
+  const req2Box   = document.getElementById("req2Box")
+  const req2Check = document.getElementById("req2Check")
+  if(req2Box && igSeguido){
+    req2Box.style.borderColor = "rgba(74,222,128,.55)"
+    req2Box.style.background  = "rgba(74,222,128,.1)"
+    if(req2Check) req2Check.textContent = "✅"
+  }
+
+  // Mostrar éxito o botón normal
+  const succ    = document.getElementById("prodeSuccess")
+  const btnWrap = document.getElementById("prodeBtnWrap")
+  if(succ)    succ.style.display    = ambos ? "block" : "none"
+  if(btnWrap) btnWrap.style.display = ambos ? "none"  : "block"
+}
+
+/* ── Helpers globales para marcar desde onclick ── */
+window._marcarCompartido = function(){
+  localStorage.setItem('tc_compartido', '1')
+  setTimeout(cargarProdeCard, 800)
+}
+window._marcarIGSeguido = function(){
+  localStorage.setItem('tc_ig_seguido', '1')
+  setTimeout(cargarProdeCard, 1500)
+}
+
+/* ── Popup Reglas Mundial (abre el popup de mundial.html si está; si no, va a mundial.html) ── */
+window._abrirReglasMundial = function(){
+  const p = document.getElementById('popupReglas')
+  if(p){ p.style.display = 'flex' }
+  else { window.location.href = '/mundial.html' }
+}
+
+/* ══════════════════════════════════════════════════════════
+   FAQ CHATBOX — Botón flotante + panel de preguntas frecuentes
+══════════════════════════════════════════════════════════ */
+function montarFAQChat(){
+  if(document.getElementById('tc-faq-btn')) return // ya montado
+
+  const FAQS = [
+    { q: '¿Cómo me registro?',
+      a: 'Hacé click en <strong>"Registrarse"</strong> en la pantalla de inicio, elegí tu tipo de perfil (busco empleo, ofrezco oficios, soy profesional, empresa) y completá tus datos. ¡Es gratis y tardás menos de 2 minutos!' },
+    { q: '¿Cómo participo en el Prode del Mundial 2026?',
+      a: 'Para participar tenés que: <strong>1)</strong> Compartir la página en Instagram o Facebook, <strong>2)</strong> Seguir <strong>@datawebdigital</strong> en Instagram. Con eso ya podés completar el fixture del Mundial.' },
+    { q: '¿Cómo busco trabajo?',
+      a: 'Cargá tu CV en tu perfil (sección <em>Perfil CV</em>). Las empresas y empleadores te encontrarán en el buscador de CVs. También podés buscar ofertas en el buscador de <strong>Ofertas de trabajo</strong>.' },
+    { q: '¿Cómo busco un profesional o servicio?',
+      a: 'Desde la pantalla principal usá los buscadores: <strong>Oficios</strong> (plomeros, electricistas, albañiles…), <strong>Profesionales</strong> (contadores, diseñadores, médicos…) o <strong>Emprendimientos</strong>.' },
+    { q: '¿Cómo activo "Disponible ahora"?',
+      a: 'En tu perfil, en la sección <strong>"Disponibilidad"</strong>, tocá el botón <em>"⚡ Estoy disponible"</em>. Aparecerás con un punto verde en los resultados durante 8 horas automáticamente.' },
+    { q: '¿Cómo contacto a un profesional?',
+      a: 'En la tarjeta de cada profesional hay un botón de <strong>WhatsApp</strong> para contactarlo directamente. Sin intermediarios ni comisiones.' },
+    { q: '¿Cómo funciona el sistema de referidos?',
+      a: 'Compartí tu link único de referido (lo encontrás en tu perfil, sección <em>Invitá amigos</em>). Cada persona que se registre con tu link te suma <strong>1 punto</strong>.' },
+    { q: '¿Cómo subo mi foto de perfil?',
+      a: 'En tu perfil, hacé click en <strong>"Cambiar foto"</strong> debajo de tu avatar. Admite JPG, PNG y formatos similares.' },
+    { q: '¿Es gratis?',
+      a: '¡Sí! <strong>Trabajos Cerca es 100% gratuito.</strong> Los planes de pago son opcionales y te permiten subir fotos de trabajos realizados para destacarte en el buscador.' },
+    { q: '¿Cómo actualizo mi ubicación?',
+      a: 'En <em>"Mis datos"</em>, ingresá tu <strong>Código Postal</strong> y la localidad se completa automáticamente. Luego hacé click en <strong>"Guardar cambios"</strong>.' },
+    { q: '¿Cómo publico una oferta de trabajo?',
+      a: 'Si tenés cuenta de <strong>Empleador</strong>, en tu perfil encontrás el botón <em>"Publicar puesto"</em>. Completá los datos y tu oferta aparecerá visible para todos los candidatos.' },
+    { q: '¿Cómo activo Google Maps en el buscador?',
+      a: 'En tu perfil, sección <em>"Visibilidad en el buscador"</em>, activá la opción <strong>"Mostrar enlace a Google Maps"</strong>. Así cada resultado mostrará un enlace directo a la ubicación.' },
+  ]
+
+  /* ── CSS ── */
+  const s = document.createElement('style')
+  s.textContent = `
+  #tc-faq-btn {
+    position:fixed; bottom:24px; right:24px; z-index:9990;
+    width:52px; height:52px; border-radius:50%;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    color:white; border:none; cursor:pointer; font-size:21px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 22px rgba(37,99,235,.45);
+    transition:transform .2s,box-shadow .2s; font-family:inherit;
+  }
+  #tc-faq-btn:hover { transform:scale(1.1); box-shadow:0 8px 30px rgba(37,99,235,.55); }
+  #tc-faq-panel {
+    position:fixed; bottom:86px; right:24px; z-index:9989;
+    width:320px; max-width:calc(100vw - 48px);
+    background:white; border-radius:18px;
+    box-shadow:0 14px 50px rgba(0,0,0,.22);
+    display:none; flex-direction:column;
+    max-height:72vh; overflow:hidden;
+  }
+  #tc-faq-panel.tc-faq-open {
+    display:flex;
+    animation:tcFaqIn .25s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes tcFaqIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  #tc-faq-header {
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    color:white; padding:14px 16px; border-radius:18px 18px 0 0;
+    display:flex; align-items:center; gap:10px; flex-shrink:0;
+  }
+  #tc-faq-lista { overflow-y:auto; flex:1; }
+  .tc-faq-item { border-bottom:1px solid #f1f5f9; }
+  .tc-faq-item:last-child { border-bottom:none; }
+  .tc-faq-q {
+    width:100%; text-align:left; background:none; border:none;
+    padding:12px 14px; font-size:13px; font-weight:700; color:#1e293b;
+    cursor:pointer; display:flex; align-items:center; justify-content:space-between;
+    gap:8px; font-family:inherit; transition:background .15s; line-height:1.4;
+  }
+  .tc-faq-q:hover { background:#f8fafc; }
+  .tc-faq-q.tc-open { color:#2563eb; background:#eff6ff; }
+  .tc-faq-q .tc-arr { font-size:10px; flex-shrink:0; transition:transform .2s; color:#94a3b8; }
+  .tc-faq-q.tc-open .tc-arr { transform:rotate(180deg); color:#2563eb; }
+  .tc-faq-a {
+    overflow:hidden; max-height:0; transition:max-height .3s ease,padding .25s;
+    font-size:12px; color:#475569; line-height:1.65;
+    padding:0 14px;
+  }
+  .tc-faq-a.tc-open { max-height:220px; padding:2px 14px 12px; }
+  `
+  document.head.appendChild(s)
+
+  /* ── HTML del panel ── */
+  const panel = document.createElement('div')
+  panel.id = 'tc-faq-panel'
+  panel.innerHTML = `
+    <div id="tc-faq-header">
+      <i class="fa-solid fa-circle-question" style="font-size:20px;flex-shrink:0;"></i>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:900;line-height:1.2;">Preguntas frecuentes</div>
+        <div style="font-size:11px;opacity:.8;margin-top:1px;">¿En qué te podemos ayudar?</div>
+      </div>
+      <button id="tc-faq-close"
+        style="background:rgba(255,255,255,.2);border:none;color:white;width:28px;height:28px;border-radius:50%;
+        font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;line-height:1;">×</button>
+    </div>
+    <div id="tc-faq-lista">
+      ${FAQS.map((f, i) => `
+      <div class="tc-faq-item">
+        <button class="tc-faq-q" data-idx="${i}">
+          <span>${f.q}</span>
+          <i class="fa-solid fa-chevron-down tc-arr"></i>
+        </button>
+        <div class="tc-faq-a" id="tc-faq-a-${i}">${f.a}</div>
+      </div>`).join('')}
+    </div>
+  `
+
+  /* ── Botón flotante ── */
+  const btn = document.createElement('button')
+  btn.id = 'tc-faq-btn'
+  btn.title = 'Preguntas frecuentes'
+  btn.innerHTML = '<i class="fa-solid fa-circle-question"></i>'
+
+  document.body.appendChild(panel)
+  document.body.appendChild(btn)
+
+  /* ── Eventos ── */
+  btn.onclick = () => panel.classList.toggle('tc-faq-open')
+  document.getElementById('tc-faq-close').onclick = () => panel.classList.remove('tc-faq-open')
+
+  document.getElementById('tc-faq-lista').addEventListener('click', e => {
+    const qBtn = e.target.closest('.tc-faq-q')
+    if(!qBtn) return
+    const idx     = qBtn.dataset.idx
+    const answerEl = document.getElementById(`tc-faq-a-${idx}`)
+    const isOpen   = answerEl.classList.contains('tc-open')
+
+    // Cerrar todos
+    document.querySelectorAll('.tc-faq-q').forEach(q => q.classList.remove('tc-open'))
+    document.querySelectorAll('.tc-faq-a').forEach(a => a.classList.remove('tc-open'))
+
+    // Abrir o cerrar el clickeado
+    if(!isOpen){
+      qBtn.classList.add('tc-open')
+      answerEl.classList.add('tc-open')
+    }
+  })
 }
 
 init()

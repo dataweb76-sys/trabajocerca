@@ -218,7 +218,7 @@ function renderResultados(cvs){
             <span style="background:rgba(255,255,255,.18);border-radius:20px;padding:4px 12px;font-size:12px;color:white;font-weight:600;">🆓 Sin costo</span>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <a href="/registro_empresa.html"
+            <a href="/registro.html"
               style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:white;color:#7c3aed;border-radius:12px;font-weight:800;font-size:14px;text-decoration:none;">
               <i class="fa-solid fa-building"></i> Registrá tu empresa gratis
             </a>
@@ -282,7 +282,7 @@ function renderResultados(cvs){
         <div style="margin-top:12px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <i class="fa-solid fa-lock" style="color:#7c3aed;flex-shrink:0;"></i>
           <span style="font-size:13px;color:#4c1d95;flex:1;">Necesitás una <strong>cuenta de empresa</strong> para ver el CV y contactar.</span>
-          <a href="/registro_empresa.html"
+          <a href="/registro.html"
             style="display:inline-flex;align-items:center;gap:5px;padding:8px 14px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;">
             <i class="fa-solid fa-building"></i> Registrar empresa
           </a>
@@ -291,11 +291,11 @@ function renderResultados(cvs){
       // ── Sin sesión: invitar a registrarse ──
       accionesHtml = `
         <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-          <a href="/registro_empresa.html"
+          <a href="/registro.html"
             style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">
             <i class="fa-solid fa-eye"></i> Ver CV completo
           </a>
-          <a href="/registro_empresa.html"
+          <a href="/registro.html"
             style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#e2e8f0;color:#64748b;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;">
             <i class="fa-brands fa-whatsapp"></i> WhatsApp
           </a>

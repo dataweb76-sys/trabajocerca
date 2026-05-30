@@ -251,6 +251,24 @@ async function cargarSolicitudes() {
   document.getElementById("contadorSolicitudes").textContent =
     total ? `· ${total} pendiente${total !== 1 ? "s" : ""}` : "· todo al día ✓"
 
+  // Alerta al admin cuando hay solicitudes pendientes (1 vez por sesión)
+  if(total > 0 && !sessionStorage.getItem("tc_sol_alerta")) {
+    sessionStorage.setItem("tc_sol_alerta", "1")
+    const nombres = pendientes.slice(0, 3).map(s => {
+      const p = s.perfiles || {}
+      const cant = s.cantidad || 1
+      const nom  = (p.nombre_empresa && p.nombre_empresa.trim())
+        ? p.nombre_empresa
+        : `${p.nombre || ""} ${p.apellido || ""}`.trim() || "(sin nombre)"
+      return `• ${nom} — Plan ${s.plan} (${cant} trabajo${cant > 1 ? "s" : ""})`
+    }).join("\n")
+    const msg =
+      `⚠️ Hay ${total} solicitud${total > 1 ? "es" : ""} de portfolio pendiente${total > 1 ? "s" : ""}:\n\n` +
+      nombres + (total > 3 ? `\n  …y ${total - 3} más.` : "") +
+      `\n\nHacé clic en "Aprobar" para activarle el plan al profesional.`
+    setTimeout(() => alert(msg), 400)
+  }
+
   if (!data?.length) {
     cont.innerHTML = `<p style="text-align:center;color:#94a3b8;padding:20px;font-size:13px;">No hay solicitudes aún.</p>`
     return

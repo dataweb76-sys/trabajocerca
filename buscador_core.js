@@ -138,19 +138,35 @@ const CIUDADES_POR_PROVINCIA = {
   "Tucumán":            ["San Miguel de Tucumán","Tafí Viejo","Banda del Río Salí","Yerba Buena","Concepción","Monteros","Aguilares","Famaillá","Alberdi","Bella Vista","Río Chico","Lules"]
 }
 
-// Nombres de categorías profesionales normalizados (sin tildes, minúsculas)
+// Nombres de categorías normalizados (sin tildes, minúsculas)
 function normStr(s){
   return (s||"").toLowerCase()
     .replace(/á/g,"a").replace(/é/g,"e").replace(/í/g,"i")
     .replace(/ó/g,"o").replace(/ú/g,"u").replace(/ü/g,"u").replace(/ñ/g,"n")
 }
-const CATS_PROF = CHIPS_PROFESIONALES.map(([,c]) => normStr(c))
+// Listas de categorías normalizadas (sin "Disponible ahora")
+const CATS_PROF   = CHIPS_PROFESIONALES.slice(1).map(([,c]) => normStr(c))
+const CATS_OFICIO = CHIPS_OFICIOS.slice(1).map(([,c]) => normStr(c))
 
 // ¿Este item es de un profesional universitario?
+// REGLA: la categoría del servicio manda sobre el campo tipo,
+// porque hay usuarios viejos con tipo='profesional' que son oficios.
 function esProfesionalUni(item){
-  if(item.perfiles?.profesion_universitaria) return true
-  const cat = normStr(item.categoria)
-  return CATS_PROF.some(c => cat.includes(c) || c.includes(cat))
+  const cat  = normStr(item.categoria || '')
+  const tipo = item.perfiles?.tipo
+
+  // 1. Si la categoría coincide con una categoría de OFICIO → siempre oficio
+  if(cat && CATS_OFICIO.some(c => cat.includes(c) || c.includes(cat))) return false
+
+  // 2. Si la categoría coincide con una categoría PROFESIONAL → siempre profesional
+  if(cat && CATS_PROF.some(c => cat.includes(c) || c.includes(cat))) return true
+
+  // 3. Categoría ambigua o vacía → usar campo tipo si está bien seteado
+  if(tipo === "profesional") return true
+  if(tipo === "oficio" || tipo === "emprendimiento" || tipo === "empresa" || tipo === "cv") return false
+
+  // 4. Sin tipo y sin categoría reconocida → no mostrar en ninguno
+  return false
 }
 
 /* ── SELECTOR DE CIUDAD (según provincia elegida) ── */
@@ -218,7 +234,7 @@ window.buscar = async function(){
   cont.innerHTML = `<div style="text-align:center;padding:40px;color:#64748b;">
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
-  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,disponible_ahora,perfiles(id,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,verificado,profesion_universitaria)"
+  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,disponible_ahora,perfiles(id,tipo,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,verificado,profesion_universitaria,plan_nivel)"
   let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=500`
 
   if(palabra && palabra === "Disponible ahora"){
@@ -247,9 +263,7 @@ window.buscar = async function(){
   }
 
   if(!data?.length){
-    const linkReg = TIPO === "profesional"
-      ? `/registro_profesional.html`
-      : `/registro.html?tipo=profesional`
+    const linkReg = `/registro.html`
     cont.innerHTML=`<div style="text-align:center;padding:50px 20px;color:#64748b;">
       <i class="fa-solid fa-face-sad-tear" style="font-size:44px;opacity:.3;display:block;margin-bottom:14px;"></i>
       <p style="font-size:16px;margin-bottom:8px;">No encontramos resultados${palabra?` para <strong>${palabra}</strong>`:""}.</p>
@@ -328,7 +342,10 @@ window.buscar = async function(){
     const badgeVerif = p.verificado
       ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#0ea5e9;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:3px;"><i class="fa-solid fa-circle-check" style="font-size:9px;"></i> VERIFICADO</span>`
       : ""
-    const badgesLine = (badgeDest || badgeVerif) ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;">${badgeDest}${badgeVerif}</div>` : ""
+    const badgePortfolio = (p.plan_nivel > 0 && p.tipo === "oficio")
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#f97316;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:3px;"><i class="fa-solid fa-images" style="font-size:9px;"></i> TRABAJOS REALIZADOS</span>`
+      : ""
+    const badgesLine = (badgeDest || badgeVerif || badgePortfolio) ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;">${badgeDest}${badgeVerif}${badgePortfolio}</div>` : ""
 
     const card = document.createElement("div")
     card.className = "card"
@@ -355,6 +372,7 @@ window.buscar = async function(){
           <p style="margin:0;font-size:13px;color:#64748b;">
             <i class="fa-solid fa-location-dot"></i>
             ${item.localidad||p.localidad||""}${item.provincia?", "+item.provincia:""}
+            ${localStorage.getItem('tc_mapa_on')==='1'&&(item.localidad||p.localidad)?`<a href="https://www.google.com/maps/search/${encodeURIComponent((item.localidad||p.localidad)+(item.provincia?', '+item.provincia:'')+', Argentina')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="margin-left:5px;font-size:11px;color:#2563eb;font-weight:700;text-decoration:none;white-space:nowrap;vertical-align:middle;"><i class="fa-solid fa-map-location-dot"></i> Ver en mapa</a>`:''}
           </p>
           ${item.horarios?`<p style="margin:3px 0 0;font-size:13px;color:#64748b;"><i class="fa-solid fa-clock"></i> ${item.horarios}</p>`:""}
         </div>
@@ -374,6 +392,9 @@ window.buscar = async function(){
         ${getCurrentUserId()?`<button class="btn btn-sm" onclick="event.stopPropagation();abrirModal(${JSON.stringify(item).replace(/"/g,"&quot;")},true)"
           style="background:#eff6ff;color:#2563eb;display:inline-flex;align-items:center;gap:5px;">
           <i class="fa-solid fa-star"></i> Calificar</button>`:""}
+        ${p.id && getCurrentUserId() !== p.id ? `<button class="btn btn-sm" onclick="event.stopPropagation();window.iniciarConversacion('${p.id}')"
+          style="background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;display:inline-flex;align-items:center;gap:5px;">
+          <i class="fa-solid fa-comment-dots"></i> Mensaje</button>` : ""}
       </div>`
 
     cont.appendChild(card)

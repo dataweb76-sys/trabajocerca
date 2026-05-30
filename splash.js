@@ -431,7 +431,7 @@
         </button>
 
         <!-- Opción 4: Profesional -->
-        <button class="tc-reg-card" onclick="location.href='/registro_profesional.html?tipo=profesional'">
+        <button class="tc-reg-card" onclick="location.href='/registro.html'">
           <div class="tc-reg-icon" style="background:#f0fdf4;">
             <span>👔</span>
           </div>
@@ -468,4 +468,116 @@
     const overlay = document.getElementById('tc-reg-overlay')
     if(overlay) overlay.classList.add('activo')
   }
+})()
+
+
+/* ─────────────────────────────────────────────────────────
+   ⑤ NAVBAR UNIFICADA  (corre en todas las páginas)
+   Logo ← | Consultas (buscadores) centro | Inicio + Perfil → + ⚽
+───────────────────────────────────────────────────────── */
+;(function(){
+  const SB_TOKEN_KEY = 'sb-iqeiszkoifxgygoqvbem-auth-token'
+  const SB_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+
+  function isLoggedIn(){
+    try {
+      const t = JSON.parse(localStorage.getItem(SB_TOKEN_KEY))?.access_token
+      if(!t) return false
+      const exp = JSON.parse(atob(t.split('.')[1])).exp
+      return exp && Date.now() / 1000 < exp
+    } catch(e){ return false }
+  }
+
+  function getUserId(){
+    try {
+      const t = JSON.parse(localStorage.getItem(SB_TOKEN_KEY))?.access_token
+      if(!t) return null
+      return JSON.parse(atob(t.split('.')[1])).sub || null
+    } catch(e){ return null }
+  }
+
+  async function actualizarBadgeMsgs(uid){
+    try {
+      const tk = JSON.parse(localStorage.getItem(SB_TOKEN_KEY))?.access_token
+      if(!tk) return
+      const res = await fetch(
+        `${SB_URL}/rest/v1/conversaciones?or=(usuario1_id.eq.${uid},usuario2_id.eq.${uid})&select=usuario1_id,no_leidos_u1,no_leidos_u2`,
+        { headers: { apikey: SB_KEY, Authorization: `Bearer ${tk}` } }
+      )
+      if(!res.ok) return
+      const convs = await res.json()
+      let total = 0
+      convs.forEach(c => { total += c.usuario1_id === uid ? (c.no_leidos_u1||0) : (c.no_leidos_u2||0) })
+      const badge = document.getElementById('tnav-msgs-badge')
+      if(badge){
+        badge.textContent = total > 9 ? '9+' : String(total)
+        badge.style.display = total > 0 ? 'inline-flex' : 'none'
+      }
+    } catch(e){}
+  }
+
+  function buildNav(){
+    const topbar = document.querySelector('.topbar')
+    if(!topbar) return
+
+    // Quitar todo lo que no sea .logo
+    Array.from(topbar.children).forEach(c => {
+      if(!c.classList.contains('logo')) c.remove()
+    })
+
+    const loggedIn = isLoggedIn()
+    const path     = location.pathname
+
+    // ── Centro: links a todos los buscadores ──
+    const center = document.createElement('div')
+    center.className = 'tnav-center'
+    center.innerHTML =
+      `<a href="/buscador_oficios.html"${path.includes('buscador_oficios') ? ' class="activo"':''}>🔨 <span>Oficios</span></a>` +
+      `<a href="/buscador_profesionales.html"${path.includes('buscador_profesionales') ? ' class="activo"':''}>🎓 <span>Profesionales</span></a>` +
+      `<a href="/buscador_cv.html"${path.includes('buscador_cv') ? ' class="activo"':''}>📄 <span>CVs</span></a>` +
+      `<a href="/buscador_emprendimientos.html"${path.includes('buscador_emprendimientos') ? ' class="activo"':''}>💡 <span>Emprendimientos</span></a>` +
+      `<a href="/buscador_ofertas.html"${path.includes('buscador_ofertas') ? ' class="activo"':''}>🏢 <span>Ofertas</span></a>`
+
+    // ── Derecha: Inicio | Perfil (si logueado) | ⚽ Prode ──
+    const right = document.createElement('div')
+    right.className = 'tnav-right'
+    right.innerHTML =
+      `<a href="/index.html"><i class="fa-solid fa-house"></i><span> Inicio</span></a>` +
+      (loggedIn
+        ? `<a href="/perfil.html" class="btn-perfil"><i class="fa-solid fa-user"></i><span> Perfil</span></a>`
+        : '') +
+      (loggedIn
+        ? `<a href="/mensajes.html" id="tnav-msgs-link" title="Mensajes" style="position:relative;">
+            <i class="fa-solid fa-comment-dots"></i><span> Mensajes</span>
+            <span id="tnav-msgs-badge" style="display:none;position:absolute;top:1px;right:0px;background:#ef4444;color:white;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:20px;padding:0 3px;align-items:center;justify-content:center;border:1.5px solid rgba(30,41,59,.3);line-height:1;pointer-events:none;"></span>
+           </a>`
+        : '') +
+      (loggedIn
+        ? `<button class="btn-salir" title="Cerrar sesión" onclick="(function(){Object.keys(localStorage).filter(function(k){return k.startsWith('sb-')}).forEach(function(k){localStorage.removeItem(k)});location.href='/index.html';})()" >
+            <i class="fa-solid fa-right-from-bracket"></i><span> Salir</span>
+           </button>`
+        : '') +
+      `<button class="btn-prode" title="Prode del Mundial 2026" onclick="(function(){` +
+        `var p=document.getElementById('popupMundial');` +
+        `if(p){p.style.display='flex';}else{location.href='/mundial.html';}` +
+      `})()">⚽</button>`
+
+    topbar.appendChild(center)
+    topbar.appendChild(right)
+
+    // Polling badge mensajes no leídos
+    if(loggedIn){
+      const uid = getUserId()
+      if(uid){
+        actualizarBadgeMsgs(uid)
+        setInterval(() => actualizarBadgeMsgs(uid), 30000)
+      }
+    }
+  }
+
+  if(document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', buildNav)
+  else
+    buildNav()
 })()

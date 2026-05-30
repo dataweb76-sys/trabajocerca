@@ -103,6 +103,16 @@ select{cursor:pointer;}
 /* Subcategorías vacías */
 .subs-placeholder{color:#94a3b8;font-size:13px;padding:6px 0;}
 
+/* Bloques de oficio múltiple */
+.oficio-bloque{
+  border:1.5px solid #e2e8f0;border-radius:12px;
+  padding:14px 16px;margin-bottom:12px;background:#fafafa;
+}
+.oficio-bloque-titulo{
+  font-size:13px;font-weight:700;color:#d97706;
+  margin-bottom:10px;display:flex;align-items:center;gap:6px;
+}
+
 /* Botones */
 .btn-guardar{
   width:100%;padding:14px;background:#2563eb;color:#fff;
@@ -194,6 +204,28 @@ select{cursor:pointer;}
   .modal-tabs{gap:4px;}
   .mtab{font-size:11px;padding:6px 10px;}
 }
+
+/* ── Tags de habilidades ── */
+.tags-input-wrap{border:1.5px solid #e2e8f0;border-radius:9px;padding:8px 10px;background:#f8fafc;min-height:46px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;transition:border-color .15s;}
+.tags-input-wrap:focus-within{border-color:#2563eb;background:#fff;box-shadow:0 0 0 3px #bfdbfe44;}
+.tags-container{display:contents;}
+.skill-tag{display:inline-flex;align-items:center;gap:5px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:20px;padding:4px 10px 4px 12px;font-size:12px;font-weight:600;color:#1e40af;white-space:nowrap;}
+.skill-tag button{background:none;border:none;color:#93c5fd;font-size:16px;cursor:pointer;padding:0;line-height:1;display:flex;align-items:center;}
+.skill-tag button:hover{color:#2563eb;}
+.tags-input-field{border:none;outline:none;background:transparent;font-size:13px;color:#1e293b;flex:1;min-width:140px;padding:2px 4px;font-family:inherit;}
+
+/* ── Bloques de experiencia ── */
+.exp-bloque{border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:12px;background:#fafafa;}
+.exp-bloque-titulo{font-size:13px;font-weight:700;color:#d97706;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+
+/* ── Fila idioma ── */
+.idioma-fila{display:grid;grid-template-columns:1fr 1fr 36px;gap:8px;align-items:center;margin-bottom:8px;}
+
+/* ── Botones agregar / quitar fila ── */
+.btn-add-row{background:none;border:1.5px dashed #2563eb;border-radius:9px;color:#2563eb;font-size:13px;font-weight:600;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s;margin-top:4px;}
+.btn-add-row:hover{background:#eff6ff;}
+.btn-rm-row{background:none;border:1.5px solid #fecaca;border-radius:7px;color:#dc2626;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;line-height:1;}
+.btn-rm-row:hover{background:#fef2f2;}
 </style>
 </head>
 <body>
@@ -267,41 +299,18 @@ select{cursor:pointer;}
 
     <!-- Categoría y subcategorías -->
     <div class="seccion">
-      <h3><i class="fa-solid fa-wrench" style="color:#d97706;"></i> Oficio y especialidades</h3>
+      <h3><i class="fa-solid fa-wrench" style="color:#d97706;"></i> Oficios y especialidades</h3>
 
-      <label class="lbl">Categoría / Oficio *</label>
-      <select id="ofCategoria" onchange="cargarSubcategorias()">
-        <option value="">— Seleccioná tu oficio —</option>
-        <option>Albañilería</option>
-        <option>Plomería</option>
-        <option>Gasista</option>
-        <option>Electricidad</option>
-        <option>Carpintería</option>
-        <option>Pintura</option>
-        <option>Herrería</option>
-        <option>Cerrajería</option>
-        <option>Jardinería</option>
-        <option>Limpieza</option>
-        <option>Mudanzas / Fletes</option>
-        <option>Refrigeración / Aire Acondicionado</option>
-        <option>Informática / Tecnología</option>
-        <option>Mecánica Automotriz</option>
-        <option>Tapicería</option>
-        <option>Techos e Impermeabilización</option>
-        <option>Soldadura</option>
-        <option>Cadetería / Delivery</option>
-        <option>Fotografía / Video</option>
-        <option>Peluquería / Estética</option>
-        <option>Costura / Modistería</option>
-        <option>Gastronomía / Catering</option>
-        <option>Mecánica del Hogar</option>
-        <option>Otro oficio</option>
+      <label class="lbl">¿Cuántos oficios diferentes realizás?</label>
+      <select id="cantidadOficios" onchange="actualizarBloques()">
+        <option value="1">1 oficio</option>
+        <option value="2">2 oficios</option>
+        <option value="3">3 oficios</option>
+        <option value="4">4 oficios</option>
+        <option value="5">5 oficios</option>
       </select>
 
-      <label class="lbl">¿Qué trabajos hacés? <span style="color:#94a3b8;font-weight:400;">(marcá todos los que aplican)</span></label>
-      <div id="subsContainer">
-        <p class="subs-placeholder">Seleccioná primero la categoría</p>
-      </div>
+      <div id="bloquesOficios" style="margin-top:14px;"></div>
     </div>
 
     <!-- Zona de trabajo -->
@@ -413,21 +422,855 @@ select{cursor:pointer;}
       <i class="fa-solid fa-save"></i> Guardar y publicar perfil
     </button>
 
+    <!-- ══ TRABAJOS REALIZADOS (solo si plan activo) ══ -->
+    <div id="seccionPortfolio" style="display:none;margin-top:4px;"></div>
+
   </div><!-- fin formOficio -->
 
   <!-- ══ PLACEHOLDERS OTROS TIPOS ══ -->
+
+  <!-- ══════════ FORM PROFESIONAL ══════════ -->
   <div id="formProfesional" style="display:none;">
-    <div class="seccion"><div class="pendiente"><i class="fa-solid fa-user-tie" style="color:#7c3aed;"></i><strong>Perfil Profesional</strong><span>Próximamente — en construcción</span></div></div>
-  </div>
+
+    <!-- Profesión y especialidades -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-graduation-cap" style="color:#7c3aed;"></i> Profesión y especialidades</h3>
+
+      <label class="lbl">Profesión / Título *</label>
+      <select id="proProfesion" onchange="cargarEspecialidades()">
+        <option value="">— Seleccioná tu profesión —</option>
+        <optgroup label="🏥 Salud">
+          <option>Médico/a</option><option>Odontólogo/a</option><option>Psicólogo/a</option>
+          <option>Kinesiólogo/a</option><option>Fonoaudiólogo/a</option><option>Nutricionista</option>
+          <option>Enfermero/a</option><option>Farmacéutico/a</option><option>Veterinario/a</option>
+          <option>Bioquímico/a</option><option>Terapeuta Ocupacional</option><option>Obstétrica / Partera</option>
+        </optgroup>
+        <optgroup label="⚖️ Jurídico">
+          <option>Abogado/a</option><option>Escribano/a</option><option>Procurador/a</option>
+        </optgroup>
+        <optgroup label="💼 Ciencias Económicas">
+          <option>Contador/a Público</option><option>Lic. en Administración</option><option>Economista</option><option>Actuario/a</option>
+        </optgroup>
+        <optgroup label="🏗️ Arquitectura e Ingeniería">
+          <option>Arquitecto/a</option><option>Ingeniero/a Civil</option><option>Ingeniero/a Eléctrico/a</option>
+          <option>Ingeniero/a Mecánico/a</option><option>Ingeniero/a en Sistemas</option>
+          <option>Ingeniero/a Agrónomo/a</option><option>Agrimensor/a</option>
+        </optgroup>
+        <optgroup label="📚 Educación y Ciencias Sociales">
+          <option>Profesor/a</option><option>Traductor/a / Intérprete</option><option>Psicopedagogo/a</option>
+          <option>Trabajador/a Social</option><option>Acompañante Terapéutico/a</option>
+        </optgroup>
+        <optgroup label="🎨 Diseño y Comunicación">
+          <option>Diseñador/a Gráfico/a</option><option>Diseñador/a de Interiores</option>
+          <option>Diseñador/a Industrial</option><option>Comunicador/a Social / Periodista</option>
+        </optgroup>
+        <optgroup label="💻 Tecnología">
+          <option>Analista en Sistemas</option><option>Programador/a</option><option>Lic. en Sistemas</option>
+        </optgroup>
+        <optgroup label="📋 Otras">
+          <option>Técnico/a Superior</option><option>Otra profesión universitaria</option>
+        </optgroup>
+      </select>
+
+      <div style="margin-top:14px;">
+        <label class="lbl">Especialidades / Áreas de práctica <span style="color:#94a3b8;font-weight:400;">(marcá las que aplican)</span></label>
+        <div id="proEspecContainer"><p class="subs-placeholder">Seleccioná primero la profesión</p></div>
+      </div>
+    </div>
+
+    <!-- Datos profesionales -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-briefcase" style="color:#7c3aed;"></i> Datos profesionales</h3>
+
+      <label class="lbl">Nombre del consultorio / estudio / institución <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+      <input type="text" id="proNombreConsultorio" placeholder="Ej: Estudio Jurídico García · Consultorio Dra. López">
+
+      <label class="lbl">Matrícula profesional <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+      <input type="text" id="proMatricula" placeholder="Ej: Mat. N° 12345 · CPACF T° XXI F° 123">
+
+      <label class="lbl" style="margin-top:12px;">Modalidad de atención</label>
+      <div class="check-group">
+        <label class="check-item"><input type="checkbox" id="proPresencial"><span>Presencial (consultorio / oficina)</span></label>
+        <label class="check-item"><input type="checkbox" id="proADomicilio"><span>A domicilio / en el lugar del cliente</span></label>
+        <label class="check-item"><input type="checkbox" id="proOnline"><span>Online / Videollamada</span></label>
+      </div>
+
+      <label class="lbl" style="margin-top:14px;">Jurisdicción / Zona donde ejerce *</label>
+      <input type="text" id="proJurisdiccion" placeholder="Ej: Provincia de Buenos Aires · CABA · Todo el país · Internacional">
+      <p style="font-size:12px;color:#94a3b8;margin-top:4px;">Abogados: fuero y provincia · Médicos: obra social o zona · Profesores: presencial o virtual.</p>
+    </div>
+
+    <!-- Ubicación -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-location-dot" style="color:#dc2626;"></i> Ubicación</h3>
+      <p style="font-size:13px;color:#64748b;margin:-6px 0 14px;">La ciudad se muestra en el buscador. La dirección exacta es privada.</p>
+
+      <label class="lbl">Código Postal</label>
+      <input type="text" id="proCP" placeholder="Ej: 1900" oninput="buscarCPPro(this.value)">
+      <div id="proCPFeedback" style="font-size:12px;margin-top:4px;display:none;"></div>
+
+      <div class="fila-2" style="margin-top:12px;">
+        <div>
+          <label class="lbl">Ciudad / Localidad *</label>
+          <input type="text" id="proLocalidad" placeholder="Ej: La Plata">
+        </div>
+        <div>
+          <label class="lbl">Provincia</label>
+          <input type="text" id="proProvincia" placeholder="Se completa automático">
+        </div>
+      </div>
+
+      <label class="lbl">Dirección laboral <span style="color:#94a3b8;font-weight:400;">(opcional — privada)</span></label>
+      <input type="text" id="proDireccion" placeholder="Ej: Av. 51 N° 1234, Piso 3, Of. 12">
+    </div>
+
+    <!-- Sobre vos -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-pen-to-square" style="color:#2563eb;"></i> Sobre vos</h3>
+
+      <label class="lbl">Presentación / Descripción *</label>
+      <textarea id="proDescripcion" rows="5" placeholder="Contá tu formación, años de experiencia, enfoque, logros, universidades donde te graduaste, etc."></textarea>
+
+      <div class="check-group" style="margin-top:14px;">
+        <label class="check-item">
+          <input type="checkbox" id="proAsesoramiento">
+          <span>Ofrezco consulta inicial / asesoramiento <strong>sin costo</strong></span>
+        </label>
+      </div>
+      <p style="font-size:12px;color:#94a3b8;margin-top:4px;">Aparece como distintivo en tu perfil del buscador.</p>
+    </div>
+
+    <!-- Disponibilidad -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-clock" style="color:#059669;"></i> Disponibilidad horaria</h3>
+      <input type="text" id="proHorario" placeholder="Ej: Lunes a Viernes de 9 a 18hs · Con turno previo">
+      <div class="horario-chips">
+        <span class="chip" onclick="setHorarioPro('Lunes a Viernes de 9 a 18hs')">Lun–Vie 9–18</span>
+        <span class="chip" onclick="setHorarioPro('Lunes a Viernes de 8 a 20hs')">Lun–Vie 8–20</span>
+        <span class="chip" onclick="setHorarioPro('Con turno previo · Lunes a Viernes')">Con turno previo</span>
+        <span class="chip" onclick="setHorarioPro('Lunes a Sábado por la mañana')">Lun–Sáb mañana</span>
+        <span class="chip" onclick="setHorarioPro('Lunes a Domingo disponible')">Lun–Dom</span>
+        <span class="chip" onclick="setHorarioPro('A acordar con el cliente')">A acordar</span>
+      </div>
+    </div>
+
+    <!-- Idiomas -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-language" style="color:#0369a1;"></i> Idiomas de atención</h3>
+      <div class="checks-grid">
+        <label class="check-item"><input type="checkbox" id="idEspanol" checked><span>Español</span></label>
+        <label class="check-item"><input type="checkbox" id="idIngles"><span>Inglés</span></label>
+        <label class="check-item"><input type="checkbox" id="idFrances"><span>Francés</span></label>
+        <label class="check-item"><input type="checkbox" id="idPortugues"><span>Portugués</span></label>
+        <label class="check-item"><input type="checkbox" id="idItaliano"><span>Italiano</span></label>
+        <label class="check-item"><input type="checkbox" id="idAleman"><span>Alemán</span></label>
+      </div>
+      <label class="lbl">Otro idioma</label>
+      <input type="text" id="idOtro" placeholder="Ej: Chino, Árabe, Lenguaje de señas...">
+    </div>
+
+    <!-- Contacto y visibilidad -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-address-card" style="color:#7c3aed;"></i> Contacto y visibilidad</h3>
+
+      <label class="lbl">Teléfono / WhatsApp *</label>
+      <div class="tel-wrap">
+        <span class="tel-prefix">+549</span>
+        <input type="tel" id="proTelefono" placeholder="Ej: 2214561234 (sin 0 ni 15)">
+      </div>
+      <p style="font-size:12px;color:#94a3b8;margin-top:4px;">Sin el 0 inicial ni el 15.</p>
+
+      <label class="lbl" style="margin-top:12px;">Correo electrónico laboral <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+      <input type="email" id="proEmail" placeholder="Ej: dr.garcia@clinica.com.ar">
+
+      <label class="lbl" style="margin-top:12px;">Sitio web <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+      <input type="text" id="proWeb" placeholder="Ej: www.estudiojuridico.com.ar">
+
+      <label class="lbl" style="margin-top:14px;">¿Cómo aparecés en el buscador?</label>
+      <div class="check-group">
+        <label class="radio-item"><input type="radio" name="proMostrarComo" value="personal" checked><span>Con mi nombre personal</span></label>
+        <label class="radio-item"><input type="radio" name="proMostrarComo" value="empresa"><span>Con el nombre del consultorio / estudio</span></label>
+      </div>
+
+      <div class="check-group" style="margin-top:14px;">
+        <label class="check-item"><input type="checkbox" id="proMostrarTel" checked><span>Mostrar mi teléfono en el perfil público</span></label>
+      </div>
+    </div>
+
+    <div id="msgProfesional" class="msg" style="margin-top:14px;"></div>
+    <button class="btn-guardar" id="btnGuardarPro" onclick="guardarProfesional()" style="background:#7c3aed;">
+      <i class="fa-solid fa-save"></i> Guardar y publicar perfil
+    </button>
+    <style>#btnGuardarPro:hover:not(:disabled){background:#6d28d9!important;}</style>
+
+  </div><!-- fin formProfesional -->
+  <!-- ══════════ FORM CV / BUSCO EMPLEO ══════════ -->
   <div id="formCV" style="display:none;">
-    <div class="seccion"><div class="pendiente"><i class="fa-solid fa-file-lines" style="color:#dc2626;"></i><strong>Busco Empleo / CV</strong><span>Próximamente — en construcción</span></div></div>
-  </div>
+
+    <!-- Subir CV -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-file-pdf" style="color:#dc2626;"></i> Currículum Vitae</h3>
+      <p style="font-size:13px;color:#64748b;margin-bottom:12px;">Si ya tenés un CV hecho, podés cargarlo. También podés completar el formulario de abajo.</p>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <label class="btn-foto" for="inputCV" style="border-color:#dc2626;color:#dc2626;">
+          <i class="fa-solid fa-file-arrow-up"></i> Subir CV (PDF / Word)
+        </label>
+        <input type="file" id="inputCV" accept=".pdf,.doc,.docx" style="display:none" onchange="mostrarNombreCV(this)">
+        <span id="cvNombreArchivo" style="font-size:13px;color:#166534;font-weight:600;"></span>
+      </div>
+      <div id="cvUrlActual" style="font-size:12px;margin-top:8px;"></div>
+    </div>
+
+    <!-- Contacto -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-address-card" style="color:#2563eb;"></i> Datos de contacto</h3>
+
+      <label class="lbl">Teléfono / WhatsApp *</label>
+      <div class="tel-wrap">
+        <span class="tel-prefix">+549</span>
+        <input type="tel" id="cvTelefono" placeholder="Ej: 2214561234 (sin 0 ni 15)">
+      </div>
+
+      <label class="lbl" style="margin-top:12px;">Correo electrónico *</label>
+      <input type="email" id="cvEmail" placeholder="Ej: juan.perez@gmail.com">
+
+      <label class="lbl" style="margin-top:12px;">LinkedIn / Portfolio / Sitio web <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+      <input type="text" id="cvEnlace" placeholder="Ej: linkedin.com/in/juanperez · github.com/usuario">
+    </div>
+
+    <!-- Ubicación -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-location-dot" style="color:#dc2626;"></i> Ubicación</h3>
+
+      <label class="lbl">Código Postal</label>
+      <input type="text" id="cvCP" placeholder="Ej: 1900" oninput="buscarCPCV(this.value)">
+      <div id="cvCPFeedback" style="font-size:12px;margin-top:4px;display:none;"></div>
+
+      <div class="fila-2" style="margin-top:12px;">
+        <div>
+          <label class="lbl">Provincia *</label>
+          <input type="text" id="cvProvincia" placeholder="Ej: Buenos Aires">
+        </div>
+        <div>
+          <label class="lbl">Ciudad / Localidad *</label>
+          <input type="text" id="cvLocalidad" placeholder="Ej: La Plata">
+        </div>
+      </div>
+
+      <label class="lbl">Barrio / Zona <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+      <input type="text" id="cvBarrio" placeholder="Ej: Centro · Barrio Norte · Villa del Parque">
+    </div>
+
+    <!-- Puesto deseado -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-bullseye" style="color:#059669;"></i> Puesto que deseás desempeñar</h3>
+
+      <label class="lbl">Puesto principal *</label>
+      <select id="cvPuesto">
+        <option value="">— Seleccioná el puesto —</option>
+        <optgroup label="📊 Administración y Oficina">
+          <option>Auxiliar Administrativo/a</option><option>Secretario/a</option>
+          <option>Recepcionista</option><option>Administrativo/a Contable</option>
+          <option>Asistente de Gerencia</option><option>Asistente Contable</option>
+          <option>Telefonista / Operador/a</option><option>Archivista / Documentalista</option>
+        </optgroup>
+        <optgroup label="🛒 Comercio y Ventas">
+          <option>Cajero/a</option><option>Vendedor/a</option><option>Repositor/a</option>
+          <option>Promotor/a de Ventas</option><option>Asesor/a Comercial</option>
+          <option>Encargado/a de Local</option><option>Operador/a de E-commerce</option>
+        </optgroup>
+        <optgroup label="🍽️ Gastronomía y Hotelería">
+          <option>Cajero/a Gastronómico/a</option><option>Mozo/a / Camarero/a</option>
+          <option>Cocinero/a</option><option>Ayudante de Cocina</option>
+          <option>Barista</option><option>Bartender / Barman</option>
+          <option>Pizzero/a</option><option>Panadero/a / Pastelero/a</option>
+          <option>Encargado/a de Local Gastronómico</option><option>Recepcionista Hotelero/a</option>
+        </optgroup>
+        <optgroup label="📦 Logística y Depósito">
+          <option>Operario/a de Depósito</option><option>Chofer de Reparto</option>
+          <option>Operador/a de Autoelevador</option><option>Preparador/a de Pedidos</option>
+          <option>Repartidor/a / Cadete</option><option>Logística y Distribución</option>
+        </optgroup>
+        <optgroup label="👶 Cuidados y Asistencia">
+          <option>Niñera / Cuidador/a de Niños</option><option>Cuidador/a de Adultos Mayores</option>
+          <option>Asistente Geriátrico/a</option><option>Acompañante Terapéutico/a</option>
+          <option>Personal de Limpieza del Hogar</option><option>Personal de Limpieza Comercial</option>
+        </optgroup>
+        <optgroup label="🏗️ Construcción y Producción">
+          <option>Ayudante de Obra / Peón</option><option>Operario/a Industrial</option>
+          <option>Operario/a Textil</option><option>Operador/a de Máquinas</option>
+          <option>Control de Calidad</option>
+        </optgroup>
+        <optgroup label="💻 Tecnología">
+          <option>Técnico/a en Sistemas</option><option>Soporte Técnico</option>
+          <option>Programador/a</option><option>Diseñador/a Web</option>
+          <option>Community Manager / Marketing Digital</option>
+        </optgroup>
+        <optgroup label="📚 Educación">
+          <option>Docente</option><option>Tutor/a / Profesor/a Particular</option>
+          <option>Maestra Jardinera / Asistente de Jardín</option><option>Auxiliar Educativo</option>
+        </optgroup>
+        <optgroup label="🔒 Seguridad">
+          <option>Vigilador/a / Personal de Seguridad</option>
+          <option>Sereno/a</option><option>Guardia de Seguridad</option>
+        </optgroup>
+        <optgroup label="🌾 Rural y Agropecuario">
+          <option>Peón Rural</option><option>Tractorista</option>
+          <option>Encargado/a Rural</option><option>Tambero/a</option>
+        </optgroup>
+        <optgroup label="🔧 Asistente de Oficio">
+          <option>Ayudante de Electricista</option><option>Ayudante de Plomero/a</option>
+          <option>Ayudante de Mecánico/a</option><option>Ayudante de Pintor/a</option>
+          <option>Ayudante de Carpintero/a</option>
+        </optgroup>
+        <optgroup label="📋 Otro"><option>Otro puesto</option></optgroup>
+      </select>
+
+      <label class="lbl" style="margin-top:12px;">Aclaraciones sobre el puesto <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+      <input type="text" id="cvPuestoAcl" placeholder="Ej: También acepto como encargado/a · Con experiencia en turno noche">
+    </div>
+
+    <!-- Sobre mí -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-user" style="color:#2563eb;"></i> Sobre mí</h3>
+      <label class="lbl">Contá tu trayectoria laboral *</label>
+      <textarea id="cvSobreMi" rows="5" placeholder="Describí tu experiencia, qué tipo de trabajos hiciste, tus capacidades, qué buscás en un empleo, etc."></textarea>
+    </div>
+
+    <!-- Experiencia laboral -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-briefcase" style="color:#d97706;"></i> Trabajos que desempeñaste</h3>
+
+      <label class="lbl">¿Cuántos trabajos anteriores querés agregar?</label>
+      <select id="cantidadExp" onchange="actualizarBloquesExp()">
+        <option value="0">Sin experiencia previa</option>
+        <option value="1">1 trabajo</option>
+        <option value="2">2 trabajos</option>
+        <option value="3">3 trabajos</option>
+        <option value="4">4 trabajos</option>
+        <option value="5">5 trabajos</option>
+      </select>
+
+      <div id="bloquesExp" style="margin-top:14px;"></div>
+    </div>
+
+    <!-- Educación -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-graduation-cap" style="color:#7c3aed;"></i> Educación y formación</h3>
+
+      <label class="lbl">Título obtenido / En curso</label>
+      <input type="text" id="cvTitulo" placeholder="Ej: Bachiller · Tecnicatura en Gastronomía · Lic. en Administración">
+
+      <label class="lbl">Institución / Escuela / Universidad</label>
+      <input type="text" id="cvInstitucion" placeholder="Ej: Escuela N° 34 · UTN · Instituto Superior de Gastronomía">
+
+      <div class="fila-2" style="margin-top:12px;">
+        <div>
+          <label class="lbl">Nivel de estudios</label>
+          <select id="cvNivelEst">
+            <option value="">— Seleccioná —</option>
+            <option>Primario Completo</option>
+            <option>Secundario Incompleto</option>
+            <option>Secundario Completo</option>
+            <option>Terciario</option>
+            <option>Universitario</option>
+            <option>Posgrado / Maestría</option>
+            <option>Curso / Capacitación</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Estado</label>
+          <select id="cvEstadoEst">
+            <option value="">— Estado —</option>
+            <option>Graduado/a</option>
+            <option>En curso</option>
+            <option>Suspendido/a</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="lbl" style="margin-top:12px;">Año de finalización (o estimado)</label>
+      <input type="number" id="cvAnioEst" placeholder="Ej: 2022" min="1970" max="2030" style="max-width:160px;">
+    </div>
+
+    <!-- Habilidades e idiomas -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Habilidades e idiomas</h3>
+
+      <label class="lbl">Habilidades técnicas / Herramientas</label>
+      <p style="font-size:12px;color:#64748b;margin-bottom:8px;">Escribí una habilidad y presioná <strong>Enter</strong> para agregarla como etiqueta.</p>
+      <div class="tags-input-wrap" onclick="document.getElementById('cvTagInput').focus()">
+        <div class="tags-container" id="cvTagsContainer"></div>
+        <input type="text" id="cvTagInput" class="tags-input-field" placeholder="Ej: Excel avanzado, Autoelevador, Soldadura MIG...">
+      </div>
+
+      <label class="lbl" style="margin-top:16px;">Habilidades blandas / Cualidades</label>
+      <div class="checks-grid" style="margin-top:6px;">
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Trabajo en equipo"><span>Trabajo en equipo</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Puntualidad"><span>Puntualidad</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Orientación al cliente"><span>Orientación al cliente</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Proactividad"><span>Proactividad</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Responsabilidad"><span>Responsabilidad</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Adaptabilidad"><span>Adaptabilidad</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Comunicación efectiva"><span>Comunicación efectiva</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Resolución de problemas"><span>Resolución de problemas</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Liderazgo"><span>Liderazgo</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Organización"><span>Organización</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Autonomía"><span>Autonomía</span></label>
+        <label class="check-item"><input type="checkbox" name="cvBlanda" value="Creatividad"><span>Creatividad</span></label>
+      </div>
+
+      <label class="lbl" style="margin-top:16px;">Idiomas</label>
+      <div id="cvIdiomasContainer"></div>
+      <button type="button" class="btn-add-row" id="btnAddIdiomaCV" onclick="agregarIdiomaCV()">
+        <i class="fa-solid fa-plus"></i> Agregar idioma
+      </button>
+    </div>
+
+    <!-- Preferencias de empleo -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-sliders" style="color:#059669;"></i> Preferencias de empleo</h3>
+
+      <label class="lbl">Disponibilidad horaria</label>
+      <div class="check-group">
+        <label class="check-item"><input type="checkbox" name="cvDisp" value="Full-time (Jornada completa)"><span>Full-time (Jornada completa)</span></label>
+        <label class="check-item"><input type="checkbox" name="cvDisp" value="Part-time (Media jornada)"><span>Part-time (Media jornada)</span></label>
+        <label class="check-item"><input type="checkbox" name="cvDisp" value="Turnos rotativos"><span>Turnos rotativos</span></label>
+        <label class="check-item"><input type="checkbox" name="cvDisp" value="Turno nocturno"><span>Turno nocturno</span></label>
+        <label class="check-item"><input type="checkbox" name="cvDisp" value="Flexible / A convenir"><span>Flexible / A convenir</span></label>
+      </div>
+
+      <label class="lbl" style="margin-top:14px;">Modalidad de preferencia</label>
+      <div class="check-group">
+        <label class="check-item"><input type="checkbox" name="cvModalidad" value="Presencial"><span>Presencial</span></label>
+        <label class="check-item"><input type="checkbox" name="cvModalidad" value="Híbrido"><span>Híbrido</span></label>
+        <label class="check-item"><input type="checkbox" name="cvModalidad" value="Remoto"><span>Remoto</span></label>
+      </div>
+
+      <div class="fila-2" style="margin-top:14px;">
+        <div>
+          <label class="lbl">Movilidad propia</label>
+          <select id="cvMovilidad">
+            <option value="No">No</option>
+            <option value="Sí, auto">Sí, auto</option>
+            <option value="Sí, moto">Sí, moto</option>
+            <option value="Sí, auto y moto">Sí, auto y moto</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Licencia de conducir</label>
+          <select id="cvLicencia" onchange="toggleLicCat(this.value)">
+            <option value="No">No</option>
+            <option value="Sí">Sí</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="cvLicCatWrap" style="display:none;margin-top:10px;">
+        <label class="lbl">Categoría de licencia</label>
+        <input type="text" id="cvLicCat" placeholder="Ej: B1 · Profesional D1 · A2">
+      </div>
+
+      <label class="lbl" style="margin-top:14px;">Remuneración pretendida <span style="color:#94a3b8;font-weight:400;">(opcional — sueldo en mano en $)</span></label>
+      <input type="number" id="cvRemuneracion" placeholder="Ej: 600000" min="0" style="max-width:200px;">
+    </div>
+
+    <div id="msgCV" class="msg" style="margin-top:14px;"></div>
+    <button class="btn-guardar" id="btnGuardarCV" onclick="guardarCV()" style="background:#059669;">
+      <i class="fa-solid fa-save"></i> Guardar y publicar perfil
+    </button>
+    <style>#btnGuardarCV:hover:not(:disabled){background:#047857!important;}</style>
+
+  </div><!-- fin formCV -->
+  <!-- ══════════ FORM EMPRESA / COMERCIO ══════════ -->
   <div id="formEmpresa" style="display:none;">
-    <div class="seccion"><div class="pendiente"><i class="fa-solid fa-building" style="color:#0369a1;"></i><strong>Empresa / Comercio</strong><span>Próximamente — en construcción</span></div></div>
-  </div>
+
+    <!-- Bloque 1: Datos de la empresa -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-building" style="color:#0369a1;"></i> Datos de la empresa o comercio</h3>
+      <p style="font-size:13px;color:#64748b;margin:-6px 0 14px;">El logo o foto ya podés subirlo desde la sección de foto de perfil de arriba.</p>
+
+      <label class="lbl">Nombre de la empresa / Nombre Fantasía *</label>
+      <input type="text" id="empNombre" placeholder='Ej: "Panadería La Unión" o "Estudio Contable Pérez"'>
+
+      <label class="lbl" style="margin-top:12px;">Rubro / Sector *</label>
+      <select id="empRubro">
+        <option value="">— Seleccioná el rubro —</option>
+        <option>Gastronomía y Hotelería</option>
+        <option>Comercio / Retail</option>
+        <option>Administración y Contabilidad</option>
+        <option>Logística y Transporte</option>
+        <option>Construcción y Oficios</option>
+        <option>Salud y Cuidados</option>
+        <option>Educación</option>
+        <option>Tecnología e Informática</option>
+        <option>Seguridad</option>
+        <option>Agropecuario y Rural</option>
+        <option>Industria y Manufactura</option>
+        <option>Servicios al Hogar y Limpieza</option>
+        <option>Turismo y Entretenimiento</option>
+        <option>Textil y Confección</option>
+        <option>Automotriz</option>
+        <option>Inmobiliaria</option>
+        <option>Medios y Comunicación</option>
+        <option>Otro</option>
+      </select>
+
+      <label class="lbl" style="margin-top:14px;">¿Querés ocultar el nombre de la empresa?</label>
+      <div class="check-group">
+        <label class="radio-item"><input type="radio" name="empConfidencial" value="no" checked onchange="toggleConfidencial(this.value)"><span>No — mostrar el nombre de la empresa</span></label>
+        <label class="radio-item"><input type="radio" name="empConfidencial" value="si" onchange="toggleConfidencial(this.value)"><span>Sí — búsqueda confidencial</span></label>
+      </div>
+      <div id="empConfidencialNota" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;padding:10px 13px;font-size:12px;color:#92400e;margin-top:8px;">
+        <strong>Modo confidencial:</strong> En el buscador se mostrará como <em>"Importante empresa del rubro [sector]"</em> en lugar del nombre real.
+      </div>
+    </div>
+
+    <!-- Bloque 2: Vacante -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-clipboard-list" style="color:#0369a1;"></i> Detalles de la vacante</h3>
+
+      <label class="lbl">Título de la oferta / Puesto *</label>
+      <input type="text" id="empTituloOferta" placeholder='Ej: "Cajero/a para Turno Tarde", "Mecánico Automotriz", "Vendedor/a de Salón"'>
+
+      <label class="lbl" style="margin-top:12px;">Descripción del puesto y tareas *</label>
+      <textarea id="empDescripcion" rows="6" placeholder="Describí claramente las responsabilidades, el día a día del trabajo, el equipo, objetivos, etc."></textarea>
+
+      <label class="lbl" style="margin-top:12px;">Cantidad de vacantes</label>
+      <input type="number" id="empVacantes" value="1" min="1" max="99" style="max-width:120px;">
+    </div>
+
+    <!-- Bloque 3: Ubicación y modalidad -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-location-dot" style="color:#dc2626;"></i> Ubicación y modalidad</h3>
+
+      <label class="lbl">Código Postal</label>
+      <input type="text" id="empCP" placeholder="Ej: 1900" oninput="buscarCPEmp(this.value)">
+      <div id="empCPFeedback" style="font-size:12px;margin-top:4px;display:none;"></div>
+
+      <div class="fila-2" style="margin-top:12px;">
+        <div>
+          <label class="lbl">Provincia *</label>
+          <select id="empProvincia">
+            <option value="">— Provincia —</option>
+            <option>Buenos Aires</option><option>CABA</option><option>Catamarca</option>
+            <option>Chaco</option><option>Chubut</option><option>Córdoba</option>
+            <option>Corrientes</option><option>Entre Ríos</option><option>Formosa</option>
+            <option>Jujuy</option><option>La Pampa</option><option>La Rioja</option>
+            <option>Mendoza</option><option>Misiones</option><option>Neuquén</option>
+            <option>Río Negro</option><option>Salta</option><option>San Juan</option>
+            <option>San Luis</option><option>Santa Cruz</option><option>Santa Fe</option>
+            <option>Santiago del Estero</option><option>Tierra del Fuego</option><option>Tucumán</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Ciudad / Localidad *</label>
+          <input type="text" id="empLocalidad" placeholder="Ej: La Plata">
+        </div>
+      </div>
+
+      <label class="lbl">Barrio / Zona <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+      <input type="text" id="empBarrio" placeholder="Ej: Centro · Barrio Norte · Zona industrial">
+
+      <label class="lbl" style="margin-top:14px;">Modalidad de trabajo *</label>
+      <div class="check-group">
+        <label class="radio-item"><input type="radio" name="empModalidad" value="Presencial" checked><span>Presencial</span></label>
+        <label class="radio-item"><input type="radio" name="empModalidad" value="Híbrido"><span>Híbrido</span></label>
+        <label class="radio-item"><input type="radio" name="empModalidad" value="100% Remoto"><span>100% Remoto</span></label>
+      </div>
+    </div>
+
+    <!-- Bloque 4: Requisitos -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-filter" style="color:#7c3aed;"></i> Requisitos del puesto</h3>
+
+      <div class="fila-2">
+        <div>
+          <label class="lbl">Nivel de estudios mínimo</label>
+          <select id="empNivelEst">
+            <option value="Sin preferencia">Sin preferencia</option>
+            <option>Secundario en curso</option>
+            <option>Secundario completo</option>
+            <option>Terciario</option>
+            <option>Universitario</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Experiencia mínima requerida</label>
+          <select id="empExperiencia">
+            <option value="Sin experiencia previa">Sin experiencia previa</option>
+            <option>Menos de 1 año</option>
+            <option>1 a 3 años</option>
+            <option>Más de 3 años</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="lbl" style="margin-top:14px;">Habilidades técnicas / Conocimientos clave</label>
+      <p style="font-size:12px;color:#64748b;margin-bottom:8px;">Escribí una habilidad y presioná <strong>Enter</strong> para agregarla.</p>
+      <div class="tags-input-wrap" onclick="document.getElementById('empTagInput').focus()">
+        <div class="tags-container" id="empTagsContainer"></div>
+        <input type="text" id="empTagInput" class="tags-input-field" placeholder="Ej: Manejo de caja, Excel intermedio, Autoelevador...">
+      </div>
+
+      <div class="fila-2" style="margin-top:14px;">
+        <div>
+          <label class="lbl">¿Obligatorio residir en la zona?</label>
+          <select id="empResidencia">
+            <option value="No">No</option>
+            <option value="Sí">Sí</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">¿Requiere movilidad o licencia?</label>
+          <select id="empMovilidad">
+            <option value="No">No</option>
+            <option value="Sí, licencia de auto">Sí, licencia de auto</option>
+            <option value="Sí, licencia de moto">Sí, licencia de moto</option>
+            <option value="Sí, licencia profesional">Sí, licencia profesional</option>
+            <option value="Sí, vehículo propio">Sí, vehículo propio</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloque 5: Condiciones -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-hand-holding-dollar" style="color:#059669;"></i> Condiciones ofrecidas</h3>
+
+      <div class="fila-2">
+        <div>
+          <label class="lbl">Tipo de jornada *</label>
+          <select id="empJornada">
+            <option value="">— Seleccioná —</option>
+            <option>Full-time (Jornada completa)</option>
+            <option>Part-time (Media jornada)</option>
+            <option>Turnos rotativos</option>
+            <option>Solo fines de semana</option>
+            <option>Por temporada</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Horario de trabajo</label>
+          <input type="text" id="empHorario" placeholder="Ej: Lun–Vie 9 a 18hs">
+        </div>
+      </div>
+
+      <label class="lbl" style="margin-top:14px;">Sueldo / Remuneración ofrecida</label>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px;">
+        <input type="number" id="empSueldo" placeholder="Ej: 750000" min="0" style="max-width:180px;" oninput="if(this.value)document.getElementById('empSueldoConvenir').checked=false">
+        <label class="check-item" style="margin:0;">
+          <input type="checkbox" id="empSueldoConvenir" onchange="toggleSueldoEmp(this.checked)">
+          <span style="font-size:13px;">No mostrar — A convenir</span>
+        </label>
+      </div>
+
+      <label class="lbl" style="margin-top:14px;">Beneficios adicionales <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>
+      <div class="checks-grid" style="margin-top:6px;">
+        <label class="check-item"><input type="checkbox" name="empBeneficio" value="Obra social / Prepaga"><span>Obra social / Prepaga</span></label>
+        <label class="check-item"><input type="checkbox" name="empBeneficio" value="Comedor en planta / Almuerzo"><span>Comedor / Almuerzo</span></label>
+        <label class="check-item"><input type="checkbox" name="empBeneficio" value="Comisiones por objetivos"><span>Comisiones por objetivos</span></label>
+        <label class="check-item"><input type="checkbox" name="empBeneficio" value="Capacitaciones pagas"><span>Capacitaciones pagas</span></label>
+        <label class="check-item"><input type="checkbox" name="empBeneficio" value="Uniforme provisto"><span>Uniforme provisto</span></label>
+        <label class="check-item"><input type="checkbox" name="empBeneficio" value="Bono por presentismo"><span>Bono por presentismo</span></label>
+      </div>
+    </div>
+
+    <!-- Bloque 6: Recepción de postulaciones -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-paper-plane" style="color:#0369a1;"></i> Recepción de postulaciones</h3>
+
+      <label class="lbl">¿Cómo querés recibir los CVs? *</label>
+      <div class="check-group" style="margin-top:6px;">
+        <label class="radio-item">
+          <input type="radio" name="empContactoTipo" value="plataforma" checked onchange="cambiarContactoEmp(this.value)">
+          <span>A través de la plataforma <span style="font-size:11px;color:#64748b;">(los postulantes tocan "Postularse" y los ves en tu panel)</span></span>
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="empContactoTipo" value="email" onchange="cambiarContactoEmp(this.value)">
+          <span>Por correo electrónico externo</span>
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="empContactoTipo" value="whatsapp" onchange="cambiarContactoEmp(this.value)">
+          <span>Por WhatsApp directo <span style="font-size:11px;color:#64748b;">(ideal para comercios de barrio o urgencias)</span></span>
+        </label>
+      </div>
+
+      <div id="empContactoEmailWrap" style="display:none;margin-top:12px;">
+        <label class="lbl">Email de RRHH / Contacto</label>
+        <input type="email" id="empContactoEmail" placeholder="Ej: rrhh@miempresa.com.ar">
+      </div>
+
+      <div id="empContactoWAWrap" style="display:none;margin-top:12px;">
+        <label class="lbl">Número de WhatsApp</label>
+        <div class="tel-wrap">
+          <span class="tel-prefix">+549</span>
+          <input type="tel" id="empContactoWA" placeholder="Ej: 2214561234 (sin 0 ni 15)">
+        </div>
+      </div>
+    </div>
+
+    <div id="msgEmpresa" class="msg" style="margin-top:14px;"></div>
+    <button class="btn-guardar" id="btnGuardarEmpresa" onclick="guardarEmpresa()" style="background:#0369a1;">
+      <i class="fa-solid fa-bullhorn"></i> Publicar oferta de empleo
+    </button>
+    <style>#btnGuardarEmpresa:hover:not(:disabled){background:#0c4a6e!important;}</style>
+
+  </div><!-- fin formEmpresa -->
+  <!-- ══════════ FORM EMPRENDIMIENTO ══════════ -->
   <div id="formEmprendimiento" style="display:none;">
-    <div class="seccion"><div class="pendiente"><i class="fa-solid fa-rocket" style="color:#059669;"></i><strong>Emprendimiento</strong><span>Próximamente — en construcción</span></div></div>
-  </div>
+
+    <!-- Nota foto -->
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:4px;font-size:13px;color:#166534;display:flex;align-items:center;gap:10px;">
+      <i class="fa-solid fa-camera" style="font-size:18px;flex-shrink:0;"></i>
+      <span><strong>Foto de perfil:</strong> Podés subir una foto tuya, del local o de tus productos. Usá la imagen circular de arriba.</span>
+    </div>
+
+    <!-- Bloque 1: Datos del emprendedor -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-user" style="color:#059669;"></i> Datos del Emprendedor</h3>
+      <div class="fila-2">
+        <div>
+          <label class="lbl">Nombre *</label>
+          <input type="text" id="empNombreFundador" placeholder="Tu nombre">
+        </div>
+        <div>
+          <label class="lbl">Apellido *</label>
+          <input type="text" id="empApellidoFundador" placeholder="Tu apellido">
+        </div>
+      </div>
+      <label class="lbl">Rol en el emprendimiento *</label>
+      <select id="empRolFundador">
+        <option value="">— Seleccioná tu rol —</option>
+        <option value="Fundador">👑 Fundador/a</option>
+        <option value="Co-creador">🤝 Co-creador/a</option>
+        <option value="Gestor">📋 Gestor/a</option>
+      </select>
+      <label class="lbl">Teléfono de contacto *</label>
+      <div class="tel-wrap">
+        <span class="tel-prefix">+549</span>
+        <input type="tel" id="empTelFundador" placeholder="Ej: 2954123456" style="border-radius:0 9px 9px 0;">
+      </div>
+      <label class="lbl">Correo electrónico</label>
+      <input type="email" id="empEmailFundador" placeholder="tu@email.com">
+    </div>
+
+    <!-- Bloque 2: Identidad del emprendimiento -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-store" style="color:#059669;"></i> Identidad del Emprendimiento</h3>
+      <label class="lbl">Nombre del Emprendimiento / Marca *</label>
+      <input type="text" id="empNombreMarca" placeholder="Ej: Pastelería La Luna">
+      <label class="lbl">Eslogan o frase corta</label>
+      <input type="text" id="empEslogan" maxlength="100" placeholder="Ej: Pastelería artesanal 100% libre de gluten" oninput="document.getElementById('empEsloganCnt').textContent=this.value.length">
+      <div style="text-align:right;font-size:11px;color:#94a3b8;margin-top:2px;"><span id="empEsloganCnt">0</span>/100</div>
+      <label class="lbl">Historia / ¿Qué hacen? *</label>
+      <textarea id="empHistoria" maxlength="400" placeholder="Contá brevemente qué vendés, cómo nació la idea y qué hace único a tu producto." oninput="document.getElementById('empHistoriaCnt').textContent=this.value.length"></textarea>
+      <div style="text-align:right;font-size:11px;color:#94a3b8;margin-top:2px;"><span id="empHistoriaCnt">0</span>/400</div>
+    </div>
+
+    <!-- Bloque 3: Categoría y tipo de producto -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-tags" style="color:#059669;"></i> Categoría y Tipo de Producto</h3>
+      <label class="lbl">Rubro Principal *</label>
+      <select id="empRubroMain">
+        <option value="">— Seleccioná un rubro —</option>
+        <option value="Gastronomía / Alimentos">🍕 Gastronomía / Alimentos</option>
+        <option value="Indumentaria y Calzado">👗 Indumentaria y Calzado</option>
+        <option value="Decoración / Hogar">🏠 Decoración / Hogar</option>
+        <option value="Estética / Cosmética Natural">💄 Estética / Cosmética Natural</option>
+        <option value="Tecnología">💻 Tecnología</option>
+        <option value="Artesanías y Manualidades">🎨 Artesanías y Manualidades</option>
+        <option value="Librería / Papelería">📚 Librería / Papelería</option>
+        <option value="Juguetería / Juegos">🧸 Juguetería / Juegos</option>
+        <option value="Plantas / Jardín">🌿 Plantas / Jardín</option>
+        <option value="Mascotas">🐾 Mascotas</option>
+        <option value="Arte y Fotografía">🖼️ Arte y Fotografía</option>
+        <option value="Servicios Digitales">📱 Servicios Digitales</option>
+        <option value="Textil y Confección">🧵 Textil y Confección</option>
+        <option value="Otro">⭐ Otro</option>
+      </select>
+      <label class="lbl">Tipo de producción *</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="radio" name="empProduccion" value="Fabricación propia / Artesanal"> Fabricación propia / Artesanal</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="radio" name="empProduccion" value="Revendedor / Distribuidor"> Revendedor / Distribuidor</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="radio" name="empProduccion" value="Diseño propio con producción tercerizada"> Diseño propio con producción tercerizada</label>
+      </div>
+      <label class="lbl" style="margin-top:14px;">Palabras clave / Tags</label>
+      <div class="tags-input-wrap" id="empTagsWrap" onclick="document.getElementById('empTagInput').focus()">
+        <div id="empTagsContainer"></div>
+        <input type="text" id="empTagInput" placeholder="Escribí y presioná Enter (Ej: Vegano, Madera, Vintage...)" style="border:none;outline:none;background:transparent;font-size:13px;min-width:140px;padding:4px;">
+      </div>
+    </div>
+
+    <!-- Bloque 4: Logística y canales -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-truck" style="color:#059669;"></i> Logística, Puntos de Venta y Canales</h3>
+      <label class="lbl">¿Tenés local físico a la calle?</label>
+      <div style="display:flex;gap:16px;margin-bottom:10px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;"><input type="radio" name="empLocal" value="si" onchange="toggleEmpLocal(this.value)"> Sí</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;"><input type="radio" name="empLocal" value="no" onchange="toggleEmpLocal(this.value)" checked> No</label>
+      </div>
+      <div id="empShowroomWrap">
+        <label class="lbl">¿Tenés Showroom / Punto de retiro?</label>
+        <div style="display:flex;gap:16px;margin-bottom:10px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;"><input type="radio" name="empShowroom" value="si"> Sí</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;"><input type="radio" name="empShowroom" value="no" checked> No</label>
+        </div>
+      </div>
+      <label class="lbl">Dirección (opcional)</label>
+      <input type="text" id="empDireccion" placeholder="Ej: Av. Rivadavia 1234, CABA">
+      <label class="lbl">Provincia *</label>
+      <select id="empProvinciaEmp" onchange="buscarCPEmpre()">
+        <option value="">— Seleccioná provincia —</option>
+        <option>Buenos Aires</option><option>CABA</option><option>Catamarca</option>
+        <option>Chaco</option><option>Chubut</option><option>Córdoba</option>
+        <option>Corrientes</option><option>Entre Ríos</option><option>Formosa</option>
+        <option>Jujuy</option><option>La Pampa</option><option>La Rioja</option>
+        <option>Mendoza</option><option>Misiones</option><option>Neuquén</option>
+        <option>Río Negro</option><option>Salta</option><option>San Juan</option>
+        <option>San Luis</option><option>Santa Cruz</option><option>Santa Fe</option>
+        <option>Santiago del Estero</option><option>Tierra del Fuego</option><option>Tucumán</option>
+      </select>
+      <label class="lbl">Localidad *</label>
+      <input type="text" id="empLocalidadEmp" placeholder="Ej: Mar del Plata">
+      <label class="lbl" style="margin-top:14px;">Canales de venta actuales</label>
+      <div style="display:flex;flex-direction:column;gap:7px;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="checkbox" name="empCanal" value="Tienda Online propia"> 🛒 Tienda Online propia (Empretienda, Tiendanube, Web propia)</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="checkbox" name="empCanal" value="Redes Sociales"> 📱 Redes Sociales (Instagram / TikTok)</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="checkbox" name="empCanal" value="Plataformas de terceros"> 🏪 Plataformas de terceros (Mercado Libre, Marketplace)</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="checkbox" name="empCanal" value="Ferias y mercados"> 🎪 Ferias / Mercados vecinales</label>
+      </div>
+      <label class="lbl" style="margin-top:14px;">Métodos de envío</label>
+      <div style="display:flex;flex-direction:column;gap:7px;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="checkbox" name="empEnvio" value="Correo postal"> 📮 Envíos por correo (A todo el país)</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="checkbox" name="empEnvio" value="Cadetería local"> 🛵 Cadetería / Moto propia (Zona local)</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;"><input type="checkbox" name="empEnvio" value="Retiro en domicilio"> 🏠 Retiro en domicilio / Showroom</label>
+      </div>
+    </div>
+
+    <!-- Bloque 5: Redes y enlaces -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-share-nodes" style="color:#059669;"></i> Redes y Enlaces Comerciales</h3>
+      <label class="lbl"><i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram <span style="color:#94a3b8;font-weight:400;">(recomendado)</span></label>
+      <input type="text" id="empInstagram" placeholder="https://instagram.com/tu_marca o @tu_marca">
+      <label class="lbl"><i class="fa-brands fa-tiktok"></i> TikTok</label>
+      <input type="text" id="empTiktok" placeholder="https://tiktok.com/@tu_marca">
+      <label class="lbl"><i class="fa-brands fa-whatsapp" style="color:#25d366;"></i> WhatsApp Comercial / Catálogo</label>
+      <div class="tel-wrap">
+        <span class="tel-prefix">+549</span>
+        <input type="tel" id="empWAComercial" placeholder="Número WhatsApp comercial" style="border-radius:0 9px 9px 0;">
+      </div>
+      <label class="lbl"><i class="fa-solid fa-globe" style="color:#0369a1;"></i> Sitio Web / Tienda Online</label>
+      <input type="text" id="empSitioWeb" placeholder="https://tutienda.com.ar">
+    </div>
+
+    <div id="msgEmprendimiento" class="msg" style="margin-top:14px;"></div>
+    <button class="btn-guardar" id="btnGuardarEmprendimiento" onclick="guardarEmprendimiento()" style="background:#059669;">
+      <i class="fa-solid fa-rocket"></i> Publicar emprendimiento
+    </button>
+    <style>#btnGuardarEmprendimiento:hover:not(:disabled){background:#047857!important;}</style>
+
+  </div><!-- fin formEmprendimiento -->
 
 </div><!-- fin wrap -->
 
@@ -653,16 +1496,72 @@ const SUBCATS = {
   'Otro oficio':              ['Otro (descripción libre)']
 }
 
-function cargarSubcategorias() {
-  var cat  = document.getElementById('ofCategoria').value
-  var cont = document.getElementById('subsContainer')
+/* ════════════════════════════
+   BLOQUES DE OFICIOS MÚLTIPLES
+════════════════════════════ */
+var CATS_LISTA = Object.keys(SUBCATS)
+
+function actualizarBloques() {
+  var cantidad = parseInt(document.getElementById('cantidadOficios').value) || 1
+  var cont = document.getElementById('bloquesOficios')
+  // Preservar selecciones existentes
+  var existentes = []
+  var bloques = cont.querySelectorAll('.oficio-bloque')
+  bloques.forEach(function(b) {
+    var sel = b.querySelector('select')
+    var subs = Array.from(b.querySelectorAll('input[type=checkbox]:checked')).map(function(c){return c.value})
+    existentes.push({ cat: sel ? sel.value : '', subs: subs })
+  })
+
+  var html = ''
+  for(var i = 1; i <= cantidad; i++) {
+    var prev = existentes[i-1] || { cat: '', subs: [] }
+    html += generarBloqueOficio(i, prev.cat, prev.subs)
+  }
+  cont.innerHTML = html
+}
+
+function generarBloqueOficio(n, catSelec, subsSelec) {
+  catSelec  = catSelec  || ''
+  subsSelec = subsSelec || []
+  var opcionsCat = CATS_LISTA.map(function(cat) {
+    return '<option value="'+cat+'"'+(cat===catSelec?' selected':'')+'>'+cat+'</option>'
+  }).join('')
+
+  var subsHtml = '<p class="subs-placeholder">Seleccioná primero la categoría</p>'
+  if(catSelec && SUBCATS[catSelec]) {
+    subsHtml = '<div class="checks-grid">' +
+      SUBCATS[catSelec].map(function(sub) {
+        var chk = subsSelec.includes(sub) ? ' checked' : ''
+        return '<label class="check-item"><input type="checkbox" name="ofSub'+n+'" value="'+sub+'"'+chk+'> <span>'+sub+'</span></label>'
+      }).join('') + '</div>'
+  }
+
+  var iconos = ['🔧','🪛','🔨','⚙️','🛠️']
+  return '<div class="oficio-bloque">' +
+    '<div class="oficio-bloque-titulo">'+iconos[n-1]+' Oficio '+n+'</div>' +
+    '<label class="lbl" style="margin-top:0;">Categoría *</label>' +
+    '<select id="ofCategoria'+n+'" onchange="cargarSubcategoriasBloque('+n+')">' +
+      '<option value="">— Seleccioná el oficio —</option>' +
+      opcionsCat +
+    '</select>' +
+    '<div style="margin-top:10px;">' +
+      '<label class="lbl">Especialidades <span style="color:#94a3b8;font-weight:400;">(marcá las que aplican)</span></label>' +
+      '<div id="subsContainer'+n+'">' + subsHtml + '</div>' +
+    '</div>' +
+  '</div>'
+}
+
+function cargarSubcategoriasBloque(n) {
+  var cat  = document.getElementById('ofCategoria'+n).value
+  var cont = document.getElementById('subsContainer'+n)
   if(!cat || !SUBCATS[cat]) {
     cont.innerHTML = '<p class="subs-placeholder">Seleccioná primero la categoría</p>'
     return
   }
   var html = '<div class="checks-grid">'
   SUBCATS[cat].forEach(function(sub) {
-    html += '<label class="check-item"><input type="checkbox" name="ofSub" value="'+sub+'"> <span>'+sub+'</span></label>'
+    html += '<label class="check-item"><input type="checkbox" name="ofSub'+n+'" value="'+sub+'"> <span>'+sub+'</span></label>'
   })
   html += '</div>'
   cont.innerHTML = html
@@ -718,9 +1617,20 @@ async function cambiarTipo(tipo) {
   forms.forEach(function(f){ document.getElementById('form'+f).style.display = 'none' })
   if(tipo === 'oficio')             document.getElementById('formOficio').style.display = 'block'
   else if(tipo === 'profesional')   document.getElementById('formProfesional').style.display = 'block'
-  else if(tipo === 'cv')            document.getElementById('formCV').style.display = 'block'
-  else if(tipo === 'empresa')       document.getElementById('formEmpresa').style.display = 'block'
-  else if(tipo === 'emprendimiento')document.getElementById('formEmprendimiento').style.display = 'block'
+  else if(tipo === 'cv') {
+    document.getElementById('formCV').style.display = 'block'
+    // Inicializar tag input y primer idioma si no existen aún
+    initCVTagInput()
+    if(!document.getElementById('cvIdiomasContainer').children.length) agregarIdiomaCV()
+  }
+  else if(tipo === 'empresa') {
+    document.getElementById('formEmpresa').style.display = 'block'
+    initEmpTagInput()
+  }
+  else if(tipo === 'emprendimiento') {
+    document.getElementById('formEmprendimiento').style.display = 'block'
+    initEmpTagInput2()
+  }
 
   // Guardar el tipo en la DB al instante
   if(currentUser && tipo) {
@@ -748,84 +1658,113 @@ function previsualizarFoto(input) {
    GUARDAR OFICIO
 ════════════════════════════ */
 async function guardarOficio() {
-  var btn    = document.getElementById('btnGuardar')
-  var msgEl  = document.getElementById('msgOficio')
-  msgEl.className = 'msg'; msgEl.style.display = 'none'
+  var btn = document.getElementById('btnGuardar')
+  try {
+    var msgEl = document.getElementById('msgOficio')
+    msgEl.className = 'msg'; msgEl.style.display = 'none'
 
-  var categoria  = document.getElementById('ofCategoria').value
-  var localidad  = document.getElementById('ofLocalidad').value.trim()
-  var telefono   = document.getElementById('ofTelefono').value.trim()
-  var descripcion= document.getElementById('ofDescripcion').value.trim()
+    var localidad   = document.getElementById('ofLocalidad').value.trim()
+    var telefono    = document.getElementById('ofTelefono').value.trim()
+    var descripcion = document.getElementById('ofDescripcion').value.trim()
 
-  if(!categoria)   return mostrarMsgOficio('err','Seleccioná la categoría de tu oficio.')
-  if(!localidad)   return mostrarMsgOficio('err','Ingresá tu ciudad o código postal.')
-  if(!telefono)    return mostrarMsgOficio('err','Ingresá tu número de WhatsApp.')
-  if(!descripcion) return mostrarMsgOficio('err','Escribí una descripción de tu oficio.')
+    if(!localidad)   return mostrarMsgOficio('err','Ingresá tu ciudad o código postal.')
+    if(!telefono)    return mostrarMsgOficio('err','Ingresá tu número de WhatsApp.')
+    if(!descripcion) return mostrarMsgOficio('err','Escribí una descripción de tu oficio.')
 
-  btn.disabled = true
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
+    btn.disabled = true
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
 
-  // Subcategorías seleccionadas
-  var subs = Array.from(document.querySelectorAll('input[name="ofSub"]:checked')).map(function(c){return c.value})
+    // Recolectar categorías y subs de todos los bloques
+    var cantidad = parseInt(document.getElementById('cantidadOficios').value) || 1
+    var categorias = [], todosSubs = []
+    for(var i = 1; i <= cantidad; i++) {
+      var catEl = document.getElementById('ofCategoria'+i)
+      if(catEl && catEl.value) categorias.push(catEl.value)
+      Array.from(document.querySelectorAll('input[name="ofSub'+i+'"]:checked')).forEach(function(c){ todosSubs.push(c.value) })
+    }
+    var categoria = categorias.join(', ')
+    var subs      = todosSubs
 
-  // Visibilidad
-  var mostrarComo = document.querySelector('input[name="ofMostrarComo"]:checked')?.value || 'personal'
-  var nomEmpresa  = document.getElementById('ofNombreEmpresa').value.trim()
-  var mostrarTel  = document.getElementById('ofMostrarTel').checked
+    if(!categoria) return mostrarMsgOficio('err','Seleccioná al menos un oficio.')
 
-  // Datos extra (guardados en descripcion extendida)
-  var presupuesto = document.getElementById('ofPresupuesto').checked
-  var factura     = document.getElementById('ofFactura').checked
-  var vehiculo    = document.getElementById('ofVehiculo').checked
-  var matricula   = document.getElementById('ofMatricula').value.trim()
-  var radio       = document.getElementById('ofRadio').value.trim()
-  var horario     = document.getElementById('ofHorario').value.trim()
+    var mcRadio     = document.querySelector('input[name="ofMostrarComo"]:checked')
+    var mostrarComo = mcRadio ? mcRadio.value : 'personal'
+    var nomEmpresa  = document.getElementById('ofNombreEmpresa').value.trim()
+    var mostrarTel  = document.getElementById('ofMostrarTel').checked
+    var presupuesto = document.getElementById('ofPresupuesto').checked
+    var factura     = document.getElementById('ofFactura').checked
+    var vehiculo    = document.getElementById('ofVehiculo').checked
+    var matricula   = document.getElementById('ofMatricula').value.trim()
+    var radio       = document.getElementById('ofRadio').value.trim()
+    var horario     = document.getElementById('ofHorario').value.trim()
+    var provincia   = document.getElementById('ofProvincia').value.trim() || null
+    var cp          = document.getElementById('ofCP').value.trim() || null
+    var direccion   = document.getElementById('ofDireccion').value.trim() || null
 
-  // Descripcion enriquecida (incluye campos sin columna propia)
-  var descFull = descripcion
-  if(horario)   descFull += '\n⏰ Disponibilidad: ' + horario
-  if(matricula) descFull += '\n📋 Matrícula: ' + matricula
-  if(radio)     descFull += '\n📍 Zona de cobertura: ' + radio
-  var extras = []
-  if(presupuesto) extras.push('Presupuesto sin costo')
-  if(factura)     extras.push('Emite factura')
-  if(vehiculo)    extras.push('Vehículo propio')
-  if(extras.length) descFull += '\n✅ ' + extras.join(' · ')
+    var descFull = descripcion
+    if(horario)   descFull += '\n⏰ Disponibilidad: ' + horario
+    if(matricula) descFull += '\n📋 Matrícula: ' + matricula
+    if(radio)     descFull += '\n📍 Zona de cobertura: ' + radio
+    var extras = []
+    if(presupuesto) extras.push('Presupuesto sin costo')
+    if(factura)     extras.push('Emite factura')
+    if(vehiculo)    extras.push('Vehículo propio')
+    if(extras.length) descFull += '\n✅ ' + extras.join(' · ')
 
-  var payload = {
-    tipo:              'oficio',
-    profesion_universitaria: categoria,
-    empresa_sector:    subs.join(', ') || null,
-    empresa_descripcion: descFull || null,
-    movil:             '+549' + telefono,
-    direccion:         document.getElementById('ofDireccion').value.trim() || null,
-    codigo_postal:     document.getElementById('ofCP').value.trim() || null,
-    localidad:         localidad,
-    provincia:         document.getElementById('ofProvincia').value.trim() || null,
-    nombre_empresa:    nomEmpresa || null,
-    mostrar_como:      mostrarComo,
-    mostrar_telefono:  mostrarTel
-  }
+    // ── 1. Actualizar perfiles ──
+    var perfilPayload = {
+      tipo:                    'oficio',
+      profesion_universitaria: null,
+      movil:                   '+549' + telefono,
+      direccion:               direccion,
+      codigo_postal:           cp,
+      localidad:               localidad,
+      provincia:               provincia,
+      nombre_empresa:          nomEmpresa || null,
+      mostrar_como:            mostrarComo,
+      mostrar_telefono:        mostrarTel
+    }
 
-  var res = await supa.from('perfiles').update(payload).eq('id', currentUser.id)
+    var res = await supa.from('perfiles').update(perfilPayload).eq('id', currentUser.id)
+    if(res.error) throw new Error('Error en perfiles: ' + res.error.message)
 
-  if(res.error) {
-    mostrarMsgOficio('err', 'Error al guardar: ' + res.error.message)
+    // ── 2. Upsert en servicios ──
+    var srvPayload = {
+      usuario_id:      currentUser.id,
+      categoria:       categoria,
+      titulo:          nomEmpresa || categoria,
+      descripcion:     descFull,
+      servicios_lista: subs.join(', ') || null,
+      horarios:        horario || null,
+      direccion:       direccion,
+      localidad:       localidad,
+      provincia:       provincia,
+      activo:          true
+    }
+
+    var srvEx = await supa.from('servicios').select('id').eq('usuario_id', currentUser.id).maybeSingle()
+    var srvRes
+    if(srvEx.data) {
+      srvRes = await supa.from('servicios').update(srvPayload).eq('id', srvEx.data.id)
+    } else {
+      srvRes = await supa.from('servicios').insert(srvPayload)
+    }
+    if(srvRes.error) throw new Error('Error en servicios: ' + srvRes.error.message)
+
+    // ── 3. Subir foto ──
+    var fotoInput = document.getElementById('inputFoto')
+    if(fotoInput.files && fotoInput.files[0]) {
+      await subirFoto(fotoInput.files[0])
+    }
+
+    mostrarMsgOficio('ok', '✅ Perfil guardado. Redirigiendo...')
+    setTimeout(function(){ window.location.href = '/perfil.html' }, 1500)
+
+  } catch(e) {
+    console.error('guardarOficio error:', e)
+    mostrarMsgOficio('err', '❌ ' + (e.message || 'Error inesperado. Revisá la consola.'))
     btn.disabled = false
     btn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar y publicar perfil'
-    return
-  }
-
-  mostrarMsgOficio('ok', '✅ Perfil guardado y publicado correctamente.')
-  btn.disabled = false
-  btn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar y publicar perfil'
-  btn.style.background = '#059669'
-  setTimeout(function(){ btn.style.background = ''; }, 3000)
-
-  // Subir foto si se seleccionó
-  var fotoInput = document.getElementById('inputFoto')
-  if(fotoInput.files && fotoInput.files[0]) {
-    subirFoto(fotoInput.files[0])
   }
 }
 
@@ -842,12 +1781,14 @@ function mostrarMsgOficio(tipo, msg) {
 ════════════════════════════ */
 async function subirFoto(file) {
   if(!currentUser) return
-  var ext  = file.name.split('.').pop()
-  var path = 'avatars/' + currentUser.id + '.' + ext
-  var upRes = await supa.storage.from('fotos').upload(path, file, { upsert: true })
+  var ext    = file.name.split('.').pop()
+  var path   = 'perfil_' + currentUser.id + '_' + Date.now() + '.' + ext
+  var upRes  = await supa.storage.from('trabajos').upload(path, file, { upsert: true })
   if(upRes.error){ console.warn('foto upload:', upRes.error.message); return }
-  var { data: urlData } = supa.storage.from('fotos').getPublicUrl(path)
-  await supa.from('perfiles').update({ foto: urlData.publicUrl }).eq('id', currentUser.id)
+  var { data: urlData } = supa.storage.from('trabajos').getPublicUrl(path)
+  if(urlData?.publicUrl) {
+    await supa.from('perfiles').update({ foto: urlData.publicUrl }).eq('id', currentUser.id)
+  }
 }
 
 /* ════════════════════════════
@@ -866,6 +1807,1082 @@ function verTab(id) {
 }
 
 /* ════════════════════════════
+   CV — TAGS HABILIDADES TÉCNICAS
+════════════════════════════ */
+var cvTags = []
+
+function initCVTagInput() {
+  var inp = document.getElementById('cvTagInput')
+  if(!inp || inp._cvInit) return
+  inp._cvInit = true
+  inp.addEventListener('keydown', function(e) {
+    if(e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      var val = this.value.trim().replace(/,+$/, '')
+      if(val && cvTags.indexOf(val) === -1) { cvTags.push(val); renderCVTags() }
+      this.value = ''
+    }
+  })
+}
+
+function renderCVTags() {
+  var cont = document.getElementById('cvTagsContainer')
+  if(!cont) return
+  cont.innerHTML = cvTags.map(function(t, i) {
+    return '<span class="skill-tag">'+t+' <button type="button" onclick="removeCVTag('+i+')">×</button></span>'
+  }).join('')
+}
+
+function removeCVTag(i) { cvTags.splice(i, 1); renderCVTags() }
+
+/* ════════════════════════════
+   CV — BLOQUES EXPERIENCIA
+════════════════════════════ */
+function actualizarBloquesExp() {
+  var cantidad = parseInt(document.getElementById('cantidadExp').value) || 0
+  var cont = document.getElementById('bloquesExp')
+  var existentes = []
+  cont.querySelectorAll('.exp-bloque').forEach(function(b) {
+    existentes.push({
+      puesto:  b.querySelector('.exp-puesto')  ? b.querySelector('.exp-puesto').value  : '',
+      empresa: b.querySelector('.exp-empresa') ? b.querySelector('.exp-empresa').value : '',
+      inicio:  b.querySelector('.exp-inicio')  ? b.querySelector('.exp-inicio').value  : '',
+      actual:  b.querySelector('.exp-actual')  ? b.querySelector('.exp-actual').checked : false,
+      fin:     b.querySelector('.exp-fin')     ? b.querySelector('.exp-fin').value     : '',
+      desc:    b.querySelector('.exp-desc')    ? b.querySelector('.exp-desc').value    : ''
+    })
+  })
+  var html = ''
+  for(var i = 1; i <= cantidad; i++) {
+    html += generarBloqueExp(i, existentes[i-1] || {})
+  }
+  cont.innerHTML = html
+}
+
+function generarBloqueExp(n, d) {
+  d = d || {}
+  var iconos = ['💼','🏢','🔧','📋','⭐']
+  var finDisabled = d.actual ? 'disabled style="opacity:.5"' : ''
+  return '<div class="exp-bloque">' +
+    '<div class="exp-bloque-titulo">'+iconos[n-1]+' Trabajo '+n+'</div>' +
+    '<label class="lbl" style="margin-top:0;">Puesto / Cargo</label>' +
+    '<input type="text" class="exp-puesto" value="'+(d.puesto||'')+'" placeholder="Ej: Cajero/a · Niñera · Encargado/a de depósito"><br>' +
+    '<label class="lbl">Empresa / Negocio / Empleador</label>' +
+    '<input type="text" class="exp-empresa" value="'+(d.empresa||'')+'" placeholder="Ej: Supermercado Día · Familia García · Automotriz López"><br>' +
+    '<div class="fila-2" style="margin-top:10px;">' +
+      '<div><label class="lbl">Año de inicio</label><input type="number" class="exp-inicio" value="'+(d.inicio||'')+'" placeholder="Ej: 2019" min="1970" max="2030"></div>' +
+      '<div><label class="lbl">Año de fin</label><input type="number" class="exp-fin" id="expFin'+n+'" value="'+(d.fin||'')+'" placeholder="Ej: 2023" min="1970" max="2030" '+finDisabled+'></div>' +
+    '</div>' +
+    '<label class="check-item" style="margin-top:8px;display:inline-flex;">' +
+      '<input type="checkbox" class="exp-actual" onchange="toggleExpActual(this,'+n+')" '+(d.actual?'checked':'')+' style="width:18px;height:18px;accent-color:#2563eb;margin-right:8px;"> ' +
+      '<span style="font-size:13px;color:#374151;">Trabajo actual</span>' +
+    '</label>' +
+    '<label class="lbl" style="margin-top:10px;">Descripción breve <span style="color:#94a3b8;font-weight:400;">(opcional)</span></label>' +
+    '<textarea class="exp-desc" rows="2" placeholder="Ej: Atención al público, manejo de caja, apertura y cierre de local.">'+(d.desc||'')+'</textarea>' +
+  '</div>'
+}
+
+function toggleExpActual(cb, n) {
+  var fi = document.getElementById('expFin'+n)
+  if(!fi) return
+  fi.disabled = cb.checked; fi.style.opacity = cb.checked ? '.5' : '1'
+  if(cb.checked) fi.value = ''
+}
+
+/* ════════════════════════════
+   CV — IDIOMAS
+════════════════════════════ */
+var _cvIdiomaIds = []
+
+function agregarIdiomaCV() {
+  var cont = document.getElementById('cvIdiomasContainer')
+  if(!cont || _cvIdiomaIds.length >= 5) return
+  var id = Date.now()
+  _cvIdiomaIds.push(id)
+  var div = document.createElement('div')
+  div.className = 'idioma-fila'; div.id = 'idiomaCV_' + id
+  div.innerHTML =
+    '<select class="idioma-lang">' +
+      '<option value="">— Idioma —</option>' +
+      '<option>Inglés</option><option>Portugués</option><option>Francés</option>' +
+      '<option>Italiano</option><option>Alemán</option><option>Japonés</option>' +
+      '<option>Chino</option><option>Árabe</option><option>Otro</option>' +
+    '</select>' +
+    '<select class="idioma-nivel">' +
+      '<option value="">— Nivel —</option>' +
+      '<option>Básico</option><option>Intermedio</option><option>Avanzado</option><option>Bilingüe</option>' +
+    '</select>' +
+    '<button type="button" class="btn-rm-row" onclick="removerIdiomaCV('+id+')">×</button>'
+  cont.appendChild(div)
+  if(_cvIdiomaIds.length >= 5) document.getElementById('btnAddIdiomaCV').style.display = 'none'
+}
+
+function removerIdiomaCV(id) {
+  var el = document.getElementById('idiomaCV_' + id)
+  if(el) el.remove()
+  var idx = _cvIdiomaIds.indexOf(id)
+  if(idx !== -1) _cvIdiomaIds.splice(idx, 1)
+  if(document.getElementById('btnAddIdiomaCV')) document.getElementById('btnAddIdiomaCV').style.display = 'inline-flex'
+}
+
+/* ════════════════════════════
+   CV — CP / LICENCIA / ARCHIVO
+════════════════════════════ */
+var _lastCPCV = ''
+async function buscarCPCV(cp) {
+  cp = (cp||'').trim()
+  if(cp === _lastCPCV || cp.length < 4) return
+  _lastCPCV = cp
+  var fb = document.getElementById('cvCPFeedback')
+  fb.textContent = 'Buscando...'; fb.style.display = 'block'; fb.style.color = '#2563eb'
+  try {
+    var res  = await fetch('https://api.zippopotam.us/ar/' + cp)
+    if(!res.ok){ fb.textContent = 'CP no encontrado.'; fb.style.color='#b91c1c'; return }
+    var data = await res.json(); var pl = data.places || []
+    if(!pl.length){ fb.textContent = 'Sin resultados.'; fb.style.color='#b91c1c'; return }
+    document.getElementById('cvProvincia').value = pl[0]['state']
+    document.getElementById('cvLocalidad').value  = pl[0]['place name']
+    fb.textContent = '✓ Localidad cargada'; fb.style.color = '#166534'
+    setTimeout(function(){ fb.style.display='none' }, 3000)
+  } catch(e) { fb.textContent = 'Error de red.'; fb.style.color='#b91c1c' }
+}
+
+function toggleLicCat(val) {
+  document.getElementById('cvLicCatWrap').style.display = val === 'Sí' ? 'block' : 'none'
+}
+
+function mostrarNombreCV(input) {
+  if(input.files && input.files[0])
+    document.getElementById('cvNombreArchivo').textContent = '📎 ' + input.files[0].name
+}
+
+async function subirArchivoCV(file) {
+  if(!currentUser || !file) return null
+  var ext  = file.name.split('.').pop()
+  var path = 'cv_' + currentUser.id + '_' + Date.now() + '.' + ext
+  var up   = await supa.storage.from('trabajos').upload(path, file, { upsert: true })
+  if(up.error){ console.warn('CV upload:', up.error.message); return null }
+  var { data: urlData } = supa.storage.from('trabajos').getPublicUrl(path)
+  return urlData?.publicUrl || null
+}
+
+/* ════════════════════════════
+   GUARDAR CV
+════════════════════════════ */
+async function guardarCV() {
+  var btn = document.getElementById('btnGuardarCV')
+  try {
+    document.getElementById('msgCV').className = 'msg'; document.getElementById('msgCV').style.display = 'none'
+
+    var puesto    = document.getElementById('cvPuesto').value
+    var localidad = document.getElementById('cvLocalidad').value.trim()
+    var telefono  = document.getElementById('cvTelefono').value.trim()
+    var sobreMi   = document.getElementById('cvSobreMi').value.trim()
+
+    if(!puesto)    return mostrarMsgCV('err','Seleccioná el puesto deseado.')
+    if(!localidad) return mostrarMsgCV('err','Ingresá tu ciudad.')
+    if(!telefono)  return mostrarMsgCV('err','Ingresá tu teléfono.')
+    if(!sobreMi)   return mostrarMsgCV('err','Completá la sección "Sobre mí".')
+
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
+
+    var email     = document.getElementById('cvEmail').value.trim()
+    var enlace    = document.getElementById('cvEnlace').value.trim()
+    var cp        = document.getElementById('cvCP').value.trim() || null
+    var provincia = document.getElementById('cvProvincia').value.trim() || null
+    var barrio    = document.getElementById('cvBarrio').value.trim()
+    var puestoAcl = document.getElementById('cvPuestoAcl').value.trim()
+    var titulo    = document.getElementById('cvTitulo').value.trim()
+    var institucion = document.getElementById('cvInstitucion').value.trim()
+    var nivelEst  = document.getElementById('cvNivelEst').value
+    var estadoEst = document.getElementById('cvEstadoEst').value
+    var anioEst   = document.getElementById('cvAnioEst').value
+    var movilidad = document.getElementById('cvMovilidad').value
+    var licencia  = document.getElementById('cvLicencia').value
+    var licCat    = document.getElementById('cvLicCat').value.trim()
+    var remun     = document.getElementById('cvRemuneracion').value
+
+    var dispArr   = Array.from(document.querySelectorAll('input[name="cvDisp"]:checked')).map(function(c){return c.value})
+    var modalArr  = Array.from(document.querySelectorAll('input[name="cvModalidad"]:checked')).map(function(c){return c.value})
+    var blandasArr= Array.from(document.querySelectorAll('input[name="cvBlanda"]:checked')).map(function(c){return c.value})
+
+    var idiomasArr = []
+    document.querySelectorAll('.idioma-fila').forEach(function(row) {
+      var lang  = row.querySelector('.idioma-lang') ? row.querySelector('.idioma-lang').value : ''
+      var nivel = row.querySelector('.idioma-nivel') ? row.querySelector('.idioma-nivel').value : ''
+      if(lang && nivel) idiomasArr.push(lang + ' (' + nivel + ')')
+    })
+
+    var expArr = []
+    document.querySelectorAll('.exp-bloque').forEach(function(b) {
+      var p  = b.querySelector('.exp-puesto')  ? b.querySelector('.exp-puesto').value.trim()  : ''
+      var em = b.querySelector('.exp-empresa') ? b.querySelector('.exp-empresa').value.trim() : ''
+      var ini = b.querySelector('.exp-inicio')  ? b.querySelector('.exp-inicio').value  : ''
+      var act = b.querySelector('.exp-actual')  ? b.querySelector('.exp-actual').checked : false
+      var fin = act ? 'Actualidad' : (b.querySelector('.exp-fin') ? b.querySelector('.exp-fin').value : '')
+      var dc  = b.querySelector('.exp-desc')   ? b.querySelector('.exp-desc').value.trim()   : ''
+      if(p) expArr.push({ p: p, em: em, ini: ini, fin: fin, dc: dc })
+    })
+
+    // Subir archivo CV
+    var cvUrl = null
+    var cvFile = document.getElementById('inputCV')
+    if(cvFile.files && cvFile.files[0]) cvUrl = await subirArchivoCV(cvFile.files[0])
+
+    // Armar descripción completa
+    var descFull = sobreMi
+    if(puestoAcl) descFull += '\n📌 ' + puestoAcl
+    if(barrio)    descFull += '\n📍 Zona: ' + barrio
+    if(expArr.length) {
+      descFull += '\n\n💼 Experiencia laboral:'
+      expArr.forEach(function(e, i) {
+        descFull += '\n' + (i+1) + '. ' + e.p
+        if(e.em)  descFull += ' — ' + e.em
+        if(e.ini || e.fin) descFull += ' (' + (e.ini||'') + (e.fin ? ' – '+e.fin : '') + ')'
+        if(e.dc)  descFull += '\n   ' + e.dc
+      })
+    }
+    var eduParts = [titulo, institucion, nivelEst, estadoEst, anioEst].filter(Boolean)
+    if(eduParts.length) descFull += '\n\n🎓 Educación:\n' + eduParts.join(' · ')
+    if(cvTags.length)    descFull += '\n⚙️ Habilidades: ' + cvTags.join(', ')
+    if(blandasArr.length) descFull += '\n🤝 Cualidades: ' + blandasArr.join(', ')
+    if(idiomasArr.length) descFull += '\n🗣️ Idiomas: ' + idiomasArr.join(' · ')
+    if(dispArr.length)   descFull += '\n⏰ Disponibilidad: ' + dispArr.join(' · ')
+    if(modalArr.length)  descFull += '\n💻 Modalidad: ' + modalArr.join(' · ')
+    if(movilidad !== 'No') descFull += '\n🚗 Movilidad: ' + movilidad
+    if(licencia === 'Sí') descFull += ' · Licencia: ' + (licCat || 'Sí')
+    if(email)  descFull += '\n📧 ' + email
+    if(enlace) descFull += '\n🔗 ' + enlace
+    if(remun)  descFull += '\n💰 Remuneración pretendida: $' + parseInt(remun).toLocaleString('es-AR')
+    if(cvUrl)  descFull += '\n📄 CV adjunto: ' + cvUrl
+
+    // ── 1. Perfiles ──
+    var perfilPayload = {
+      tipo: 'cv', profesion_universitaria: puesto,
+      movil: '+549' + telefono,
+      codigo_postal: cp, localidad: localidad, provincia: provincia,
+      nombre_empresa: barrio || null,
+      mostrar_telefono: true,
+      empresa_sector: cvTags.join(', ') || null,
+      empresa_descripcion: cvUrl || null
+    }
+    var resP = await supa.from('perfiles').update(perfilPayload).eq('id', currentUser.id)
+    if(resP.error) throw new Error('Error en perfiles: ' + resP.error.message)
+
+    // ── 2. Servicios ──
+    var srvPayload = {
+      usuario_id: currentUser.id, categoria: puesto,
+      titulo: puesto + (puestoAcl ? ' · ' + puestoAcl : ''),
+      descripcion: descFull,
+      servicios_lista: cvTags.concat(blandasArr).join(', ') || null,
+      horarios: dispArr.join(', ') || null,
+      localidad: localidad, provincia: provincia, activo: true
+    }
+    var srvEx = await supa.from('servicios').select('id').eq('usuario_id', currentUser.id).maybeSingle()
+    var srvRes
+    if(srvEx.data) { srvRes = await supa.from('servicios').update(srvPayload).eq('id', srvEx.data.id) }
+    else           { srvRes = await supa.from('servicios').insert(srvPayload) }
+    if(srvRes.error) throw new Error('Error en servicios: ' + srvRes.error.message)
+
+    // ── 3. Foto ──
+    var fotoInput = document.getElementById('inputFoto')
+    if(fotoInput.files && fotoInput.files[0]) await subirFoto(fotoInput.files[0])
+
+    mostrarMsgCV('ok', '✅ Perfil guardado. Redirigiendo...')
+    setTimeout(function(){ window.location.href = '/perfil.html' }, 1500)
+
+  } catch(e) {
+    console.error('guardarCV:', e)
+    mostrarMsgCV('err', '❌ ' + (e.message || 'Error inesperado.'))
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar y publicar perfil'
+  }
+}
+
+function mostrarMsgCV(tipo, msg) {
+  var el = document.getElementById('msgCV')
+  el.textContent = msg; el.className = 'msg ' + tipo; el.style.display = 'block'
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' })
+}
+
+/* ════════════════════════════
+   EMPRESA — TAGS HABILIDADES
+════════════════════════════ */
+var empTags = []
+
+function initEmpTagInput() {
+  var inp = document.getElementById('empTagInput')
+  if(!inp || inp._empInit) return
+  inp._empInit = true
+  inp.addEventListener('keydown', function(e) {
+    if(e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      var val = this.value.trim().replace(/,+$/, '')
+      if(val && empTags.indexOf(val) === -1) { empTags.push(val); renderEmpTags() }
+      this.value = ''
+    }
+  })
+}
+
+function renderEmpTags() {
+  var cont = document.getElementById('empTagsContainer')
+  if(!cont) return
+  cont.innerHTML = empTags.map(function(t, i) {
+    return '<span class="skill-tag">'+t+' <button type="button" onclick="removeEmpTag('+i+')">×</button></span>'
+  }).join('')
+}
+
+function removeEmpTag(i) { empTags.splice(i, 1); renderEmpTags() }
+
+/* ════════════════════════════
+   EMPRESA — UI HELPERS
+════════════════════════════ */
+function toggleConfidencial(val) {
+  document.getElementById('empConfidencialNota').style.display = val === 'si' ? 'block' : 'none'
+}
+
+function toggleSueldoEmp(checked) {
+  document.getElementById('empSueldo').disabled = checked
+  document.getElementById('empSueldo').style.opacity = checked ? '.4' : '1'
+  if(checked) document.getElementById('empSueldo').value = ''
+}
+
+function cambiarContactoEmp(val) {
+  document.getElementById('empContactoEmailWrap').style.display = val === 'email'    ? 'block' : 'none'
+  document.getElementById('empContactoWAWrap').style.display    = val === 'whatsapp' ? 'block' : 'none'
+}
+
+/* ════════════════════════════
+   EMPRESA — CÓDIGO POSTAL
+════════════════════════════ */
+var _lastCPEmp = ''
+async function buscarCPEmp(cp) {
+  cp = (cp||'').trim()
+  if(cp === _lastCPEmp || cp.length < 4) return
+  _lastCPEmp = cp
+  var fb = document.getElementById('empCPFeedback')
+  fb.textContent = 'Buscando...'; fb.style.display = 'block'; fb.style.color = '#2563eb'
+  try {
+    var res  = await fetch('https://api.zippopotam.us/ar/' + cp)
+    if(!res.ok){ fb.textContent = 'CP no encontrado.'; fb.style.color='#b91c1c'; return }
+    var data = await res.json(); var pl = data.places || []
+    if(!pl.length){ fb.textContent = 'Sin resultados.'; fb.style.color='#b91c1c'; return }
+    document.getElementById('empProvincia').value = pl[0]['state']
+    document.getElementById('empLocalidad').value  = pl[0]['place name']
+    fb.textContent = '✓ Localidad cargada'; fb.style.color = '#166534'
+    setTimeout(function(){ fb.style.display='none' }, 3000)
+  } catch(e) { fb.textContent = 'Error de red.'; fb.style.color='#b91c1c' }
+}
+
+/* ════════════════════════════
+   GUARDAR EMPRESA
+════════════════════════════ */
+async function guardarEmpresa() {
+  var btn = document.getElementById('btnGuardarEmpresa')
+  try {
+    document.getElementById('msgEmpresa').className = 'msg'; document.getElementById('msgEmpresa').style.display = 'none'
+
+    var nombre     = document.getElementById('empNombre').value.trim()
+    var rubro      = document.getElementById('empRubro').value
+    var localidad  = document.getElementById('empLocalidad').value.trim()
+    var titulo     = document.getElementById('empTituloOferta').value.trim()
+    var descripcion= document.getElementById('empDescripcion').value.trim()
+    var jornada    = document.getElementById('empJornada').value
+    var confidencial = document.querySelector('input[name="empConfidencial"]:checked')
+    var esConf     = confidencial && confidencial.value === 'si'
+
+    if(!nombre)      return mostrarMsgEmpresa('err','Ingresá el nombre de la empresa o comercio.')
+    if(!rubro)       return mostrarMsgEmpresa('err','Seleccioná el rubro.')
+    if(!titulo)      return mostrarMsgEmpresa('err','Ingresá el título de la oferta / puesto.')
+    if(!descripcion) return mostrarMsgEmpresa('err','Completá la descripción del puesto.')
+    if(!localidad)   return mostrarMsgEmpresa('err','Ingresá la ciudad.')
+    if(!jornada)     return mostrarMsgEmpresa('err','Seleccioná el tipo de jornada.')
+
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publicando...'
+
+    var provincia  = document.getElementById('empProvincia').value || null
+    var barrio     = document.getElementById('empBarrio').value.trim()
+    var cp         = document.getElementById('empCP').value.trim() || null
+    var vacantes   = document.getElementById('empVacantes').value || '1'
+    var modalidad  = document.querySelector('input[name="empModalidad"]:checked')
+    var modalidadVal = modalidad ? modalidad.value : 'Presencial'
+    var nivelEst   = document.getElementById('empNivelEst').value
+    var experiencia= document.getElementById('empExperiencia').value
+    var residencia = document.getElementById('empResidencia').value
+    var movilidad  = document.getElementById('empMovilidad').value
+    var horario    = document.getElementById('empHorario').value.trim()
+    var sueldo     = document.getElementById('empSueldo').value
+    var convenir   = document.getElementById('empSueldoConvenir').checked
+    var beneficios = Array.from(document.querySelectorAll('input[name="empBeneficio"]:checked')).map(function(c){return c.value})
+    var contactoTipo = document.querySelector('input[name="empContactoTipo"]:checked')
+    var ctTipo     = contactoTipo ? contactoTipo.value : 'plataforma'
+    var ctEmail    = document.getElementById('empContactoEmail').value.trim()
+    var ctWA       = document.getElementById('empContactoWA').value.trim()
+
+    // Descripción completa
+    var descFull = descripcion
+    if(barrio)       descFull += '\n📍 Zona: ' + barrio
+    descFull += '\n🏢 Modalidad: ' + modalidadVal
+    descFull += '\n\n📋 Requisitos:\n'
+    descFull += '• Estudios: ' + nivelEst
+    descFull += '\n• Experiencia: ' + experiencia
+    if(empTags.length) descFull += '\n• Habilidades: ' + empTags.join(', ')
+    if(residencia === 'Sí') descFull += '\n• Residir en la zona: Obligatorio'
+    if(movilidad !== 'No')  descFull += '\n• Movilidad: ' + movilidad
+    descFull += '\n\n⏰ Jornada: ' + jornada
+    if(horario) descFull += ' · ' + horario
+    if(!convenir && sueldo) descFull += '\n💰 Remuneración: $' + parseInt(sueldo).toLocaleString('es-AR')
+    else                    descFull += '\n💰 Remuneración: A convenir'
+    if(beneficios.length)   descFull += '\n✅ Beneficios: ' + beneficios.join(', ')
+    descFull += '\n👥 Vacantes: ' + vacantes
+    if(ctTipo === 'email' && ctEmail)       descFull += '\n📧 Contacto: ' + ctEmail
+    else if(ctTipo === 'whatsapp' && ctWA)  descFull += '\n📱 WhatsApp: +549' + ctWA
+
+    // Nombre para mostrar según confidencialidad
+    var nombreDisplay = esConf ? ('Importante empresa del rubro ' + rubro) : nombre
+
+    // ── 1. Perfiles ──
+    var movil = ctTipo === 'whatsapp' ? ('+549' + ctWA) : null
+    var perfilPayload = {
+      tipo:             'empresa',
+      nombre_empresa:   nombre,
+      empresa_sector:   rubro,
+      empresa_descripcion: ctEmail || null,
+      mostrar_como:     esConf ? 'oculto' : 'empresa',
+      mostrar_telefono: ctTipo === 'whatsapp',
+      movil:            movil,
+      codigo_postal:    cp,
+      localidad:        localidad,
+      provincia:        provincia
+    }
+    var resP = await supa.from('perfiles').update(perfilPayload).eq('id', currentUser.id)
+    if(resP.error) throw new Error('Error en perfiles: ' + resP.error.message)
+
+    // ── 2. Servicios ──
+    var srvPayload = {
+      usuario_id:      currentUser.id,
+      categoria:       titulo,
+      titulo:          nombreDisplay + ' — ' + titulo,
+      descripcion:     descFull,
+      servicios_lista: empTags.join(', ') || null,
+      horarios:        jornada + (horario ? ' · ' + horario : ''),
+      localidad:       localidad,
+      provincia:       provincia,
+      activo:          true
+    }
+    var srvEx = await supa.from('servicios').select('id').eq('usuario_id', currentUser.id).maybeSingle()
+    var srvRes
+    if(srvEx.data) { srvRes = await supa.from('servicios').update(srvPayload).eq('id', srvEx.data.id) }
+    else           { srvRes = await supa.from('servicios').insert(srvPayload) }
+    if(srvRes.error) throw new Error('Error en servicios: ' + srvRes.error.message)
+
+    // ── 3. Foto (logo) ──
+    var fotoInput = document.getElementById('inputFoto')
+    if(fotoInput.files && fotoInput.files[0]) await subirFoto(fotoInput.files[0])
+
+    mostrarMsgEmpresa('ok', '✅ Oferta publicada. Redirigiendo...')
+    setTimeout(function(){ window.location.href = '/perfil.html' }, 1500)
+
+  } catch(e) {
+    console.error('guardarEmpresa:', e)
+    mostrarMsgEmpresa('err', '❌ ' + (e.message || 'Error inesperado.'))
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-bullhorn"></i> Publicar oferta de empleo'
+  }
+}
+
+function mostrarMsgEmpresa(tipo, msg) {
+  var el = document.getElementById('msgEmpresa')
+  el.textContent = msg; el.className = 'msg ' + tipo; el.style.display = 'block'
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' })
+}
+
+/* ════════════════════════════
+   ESPECIALIDADES POR PROFESIÓN
+════════════════════════════ */
+const PROFESIONES = {
+  'Médico/a':['Medicina General / Clínica Médica','Pediatría','Cardiología','Dermatología','Ginecología y Obstetricia','Traumatología y Ortopedia','Neurología','Psiquiatría','Oftalmología','Otorrinolaringología','Urología','Gastroenterología','Endocrinología','Neumología','Reumatología','Oncología','Cirugía General','Medicina del Trabajo','Infectología','Nefrología'],
+  'Odontólogo/a':['Odontología General','Ortodoncia','Endodoncia','Periodoncia','Cirugía Oral y Maxilofacial','Odontopediatría','Estética Dental','Implantología','Prótesis Dental'],
+  'Psicólogo/a':['Psicología Clínica Individual','Terapia de Pareja','Terapia Familiar','Psicología Infantil y Adolescente','Psicooncología','Neuropsicología','Orientación Vocacional','Psicología Laboral','Psicología Forense'],
+  'Kinesiólogo/a':['Kinesiología Traumatológica','Deportiva','Neurológica','Cardiorrespiratoria','Pediátrica','Rehabilitación postoperatoria','Piso Pelviano'],
+  'Fonoaudiólogo/a':['Trastornos del lenguaje','Pronunciación y dicción','Voz profesional','Deglución','Audiología','Estimulación temprana','TEA y neurodivergencias'],
+  'Nutricionista':['Nutrición Clínica','Deportiva','Infantil','Trastornos alimentarios (TCA)','Oncológica','Diabetes y metabolismo','Planes de alimentación'],
+  'Enfermero/a':['Cuidados domiciliarios','Curaciones y vendajes','Inyecciones y sueros','Cuidado de adultos mayores','Enfermería pediátrica','Postoperatorio','Cuidados paliativos'],
+  'Farmacéutico/a':['Farmacia magistral','Asesoramiento farmacológico','Dermofarmacia','Fitoterapia','Homeopatía'],
+  'Veterinario/a':['Pequeños animales (perros y gatos)','Grandes animales','Aves y exóticos','Cirugía veterinaria','Dermatología animal','Odontología veterinaria','Etología (comportamiento)'],
+  'Bioquímico/a':['Análisis clínicos','Bacteriología','Toxicología','Análisis de alimentos','Hematología'],
+  'Terapeuta Ocupacional':['Adultos','Pediatría','Salud mental','Geriatría','Neurología','Discapacidad'],
+  'Obstétrica / Partera':['Control de embarazo','Parto humanizado','Puerperio','Lactancia','Planificación familiar'],
+  'Abogado/a':['Derecho Penal','Derecho Civil','Derecho Laboral','Derecho de Familia','Derecho Comercial','Derecho Administrativo','Derecho Tributario / Fiscal','Derecho Inmobiliario','Derecho de Tránsito','Derecho Previsional / Jubilaciones','Derecho del Consumidor','Derecho Societario','Derecho Migratorio','Violencia de Género','Mediación y Arbitraje'],
+  'Escribano/a':['Escrituras de compraventa','Sucesiones','Poderes notariales','Constitución de sociedades','Hipotecas y garantías','Testamentos','Fideicomisos'],
+  'Procurador/a':['Gestión judicial','Presentaciones procesales','Notificaciones','Mediación prejudicial'],
+  'Contador/a Público':['Impuestos y AFIP','Auditoría','Contabilidad de empresas','Liquidación de sueldos','Monotributo y autónomos','Balances y estados contables','Consultoría financiera','Comercio exterior','Pymes y emprendedores'],
+  'Lic. en Administración':['Consultoría empresarial','Recursos humanos','Gestión de proyectos','Finanzas corporativas','Logística','Marketing','Gestión pública'],
+  'Economista':['Análisis económico','Política económica','Finanzas','Econometría','Consultoría empresarial'],
+  'Actuario/a':['Seguros y riesgo','Pensiones y previsión social','Finanzas actuariales','Estadística aplicada'],
+  'Arquitecto/a':['Diseño residencial','Proyectos comerciales e industriales','Remodelaciones','Paisajismo','Diseño de interiores','Dirección de obra','Permisos y habilitaciones','Urbanismo','Certificados y planos'],
+  'Ingeniero/a Civil':['Cálculo estructural','Obras viales','Hidráulica y saneamiento','Geotecnia','Inspección de obras','Pericias y tasaciones'],
+  'Ingeniero/a Eléctrico/a':['Instalaciones industriales','Automatización','Telecomunicaciones','Energías renovables','Domótica','Seguridad eléctrica'],
+  'Ingeniero/a Mecánico/a':['Diseño mecánico','Mantenimiento industrial','Termofluidos','Manufactura','Seguridad industrial','Pericias mecánicas'],
+  'Ingeniero/a en Sistemas':['Desarrollo de software','Aplicaciones web','Apps móviles','Bases de datos','Ciberseguridad','Cloud computing','Inteligencia artificial','Redes y telecomunicaciones'],
+  'Ingeniero/a Agrónomo/a':['Producción vegetal','Producción animal','Sanidad vegetal','Riego y suelos','Agroecología','Feedlot','Asesoramiento agropecuario'],
+  'Agrimensor/a':['Mensura y subdivisión','Planos de obra','Catastro','Relevamiento topográfico','Loteos','Tasaciones'],
+  'Profesor/a':['Inglés','Francés','Portugués','Italiano','Alemán','Matemática','Física','Química','Biología','Historia','Lengua y Literatura','Música','Arte y Plástica','Educación Física','Apoyo escolar general','Nivel inicial','Nivel primario','Nivel secundario','Universitario'],
+  'Traductor/a / Intérprete':['Inglés','Portugués','Francés','Italiano','Alemán','Japonés','Chino','Traducción técnica','Traducción legal / jurídica','Traducción médica','Traducción literaria','Interpretación simultánea','Traducción jurada','Subtitulado'],
+  'Psicopedagogo/a':['Evaluación diagnóstica','Dificultades de aprendizaje','Dislexia y disgrafía','TEA (autismo)','TDAH','Orientación vocacional','Estimulación temprana'],
+  'Trabajador/a Social':['Atención de familias','Niñez y adolescencia','Adultos mayores','Violencia de género','Discapacidad','Políticas y gestión social','Pericias sociales'],
+  'Acompañante Terapéutico/a':['Salud mental','Adultos mayores','Adicciones','Niñez y adolescencia','Discapacidad','Internación domiciliaria'],
+  'Comunicador/a Social / Periodista':['Redacción periodística','Comunicación institucional','Community manager','Relaciones públicas','Producción audiovisual','Locutor/a'],
+  'Diseñador/a Gráfico/a':['Identidad corporativa / Branding','Diseño editorial','Diseño web y UX/UI','Packaging','Redes sociales','Ilustración digital','Motion graphics'],
+  'Diseñador/a de Interiores':['Diseño residencial','Diseño comercial','Home staging','Interiorismo sustentable','Render 3D','Reformas y remodelaciones'],
+  'Diseñador/a Industrial':['Diseño de productos','Ergonomía','Prototipado','Envases y packaging','Diseño sustentable'],
+  'Analista en Sistemas':['Soporte técnico','Redes e infraestructura','Bases de datos','Programación','Ciberseguridad','ERP y sistemas de gestión'],
+  'Programador/a':['Desarrollo web (Frontend)','Desarrollo web (Backend)','Apps móviles (iOS/Android)','Python / Data Science','JavaScript / Node.js','PHP / Laravel','Java / Spring','Bases de datos SQL/NoSQL','DevOps y Cloud'],
+  'Lic. en Sistemas':['Gestión de proyectos TI','Arquitectura de software','Consultoría tecnológica','Transformación digital'],
+  'Técnico/a Superior':['Descripción libre — escribilo en la presentación'],
+  'Otra profesión universitaria':['Descripción libre — escribilo en la presentación']
+}
+
+function cargarEspecialidades() {
+  var prof = document.getElementById('proProfesion').value
+  var cont = document.getElementById('proEspecContainer')
+  if(!prof || !PROFESIONES[prof]) {
+    cont.innerHTML = '<p class="subs-placeholder">Seleccioná primero la profesión</p>'
+    return
+  }
+  var html = '<div class="checks-grid">'
+  PROFESIONES[prof].forEach(function(esp) {
+    html += '<label class="check-item"><input type="checkbox" name="proEspec" value="'+esp+'"> <span>'+esp+'</span></label>'
+  })
+  html += '</div>'
+  cont.innerHTML = html
+}
+
+/* ════════════════════════════
+   CÓDIGO POSTAL PROFESIONAL
+════════════════════════════ */
+var _lastCPPro = ''
+async function buscarCPPro(cp) {
+  cp = (cp||'').trim()
+  if(cp === _lastCPPro || cp.length < 4) return
+  _lastCPPro = cp
+  var fb = document.getElementById('proCPFeedback')
+  fb.textContent = 'Buscando...'; fb.style.display = 'block'; fb.style.color = '#2563eb'
+  try {
+    var res  = await fetch('https://api.zippopotam.us/ar/' + cp)
+    if(!res.ok){ fb.textContent = 'CP no encontrado. Escribí la ciudad manualmente.'; fb.style.color='#b91c1c'; return }
+    var data = await res.json()
+    var pl   = data.places || []
+    if(!pl.length){ fb.textContent = 'Sin resultados.'; fb.style.color='#b91c1c'; return }
+    document.getElementById('proProvincia').value = pl[0]['state']
+    document.getElementById('proLocalidad').value  = pl[0]['place name']
+    fb.textContent = '✓ Localidad cargada'; fb.style.color = '#166534'
+    setTimeout(function(){ fb.style.display='none' }, 3000)
+  } catch(e) { fb.textContent = 'Error de red.'; fb.style.color='#b91c1c' }
+}
+
+function setHorarioPro(val) { document.getElementById('proHorario').value = val }
+
+/* ════════════════════════════
+   GUARDAR PROFESIONAL
+════════════════════════════ */
+async function guardarProfesional() {
+  var btn = document.getElementById('btnGuardarPro')
+  try {
+    document.getElementById('msgProfesional').className = 'msg'
+    document.getElementById('msgProfesional').style.display = 'none'
+
+    var profesion   = document.getElementById('proProfesion').value
+    var localidad   = document.getElementById('proLocalidad').value.trim()
+    var telefono    = document.getElementById('proTelefono').value.trim()
+    var descripcion = document.getElementById('proDescripcion').value.trim()
+    var jurisdiccion= document.getElementById('proJurisdiccion').value.trim()
+
+    if(!profesion)   return mostrarMsgPro('err','Seleccioná tu profesión.')
+    if(!localidad)   return mostrarMsgPro('err','Ingresá tu ciudad o código postal.')
+    if(!telefono)    return mostrarMsgPro('err','Ingresá tu número de WhatsApp.')
+    if(!descripcion) return mostrarMsgPro('err','Escribí una presentación sobre vos.')
+
+    btn.disabled = true
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
+
+    // Especialidades
+    var especialidades = Array.from(document.querySelectorAll('#proEspecContainer input[type=checkbox]:checked')).map(function(c){return c.value})
+
+    // Datos profesionales
+    var nomConsultorio = document.getElementById('proNombreConsultorio').value.trim()
+    var matricula      = document.getElementById('proMatricula').value.trim()
+    var presencial     = document.getElementById('proPresencial').checked
+    var aDomicilio     = document.getElementById('proADomicilio').checked
+    var online         = document.getElementById('proOnline').checked
+    var cp             = document.getElementById('proCP').value.trim() || null
+    var provincia      = document.getElementById('proProvincia').value.trim() || null
+    var direccion      = document.getElementById('proDireccion').value.trim() || null
+    var horario        = document.getElementById('proHorario').value.trim()
+    var email          = document.getElementById('proEmail').value.trim()
+    var web            = document.getElementById('proWeb').value.trim()
+    var asesoramiento  = document.getElementById('proAsesoramiento').checked
+    var mcRadio        = document.querySelector('input[name="proMostrarComo"]:checked')
+    var mostrarComo    = mcRadio ? mcRadio.value : 'personal'
+    var mostrarTel     = document.getElementById('proMostrarTel').checked
+
+    // Idiomas
+    var idiomas = []
+    if(document.getElementById('idEspanol').checked)   idiomas.push('Español')
+    if(document.getElementById('idIngles').checked)    idiomas.push('Inglés')
+    if(document.getElementById('idFrances').checked)   idiomas.push('Francés')
+    if(document.getElementById('idPortugues').checked) idiomas.push('Portugués')
+    if(document.getElementById('idItaliano').checked)  idiomas.push('Italiano')
+    if(document.getElementById('idAleman').checked)    idiomas.push('Alemán')
+    var idOtro = document.getElementById('idOtro').value.trim()
+    if(idOtro) idiomas.push(idOtro)
+
+    // Modalidades
+    var modalidades = []
+    if(presencial)  modalidades.push('Presencial')
+    if(aDomicilio)  modalidades.push('A domicilio')
+    if(online)      modalidades.push('Online / Videollamada')
+
+    // Descripción completa para servicios
+    var descFull = descripcion
+    if(modalidades.length)      descFull += '\n🏥 Modalidad: ' + modalidades.join(' · ')
+    if(jurisdiccion)            descFull += '\n📍 Jurisdicción: ' + jurisdiccion
+    if(matricula)               descFull += '\n📋 Matrícula: ' + matricula
+    if(email)                   descFull += '\n📧 Email: ' + email
+    if(web)                     descFull += '\n🌐 Web: ' + web
+    if(idiomas.length > 1)      descFull += '\n🗣️ Idiomas: ' + idiomas.join(', ')
+    if(asesoramiento)           descFull += '\n✅ Primera consulta sin costo'
+    if(horario)                 descFull += '\n⏰ Horarios: ' + horario
+
+    // ── 1. Perfiles ──
+    var perfilPayload = {
+      tipo:                    'profesional',
+      profesion_universitaria: profesion,
+      movil:                   '+549' + telefono,
+      nombre_empresa:          nomConsultorio || null,
+      mostrar_como:            mostrarComo,
+      mostrar_telefono:        mostrarTel,
+      codigo_postal:           cp,
+      localidad:               localidad,
+      provincia:               provincia,
+      direccion:               direccion,
+      empresa_sector:          especialidades.join(', ') || null,
+      empresa_descripcion:     descripcion
+    }
+    var res = await supa.from('perfiles').update(perfilPayload).eq('id', currentUser.id)
+    if(res.error) throw new Error('Error en perfiles: ' + res.error.message)
+
+    // ── 2. Servicios ──
+    var srvPayload = {
+      usuario_id:      currentUser.id,
+      categoria:       profesion,
+      titulo:          nomConsultorio || profesion,
+      descripcion:     descFull,
+      servicios_lista: especialidades.join(', ') || null,
+      horarios:        horario || null,
+      localidad:       localidad,
+      provincia:       provincia,
+      activo:          true
+    }
+    var srvEx = await supa.from('servicios').select('id').eq('usuario_id', currentUser.id).maybeSingle()
+    var srvRes
+    if(srvEx.data) { srvRes = await supa.from('servicios').update(srvPayload).eq('id', srvEx.data.id) }
+    else           { srvRes = await supa.from('servicios').insert(srvPayload) }
+    if(srvRes.error) throw new Error('Error en servicios: ' + srvRes.error.message)
+
+    // ── 3. Foto ──
+    var fotoInput = document.getElementById('inputFoto')
+    if(fotoInput.files && fotoInput.files[0]) await subirFoto(fotoInput.files[0])
+
+    mostrarMsgPro('ok', '✅ Perfil guardado. Redirigiendo...')
+    setTimeout(function(){ window.location.href = '/perfil.html' }, 1500)
+
+  } catch(e) {
+    console.error('guardarProfesional:', e)
+    mostrarMsgPro('err', '❌ ' + (e.message || 'Error inesperado.'))
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-save"></i> Guardar y publicar perfil'
+  }
+}
+
+function mostrarMsgPro(tipo, msg) {
+  var el = document.getElementById('msgProfesional')
+  el.textContent = msg; el.className = 'msg ' + tipo; el.style.display = 'block'
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' })
+}
+
+/* ════════════════════════════
+   EMPRENDIMIENTO — TAGS
+════════════════════════════ */
+var empTags2 = []
+function initEmpTagInput2() {
+  var inp = document.getElementById('empTagInput')
+  if(!inp || inp._initDone2) return
+  inp._initDone2 = true
+  inp.addEventListener('keydown', function(e) {
+    if((e.key === 'Enter' || e.key === ',') && inp.value.trim()) {
+      e.preventDefault()
+      var v = inp.value.trim().replace(/,$/,'')
+      if(v && !empTags2.includes(v)) { empTags2.push(v); renderEmpTags2() }
+      inp.value = ''
+    } else if(e.key === 'Backspace' && !inp.value && empTags2.length) {
+      empTags2.pop(); renderEmpTags2()
+    }
+  })
+}
+function renderEmpTags2() {
+  var c = document.getElementById('empTagsContainer')
+  if(!c) return
+  c.innerHTML = empTags2.map(function(t, i) {
+    return '<span class="skill-tag">'+t+' <button type="button" onclick="removeEmpTag2('+i+')" style="background:none;border:none;cursor:pointer;font-size:12px;padding:0;margin-left:4px;color:#64748b;">×</button></span>'
+  }).join('')
+}
+function removeEmpTag2(i) { empTags2.splice(i,1); renderEmpTags2() }
+
+/* ════════════════════════════
+   EMPRENDIMIENTO — LOCAL TOGGLE
+════════════════════════════ */
+function toggleEmpLocal(val) {
+  document.getElementById('empShowroomWrap').style.display = val === 'no' ? 'block' : 'none'
+}
+
+/* ════════════════════════════
+   GUARDAR EMPRENDIMIENTO
+════════════════════════════ */
+async function guardarEmprendimiento() {
+  var btn = document.getElementById('btnGuardarEmprendimiento')
+  try {
+    document.getElementById('msgEmprendimiento').style.display = 'none'
+
+    // ── Recoger valores ──
+    var nombreFund = document.getElementById('empNombreFundador').value.trim()
+    var apellFund  = document.getElementById('empApellidoFundador').value.trim()
+    var rol        = document.getElementById('empRolFundador').value
+    var telFund    = document.getElementById('empTelFundador').value.trim().replace(/\D/g,'')
+    var email      = document.getElementById('empEmailFundador').value.trim()
+    var marca      = document.getElementById('empNombreMarca').value.trim()
+    var eslogan    = document.getElementById('empEslogan').value.trim()
+    var historia   = document.getElementById('empHistoria').value.trim()
+    var rubroMain  = document.getElementById('empRubroMain').value
+    var produccion = document.querySelector('input[name="empProduccion"]:checked')?.value || ''
+    var localidad  = document.getElementById('empLocalidadEmp').value.trim()
+    var provincia  = document.getElementById('empProvinciaEmp').value
+    var direccion  = document.getElementById('empDireccion').value.trim()
+    var instagram  = document.getElementById('empInstagram').value.trim()
+    var tiktok     = document.getElementById('empTiktok').value.trim()
+    var waComercial= document.getElementById('empWAComercial').value.trim().replace(/\D/g,'')
+    var sitioWeb   = document.getElementById('empSitioWeb').value.trim()
+    var tieneLocal = document.querySelector('input[name="empLocal"]:checked')?.value || 'no'
+    var tieneShow  = document.querySelector('input[name="empShowroom"]:checked')?.value || 'no'
+
+    var canales = Array.from(document.querySelectorAll('input[name="empCanal"]:checked')).map(function(c){return c.value})
+    var envios  = Array.from(document.querySelectorAll('input[name="empEnvio"]:checked')).map(function(c){return c.value})
+
+    // ── Validaciones ──
+    if(!nombreFund) return mostrarMsgEmp('err', '❌ Completá tu nombre.')
+    if(!marca)      return mostrarMsgEmp('err', '❌ Completá el nombre del emprendimiento.')
+    if(!historia)   return mostrarMsgEmp('err', '❌ Agregá una descripción del emprendimiento.')
+    if(!rubroMain)  return mostrarMsgEmp('err', '❌ Seleccioná el rubro principal.')
+    if(!provincia)  return mostrarMsgEmp('err', '❌ Seleccioná la provincia.')
+    if(!localidad)  return mostrarMsgEmp('err', '❌ Ingresá la localidad.')
+
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
+
+    // ── Armar descripción ──
+    var descFull = historia
+    if(produccion)  descFull += '\n\n🏭 Producción: ' + produccion
+    var localInfo = tieneLocal === 'si' ? 'Sí' : ('No' + (tieneShow === 'si' ? ' · Showroom: Sí' : ''))
+    descFull += '\n🏪 Local físico: ' + localInfo
+    if(direccion)   descFull += ' · ' + direccion
+    if(email)       descFull += '\n📧 Email: ' + email
+    if(canales.length)descFull += '\n🛒 Canales: ' + canales.join(', ')
+    if(envios.length) descFull += '\n📦 Envíos: ' + envios.join(', ')
+    if(tiktok)      descFull += '\n📱 TikTok: ' + tiktok
+    if(sitioWeb)    descFull += '\n🌐 Web: ' + sitioWeb
+
+    var instagramNorm = instagram
+    if(instagram && !instagram.startsWith('http') && !instagram.startsWith('@')) instagramNorm = '@' + instagram
+
+    // ── 1. Perfiles ──
+    var perfilPayload = {
+      tipo:                    'emprendimiento',
+      nombre_empresa:          marca,
+      empresa_sector:          rubroMain,
+      empresa_descripcion:     eslogan || null,
+      profesion_universitaria: rol || null,
+      mostrar_como:            'emprendimiento',
+      movil:                   telFund ? '+549' + telFund : null,
+      mostrar_telefono:        !!telFund,
+      localidad:               localidad,
+      provincia:               provincia,
+      direccion:               direccion || null,
+      instagram:               instagramNorm || null
+    }
+    var resP = await supa.from('perfiles').update(perfilPayload).eq('id', currentUser.id)
+    if(resP.error) throw new Error('Error en perfiles: ' + resP.error.message)
+
+    // ── 2. Servicios ──
+    var srvPayload = {
+      usuario_id:      currentUser.id,
+      categoria:       rubroMain,
+      titulo:          marca + (eslogan ? ' — ' + eslogan : ''),
+      descripcion:     descFull,
+      servicios_lista: empTags2.join(', ') || null,
+      horarios:        [canales.join(', '), envios.join(', ')].filter(Boolean).join(' · ') || null,
+      localidad:       localidad,
+      provincia:       provincia,
+      activo:          true
+    }
+    // WhatsApp comercial prioritario si se cargó, sino el de contacto
+    var waFinal = waComercial || telFund
+    if(waFinal) srvPayload.descripcion += '\n💬 WhatsApp: +549' + waFinal
+
+    var srvEx = await supa.from('servicios').select('id').eq('usuario_id', currentUser.id).maybeSingle()
+    var srvRes
+    if(srvEx.data) { srvRes = await supa.from('servicios').update(srvPayload).eq('id', srvEx.data.id) }
+    else           { srvRes = await supa.from('servicios').insert(srvPayload) }
+    if(srvRes.error) throw new Error('Error en servicios: ' + srvRes.error.message)
+
+    // ── 3. Foto ──
+    var fotoInput = document.getElementById('inputFoto')
+    if(fotoInput.files && fotoInput.files[0]) await subirFoto(fotoInput.files[0])
+
+    mostrarMsgEmp('ok', '✅ Emprendimiento publicado. Redirigiendo...')
+    setTimeout(function(){ window.location.href = '/perfil.html' }, 1500)
+
+  } catch(e) {
+    console.error('guardarEmprendimiento:', e)
+    mostrarMsgEmp('err', '❌ ' + (e.message || 'Error inesperado.'))
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Publicar emprendimiento'
+  }
+}
+
+function mostrarMsgEmp(tipo, msg) {
+  var el = document.getElementById('msgEmprendimiento')
+  el.textContent = msg; el.className = 'msg ' + tipo; el.style.display = 'block'
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' })
+}
+
+/* ══════════════════════════════════════════════
+   TRABAJOS REALIZADOS — PORTFOLIO
+══════════════════════════════════════════════ */
+var _portPlanNivel  = 0
+var _portItems      = []
+var _portMax        = 1
+var _portUserId     = null
+var _portDias       = 0
+var _portFechaStr   = ''
+var _portPlanLabel  = ''
+
+async function cargarSeccionPortfolio(planNivel, userId) {
+  var cont = document.getElementById('seccionPortfolio')
+  if(!cont) return
+  if(!planNivel || planNivel === 0) { cont.style.display = 'none'; return }
+
+  _portPlanNivel = planNivel
+  _portUserId    = userId
+  _portMax       = planNivel >= 3 ? 5 : planNivel >= 2 ? 2 : 1
+  _portPlanLabel = planNivel === 1 ? 'Básico' : planNivel === 2 ? 'Estándar' : 'Pro'
+
+  // Buscar solicitud aprobada para calcular días restantes
+  var solRes = await supa
+    .from('solicitudes_portfolio')
+    .select('created_at')
+    .eq('usuario_id', userId)
+    .eq('estado', 'aprobado')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  _portDias     = 30
+  _portFechaStr = ''
+  if(solRes.data) {
+    var inicio    = new Date(solRes.data.created_at)
+    var fechaVenc = new Date(inicio)
+    fechaVenc.setDate(fechaVenc.getDate() + 30)
+    var ahora = new Date()
+    _portDias     = Math.max(0, Math.ceil((fechaVenc - ahora) / (1000 * 60 * 60 * 24)))
+    _portFechaStr = fechaVenc.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  }
+
+  // Cargar items existentes
+  var itmRes = await supa
+    .from('portfolio')
+    .select('id, titulo, descripcion, foto1, foto2, foto3, created_at')
+    .eq('usuario_id', userId)
+    .order('created_at', { ascending: false })
+
+  _portItems = itmRes.data || []
+  cont.style.display = 'block'
+  _renderPortfolio()
+}
+
+function _renderPortfolio() {
+  var cont = document.getElementById('seccionPortfolio')
+  if(!cont) return
+
+  var puedeSubir  = _portDias > 0 && _portItems.length < _portMax
+  var colorDias   = _portDias > 10 ? '#166534' : _portDias > 3 ? '#92400e' : '#991b1b'
+  var bgDias      = _portDias > 10 ? '#f0fdf4' : _portDias > 3 ? '#fffbeb' : '#fef2f2'
+  var bdDias      = _portDias > 10 ? '#bbf7d0' : _portDias > 3 ? '#fde68a' : '#fecaca'
+
+  // Items existentes
+  var itemsHTML = _portItems.map(function(item, idx) {
+    var fotos = [item.foto1, item.foto2, item.foto3].filter(Boolean)
+    return '<div style="border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:10px;background:#f8fafc;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+        '<strong style="font-size:14px;color:#1e293b;">' + (item.titulo || 'Trabajo ' + (idx + 1)) + '</strong>' +
+        '<button onclick="window.eliminarTrabajo(\'' + item.id + '\')" style="background:none;border:1.5px solid #fecaca;border-radius:7px;color:#dc2626;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Eliminar">' +
+          '<i class="fa-solid fa-trash" style="font-size:11px;"></i>' +
+        '</button>' +
+      '</div>' +
+      (item.descripcion ? '<p style="font-size:12px;color:#64748b;margin:0 0 8px;">' + item.descripcion + '</p>' : '') +
+      (fotos.length ? '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+        fotos.map(function(f) { return '<img src="' + f + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;">'; }).join('') +
+      '</div>' : '') +
+    '</div>'
+  }).join('')
+
+  // Formulario de nuevo trabajo
+  var addForm = ''
+  if(puedeSubir) {
+    var fotoInputs = [1,2,3].map(function(n) {
+      return '<label for="portFoto' + n + '" style="width:90px;height:90px;border:2px dashed #cbd5e1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#fff;transition:border-color .15s;position:relative;overflow:hidden;" id="labelPortFoto' + n + '" onmouseover="this.style.borderColor=\'#2563eb\'" onmouseout="this.style.borderColor=\'#cbd5e1\'">' +
+        '<div id="previewPortFoto' + n + '" style="display:none;position:absolute;inset:0;"><img id="imgPortFoto' + n + '" style="width:100%;height:100%;object-fit:cover;"></div>' +
+        '<div id="iconPortFoto' + n + '" style="text-align:center;">' +
+          '<i class="fa-solid fa-camera" style="color:#94a3b8;font-size:20px;"></i>' +
+          '<span style="font-size:10px;color:#94a3b8;display:block;margin-top:4px;">Foto ' + n + (n === 1 ? ' *' : '') + '</span>' +
+        '</div>' +
+        '<input type="file" id="portFoto' + n + '" accept="image/*" style="display:none" onchange="window.previewFotoPort(' + n + ',this)">' +
+      '</label>'
+    }).join('')
+
+    addForm =
+      '<div id="formNuevoTrabajo" style="border:2px dashed #cbd5e1;border-radius:12px;padding:16px;background:#f8fafc;margin-top:10px;">' +
+        '<p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#475569;display:flex;align-items:center;gap:6px;">' +
+          '<i class="fa-solid fa-plus" style="color:#2563eb;"></i> Agregar trabajo realizado' +
+        '</p>' +
+        '<label class="lbl">Título del trabajo *</label>' +
+        '<input type="text" id="portTitulo" placeholder="Ej: Instalación eléctrica en galpón">' +
+        '<label class="lbl" style="margin-top:10px;">Descripción <span style="font-size:11px;color:#94a3b8;">(opcional)</span></label>' +
+        '<textarea id="portDesc" rows="2" placeholder="Contá qué hiciste, materiales, duración..." style="min-height:60px;"></textarea>' +
+        '<label class="lbl" style="margin-top:10px;">Fotos <span style="font-size:11px;color:#94a3b8;">(hasta 3 · la primera es obligatoria)</span></label>' +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">' + fotoInputs + '</div>' +
+        '<div id="msgPortfolio" style="min-height:4px;margin-top:8px;"></div>' +
+        '<button onclick="window.guardarTrabajo()" id="btnGuardarTrabajo" style="margin-top:12px;width:100%;padding:12px;background:#2563eb;color:white;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;">' +
+          '<i class="fa-solid fa-cloud-arrow-up"></i> Guardar trabajo' +
+        '</button>' +
+      '</div>'
+  } else if(_portDias === 0) {
+    addForm = '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 14px;font-size:13px;color:#991b1b;margin-top:10px;">' +
+      '<i class="fa-solid fa-clock"></i> El período de 30 días venció. Contactanos para renovar tu plan.' +
+    '</div>'
+  } else {
+    addForm = '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px 14px;font-size:13px;color:#166534;margin-top:10px;">' +
+      '<i class="fa-solid fa-check-circle"></i> Llegaste al máximo de ' + _portMax + ' trabajo' + (_portMax > 1 ? 's' : '') + ' de tu plan.' +
+    '</div>'
+  }
+
+  cont.innerHTML =
+    '<div class="seccion" style="margin-top:16px;">' +
+      '<h3 style="display:flex;align-items:center;gap:8px;">' +
+        '<i class="fa-solid fa-images" style="color:#f97316;"></i> Trabajos Realizados' +
+        '<span style="margin-left:auto;font-size:11px;font-weight:600;background:#ffedd5;color:#ea580c;padding:2px 8px;border-radius:20px;white-space:nowrap;">Plan ' + _portPlanLabel + '</span>' +
+      '</h3>' +
+      '<div style="background:' + bgDias + ';border:1px solid ' + bdDias + ';border-radius:8px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+        '<i class="fa-solid fa-calendar-days" style="color:' + colorDias + ';flex-shrink:0;"></i>' +
+        '<span style="font-size:13px;color:' + colorDias + ';font-weight:600;">' +
+          (_portDias > 0
+            ? _portDias + ' día' + (_portDias !== 1 ? 's' : '') + ' restante' + (_portDias !== 1 ? 's' : '') + ' para subir' + (_portFechaStr ? ' · Vence el ' + _portFechaStr : '')
+            : 'El período de 30 días venció') +
+        '</span>' +
+        '<span style="margin-left:auto;font-size:12px;color:#64748b;">' + _portItems.length + '/' + _portMax + ' trabajo' + (_portMax > 1 ? 's' : '') + '</span>' +
+      '</div>' +
+      itemsHTML +
+      addForm +
+    '</div>'
+}
+
+window.previewFotoPort = function(n, input) {
+  if(!input.files[0]) return
+  var reader = new FileReader()
+  reader.onload = function(e) {
+    var img = document.getElementById('imgPortFoto' + n)
+    var prev = document.getElementById('previewPortFoto' + n)
+    var ico  = document.getElementById('iconPortFoto' + n)
+    if(img)  img.src = e.target.result
+    if(prev) prev.style.display = 'block'
+    if(ico)  ico.style.display  = 'none'
+  }
+  reader.readAsDataURL(input.files[0])
+}
+
+window.guardarTrabajo = async function() {
+  var btn   = document.getElementById('btnGuardarTrabajo')
+  var msgEl = document.getElementById('msgPortfolio')
+  var titulo = (document.getElementById('portTitulo')?.value || '').trim()
+  var desc   = (document.getElementById('portDesc')?.value   || '').trim()
+
+  if(!titulo) {
+    msgEl.innerHTML = '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:7px;padding:8px 10px;font-size:12px;color:#991b1b;margin-top:4px;">El título es obligatorio.</div>'
+    return
+  }
+  var foto1Input = document.getElementById('portFoto1')
+  if(!foto1Input?.files[0]) {
+    msgEl.innerHTML = '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:7px;padding:8px 10px;font-size:12px;color:#991b1b;margin-top:4px;">Agregá al menos una foto (Foto 1).</div>'
+    return
+  }
+
+  btn.disabled = true
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Subiendo fotos...'
+  msgEl.innerHTML = ''
+
+  // Subir cada foto al Storage
+  var urls = [null, null, null]
+  for(var i = 1; i <= 3; i++) {
+    var inp = document.getElementById('portFoto' + i)
+    if(inp && inp.files[0]) {
+      var file = inp.files[0]
+      var ext  = file.name.split('.').pop().toLowerCase()
+      var path = _portUserId + '/' + Date.now() + '_f' + i + '.' + ext
+      var upRes = await supa.storage.from('trabajos').upload(path, file, { upsert: true })
+      if(upRes.error) {
+        btn.disabled = false
+        btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Guardar trabajo'
+        msgEl.innerHTML = '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:7px;padding:8px 10px;font-size:12px;color:#991b1b;margin-top:4px;">Error subiendo foto ' + i + ': ' + upRes.error.message + '</div>'
+        return
+      }
+      var pubRes = supa.storage.from('trabajos').getPublicUrl(path)
+      urls[i - 1] = pubRes.data.publicUrl
+    }
+  }
+
+  // Insertar en tabla portfolio
+  var insRes = await supa.from('portfolio').insert({
+    usuario_id:  _portUserId,
+    titulo:      titulo,
+    descripcion: desc || null,
+    foto1:       urls[0] || null,
+    foto2:       urls[1] || null,
+    foto3:       urls[2] || null
+  })
+
+  if(insRes.error) {
+    btn.disabled = false
+    btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Guardar trabajo'
+    msgEl.innerHTML = '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:7px;padding:8px 10px;font-size:12px;color:#991b1b;margin-top:4px;">Error guardando: ' + insRes.error.message + '</div>'
+    return
+  }
+
+  // Refrescar sección completa
+  await cargarSeccionPortfolio(_portPlanNivel, _portUserId)
+}
+
+window.eliminarTrabajo = async function(id) {
+  if(!confirm('¿Eliminar este trabajo realizado?\nLas fotos también serán removidas.')) return
+  await supa.from('portfolio').delete().eq('id', id).eq('usuario_id', _portUserId)
+  await cargarSeccionPortfolio(_portPlanNivel, _portUserId)
+}
+
+/* ════════════════════════════
    INIT: CARGAR PERFIL EXISTENTE
 ════════════════════════════ */
 async function init() {
@@ -875,7 +2892,7 @@ async function init() {
   currentUser = session.user
 
   var perfilRes = await supa.from('perfiles')
-    .select('tipo,profesion_universitaria,empresa_sector,empresa_descripcion,movil,direccion,codigo_postal,localidad,provincia,nombre_empresa,mostrar_como,mostrar_telefono,foto')
+    .select('tipo,profesion_universitaria,empresa_sector,empresa_descripcion,movil,direccion,codigo_postal,localidad,provincia,nombre_empresa,mostrar_como,mostrar_telefono,foto,instagram,plan_nivel')
     .eq('id', currentUser.id)
     .maybeSingle()
 
@@ -895,31 +2912,223 @@ async function init() {
 
   // Precargar oficio
   if(p.tipo === 'oficio') {
-    if(p.profesion_universitaria) {
-      document.getElementById('ofCategoria').value = p.profesion_universitaria
-      cargarSubcategorias()
-      // Marcar subcategorías
-      if(p.empresa_sector) {
-        var savedSubs = p.empresa_sector.split(', ')
-        setTimeout(function(){
-          document.querySelectorAll('input[name="ofSub"]').forEach(function(cb){
-            cb.checked = savedSubs.includes(cb.value)
+    var srvRes2 = await supa.from('servicios')
+      .select('categoria,descripcion,servicios_lista,horarios,localidad,provincia')
+      .eq('usuario_id', currentUser.id).maybeSingle()
+    var srv = srvRes2.data
+
+    // Categorías guardadas (puede ser "Plomería, Gasista" o solo "Plomería")
+    var catVal  = (srv && srv.categoria) ? srv.categoria : (p.profesion_universitaria || '')
+    var subsStr = (srv && srv.servicios_lista) ? srv.servicios_lista : (p.empresa_sector || '')
+
+    if(catVal) {
+      var catsArr = catVal.split(', ').map(function(c){return c.trim()}).filter(Boolean)
+      var subsArr = subsStr ? subsStr.split(', ').map(function(s){return s.trim()}).filter(Boolean) : []
+
+      // Ajustar el selector de cantidad
+      var cantSel = document.getElementById('cantidadOficios')
+      cantSel.value = Math.min(catsArr.length, 5)
+
+      // Generar bloques con los datos guardados
+      var bloquesCont = document.getElementById('bloquesOficios')
+      var html = ''
+      for(var bi = 1; bi <= catsArr.length; bi++) {
+        html += generarBloqueOficio(bi, catsArr[bi-1], subsArr)
+      }
+      bloquesCont.innerHTML = html
+    } else {
+      // Sin datos previos: mostrar 1 bloque vacío
+      actualizarBloques()
+    }
+
+    // Resto de campos
+    var descVal = (srv && srv.descripcion) ? srv.descripcion : (p.empresa_descripcion || '')
+    if(descVal) document.getElementById('ofDescripcion').value = descVal
+    if(srv && srv.horarios) document.getElementById('ofHorario').value = srv.horarios
+    if(p.movil) document.getElementById('ofTelefono').value = p.movil.replace('+549','')
+    if(p.direccion) document.getElementById('ofDireccion').value = p.direccion
+    if(p.codigo_postal) document.getElementById('ofCP').value = p.codigo_postal
+    var locVal2  = (srv && srv.localidad)  ? srv.localidad  : p.localidad
+    var provVal2 = (srv && srv.provincia)  ? srv.provincia  : p.provincia
+    if(locVal2)  document.getElementById('ofLocalidad').value = locVal2
+    if(provVal2) document.getElementById('ofProvincia').value = provVal2
+    if(p.nombre_empresa) document.getElementById('ofNombreEmpresa').value = p.nombre_empresa
+    if(p.mostrar_como) {
+      var r2 = document.querySelector('input[name="ofMostrarComo"][value="'+p.mostrar_como+'"]')
+      if(r2){ r2.checked = true; if(p.mostrar_como==='empresa') document.getElementById('ofNombreEmpresaWrap').style.display='block' }
+    }
+    document.getElementById('ofMostrarTel').checked = p.mostrar_telefono !== false
+
+    // Cargar sección Trabajos Realizados si tiene plan activo
+    if((p.plan_nivel || 0) > 0) {
+      cargarSeccionPortfolio(p.plan_nivel, currentUser.id)
+    }
+  }
+
+  // Precargar profesional
+  if(p.tipo === 'profesional') {
+    var srvPro = await supa.from('servicios')
+      .select('categoria,descripcion,servicios_lista,horarios,localidad,provincia')
+      .eq('usuario_id', currentUser.id).maybeSingle()
+    var sp = srvPro.data
+
+    // Profesión
+    var profVal = (sp && sp.categoria) ? sp.categoria : (p.profesion_universitaria || '')
+    if(profVal) {
+      document.getElementById('proProfesion').value = profVal
+      cargarEspecialidades()
+      // Pre-marcar especialidades guardadas
+      var espStr = p.empresa_sector || (sp && sp.servicios_lista) || ''
+      if(espStr) {
+        var espArr = espStr.split(', ').map(function(e){return e.trim()}).filter(Boolean)
+        setTimeout(function() {
+          document.querySelectorAll('#proEspecContainer input[type=checkbox]').forEach(function(cb) {
+            if(espArr.indexOf(cb.value) !== -1) cb.checked = true
           })
         }, 50)
       }
     }
-    if(p.empresa_descripcion) document.getElementById('ofDescripcion').value = p.empresa_descripcion
-    if(p.movil) document.getElementById('ofTelefono').value = p.movil.replace('+549','')
-    if(p.direccion) document.getElementById('ofDireccion').value = p.direccion
-    if(p.codigo_postal) document.getElementById('ofCP').value = p.codigo_postal
-    if(p.localidad)  document.getElementById('ofLocalidad').value = p.localidad
-    if(p.provincia)  document.getElementById('ofProvincia').value = p.provincia
-    if(p.nombre_empresa) document.getElementById('ofNombreEmpresa').value = p.nombre_empresa
+
+    // Campos de texto
+    if(p.movil)               document.getElementById('proTelefono').value = p.movil.replace('+549','')
+    if(p.nombre_empresa)      document.getElementById('proNombreConsultorio').value = p.nombre_empresa
+    if(p.codigo_postal)       document.getElementById('proCP').value = p.codigo_postal
+    var locPro  = (sp && sp.localidad)  ? sp.localidad  : p.localidad
+    var provPro = (sp && sp.provincia)  ? sp.provincia  : p.provincia
+    if(locPro)   document.getElementById('proLocalidad').value = locPro
+    if(provPro)  document.getElementById('proProvincia').value = provPro
+    if(p.direccion)       document.getElementById('proDireccion').value = p.direccion
+    if(p.empresa_descripcion) document.getElementById('proDescripcion').value = p.empresa_descripcion
+    if(sp && sp.horarios) document.getElementById('proHorario').value = sp.horarios
+
+    // Mostrar como
     if(p.mostrar_como) {
-      var r = document.querySelector('input[name="ofMostrarComo"][value="'+p.mostrar_como+'"]')
-      if(r){ r.checked = true; if(p.mostrar_como==='empresa') document.getElementById('ofNombreEmpresaWrap').style.display='block' }
+      var r3 = document.querySelector('input[name="proMostrarComo"][value="'+p.mostrar_como+'"]')
+      if(r3) r3.checked = true
     }
-    document.getElementById('ofMostrarTel').checked = p.mostrar_telefono !== false
+    document.getElementById('proMostrarTel').checked = p.mostrar_telefono !== false
+  }
+
+  // Precargar CV
+  if(p.tipo === 'cv') {
+    var srvCV = await supa.from('servicios')
+      .select('categoria,descripcion,servicios_lista,horarios,localidad,provincia')
+      .eq('usuario_id', currentUser.id).maybeSingle()
+    var sc = srvCV.data
+
+    var puestoVal = (sc && sc.categoria) ? sc.categoria : (p.profesion_universitaria || '')
+    if(puestoVal) document.getElementById('cvPuesto').value = puestoVal
+    if(p.movil)         document.getElementById('cvTelefono').value = p.movil.replace('+549','')
+    if(p.codigo_postal) document.getElementById('cvCP').value = p.codigo_postal
+    var locCV  = (sc && sc.localidad) ? sc.localidad : p.localidad
+    var provCV = (sc && sc.provincia) ? sc.provincia : p.provincia
+    if(locCV)  document.getElementById('cvLocalidad').value = locCV
+    if(provCV) document.getElementById('cvProvincia').value = provCV
+    if(p.nombre_empresa) document.getElementById('cvBarrio').value = p.nombre_empresa
+
+    // Sobre mí: primera sección de la descripción
+    if(sc && sc.descripcion) {
+      var sobreMiGuardado = sc.descripcion.split('\n\n')[0].split('\n📌')[0].trim()
+      document.getElementById('cvSobreMi').value = sobreMiGuardado
+    }
+
+    // Habilidades técnicas (tags)
+    if(p.empresa_sector) {
+      cvTags = p.empresa_sector.split(', ').map(function(t){return t.trim()}).filter(Boolean)
+      renderCVTags()
+    }
+
+    // Disponibilidad
+    if(sc && sc.horarios) {
+      var dispGuardados = sc.horarios.split(', ')
+      document.querySelectorAll('input[name="cvDisp"]').forEach(function(cb) {
+        if(dispGuardados.indexOf(cb.value) !== -1) cb.checked = true
+      })
+    }
+
+  // Precargar empresa
+  if(p.tipo === 'empresa') {
+    var srvEmp = await supa.from('servicios')
+      .select('categoria,descripcion,servicios_lista,horarios,localidad,provincia')
+      .eq('usuario_id', currentUser.id).maybeSingle()
+    var se = srvEmp.data
+
+    if(p.nombre_empresa) document.getElementById('empNombre').value = p.nombre_empresa
+    if(p.empresa_sector) document.getElementById('empRubro').value = p.empresa_sector
+    var locEmp  = (se && se.localidad) ? se.localidad : p.localidad
+    var provEmp = (se && se.provincia) ? se.provincia : p.provincia
+    if(locEmp)  document.getElementById('empLocalidad').value = locEmp
+    if(provEmp) document.getElementById('empProvincia').value = provEmp
+    if(p.codigo_postal) document.getElementById('empCP').value = p.codigo_postal
+
+    // Reconstruir título
+    if(se && se.categoria) document.getElementById('empTituloOferta').value = se.categoria
+    // Descripción original (primer bloque antes de requisitos)
+    if(se && se.descripcion) {
+      var descOrig = se.descripcion.split('\n\n📋')[0].split('\n📍')[0].split('\n🏢')[0].trim()
+      document.getElementById('empDescripcion').value = descOrig
+    }
+
+    // Habilidades requeridas
+    if(p.empresa_sector && se && se.servicios_lista) {
+      empTags = se.servicios_lista.split(', ').map(function(t){return t.trim()}).filter(Boolean)
+      renderEmpTags()
+    }
+
+    // Confidencial
+    if(p.mostrar_como === 'oculto') {
+      var radConf = document.querySelector('input[name="empConfidencial"][value="si"]')
+      if(radConf){ radConf.checked = true; toggleConfidencial('si') }
+    }
+
+    // Contacto
+    if(p.empresa_descripcion) {
+      var radEmail = document.querySelector('input[name="empContactoTipo"][value="email"]')
+      if(radEmail){ radEmail.checked = true; cambiarContactoEmp('email'); document.getElementById('empContactoEmail').value = p.empresa_descripcion }
+    } else if(p.movil) {
+      var radWA = document.querySelector('input[name="empContactoTipo"][value="whatsapp"]')
+      if(radWA){ radWA.checked = true; cambiarContactoEmp('whatsapp'); document.getElementById('empContactoWA').value = p.movil.replace('+549','') }
+    }
+  }
+
+    // CV adjunto guardado
+    if(p.empresa_descripcion && p.empresa_descripcion.startsWith('http')) {
+      document.getElementById('cvUrlActual').innerHTML =
+        '📄 CV guardado: <a href="'+p.empresa_descripcion+'" target="_blank" style="color:#2563eb;font-weight:600;">Ver / Descargar</a> · <span style="color:#94a3b8;font-size:11px;">Podés subir uno nuevo para reemplazarlo</span>'
+    }
+  }
+
+  // Precargar emprendimiento
+  if(p.tipo === 'emprendimiento') {
+    var srvEmpre = await supa.from('servicios')
+      .select('categoria,descripcion,servicios_lista,horarios,localidad,provincia')
+      .eq('usuario_id', currentUser.id).maybeSingle()
+    var se2 = srvEmpre.data
+
+    if(p.nombre_empresa) document.getElementById('empNombreMarca').value = p.nombre_empresa
+    if(p.empresa_sector) document.getElementById('empRubroMain').value = p.empresa_sector
+    if(p.empresa_descripcion) document.getElementById('empEslogan').value = p.empresa_descripcion
+    if(p.profesion_universitaria) document.getElementById('empRolFundador').value = p.profesion_universitaria
+    if(p.movil) document.getElementById('empTelFundador').value = p.movil.replace('+549','')
+    if(p.instagram) document.getElementById('empInstagram').value = p.instagram
+    var locEmpre = (se2 && se2.localidad) ? se2.localidad : p.localidad
+    var provEmpre = (se2 && se2.provincia) ? se2.provincia : p.provincia
+    if(locEmpre)  document.getElementById('empLocalidadEmp').value = locEmpre
+    if(provEmpre) document.getElementById('empProvinciaEmp').value = provEmpre
+    if(p.direccion) document.getElementById('empDireccion').value = p.direccion
+
+    // Historia (primera sección antes de datos empaquetados)
+    if(se2 && se2.descripcion) {
+      var historiaGuard = se2.descripcion.split('\n\n🏭')[0].split('\n🏭')[0].trim()
+      document.getElementById('empHistoria').value = historiaGuard
+      document.getElementById('empHistoriaCnt').textContent = historiaGuard.length
+    }
+
+    // Tags
+    if(se2 && se2.servicios_lista) {
+      empTags2 = se2.servicios_lista.split(', ').map(function(t){return t.trim()}).filter(Boolean)
+      renderEmpTags2()
+    }
   }
 }
 

@@ -13,38 +13,128 @@ body {
 
 /* HEADER */
 
+/* ══════════════════════════════════════
+   TOPBAR UNIFICADO — 3 columnas
+   Logo | Centro (buscadores) | Derecha (Inicio + Perfil)
+══════════════════════════════════════ */
 .topbar {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  padding: 14px 30px;
+  gap: 8px;
+  padding: 0 20px;
   background: #2563eb;
   color: white;
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  min-height: 54px;
 }
 
-.logo img { height: 44px; object-fit: contain; }
+.logo img { height: 36px; object-fit: contain; }
 .logo a   { display: flex; align-items: center; }
 
-nav { display: flex; gap: 4px; align-items: center; }
+/* Centro: links a buscadores */
+.tnav-center {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.tnav-center a {
+  color: rgba(255,255,255,.82);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  transition: background .15s, color .15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.tnav-center a:hover,
+.tnav-center a.activo { background: rgba(255,255,255,.18); color: white; }
 
+/* Derecha: Inicio + Perfil/Login + opcional prode */
+.tnav-right {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+.tnav-right a, .tnav-right button {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 7px;
+  font-size: 13px;
+  transition: background .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tnav-right a:hover, .tnav-right button:hover { background: rgba(255,255,255,.2); }
+.tnav-right .btn-perfil {
+  background: rgba(255,255,255,.15);
+  border: 1.5px solid rgba(255,255,255,.35);
+  border-radius: 8px;
+}
+.tnav-right .btn-perfil:hover { background: rgba(255,255,255,.28); }
+.tnav-right .btn-prode {
+  font-size: 18px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: rgba(250,204,21,.18);
+  border: 1.5px solid rgba(250,204,21,.4);
+  line-height: 1;
+}
+.tnav-right .btn-prode:hover { background: rgba(250,204,21,.35); border-color: rgba(250,204,21,.7); }
+.tnav-right .btn-salir {
+  background: rgba(239,68,68,.15);
+  border: 1.5px solid rgba(239,68,68,.35);
+  border-radius: 8px;
+  color: #fca5a5 !important;
+}
+.tnav-right .btn-salir:hover { background: rgba(239,68,68,.32) !important; border-color: rgba(239,68,68,.65); color: white !important; }
+
+/* Compatibilidad: nav genérico dentro de topbar (páginas viejas) */
+.topbar > nav:not(.tnav-center):not(.tnav-right) {
+  display: flex; gap: 4px; align-items: center;
+}
 nav a {
   color: white;
   text-decoration: none;
   font-weight: 600;
-  padding: 8px 13px;
+  padding: 7px 12px;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 13px;
   transition: background 0.2s;
   display: flex;
   align-items: center;
   gap: 6px;
 }
-
 nav a:hover { background: rgba(255,255,255,0.18); }
+
+/* Mobile: ocultar centro, compactar */
+@media(max-width: 700px) {
+  .tnav-center { display: none; }
+  .topbar { padding: 0 12px; }
+  .tnav-right a span, .tnav-right button span { display: none; }
+  .tnav-right a, .tnav-right button { padding: 7px 9px; }
+  nav a span { display: none; }
+}
 
 /* HERO */
 

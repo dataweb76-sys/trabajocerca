@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0369a1">
+<title>Ofertas de Trabajo en Argentina — Trabajos Cerca</title>
+<meta name="description" content="Buscá ofertas de trabajo y empleo cerca tuyo. Empresas y comercios que buscan empleados en Argentina.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ── Chips de rubro ── */
+.rubros-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;}
+.rubros-scroll::-webkit-scrollbar{height:4px;}
+.rubros-scroll::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px;}
+.chip-rubro{white-space:nowrap;padding:7px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:12px;font-weight:600;color:#475569;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.chip-rubro.activo{border-color:#0369a1;background:#eff6ff;color:#0369a1;}
+.chip-rubro:hover:not(.activo){border-color:#0369a1;color:#0369a1;}
+
+/* ── Oferta card ── */
+.oferta-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:12px;transition:box-shadow .15s,border-color .15s;}
+.oferta-card:hover{box-shadow:0 4px 16px rgba(3,105,161,.1);border-color:#bae6fd;}
+.oferta-header{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;}
+.oferta-logo{width:52px;height:52px;border-radius:10px;background:#eff6ff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;border:1px solid #e0f2fe;}
+.oferta-logo img{width:100%;height:100%;object-fit:cover;}
+.oferta-empresa{font-size:12px;color:#0369a1;font-weight:700;margin-bottom:2px;}
+.oferta-puesto{font-size:15px;font-weight:800;color:#1e293b;margin-bottom:4px;}
+.oferta-rubro{font-size:11px;background:#f0f9ff;color:#0369a1;border-radius:20px;padding:2px 9px;display:inline-block;font-weight:600;}
+.oferta-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:#64748b;margin-bottom:10px;}
+.oferta-meta span{display:flex;align-items:center;gap:4px;}
+.oferta-desc{font-size:13px;color:#475569;line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.oferta-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.oferta-tag{background:#f1f5f9;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:600;color:#475569;}
+.oferta-beneficio{background:#f0fdf4;color:#166534;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:600;}
+.oferta-acciones{display:flex;gap:8px;flex-wrap:wrap;}
+.btn-postularse{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;border:none;transition:all .15s;}
+.btn-post-wa{background:#25d366;color:#fff;}
+.btn-post-wa:hover{background:#1da851;}
+.btn-post-email{background:#0369a1;color:#fff;}
+.btn-post-email:hover{background:#0c4a6e;}
+.btn-post-plat{background:#eff6ff;color:#0369a1;border:1.5px solid #bae6fd;}
+.btn-post-plat:hover{background:#dbeafe;}
+.badge-urgente{background:#fef2f2;color:#dc2626;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:800;letter-spacing:.5px;}
+.badge-remoto{background:#f0fdf4;color:#166534;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;}
+.badge-vacantes{background:#fffbeb;color:#92400e;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;}
+
+/* ── Search ── */
+.search-wrap{display:flex;gap:8px;margin-bottom:12px;}
+.search-wrap input{flex:1;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;background:#f8fafc;}
+.search-wrap input:focus{border-color:#0369a1;background:#fff;}
+.search-wrap button{padding:10px 18px;background:#0369a1;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;}
+.search-wrap button:hover{background:#0c4a6e;}
+
+/* ── Sin resultados ── */
+.sin-resultados{text-align:center;padding:50px 20px;color:#64748b;}
+.sin-resultados i{font-size:36px;margin-bottom:10px;display:block;}
+
+/* ── Spinner ── */
+.spinner{text-align:center;padding:40px;color:#0369a1;}
+.spinner i{font-size:28px;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo"></div>
+</header>
+
+<div class="page-content" style="max-width:720px;margin:0 auto;padding:16px;">
+
+  <!-- Header -->
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:40px;margin-bottom:6px;">💼</div>
+    <h1 style="font-size:22px;font-weight:800;color:#1e293b;margin-bottom:4px;">Ofertas de Trabajo</h1>
+    <p style="font-size:14px;color:#64748b;">Empresas y comercios que buscan empleados cerca tuyo</p>
+  </div>
+
+  <!-- Búsqueda -->
+  <div class="search-wrap">
+    <input type="text" id="inputBusqueda" placeholder="Buscar puesto, empresa, habilidad..." oninput="aplicarFiltros()">
+    <button onclick="aplicarFiltros()"><i class="fa-solid fa-magnifying-glass"></i></button>
+  </div>
+
+  <!-- Chips de rubro -->
+  <div class="rubros-scroll" id="chipsRubro" style="margin-bottom:14px;"></div>
+
+  <!-- Provincia -->
+  <div style="margin-bottom:14px;font-size:13px;color:#64748b;display:flex;align-items:center;gap:8px;">
+    <i class="fa-solid fa-location-dot" style="color:#0369a1;"></i>
+    <span id="lblProvincia">Mostrando todas las provincias</span>
+    <a href="#" onclick="cambiarProvincia();return false;" style="color:#0369a1;font-weight:600;font-size:12px;">Cambiar</a>
+  </div>
+
+  <!-- Resultados -->
+  <div id="resultados">
+    <div class="spinner"><i class="fa-solid fa-spinner fa-spin"></i><p style="font-size:14px;margin-top:8px;">Cargando ofertas...</p></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/splash.js"></script>
+<script src="/notif_widget.js"></script>
+<script>
+const SB_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+const supa = window.supabase.createClient(SB_URL, SB_KEY)
+
+const RUBROS = [
+  'Gastronomía y Hotelería','Comercio / Retail','Administración y Contabilidad',
+  'Logística y Transporte','Construcción y Oficios','Salud y Cuidados',
+  'Educación','Tecnología e Informática','Seguridad','Agropecuario y Rural',
+  'Industria y Manufactura','Servicios al Hogar y Limpieza','Turismo y Entretenimiento',
+  'Textil y Confección','Automotriz','Inmobiliaria','Medios y Comunicación','Otro'
+]
+
+var todasLasOfertas = []
+var rubroActivo     = null
+var _prov           = localStorage.getItem('tc_provincia') || ''
+
+/* ── Chips de rubro ── */
+function renderChips() {
+  var cont = document.getElementById('chipsRubro')
+  var html = '<span class="chip-rubro'+(rubroActivo===null?' activo':'')+'" onclick="filtrarRubro(null)">🏢 Todos</span>'
+  RUBROS.forEach(function(r) {
+    html += '<span class="chip-rubro'+(rubroActivo===r?' activo':'')+'" onclick="filtrarRubro(\''+r.replace(/'/g,"\\'")+'\')">' + r + '</span>'
+  })
+  cont.innerHTML = html
+}
+
+function filtrarRubro(r) {
+  rubroActivo = r
+  renderChips()
+  aplicarFiltros()
+}
+
+/* ── Provincia ── */
+function cambiarProvincia() {
+  var prov = prompt('Ingresá tu provincia (o dejalo vacío para ver todas):', _prov)
+  if(prov !== null) {
+    _prov = prov.trim()
+    localStorage.setItem('tc_provincia', _prov)
+    document.getElementById('lblProvincia').textContent = _prov ? 'Mostrando en: ' + _prov : 'Mostrando todas las provincias'
+    aplicarFiltros()
+  }
+}
+
+/* ── Cargar ofertas ──
+   Consulta perfiles?tipo=eq.empresa directamente → sin filtro JS
+   Cada empresa puede tener varios servicios (ofertas), se aplanan a cards.
+*/
+async function cargarOfertas() {
+  var SRV_SELECT = 'id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,created_at,activo'
+  var PERF_SELECT = 'id,tipo,nombre_empresa,empresa_sector,mostrar_como,foto,movil,empresa_descripcion,mostrar_telefono'
+  var url = SB_URL + '/rest/v1/perfiles?select=' + PERF_SELECT + ',servicios(' + SRV_SELECT + ')&tipo=eq.empresa'
+  try {
+    var res = await fetch(url, {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    })
+    if(!res.ok) { console.error('cargarOfertas HTTP', res.status); aplicarFiltros(); return }
+    var empresas = await res.json()
+
+    // Aplanar: { ...servicio, perfiles: perfil }
+    todasLasOfertas = []
+    ;(empresas || []).forEach(function(p) {
+      ;(p.servicios || []).filter(function(s){ return s.activo }).forEach(function(srv) {
+        todasLasOfertas.push(Object.assign({}, srv, { perfiles: p }))
+      })
+    })
+    // Ordenar por fecha desc
+    todasLasOfertas.sort(function(a,b){ return (b.created_at||'') > (a.created_at||'') ? 1 : -1 })
+  } catch(e) {
+    console.error('cargarOfertas error:', e)
+  }
+  aplicarFiltros()
+}
+
+/* ── Filtros ── */
+function normStr(s) {
+  return (s||'').toLowerCase()
+    .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i')
+    .replace(/ó/g,'o').replace(/ú/g,'u').replace(/ü/g,'u').replace(/ñ/g,'n')
+}
+
+function aplicarFiltros() {
+  var term   = normStr(document.getElementById('inputBusqueda').value)
+  var lista  = todasLasOfertas
+
+  if(_prov) {
+    lista = lista.filter(function(d) { return normStr(d.provincia).includes(normStr(_prov)) })
+  }
+
+  if(rubroActivo) {
+    lista = lista.filter(function(d) {
+      return normStr(d.perfiles?.empresa_sector).includes(normStr(rubroActivo)) ||
+             normStr(rubroActivo).includes(normStr(d.perfiles?.empresa_sector))
+    })
+  }
+
+  if(term) {
+    lista = lista.filter(function(d) {
+      return normStr(d.titulo).includes(term) ||
+             normStr(d.categoria).includes(term) ||
+             normStr(d.descripcion).includes(term) ||
+             normStr(d.servicios_lista).includes(term) ||
+             normStr(d.perfiles?.nombre_empresa).includes(term)
+    })
+  }
+
+  renderOfertas(lista)
+}
+
+/* ── Render de cards ── */
+function renderOfertas(lista) {
+  var cont = document.getElementById('resultados')
+  if(!lista.length) {
+    cont.innerHTML = '<div class="sin-resultados">' +
+      '<i class="fa-solid fa-briefcase" style="color:#cbd5e1;"></i>' +
+      '<strong style="display:block;font-size:15px;color:#475569;margin-bottom:6px;">Sin ofertas en esta búsqueda</strong>' +
+      '<span>¿Sos una empresa? <a href="/registro.html" style="color:#0369a1;font-weight:700;">Publicá una oferta gratis</a></span>' +
+    '</div>'
+    return
+  }
+
+  var html = '<p style="font-size:13px;color:#64748b;margin-bottom:14px;">' + lista.length + ' oferta' + (lista.length!==1?'s':'') + ' encontrada' + (lista.length!==1?'s':'') + '</p>'
+
+  lista.forEach(function(d) {
+    var p       = d.perfiles || {}
+    var esConf  = p.mostrar_como === 'oculto'
+    var nombre  = esConf ? ('Importante empresa — ' + (p.empresa_sector || 'rubro desconocido')) : (p.nombre_empresa || 'Empresa')
+    var logo    = p.foto ? '<img src="'+p.foto+'" alt="Logo">' : '🏢'
+    var rubro   = p.empresa_sector || ''
+    var puesto  = d.categoria || d.titulo || 'Puesto'
+    var loc     = [d.localidad, d.provincia].filter(Boolean).join(', ')
+
+    // Parsear descripcion para extraer info
+    var desc    = d.descripcion || ''
+    var descCorta = desc.split('\n\n📋')[0].split('\n📍')[0].split('\n🏢')[0].trim()
+    var modalidad = ''
+    var vacantes  = ''
+    var jornada   = d.horarios || ''
+    var tags      = (d.servicios_lista || '').split(',').map(function(t){return t.trim()}).filter(Boolean)
+
+    var mMatch  = desc.match(/🏢 Modalidad: ([^\n]+)/)
+    if(mMatch)  modalidad = mMatch[1]
+    var vMatch  = desc.match(/👥 Vacantes: (\d+)/)
+    if(vMatch)  vacantes = vMatch[1]
+
+    // Beneficios
+    var benMatch = desc.match(/✅ Beneficios: ([^\n]+)/)
+    var beneficios = benMatch ? benMatch[1].split(', ') : []
+
+    // Sueldo
+    var sueldoMatch = desc.match(/💰 Remuneración: ([^\n]+)/)
+    var sueldo = sueldoMatch ? sueldoMatch[1] : ''
+
+    // Botón de contacto
+    var btnContacto = ''
+    if(p.empresa_descripcion && p.empresa_descripcion.includes('@')) {
+      btnContacto = '<a href="mailto:'+p.empresa_descripcion+'?subject=Postulación: '+encodeURIComponent(puesto)+'" class="btn-postularse btn-post-email">' +
+        '<i class="fa-solid fa-envelope"></i> Enviar CV por email</a>'
+    } else if(p.movil && p.mostrar_telefono) {
+      var num  = p.movil.replace(/\D/g,'')
+      var msg  = encodeURIComponent('Hola! Me postulo para el puesto de '+puesto+' que vi en Trabajos Cerca. Te adjunto mi CV.')
+      btnContacto = '<a href="https://wa.me/'+num+'?text='+msg+'" target="_blank" class="btn-postularse btn-post-wa">' +
+        '<i class="fa-brands fa-whatsapp"></i> Postularse por WhatsApp</a>'
+    } else {
+      btnContacto = '<button class="btn-postularse btn-post-plat" onclick="alert(\'Función de postulación interna próximamente. Contactá a la empresa desde su perfil.\')">' +
+        '<i class="fa-solid fa-paper-plane"></i> Postularse</button>'
+    }
+
+    html += '<div class="oferta-card">' +
+      '<div class="oferta-header">' +
+        '<div class="oferta-logo">'+logo+'</div>' +
+        '<div style="flex:1;">' +
+          '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
+            '<div class="oferta-empresa">'+nombre+'</div>' +
+            (esConf ? '<span class="badge-urgente">CONFIDENCIAL</span>' : '') +
+            (vacantes && parseInt(vacantes)>1 ? '<span class="badge-vacantes">'+vacantes+' vacantes</span>' : '') +
+          '</div>' +
+          '<div class="oferta-puesto">'+puesto+'</div>' +
+          '<span class="oferta-rubro">'+rubro+'</span>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="oferta-meta">' +
+        (loc ? '<span><i class="fa-solid fa-location-dot" style="color:#dc2626;"></i> '+loc+'</span>' : '') +
+        (modalidad ? '<span><i class="fa-solid fa-laptop-house" style="color:#0369a1;"></i> '+modalidad+'</span>' : '') +
+        (jornada ? '<span><i class="fa-solid fa-clock" style="color:#059669;"></i> '+jornada.split(' · ')[0]+'</span>' : '') +
+        (sueldo ? '<span><i class="fa-solid fa-money-bill-wave" style="color:#059669;"></i> '+sueldo+'</span>' : '') +
+      '</div>' +
+
+      (descCorta ? '<div class="oferta-desc">'+descCorta+'</div>' : '') +
+
+      (tags.length || beneficios.length ? '<div class="oferta-tags">' +
+        tags.slice(0,4).map(function(t){ return '<span class="oferta-tag">'+t+'</span>' }).join('') +
+        beneficios.slice(0,2).map(function(b){ return '<span class="oferta-beneficio">✅ '+b+'</span>' }).join('') +
+      '</div>' : '') +
+
+      '<div class="oferta-acciones">' +
+        btnContacto +
+        '<a href="/perfil_servicio.html" class="btn-postularse btn-post-plat" style="font-size:12px;">' +
+          '<i class="fa-solid fa-eye"></i> Ver oferta completa' +
+        '</a>' +
+      '</div>' +
+    '</div>'
+  })
+
+  cont.innerHTML = html
+}
+
+/* ── Init ── */
+async function init() {
+  if(_prov) document.getElementById('lblProvincia').textContent = 'Mostrando en: ' + _prov
+  renderChips()
+  await cargarOfertas()
+}
+
+init()
+</script>
+</body>
+</html>

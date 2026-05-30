@@ -182,10 +182,7 @@
 <body>
 
 <header class="topbar">
-  <div class="logo">
-    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
-  </div>
-  <nav id="menu"></nav>
+  <div class="logo"></div>
 </header>
 
 <section class="hero">
@@ -243,6 +240,9 @@
       <a href="/buscador_emprendimientos.html" class="hero-buscar-btn">
         <span class="hb-ico">💡</span> Buscar Emprendimientos
       </a>
+      <a href="/buscador_ofertas.html" class="hero-buscar-btn" style="border-color:#0369a1;color:#0369a1;">
+        <span class="hb-ico">💼</span> Ofertas de Trabajo
+      </a>
     </div>
 
     <!-- Botones de acceso (se muestran/ocultan según estado de sesión) -->
@@ -271,7 +271,7 @@
     </div>
 
     <!-- Botón Mi Perfil (solo logueados) -->
-    <div id="heroPerfilBtn" style="display:none;margin-top:20px;text-align:center;">
+    <div id="heroPerfilBtn" style="display:none;margin-top:20px;text-align:center;justify-content:center;">
       <a href="/perfil.html" style="
         display:inline-flex;align-items:center;gap:8px;
         background:rgba(255,255,255,.15);backdrop-filter:blur(6px);
@@ -334,70 +334,32 @@
       </div>
     </div>
 
-    <!-- 4 tipos de registro -->
+    <!-- Registro unificado -->
     <div style="padding:20px 22px 24px;">
       <div style="font-size:12px;font-weight:700;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;text-align:center;">
-        ¿Cómo querés registrarte?
+        Unite a Trabajos Cerca
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <a href="/registro.html" style="
+        display:flex;align-items:center;justify-content:center;gap:10px;
+        background:linear-gradient(135deg,#2563eb,#1d4ed8);
+        border-radius:14px;padding:18px 22px;
+        text-decoration:none;color:white;font-weight:800;font-size:16px;
+        box-shadow:0 4px 16px rgba(37,99,235,.35);
+        transition:transform .15s,box-shadow .15s;"
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(37,99,235,.45)'"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(37,99,235,.35)'">
+        <i class="fa-solid fa-user-plus" style="font-size:20px;"></i>
+        Registrarme gratis →
+      </a>
 
-        <!-- 1. Oficio (activo) -->
-        <a href="/registro-oficio.html" style="
-          display:flex;flex-direction:column;align-items:center;gap:8px;
-          background:linear-gradient(135deg,#fff7ed,#fff);
-          border:2px solid #fed7aa;border-radius:16px;padding:18px 12px;
-          text-decoration:none;transition:transform .15s,box-shadow .15s;cursor:pointer;"
-          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(249,115,22,.2)'"
-          onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <span style="font-size:34px;">🔨</span>
-          <div style="font-weight:800;font-size:14px;color:#c2410c;text-align:center;line-height:1.3;">Ingresá tu Oficio</div>
-          <div style="font-size:11px;color:#64748b;text-align:center;line-height:1.4;">Plomero, electricista, albañil, peluquero y más</div>
-          <span style="background:#ea580c;color:white;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;margin-top:4px;">Registrarme →</span>
-        </a>
-
-        <!-- 2. CV (activo) -->
-        <a href="/registro-cv.html" style="
-          display:flex;flex-direction:column;align-items:center;gap:8px;
-          background:linear-gradient(135deg,#eff6ff,#fff);
-          border:2px solid #bfdbfe;border-radius:16px;padding:18px 12px;
-          text-decoration:none;transition:transform .15s,box-shadow .15s;cursor:pointer;"
-          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(3,105,161,.2)'"
-          onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <span style="font-size:34px;">📄</span>
-          <div style="font-weight:800;font-size:14px;color:#0369a1;text-align:center;line-height:1.3;">Ingresá tu CV</div>
-          <div style="font-size:11px;color:#64748b;text-align:center;line-height:1.4;">Buscás empleo en relación de dependencia</div>
-          <span style="background:#0369a1;color:white;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;margin-top:4px;">Registrarme →</span>
-        </a>
-
-        <!-- 3. Profesión (activo) -->
-        <a href="/registro-profesional.html" style="
-          display:flex;flex-direction:column;align-items:center;gap:8px;
-          background:linear-gradient(135deg,#f5f3ff,#fff);
-          border:2px solid #ddd6fe;border-radius:16px;padding:18px 12px;
-          text-decoration:none;transition:transform .15s,box-shadow .15s;cursor:pointer;"
-          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(124,58,237,.2)'"
-          onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <span style="font-size:34px;">🎓</span>
-          <div style="font-weight:800;font-size:14px;color:#7c3aed;text-align:center;line-height:1.3;">Ingresá tu Profesión</div>
-          <div style="font-size:11px;color:#64748b;text-align:center;line-height:1.4;">Médico, abogado, contador, arquitecto</div>
-          <span style="background:#7c3aed;color:white;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;margin-top:4px;">Registrarme →</span>
-        </a>
-
-        <!-- 4. Emprendimiento (activo) -->
-        <a href="/registro-emprendimiento.html" style="
-          display:flex;flex-direction:column;align-items:center;gap:8px;
-          background:linear-gradient(135deg,#fffbeb,#fff);
-          border:2px solid #fde68a;border-radius:16px;padding:18px 12px;
-          text-decoration:none;transition:transform .15s,box-shadow .15s;cursor:pointer;"
-          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(217,119,6,.2)'"
-          onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <span style="font-size:34px;">💡</span>
-          <div style="font-weight:800;font-size:14px;color:#d97706;text-align:center;line-height:1.3;">Ingresá tu Emprendimiento</div>
-          <div style="font-size:11px;color:#64748b;text-align:center;line-height:1.4;">Negocio propio, tienda online, marca</div>
-          <span style="background:#d97706;color:white;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;margin-top:4px;">Registrarme →</span>
-        </a>
-
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px;">
+        <span style="background:#f1f5f9;border-radius:20px;padding:4px 12px;font-size:11px;color:#64748b;">🔧 Oficios</span>
+        <span style="background:#f1f5f9;border-radius:20px;padding:4px 12px;font-size:11px;color:#64748b;">👔 Profesionales</span>
+        <span style="background:#f1f5f9;border-radius:20px;padding:4px 12px;font-size:11px;color:#64748b;">📄 Busco trabajo</span>
+        <span style="background:#f1f5f9;border-radius:20px;padding:4px 12px;font-size:11px;color:#64748b;">🚀 Emprendimientos</span>
+        <span style="background:#f1f5f9;border-radius:20px;padding:4px 12px;font-size:11px;color:#64748b;">🏢 Empresas</span>
+        <span style="background:#e0f2fe;border-radius:20px;padding:4px 12px;font-size:11px;color:#0369a1;font-weight:700;">💼 Ofertas de Trabajo</span>
       </div>
 
       <p style="text-align:center;font-size:11px;color:#94a3b8;margin:14px 0 0;">
@@ -492,9 +454,9 @@
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:18px;font-size:12px;">
         <span style="background:#f0fdf4;color:#15803d;border-radius:8px;padding:5px 11px;font-weight:700;">1️⃣ Registrate</span>
         <span style="color:#cbd5e1;">→</span>
-        <span style="background:#fdf4ff;color:#7c3aed;border-radius:8px;padding:5px 11px;font-weight:700;">📸 Seguinos IG</span>
+        <span style="background:#fff7ed;color:#c2410c;border-radius:8px;padding:5px 11px;font-weight:700;">📱 Compartí en IG/FB</span>
         <span style="color:#cbd5e1;">→</span>
-        <span style="background:#eff6ff;color:#1d4ed8;border-radius:8px;padding:5px 11px;font-weight:700;">👥 10 invitados</span>
+        <span style="background:#fdf4ff;color:#7c3aed;border-radius:8px;padding:5px 11px;font-weight:700;">📸 Seguinos en @datawebdigital</span>
         <span style="color:#cbd5e1;">→</span>
         <span style="background:#fefce8;color:#a16207;border-radius:8px;padding:5px 11px;font-weight:700;">⚽ Predecí</span>
       </div>
@@ -569,6 +531,28 @@ window.cerrarPopupMundial = function(e){
 </script>
 
 
+<!-- BANNER PRODE MUNDIAL 2026 -->
+<div style="max-width:900px;margin:0 auto 16px;padding:0 24px;">
+  <a href="/mundial.html" style="
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+    background:linear-gradient(135deg,#d97706 0%,#f59e0b 50%,#facc15 100%);
+    color:#1c1917;text-decoration:none;border-radius:18px;padding:18px 24px;
+    box-shadow:0 6px 28px rgba(250,204,21,0.40);transition:transform .2s,box-shadow .2s;"
+    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(250,204,21,0.55)'"
+    onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(250,204,21,0.40)'">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span style="font-size:36px;">⚽</span>
+      <div>
+        <div style="font-weight:900;font-size:16px;line-height:1.3;">¡Prode del Mundial 2026!</div>
+        <div style="font-size:13px;opacity:.80;margin-top:2px;">Compartí, seguinos y predecí los resultados · ¡100% gratis!</div>
+      </div>
+    </div>
+    <span style="background:rgba(28,25,23,0.12);border:1.5px solid rgba(28,25,23,0.25);border-radius:10px;padding:9px 18px;font-weight:700;font-size:14px;white-space:nowrap;">
+      ¡Jugar! <i class="fa-solid fa-arrow-right" style="margin-left:6px;font-size:12px;"></i>
+    </span>
+  </a>
+</div>
+
 <!-- BANNER SORTEO -->
 <div style="max-width:900px;margin:0 auto;padding:0 24px;">
   <a href="/sorteo.html" style="
@@ -591,23 +575,6 @@ window.cerrarPopupMundial = function(e){
   </a>
 </div>
 
-<div class="buscadores-grid">
-  <div class="buscador-card" onclick="abrirModalOficio(event)">
-    <span class="bc-ico">🔨</span>
-    <h3>Ingresá tu Oficio</h3>
-    <p>Plomeros, electricistas, carpinteros y más oficios</p>
-  </div>
-  <div class="buscador-card" onclick="abrirModalCV(event)">
-    <span class="bc-ico">📄</span>
-    <h3>Ingresá tu CV</h3>
-    <p>Trabajadores en búsqueda activa de empleo</p>
-  </div>
-  <div class="buscador-card" onclick="abrirModalProfesional(event)">
-    <span class="bc-ico">🎓</span>
-    <h3>Ingresá tu Profesión</h3>
-    <p>Médicos, abogados, arquitectos y más profesionales</p>
-  </div>
-</div>
 
 <section class="como-funciona">
   <h2>¿Cómo funciona?</h2>
@@ -834,7 +801,7 @@ window.cerrarPopupMundial = function(e){
       </div>
 
       <div style="padding:20px 28px 24px;">
-        <a href="/registro_profesional.html"
+        <a href="/registro.html"
           style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;font-size:16px;font-weight:800;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:white;border:none;border-radius:12px;text-decoration:none;margin-bottom:12px;">
           <i class="fa-solid fa-graduation-cap"></i> Registrarme como profesional
         </a>
@@ -949,22 +916,10 @@ import { supabase } from "./supabase.js"
 
 async function cargarMenu(){
   const { data } = await supabase.auth.getUser()
-  const menu = document.getElementById("menu")
-
   if(data.user){
-    // Logueado: mostrar navegación normal + ocultar botones auth del hero
-    menu.innerHTML = `
-      <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
-      <a href="/mapa.html"><i class="fa-solid fa-map"></i> <span>Mapa</span></a>
-      <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Mi perfil</span></a>
-    `
     document.getElementById("heroPerfilBtn").style.display = "flex"
     document.getElementById("heroAuthBtns").style.display  = "none"
   } else {
-    // No logueado: solo Buscar en el topbar, mostrar auth en el hero
-    menu.innerHTML = `
-      <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
-    `
     document.getElementById("heroAuthBtns").style.display  = "flex"
     document.getElementById("heroPerfilBtn").style.display = "none"
   }

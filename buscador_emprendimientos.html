@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#059669">
+<title>Buscador de Emprendimientos en Argentina — Trabajos Cerca</title>
+<meta name="description" content="Descubrí emprendimientos y proyectos locales cerca tuyo. Gastronomía, indumentaria, artesanías, cosmética natural y mucho más.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ── Chips de rubro ── */
+.rubros-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:#bbf7d0 transparent;}
+.rubros-scroll::-webkit-scrollbar{height:4px;}
+.rubros-scroll::-webkit-scrollbar-thumb{background:#bbf7d0;border-radius:4px;}
+.chip-rubro{white-space:nowrap;padding:7px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:12px;font-weight:600;color:#475569;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.chip-rubro.activo{border-color:#059669;background:#f0fdf4;color:#059669;}
+.chip-rubro:hover:not(.activo){border-color:#059669;color:#059669;}
+
+/* ── Card emprendimiento ── */
+.emp-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px;margin-bottom:14px;transition:box-shadow .15s,border-color .15s;cursor:pointer;}
+.emp-card:hover{box-shadow:0 4px 20px rgba(5,150,105,.1);border-color:#6ee7b7;}
+.emp-header{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;}
+.emp-logo{width:60px;height:60px;border-radius:12px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;overflow:hidden;border:1.5px solid #d1fae5;}
+.emp-logo img{width:100%;height:100%;object-fit:cover;}
+.emp-nombre{font-size:16px;font-weight:800;color:#1e293b;margin-bottom:2px;}
+.emp-rubro{font-size:11px;background:#f0fdf4;color:#059669;border-radius:20px;padding:2px 9px;display:inline-block;font-weight:600;margin-bottom:4px;}
+.emp-rol{font-size:12px;color:#64748b;}
+.emp-eslogan{font-size:13px;color:#0369a1;font-style:italic;margin-bottom:8px;font-weight:600;}
+.emp-historia{font-size:13px;color:#475569;line-height:1.55;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.emp-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.emp-tag{background:#f1f5f9;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:600;color:#475569;}
+.emp-meta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#64748b;margin-bottom:12px;}
+.emp-meta span{display:flex;align-items:center;gap:4px;}
+.emp-acciones{display:flex;gap:8px;flex-wrap:wrap;}
+.btn-emp{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;border:none;transition:all .15s;}
+.btn-emp-ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;}
+.btn-emp-wa{background:#25d366;color:#fff;}
+.btn-emp-wa:hover{background:#1da851;}
+.btn-emp-web{background:#eff6ff;color:#0369a1;border:1.5px solid #bae6fd;}
+.btn-emp-web:hover{background:#dbeafe;}
+.badge-produccion{background:#fefce8;color:#854d0e;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;}
+
+/* ── Búsqueda ── */
+.search-wrap{display:flex;gap:8px;margin-bottom:12px;}
+.search-wrap input{flex:1;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;background:#f8fafc;}
+.search-wrap input:focus{border-color:#059669;background:#fff;}
+.search-wrap button{padding:10px 18px;background:#059669;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;}
+.search-wrap button:hover{background:#047857;}
+
+/* ── Sin resultados ── */
+.sin-resultados{text-align:center;padding:50px 20px;color:#64748b;}
+.sin-resultados i{font-size:36px;margin-bottom:10px;display:block;}
+.spinner{text-align:center;padding:40px;color:#059669;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo"></div>
+</header>
+
+<div class="page-content" style="max-width:720px;margin:0 auto;padding:16px;">
+
+  <!-- Header -->
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:40px;margin-bottom:6px;">🚀</div>
+    <h1 style="font-size:22px;font-weight:800;color:#1e293b;margin-bottom:4px;">Emprendimientos</h1>
+    <p style="font-size:14px;color:#64748b;">Descubrí proyectos y marcas locales cerca tuyo</p>
+  </div>
+
+  <!-- Búsqueda -->
+  <div class="search-wrap">
+    <input type="text" id="inputBusqueda" placeholder="Buscar emprendimiento, producto, marca..." oninput="aplicarFiltros()">
+    <button onclick="aplicarFiltros()"><i class="fa-solid fa-magnifying-glass"></i></button>
+  </div>
+
+  <!-- Chips de rubro -->
+  <div class="rubros-scroll" id="chipsRubro" style="margin-bottom:14px;"></div>
+
+  <!-- Provincia -->
+  <div style="margin-bottom:14px;font-size:13px;color:#64748b;display:flex;align-items:center;gap:8px;">
+    <i class="fa-solid fa-location-dot" style="color:#059669;"></i>
+    <span id="lblProvincia">Mostrando todas las provincias</span>
+    <a href="#" onclick="cambiarProvincia();return false;" style="color:#059669;font-weight:600;font-size:12px;">Cambiar</a>
+  </div>
+
+  <!-- Resultados -->
+  <div id="resultados">
+    <div class="spinner"><i class="fa-solid fa-spinner fa-spin"></i><p style="font-size:14px;margin-top:8px;">Cargando emprendimientos...</p></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/splash.js"></script>
+<script src="/notif_widget.js"></script>
+<script>
+const SB_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+
+const RUBROS = [
+  'Gastronomía / Alimentos','Indumentaria y Calzado','Decoración / Hogar',
+  'Estética / Cosmética Natural','Tecnología','Artesanías y Manualidades',
+  'Librería / Papelería','Juguetería / Juegos','Plantas / Jardín',
+  'Mascotas','Arte y Fotografía','Servicios Digitales','Textil y Confección','Otro'
+]
+
+var todasLasEmpresas = []
+var rubroActivo = null
+var _prov = localStorage.getItem('tc_provincia') || ''
+
+function normStr(s){ return (s||'').toLowerCase().replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ü/g,'u').replace(/ñ/g,'n') }
+
+/* ── Chips ── */
+function renderChips() {
+  var cont = document.getElementById('chipsRubro')
+  var html = '<span class="chip-rubro'+(rubroActivo===null?' activo':'')+'" onclick="filtrarRubro(null)">🚀 Todos</span>'
+  RUBROS.forEach(function(r) {
+    html += '<span class="chip-rubro'+(rubroActivo===r?' activo':'')+'" onclick="filtrarRubro(\''+r.replace(/'/g,"\\'")+'\')">' + r + '</span>'
+  })
+  cont.innerHTML = html
+}
+
+function filtrarRubro(r) { rubroActivo = r; renderChips(); aplicarFiltros() }
+
+/* ── Provincia ── */
+function cambiarProvincia() {
+  var prov = prompt('Ingresá tu provincia (o dejalo vacío para ver todas):', _prov)
+  if(prov !== null) {
+    _prov = prov.trim()
+    localStorage.setItem('tc_provincia', _prov)
+    document.getElementById('lblProvincia').textContent = _prov ? 'Mostrando en: ' + _prov : 'Mostrando todas las provincias'
+    aplicarFiltros()
+  }
+}
+
+/* ── Cargar emprendimientos ──
+   Consulta perfiles?tipo=eq.emprendimiento con servicios embebidos
+*/
+async function cargarEmprendimientos() {
+  var PERF_SELECT = 'id,tipo,nombre_empresa,empresa_sector,empresa_descripcion,profesion_universitaria,foto,movil,mostrar_telefono,instagram,localidad,provincia'
+  var SRV_SELECT  = 'id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,created_at,activo'
+  var url = SB_URL + '/rest/v1/perfiles?select=' + PERF_SELECT + ',servicios(' + SRV_SELECT + ')&tipo=eq.emprendimiento'
+  try {
+    var res = await fetch(url, { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } })
+    if(!res.ok) { console.error('cargarEmprendimientos HTTP', res.status); aplicarFiltros(); return }
+    var empresas = await res.json()
+
+    // Aplanar: { ...servicio_activo, perfiles: perfil }
+    todasLasEmpresas = []
+    ;(empresas || []).forEach(function(p) {
+      var srvs = (p.servicios || []).filter(function(s){ return s.activo !== false })
+      if(srvs.length) {
+        // Usar el primer servicio activo como representante de la empresa
+        todasLasEmpresas.push(Object.assign({}, srvs[0], { perfiles: p }))
+      } else {
+        // Empresa sin servicio: igual la mostramos con datos del perfil
+        todasLasEmpresas.push({ perfiles: p })
+      }
+    })
+    todasLasEmpresas.sort(function(a,b){ return (b.created_at||'') > (a.created_at||'') ? 1 : -1 })
+  } catch(e) {
+    console.error('cargarEmprendimientos error:', e)
+  }
+  aplicarFiltros()
+}
+
+/* ── Filtros ── */
+function aplicarFiltros() {
+  var term  = normStr(document.getElementById('inputBusqueda').value)
+  var lista = todasLasEmpresas
+
+  if(_prov) {
+    lista = lista.filter(function(d) {
+      return normStr(d.provincia || d.perfiles?.provincia).includes(normStr(_prov))
+    })
+  }
+  if(rubroActivo) {
+    lista = lista.filter(function(d) {
+      return normStr(d.perfiles?.empresa_sector).includes(normStr(rubroActivo)) ||
+             normStr(rubroActivo).includes(normStr(d.perfiles?.empresa_sector))
+    })
+  }
+  if(term) {
+    lista = lista.filter(function(d) {
+      return normStr(d.titulo).includes(term) ||
+             normStr(d.descripcion).includes(term) ||
+             normStr(d.servicios_lista).includes(term) ||
+             normStr(d.perfiles?.nombre_empresa).includes(term) ||
+             normStr(d.perfiles?.empresa_sector).includes(term)
+    })
+  }
+  renderEmprendimientos(lista)
+}
+
+/* ── Render ── */
+function renderEmprendimientos(lista) {
+  var cont = document.getElementById('resultados')
+  if(!lista.length) {
+    cont.innerHTML = '<div class="sin-resultados">' +
+      '<i class="fa-solid fa-rocket" style="color:#d1fae5;"></i>' +
+      '<strong style="display:block;font-size:15px;color:#475569;margin-bottom:6px;">Sin emprendimientos en esta búsqueda</strong>' +
+      '<span>¿Tenés un emprendimiento? <a href="/registro.html" style="color:#059669;font-weight:700;">Publicalo gratis</a></span>' +
+    '</div>'
+    return
+  }
+
+  var html = '<p style="font-size:13px;color:#64748b;margin-bottom:14px;">' + lista.length + ' emprendimiento' + (lista.length!==1?'s':'') + ' encontrado' + (lista.length!==1?'s':'') + '</p>'
+
+  lista.forEach(function(d) {
+    var p        = d.perfiles || {}
+    var nombre   = p.nombre_empresa || 'Emprendimiento'
+    var rubro    = p.empresa_sector || ''
+    var eslogan  = p.empresa_descripcion || ''
+    var rol      = p.profesion_universitaria || ''
+    var loc      = [d.localidad || p.localidad, d.provincia || p.provincia].filter(Boolean).join(', ')
+    var logo     = p.foto ? '<img src="'+p.foto+'" alt="Logo">' : '🚀'
+    var tags     = (d.servicios_lista || '').split(',').map(function(t){return t.trim()}).filter(Boolean)
+
+    // Extraer historia (antes de la primera línea de metadata)
+    var historia = (d.descripcion || '').split('\n\n🏭')[0].split('\n🏭')[0].trim()
+
+    // Extraer tipo producción
+    var prodMatch = (d.descripcion || '').match(/🏭 Producción: ([^\n]+)/)
+    var produccion = prodMatch ? prodMatch[1] : ''
+
+    // Botones de acción
+    var btns = ''
+    if(p.instagram) {
+      var igUrl = p.instagram.startsWith('http') ? p.instagram : ('https://instagram.com/' + p.instagram.replace('@',''))
+      btns += '<a href="'+igUrl+'" target="_blank" rel="noopener" class="btn-emp btn-emp-ig"><i class="fa-brands fa-instagram"></i> Instagram</a>'
+    }
+    if(p.movil && p.mostrar_telefono) {
+      var num = p.movil.replace(/\D/g,'')
+      var msg = encodeURIComponent('Hola! Vi tu emprendimiento ' + nombre + ' en Trabajos Cerca. Me interesa saber más. 🚀')
+      btns += '<a href="https://wa.me/'+num+'?text='+msg+'" target="_blank" rel="noopener" class="btn-emp btn-emp-wa"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>'
+    }
+    var webMatch = (d.descripcion || '').match(/🌐 Web: ([^\n]+)/)
+    if(webMatch) {
+      btns += '<a href="'+webMatch[1].trim()+'" target="_blank" rel="noopener" class="btn-emp btn-emp-web"><i class="fa-solid fa-globe"></i> Sitio Web</a>'
+    }
+
+    html += '<div class="emp-card">' +
+      '<div class="emp-header">' +
+        '<div class="emp-logo">'+logo+'</div>' +
+        '<div style="flex:1;">' +
+          '<div class="emp-nombre">'+nombre+'</div>' +
+          (rubro ? '<span class="emp-rubro">'+rubro+'</span>' : '') + '<br>' +
+          (rol   ? '<span class="emp-rol"><i class="fa-solid fa-user" style="font-size:10px;"></i> '+rol+'</span>' : '') +
+        '</div>' +
+      '</div>' +
+      (eslogan ? '<div class="emp-eslogan">"'+eslogan+'"</div>' : '') +
+      (historia ? '<div class="emp-historia">'+historia+'</div>' : '') +
+      '<div class="emp-meta">' +
+        (loc ? '<span><i class="fa-solid fa-location-dot" style="color:#059669;"></i> '+loc+'</span>' : '') +
+        (produccion ? '<span class="badge-produccion">🏭 '+produccion+'</span>' : '') +
+      '</div>' +
+      (tags.length ? '<div class="emp-tags">' +
+        tags.slice(0,5).map(function(t){ return '<span class="emp-tag">'+t+'</span>' }).join('') +
+      '</div>' : '') +
+      (btns ? '<div class="emp-acciones">'+btns+'</div>' : '') +
+    '</div>'
+  })
+
+  cont.innerHTML = html
+}
+
+/* ── Init ── */
+async function init() {
+  if(_prov) document.getElementById('lblProvincia').textContent = 'Mostrando en: ' + _prov
+  renderChips()
+  await cargarEmprendimientos()
+}
+
+init()
+</script>
+</body>
+</html>
