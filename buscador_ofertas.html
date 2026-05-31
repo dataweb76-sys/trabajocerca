@@ -59,6 +59,31 @@
 /* ── Spinner ── */
 .spinner{text-align:center;padding:40px;color:#0369a1;}
 .spinner i{font-size:28px;}
+
+/* ── Modal oferta ── */
+.modal-oferta-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+  display:none;align-items:flex-start;justify-content:center;
+  padding:16px;overflow-y:auto;
+}
+.modal-oferta-overlay.open{display:flex;}
+.modal-oferta-box{
+  background:#fff;border-radius:18px;width:100%;max-width:600px;
+  box-shadow:0 24px 60px rgba(0,0,0,.25);position:relative;
+  margin:auto;animation:slideUpO .2s ease;
+}
+@keyframes slideUpO{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-oferta-close{
+  position:absolute;top:14px;right:14px;z-index:2;
+  background:#f1f5f9;border:none;width:32px;height:32px;border-radius:50%;
+  font-size:20px;cursor:pointer;color:#64748b;display:flex;align-items:center;justify-content:center;
+}
+.modal-oferta-close:hover{background:#e2e8f0;}
+.modal-oferta-body{padding:24px;}
+.mo-section{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #f1f5f9;}
+.mo-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.mo-label{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.mo-val{font-size:14px;color:#1e293b;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -99,6 +124,14 @@
 
 </div>
 
+<!-- ══ MODAL OFERTA COMPLETA ══ -->
+<div class="modal-oferta-overlay" id="modalOferta" onclick="cerrarModalOferta(event)">
+  <div class="modal-oferta-box">
+    <button class="modal-oferta-close" onclick="document.getElementById('modalOferta').classList.remove('open');document.body.style.overflow=''">×</button>
+    <div id="modalOfertaBody"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/splash.js"></script>
 <script src="/notif_widget.js"></script>
@@ -115,9 +148,10 @@ const RUBROS = [
   'Textil y Confección','Automotriz','Inmobiliaria','Medios y Comunicación','Otro'
 ]
 
-var todasLasOfertas = []
-var rubroActivo     = null
-var _prov           = localStorage.getItem('tc_provincia') || ''
+var todasLasOfertas      = []
+var _ofertasRenderizadas = []
+var rubroActivo          = null
+var _prov                = localStorage.getItem('tc_provincia') || ''
 
 /* ── Chips de rubro ── */
 function renderChips() {
@@ -211,8 +245,32 @@ function aplicarFiltros() {
   renderOfertas(lista)
 }
 
+/* ── Helpers de parseo ── */
+function parsearOferta(d) {
+  var p         = d.perfiles || {}
+  var desc      = d.descripcion || ''
+  var esConf    = p.mostrar_como === 'oculto'
+  var nombre    = esConf ? ('Importante empresa — ' + (p.empresa_sector || 'rubro desconocido')) : (p.nombre_empresa || 'Empresa')
+  var puesto    = d.categoria || d.titulo || 'Puesto'
+  var loc       = [d.localidad, d.provincia].filter(Boolean).join(', ')
+  var jornada   = d.horarios || ''
+  var tags      = (d.servicios_lista || '').split(',').map(function(t){return t.trim()}).filter(Boolean)
+  var descCorta = desc.split('\n\n📋')[0].split('\n📍')[0].split('\n🏢')[0].trim()
+
+  var modalidad   = (desc.match(/🏢 Modalidad: ([^\n]+)/)   || [])[1] || ''
+  var vacantes    = (desc.match(/👥 Vacantes: (\d+)/)        || [])[1] || ''
+  var sueldo      = (desc.match(/💰 Remuneración: ([^\n]+)/) || [])[1] || ''
+  var requisitos  = (desc.match(/📋 Requisitos: ([^\n]+)/)   || [])[1] || ''
+  var beneficios  = ((desc.match(/✅ Beneficios: ([^\n]+)/)  || [])[1] || '').split(', ').filter(Boolean)
+
+  return { p:p, esConf:esConf, nombre:nombre, puesto:puesto, loc:loc, jornada:jornada,
+           tags:tags, descCorta:descCorta, modalidad:modalidad, vacantes:vacantes,
+           sueldo:sueldo, requisitos:requisitos, beneficios:beneficios, desc:desc }
+}
+
 /* ── Render de cards ── */
 function renderOfertas(lista) {
+  _ofertasRenderizadas = lista
   var cont = document.getElementById('resultados')
   if(!lista.length) {
     cont.innerHTML = '<div class="sin-resultados">' +
@@ -225,89 +283,200 @@ function renderOfertas(lista) {
 
   var html = '<p style="font-size:13px;color:#64748b;margin-bottom:14px;">' + lista.length + ' oferta' + (lista.length!==1?'s':'') + ' encontrada' + (lista.length!==1?'s':'') + '</p>'
 
-  lista.forEach(function(d) {
-    var p       = d.perfiles || {}
-    var esConf  = p.mostrar_como === 'oculto'
-    var nombre  = esConf ? ('Importante empresa — ' + (p.empresa_sector || 'rubro desconocido')) : (p.nombre_empresa || 'Empresa')
-    var logo    = p.foto ? '<img src="'+p.foto+'" alt="Logo">' : '🏢'
-    var rubro   = p.empresa_sector || ''
-    var puesto  = d.categoria || d.titulo || 'Puesto'
-    var loc     = [d.localidad, d.provincia].filter(Boolean).join(', ')
+  lista.forEach(function(d, idx) {
+    var o = parsearOferta(d)
+    var p = o.p
+    var logo = p.foto ? '<img src="'+p.foto+'" alt="Logo">' : '🏢'
 
-    // Parsear descripcion para extraer info
-    var desc    = d.descripcion || ''
-    var descCorta = desc.split('\n\n📋')[0].split('\n📍')[0].split('\n🏢')[0].trim()
-    var modalidad = ''
-    var vacantes  = ''
-    var jornada   = d.horarios || ''
-    var tags      = (d.servicios_lista || '').split(',').map(function(t){return t.trim()}).filter(Boolean)
+    // Tipo de contacto disponible
+    var tieneWA    = !!(p.movil && p.mostrar_telefono !== false)
+    var tieneEmail = !!(p.empresa_descripcion && p.empresa_descripcion.includes('@'))
 
-    var mMatch  = desc.match(/🏢 Modalidad: ([^\n]+)/)
-    if(mMatch)  modalidad = mMatch[1]
-    var vMatch  = desc.match(/👥 Vacantes: (\d+)/)
-    if(vMatch)  vacantes = vMatch[1]
-
-    // Beneficios
-    var benMatch = desc.match(/✅ Beneficios: ([^\n]+)/)
-    var beneficios = benMatch ? benMatch[1].split(', ') : []
-
-    // Sueldo
-    var sueldoMatch = desc.match(/💰 Remuneración: ([^\n]+)/)
-    var sueldo = sueldoMatch ? sueldoMatch[1] : ''
-
-    // Botón de contacto
-    var btnContacto = ''
-    if(p.empresa_descripcion && p.empresa_descripcion.includes('@')) {
-      btnContacto = '<a href="mailto:'+p.empresa_descripcion+'?subject=Postulación: '+encodeURIComponent(puesto)+'" class="btn-postularse btn-post-email">' +
-        '<i class="fa-solid fa-envelope"></i> Enviar CV por email</a>'
-    } else if(p.movil && p.mostrar_telefono) {
-      var num  = p.movil.replace(/\D/g,'')
-      var msg  = encodeURIComponent('Hola! Me postulo para el puesto de '+puesto+' que vi en Trabajos Cerca. Te adjunto mi CV.')
-      btnContacto = '<a href="https://wa.me/'+num+'?text='+msg+'" target="_blank" class="btn-postularse btn-post-wa">' +
-        '<i class="fa-brands fa-whatsapp"></i> Postularse por WhatsApp</a>'
-    } else {
-      btnContacto = '<button class="btn-postularse btn-post-plat" onclick="alert(\'Función de postulación interna próximamente. Contactá a la empresa desde su perfil.\')">' +
-        '<i class="fa-solid fa-paper-plane"></i> Postularse</button>'
-    }
+    var btnPostularse = tieneWA || tieneEmail
+      ? '<button onclick="postularse('+idx+')" class="btn-postularse '+(tieneWA?'btn-post-wa':'btn-post-email')+'">' +
+          '<i class="fa-'+(tieneWA?'brands fa-whatsapp':'solid fa-envelope')+'"></i> ' +
+          (tieneWA ? 'Postularse por WhatsApp' : 'Enviar CV por email') +
+        '</button>'
+      : '<button class="btn-postularse btn-post-plat" onclick="postularse('+idx+')">' +
+          '<i class="fa-solid fa-paper-plane"></i> Postularse</button>'
 
     html += '<div class="oferta-card">' +
       '<div class="oferta-header">' +
         '<div class="oferta-logo">'+logo+'</div>' +
         '<div style="flex:1;">' +
           '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
-            '<div class="oferta-empresa">'+nombre+'</div>' +
-            (esConf ? '<span class="badge-urgente">CONFIDENCIAL</span>' : '') +
-            (vacantes && parseInt(vacantes)>1 ? '<span class="badge-vacantes">'+vacantes+' vacantes</span>' : '') +
+            '<div class="oferta-empresa">'+o.nombre+'</div>' +
+            (o.esConf ? '<span class="badge-urgente">CONFIDENCIAL</span>' : '') +
+            (o.vacantes && parseInt(o.vacantes)>1 ? '<span class="badge-vacantes">'+o.vacantes+' vacantes</span>' : '') +
           '</div>' +
-          '<div class="oferta-puesto">'+puesto+'</div>' +
-          '<span class="oferta-rubro">'+rubro+'</span>' +
+          '<div class="oferta-puesto">'+o.puesto+'</div>' +
+          '<span class="oferta-rubro">'+(p.empresa_sector||'')+'</span>' +
         '</div>' +
       '</div>' +
 
       '<div class="oferta-meta">' +
-        (loc ? '<span><i class="fa-solid fa-location-dot" style="color:#dc2626;"></i> '+loc+'</span>' : '') +
-        (modalidad ? '<span><i class="fa-solid fa-laptop-house" style="color:#0369a1;"></i> '+modalidad+'</span>' : '') +
-        (jornada ? '<span><i class="fa-solid fa-clock" style="color:#059669;"></i> '+jornada.split(' · ')[0]+'</span>' : '') +
-        (sueldo ? '<span><i class="fa-solid fa-money-bill-wave" style="color:#059669;"></i> '+sueldo+'</span>' : '') +
+        (o.loc ? '<span><i class="fa-solid fa-location-dot" style="color:#dc2626;"></i> '+o.loc+'</span>' : '') +
+        (o.modalidad ? '<span><i class="fa-solid fa-laptop-house" style="color:#0369a1;"></i> '+o.modalidad+'</span>' : '') +
+        (o.jornada ? '<span><i class="fa-solid fa-clock" style="color:#059669;"></i> '+o.jornada.split(' · ')[0]+'</span>' : '') +
+        (o.sueldo ? '<span><i class="fa-solid fa-money-bill-wave" style="color:#059669;"></i> '+o.sueldo+'</span>' : '') +
       '</div>' +
 
-      (descCorta ? '<div class="oferta-desc">'+descCorta+'</div>' : '') +
+      (o.descCorta ? '<div class="oferta-desc">'+o.descCorta+'</div>' : '') +
 
-      (tags.length || beneficios.length ? '<div class="oferta-tags">' +
-        tags.slice(0,4).map(function(t){ return '<span class="oferta-tag">'+t+'</span>' }).join('') +
-        beneficios.slice(0,2).map(function(b){ return '<span class="oferta-beneficio">✅ '+b+'</span>' }).join('') +
+      (o.tags.length || o.beneficios.length ? '<div class="oferta-tags">' +
+        o.tags.slice(0,4).map(function(t){ return '<span class="oferta-tag">'+t+'</span>' }).join('') +
+        o.beneficios.slice(0,2).map(function(b){ return '<span class="oferta-beneficio">✅ '+b+'</span>' }).join('') +
       '</div>' : '') +
 
       '<div class="oferta-acciones">' +
-        btnContacto +
-        '<a href="/perfil_servicio.html" class="btn-postularse btn-post-plat" style="font-size:12px;">' +
+        btnPostularse +
+        '<button onclick="verOferta('+idx+')" class="btn-postularse btn-post-plat" style="font-size:12px;">' +
           '<i class="fa-solid fa-eye"></i> Ver oferta completa' +
-        '</a>' +
+        '</button>' +
       '</div>' +
     '</div>'
   })
 
   cont.innerHTML = html
+}
+
+/* ══════════════════════════════════════
+   POSTULARSE — WA con datos del perfil
+══════════════════════════════════════ */
+async function postularse(idx) {
+  var d = _ofertasRenderizadas[idx]
+  if(!d) return
+  var p      = d.perfiles || {}
+  var puesto = d.categoria || d.titulo || 'el puesto'
+
+  // Contacto por email
+  if(p.empresa_descripcion && p.empresa_descripcion.includes('@') && !p.movil) {
+    window.location.href = 'mailto:' + p.empresa_descripcion + '?subject=' + encodeURIComponent('Postulación: ' + puesto + ' — Trabajos Cerca')
+    return
+  }
+
+  var num = (p.movil || '').replace(/\D/g,'')
+  if(!num || p.mostrar_telefono === false) {
+    alert('Esta empresa no tiene contacto disponible en este momento.\n\nSi conocés la empresa, buscala en el buscador o contactanos.')
+    return
+  }
+
+  // Obtener perfil del postulante logueado
+  var nombrePost  = 'un/a candidato/a'
+  var telPost     = ''
+  var locPost     = ''
+  var catPost     = ''
+  var linkPerfil  = ''
+
+  var sesRes = await supa.auth.getSession()
+  var user   = sesRes.data?.session?.user
+
+  if(user) {
+    var perfRes = await supa.from('perfiles')
+      .select('nombre,apellido,nombre_empresa,movil,localidad,provincia,tipo')
+      .eq('id', user.id)
+      .maybeSingle()
+    var perf = perfRes.data
+    if(perf) {
+      nombrePost = (perf.nombre_empresa && perf.nombre_empresa.trim())
+        ? perf.nombre_empresa
+        : ((perf.nombre || '') + ' ' + (perf.apellido || '')).trim() || nombrePost
+      if(perf.movil) telPost = '\n📱 Teléfono: ' + perf.movil
+      if(perf.localidad) locPost = '\n📍 Localidad: ' + perf.localidad + (perf.provincia ? ', ' + perf.provincia : '')
+    }
+    // Categoría del servicio
+    var srvRes = await supa.from('servicios')
+      .select('categoria,descripcion')
+      .eq('usuario_id', user.id)
+      .maybeSingle()
+    if(srvRes.data?.categoria) catPost = '\n💼 Me desempeño como: ' + srvRes.data.categoria
+    linkPerfil = '\n🔗 Mi perfil en Trabajos Cerca: ' + location.origin + '/perfil_publico.html?id=' + user.id
+  }
+
+  var empresa = p.nombre_empresa || 'la empresa'
+  var msg = encodeURIComponent(
+    '¡Hola ' + (p.esConf ? '' : empresa) + '! Me comunico desde Trabajos Cerca para postularme al puesto de ' + puesto + '. 👋\n\n' +
+    '👤 Mi nombre: ' + nombrePost +
+    telPost +
+    locPost +
+    catPost +
+    linkPerfil +
+    '\n\nQuedo a disposición. ¡Gracias!'
+  )
+
+  window.open('https://wa.me/' + num + '?text=' + msg, '_blank')
+}
+
+/* ══════════════════════════════════════
+   VER OFERTA COMPLETA — Modal
+══════════════════════════════════════ */
+function verOferta(idx) {
+  var d = _ofertasRenderizadas[idx]
+  if(!d) return
+  var o = parsearOferta(d)
+  var p = o.p
+  var logo = p.foto ? '<img src="'+p.foto+'" style="width:100%;height:100%;object-fit:cover;">' : '🏢'
+  var num  = (p.movil || '').replace(/\D/g,'')
+  var tieneWA = !!(num && p.mostrar_telefono !== false)
+
+  var html =
+    // Header empresa
+    '<div style="background:linear-gradient(135deg,#0c4a6e,#0369a1);padding:24px;border-radius:18px 18px 0 0;">' +
+      '<div style="display:flex;gap:14px;align-items:center;">' +
+        '<div style="width:60px;height:60px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden;flex-shrink:0;border:2px solid rgba(255,255,255,.2);">'+logo+'</div>' +
+        '<div>' +
+          '<p style="margin:0 0 2px;font-size:12px;color:rgba(255,255,255,.75);font-weight:600;">'+o.nombre+'</p>' +
+          '<h2 style="margin:0 0 4px;font-size:19px;font-weight:900;color:white;line-height:1.2;">'+o.puesto+'</h2>' +
+          (p.empresa_sector ? '<span style="background:rgba(255,255,255,.18);color:white;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;">'+p.empresa_sector+'</span>' : '') +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="modal-oferta-body">' +
+
+    // Datos rápidos
+    '<div class="mo-section" style="display:flex;flex-wrap:wrap;gap:10px;">' +
+      (o.loc ? '<span style="display:flex;align-items:center;gap:5px;background:#f1f5f9;border-radius:20px;padding:5px 12px;font-size:13px;color:#475569;font-weight:600;"><i class="fa-solid fa-location-dot" style="color:#dc2626;font-size:11px;"></i>'+o.loc+'</span>' : '') +
+      (o.modalidad ? '<span style="display:flex;align-items:center;gap:5px;background:#f0f9ff;border-radius:20px;padding:5px 12px;font-size:13px;color:#0369a1;font-weight:600;"><i class="fa-solid fa-laptop-house" style="font-size:11px;"></i>'+o.modalidad+'</span>' : '') +
+      (o.jornada ? '<span style="display:flex;align-items:center;gap:5px;background:#f0fdf4;border-radius:20px;padding:5px 12px;font-size:13px;color:#166534;font-weight:600;"><i class="fa-solid fa-clock" style="font-size:11px;"></i>'+o.jornada+'</span>' : '') +
+      (o.vacantes ? '<span style="display:flex;align-items:center;gap:5px;background:#fffbeb;border-radius:20px;padding:5px 12px;font-size:13px;color:#92400e;font-weight:600;"><i class="fa-solid fa-users" style="font-size:11px;"></i>'+o.vacantes+' vacante'+(parseInt(o.vacantes)>1?'s':'')+'</span>' : '') +
+      (o.sueldo ? '<span style="display:flex;align-items:center;gap:5px;background:#f0fdf4;border-radius:20px;padding:5px 12px;font-size:13px;color:#166534;font-weight:600;"><i class="fa-solid fa-money-bill-wave" style="font-size:11px;"></i>'+o.sueldo+'</span>' : '') +
+    '</div>' +
+
+    // Descripción completa
+    (o.descCorta ? '<div class="mo-section"><div class="mo-label"><i class="fa-solid fa-file-lines"></i> Descripción del puesto</div><div class="mo-val" style="white-space:pre-line;">'+o.descCorta+'</div></div>' : '') +
+
+    // Requisitos
+    (o.requisitos ? '<div class="mo-section"><div class="mo-label"><i class="fa-solid fa-list-check"></i> Requisitos</div><div class="mo-val">'+o.requisitos+'</div></div>' : '') +
+
+    // Habilidades buscadas
+    (o.tags.length ? '<div class="mo-section"><div class="mo-label"><i class="fa-solid fa-tags"></i> Habilidades / Perfil buscado</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">'+o.tags.map(function(t){return '<span class="oferta-tag" style="font-size:12px;">'+t+'</span>'}).join('')+'</div></div>' : '') +
+
+    // Beneficios
+    (o.beneficios.length ? '<div class="mo-section"><div class="mo-label"><i class="fa-solid fa-gift"></i> Beneficios</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">'+o.beneficios.map(function(b){return '<span class="oferta-beneficio" style="font-size:12px;">✅ '+b+'</span>'}).join('')+'</div></div>' : '') +
+
+    // Botones de acción
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">' +
+      (tieneWA
+        ? '<button onclick="document.getElementById(\'modalOferta\').classList.remove(\'open\');document.body.style.overflow=\'\';postularse('+idx+')" style="flex:1;min-width:180px;padding:13px;background:#25d366;color:white;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;">' +
+            '<i class="fa-brands fa-whatsapp"></i> Postularme ahora' +
+          '</button>'
+        : '') +
+      '<button onclick="document.getElementById(\'modalOferta\').classList.remove(\'open\');document.body.style.overflow=\'\'" style="padding:13px 20px;background:#f1f5f9;color:#475569;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Cerrar</button>' +
+    '</div>' +
+
+    '</div>'
+
+  document.getElementById('modalOfertaBody').innerHTML = html
+  document.getElementById('modalOferta').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+
+function cerrarModalOferta(e) {
+  if(e.target === document.getElementById('modalOferta')) {
+    document.getElementById('modalOferta').classList.remove('open')
+    document.body.style.overflow = ''
+  }
 }
 
 /* ── Init ── */
