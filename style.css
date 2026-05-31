@@ -598,6 +598,46 @@ label {
   margin-bottom: 22px;
 }
 
+/* Cada columna del filtro: flex-column para que el input siempre quede abajo */
+.filtros > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+/* Label uniforme: 1 línea, sin margin-bottom propio */
+.filtros label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Input ciudad alineado con cat-select */
+.filtros #ciudad,
+.filtros .ciudad-select {
+  padding: 11px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #f8fafc;
+  color: #1e293b;
+  width: 100%;
+  margin-bottom: 0;
+  transition: border-color .15s, box-shadow .15s;
+}
+.filtros #ciudad:focus,
+.filtros .ciudad-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+.filtros .ciudad-select:hover { border-color: #2563eb; }
+
 /* PERFIL PÚBLICO */
 
 .pub-header {
