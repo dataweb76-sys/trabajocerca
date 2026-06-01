@@ -1390,7 +1390,7 @@ function renderCard(partido, modo) {
         <div class="match-venue">${partido.ciudad || ""}</div>
         <button class="btn-save-pred ${pred ? "saved" : ""}"
           id="btn-${partido.id}"
-          onclick="guardarPrediccion(${partido.id})">
+          onclick="guardarPrediccion('${partido.id}')">
           ${pred ? "✅ Guardado" : "Guardar"}
         </button>
       </div>`
@@ -1429,11 +1429,11 @@ function renderCard(partido, modo) {
       <div class="score-wrap">
         <input type="number" class="score-input" id="gl-${partido.id}"
           min="0" max="20" value="${gl}" placeholder="0"
-          onchange="marcaModificado(${partido.id})">
+          oninput="marcaModificado('${partido.id}')">
         <span class="score-sep">-</span>
         <input type="number" class="score-input" id="gv-${partido.id}"
           min="0" max="20" value="${gv}" placeholder="0"
-          onchange="marcaModificado(${partido.id})">
+          oninput="marcaModificado('${partido.id}')">
       </div>`
   }
 
@@ -1477,6 +1477,7 @@ window.marcaModificado = function(pid) {
   const btn = document.getElementById("btn-" + pid)
   if (btn) {
     btn.classList.remove("saved")
+    btn.style.background = ""
     btn.innerHTML = "Guardar"
   }
 }
@@ -1486,23 +1487,34 @@ window.guardarPrediccion = async function(pid) {
 
   const glInput = document.getElementById("gl-" + pid)
   const gvInput = document.getElementById("gv-" + pid)
-  const btn = document.getElementById("btn-" + pid)
+  const btn     = document.getElementById("btn-" + pid)
 
-  let gl = parseInt(glInput?.value)
-  let gv = parseInt(gvInput?.value)
+  // Tratar vacío como 0 — no forzar al usuario a escribir 0
+  const glVal = (glInput?.value === "" || glInput?.value == null) ? "0" : glInput.value
+  const gvVal = (gvInput?.value === "" || gvInput?.value == null) ? "0" : gvInput.value
+
+  let gl = parseInt(glVal)
+  let gv = parseInt(gvVal)
 
   if (isNaN(gl) || isNaN(gv) || gl < 0 || gv < 0) {
-    glInput?.classList.add("error")
-    gvInput?.classList.add("error")
+    if (btn) {
+      btn.innerHTML = "⚠️ Ingresá los goles"
+      btn.style.background = "#f97316"
+      setTimeout(() => {
+        btn.innerHTML = "Guardar"
+        btn.style.background = ""
+      }, 2500)
+    }
     return
   }
   if (gl > 20) gl = 20
   if (gv > 20) gv = 20
 
   // Verificar que el partido no haya empezado
-  const partido = PARTIDOS.find(p => p.id === pid)
+  // Comparación loose para que funcione con IDs string o numérico
+  const partido = PARTIDOS.find(p => String(p.id) === String(pid))
   if (partido && new Date() >= new Date(partido.fecha_inicio)) {
-    btn.innerHTML = "🔒 Cerrado"
+    if (btn) btn.innerHTML = "🔒 Cerrado"
     return
   }
 
