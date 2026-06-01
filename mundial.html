@@ -186,27 +186,30 @@
 .team-name { font-size:12px;font-weight:700;color:#374151;text-align:center; }
 
 .score-wrap {
-  display:flex;align-items:center;gap:4px;min-width:80px;justify-content:center;
+  display:flex;align-items:center;gap:6px;min-width:100px;justify-content:center;
 }
 .score-input {
-  width:36px;height:36px;text-align:center;font-size:18px;font-weight:900;
-  border:2px solid #e2e8f0;border-radius:8px;outline:none;
-  font-family:inherit;color:#1e293b;transition:border-color .2s;
+  width:48px;height:48px;text-align:center;font-size:24px;font-weight:900;
+  border:2.5px solid #d1d5db;border-radius:10px;outline:none;
+  font-family:inherit;color:#1e293b;background:#fff;
+  transition:border-color .2s,box-shadow .2s;
   -moz-appearance:textfield;
+  box-shadow:0 1px 3px rgba(0,0,0,.07);
 }
 .score-input::-webkit-outer-spin-button,
 .score-input::-webkit-inner-spin-button { -webkit-appearance:none;margin:0; }
-.score-input:focus { border-color:#15803d; }
-.score-sep { font-size:20px;font-weight:900;color:#cbd5e1; }
+.score-input:focus { border-color:#15803d;box-shadow:0 0 0 3px rgba(21,128,61,.15); }
+.score-input:not(:placeholder-shown) { border-color:#15803d;background:#f0fdf4;color:#15803d; }
+.score-sep { font-size:22px;font-weight:900;color:#9ca3af; }
 
 /* Score cuando está bloqueado */
 .score-display {
   display:flex;align-items:center;gap:6px;
 }
 .score-num {
-  width:36px;height:36px;background:#f1f5f9;border-radius:8px;
+  width:48px;height:48px;background:#f1f5f9;border-radius:10px;
   display:flex;align-items:center;justify-content:center;
-  font-size:18px;font-weight:900;color:#475569;
+  font-size:22px;font-weight:900;color:#475569;
 }
 .score-result {
   display:flex;align-items:center;gap:6px;
@@ -1177,18 +1180,28 @@ async function init() {
     PARTIDOS = partidosRes.data
   }
 
-  // Verificar si puede jugar: compartió en redes + siguió @datawebdigital (localStorage)
+  // Verificar si puede jugar: compartió en redes + siguió @datawebdigital
+  // Primero chequea localStorage (mismo dispositivo)
   if (currentUser) {
     puedeJugar = !!(localStorage.getItem('tc_compartido') && localStorage.getItem('tc_ig_seguido'))
     nRefs = 0 // ya no se usa para desbloqueo
   }
 
   // Predicciones del usuario
-  if (currentUser && puedeJugar) {
+  if (currentUser) {
     const { data: preds } = await supabase
       .from("mundial_predicciones")
       .select("*")
       .eq("user_id", currentUser.id)
+
+    // Si ya tiene predicciones guardadas en la DB → ya cumplió los requisitos antes
+    // (puede estar en otro dispositivo sin localStorage)
+    if (preds && preds.length > 0 && !puedeJugar) {
+      puedeJugar = true
+      // Restaurar localStorage para que funcione offline/futuras visitas
+      localStorage.setItem('tc_compartido', '1')
+      localStorage.setItem('tc_ig_seguido', '1')
+    }
 
     if (preds) {
       preds.forEach(p => MIS_PREDS[p.partido_id] = p)
