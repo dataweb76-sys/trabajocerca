@@ -7,6 +7,13 @@
 <meta name="theme-color" content="#2563eb">
 <title>Completar perfil — Trabajos Cerca</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- Leer ?tipo= INMEDIATAMENTE para que el CSS aplique antes del primer paint -->
+<script>
+(function(){
+  var t = new URLSearchParams(location.search).get('tipo')
+  if(t) document.documentElement.setAttribute('data-tipo', t)
+})()
+</script>
 <style>
 /* ══════════════════════════════════════════
    BASE
@@ -208,19 +215,39 @@ select{cursor:pointer;}
 /* ══ HERO BANNER ══ */
 #heroSection{display:none;margin-bottom:0;}
 .hero-img{
-  height:210px;
+  height:240px;
   background-size:cover;background-position:center center;
   position:relative;overflow:hidden;
 }
 .hero-overlay{
   position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.25) 60%,transparent 100%);
+  background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.3) 55%,transparent 100%);
   display:flex;flex-direction:column;justify-content:flex-end;
-  padding:22px 20px;
+  padding:24px 20px;
 }
 .hero-pretitle{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.75);text-transform:uppercase;margin-bottom:5px;}
-.hero-title{font-size:26px;font-weight:900;color:#fff;line-height:1.15;margin:0 0 5px;}
-.hero-sub{font-size:13px;color:rgba(255,255,255,.88);margin:0;}
+.hero-title{font-size:28px;font-weight:900;color:#fff;line-height:1.15;margin:0 0 6px;}
+.hero-sub{font-size:14px;color:rgba(255,255,255,.9);margin:0;}
+
+/* ══ MOSTRAR/OCULTAR POR data-tipo (sin esperar JS async) ══ */
+/* Cuando hay tipo en URL: ocultar selector y guías */
+[data-tipo] .tipo-select-wrap  { display:none !important; }
+[data-tipo] .guia-banner       { display:none !important; }
+[data-tipo] #heroSection       { display:block !important; }
+
+/* Mostrar el form correcto inmediatamente */
+[data-tipo="oficio"]         #formOficio         { display:block !important; }
+[data-tipo="profesional"]    #formProfesional    { display:block !important; }
+[data-tipo="cv"]             #formCV             { display:block !important; }
+[data-tipo="empresa"]        #formEmpresa        { display:block !important; }
+[data-tipo="emprendimiento"] #formEmprendimiento { display:block !important; }
+
+/* Hero backgrounds por tipo */
+[data-tipo="oficio"]         #heroImg { background-image: url('/hero-oficios.jpg'),         linear-gradient(135deg,#f59e0b,#d97706,#b45309); }
+[data-tipo="profesional"]    #heroImg { background-image: url('/hero-profesionales.jpg'),    linear-gradient(135deg,#7c3aed,#5b21b6,#4c1d95); }
+[data-tipo="cv"]             #heroImg { background-image: url('/hero-cv.jpg'),               linear-gradient(135deg,#0369a1,#0c4a6e,#1e3a5f); }
+[data-tipo="empresa"]        #heroImg { background-image: url('/hero-empresa.jpg'),          linear-gradient(135deg,#2563eb,#1d4ed8,#1e40af); }
+[data-tipo="emprendimiento"] #heroImg { background-image: url('/hero-emprendimientos.jpg'),  linear-gradient(135deg,#059669,#047857,#065f46); }
 
 /* ══ FORMAS DE PAGO ══ */
 .pago-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px;}
@@ -272,7 +299,7 @@ select{cursor:pointer;}
   </a>
 </div>
 
-<!-- HERO BANNER (aparece cuando se selecciona tipo) -->
+<!-- HERO BANNER -->
 <div id="heroSection">
   <div class="hero-img" id="heroImg">
     <div class="hero-overlay">
@@ -282,6 +309,24 @@ select{cursor:pointer;}
     </div>
   </div>
 </div>
+<!-- Títulos del hero por tipo (síncrono, sin esperar auth) -->
+<script>
+(function(){
+  var t = document.documentElement.getAttribute('data-tipo')
+  if(!t) return
+  var textos = {
+    oficio:         { title:'Registrá tu Oficio',            sub:'Completá tus datos y aparecé en el buscador de oficios' },
+    profesional:    { title:'Registrá tu Profesión',         sub:'Completá tu perfil y llegá a más pacientes y clientes' },
+    cv:             { title:'Publicá tu CV',                 sub:'Hacé visible tu perfil para empleadores de tu zona' },
+    empresa:        { title:'Publicá una Oferta de Trabajo', sub:'Encontrá el empleado ideal para tu empresa o comercio' },
+    emprendimiento: { title:'Registrá tu Emprendimiento',    sub:'Mostrá tu marca y llegá a clientes de tu zona' }
+  }
+  var cfg = textos[t]
+  if(!cfg) return
+  document.getElementById('heroTitle').textContent = cfg.title
+  document.getElementById('heroSub').textContent   = cfg.sub
+})()
+</script>
 
 <div class="wrap">
 
