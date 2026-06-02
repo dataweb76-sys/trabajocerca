@@ -1767,7 +1767,11 @@ function actualizarHero(tipo) {
 async function cambiarTipo(tipo) {
   var forms = ['Oficio','Profesional','CV','Empresa','Emprendimiento']
   forms.forEach(function(f){ document.getElementById('form'+f).style.display = 'none' })
-  if(tipo === 'oficio')             document.getElementById('formOficio').style.display = 'block'
+  if(tipo === 'oficio') {
+    document.getElementById('formOficio').style.display = 'block'
+    // Si aún no hay bloques generados, mostrar 1 vacío
+    if(!document.getElementById('bloquesOficios').children.length) actualizarBloques()
+  }
   else if(tipo === 'profesional')   document.getElementById('formProfesional').style.display = 'block'
   else if(tipo === 'cv') {
     document.getElementById('formCV').style.display = 'block'
@@ -3072,20 +3076,25 @@ async function init() {
     document.getElementById('fotoCircle').innerHTML = '<img src="'+p.foto+'" alt="Foto">'
   }
 
-  // Precargar tipo: primero del perfil en DB, sino del query param ?tipo=
-  var tipoAUsar = p.tipo || new URLSearchParams(location.search).get('tipo') || ''
+  // Precargar tipo: prioridad → ?tipo= URL param > primer elemento del CSV en DB
+  var _params   = new URLSearchParams(location.search)
+  var _tipoParam = _params.get('tipo') || ''
+  var _tipoDB    = (p.tipo || '').split(',')[0].trim()  // primer elemento del CSV
+  var tipoAUsar  = _tipoParam || _tipoDB || ''
+
+  // Siempre ocultar el selector cuando viene por URL ?tipo=
+  if(_tipoParam) {
+    var tipoWrap = document.querySelector('.tipo-select-wrap')
+    if(tipoWrap) tipoWrap.style.display = 'none'
+  }
+
   if(tipoAUsar) {
     document.getElementById('selectorTipo').value = tipoAUsar
     cambiarTipo(tipoAUsar)
-    // Si vino por query param (usuario nuevo), ocultar el selector de tipo
-    if(!p.tipo && new URLSearchParams(location.search).get('tipo')) {
-      var tipoWrap = document.querySelector('.tipo-select-wrap')
-      if(tipoWrap) tipoWrap.style.display = 'none'
-    }
   }
 
-  // Precargar oficio
-  if(p.tipo === 'oficio') {
+  // Precargar oficio (si el tipo primario en DB es oficio, o si viene por ?tipo=oficio)
+  if(_tipoDB === 'oficio' || _tipoParam === 'oficio') {
     var srvRes2 = await supa.from('servicios')
       .select('categoria,descripcion,servicios_lista,horarios,localidad,provincia')
       .eq('usuario_id', currentUser.id).maybeSingle()
