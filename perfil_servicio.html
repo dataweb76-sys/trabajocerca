@@ -1632,9 +1632,16 @@ async function cambiarTipo(tipo) {
     initEmpTagInput2()
   }
 
-  // Guardar el tipo en la DB al instante
+  // Guardar el tipo en la DB preservando tipos secundarios
   if(currentUser && tipo) {
-    await supa.from('perfiles').update({ tipo: tipo }).eq('id', currentUser.id)
+    var perRes = await supa.from('perfiles').select('tipo').eq('id', currentUser.id).maybeSingle()
+    var tipoActualDB = perRes.data?.tipo || ''
+    var tiposActuales = tipoActualDB.split(',').map(function(t){return t.trim()}).filter(Boolean)
+    // El primer elemento es el tipo primario; los restantes son secundarios
+    var secundarios = tiposActuales.slice(1)
+    // Reemplazar solo el primario, conservar secundarios
+    var nuevoTipoFull = [tipo].concat(secundarios.filter(function(s){return s !== tipo})).join(',')
+    await supa.from('perfiles').update({ tipo: nuevoTipoFull }).eq('id', currentUser.id)
   }
 
   document.getElementById('selectorTipo').scrollIntoView({ behavior:'smooth', block:'start' })

@@ -187,7 +187,7 @@ function cambiarProvincia() {
 async function cargarOfertas() {
   var SRV_SELECT = 'id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,created_at,activo'
   var PERF_SELECT = 'id,tipo,nombre_empresa,empresa_sector,mostrar_como,foto,movil,empresa_descripcion,mostrar_telefono'
-  var url = SB_URL + '/rest/v1/perfiles?select=' + PERF_SELECT + ',servicios(' + SRV_SELECT + ')&tipo=eq.empresa'
+  var url = SB_URL + '/rest/v1/perfiles?select=' + PERF_SELECT + ',servicios(' + SRV_SELECT + ')&tipo=ilike.*empresa*'
   try {
     var res = await fetch(url, {
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }

@@ -142,7 +142,7 @@ function cambiarProvincia() {
 async function cargarEmprendimientos() {
   var PERF_SELECT = 'id,tipo,nombre_empresa,empresa_sector,empresa_descripcion,profesion_universitaria,foto,movil,mostrar_telefono,instagram,localidad,provincia'
   var SRV_SELECT  = 'id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,created_at,activo'
-  var url = SB_URL + '/rest/v1/perfiles?select=' + PERF_SELECT + ',servicios(' + SRV_SELECT + ')&tipo=eq.emprendimiento'
+  var url = SB_URL + '/rest/v1/perfiles?select=' + PERF_SELECT + ',servicios(' + SRV_SELECT + ')&tipo=ilike.*emprendimiento*'
   try {
     var res = await fetch(url, { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } })
     if(!res.ok) { console.error('cargarEmprendimientos HTTP', res.status); aplicarFiltros(); return }

@@ -190,6 +190,43 @@ async function init(){
   }
   const accionPrincipal = ACCION[_tipo] || ACCION.profesional
 
+  /* ── Buscadores donde aparecer (multi-tipo) ── */
+  const tiposActivos = (data.tipo || _tipo).split(",").map(t => t.trim()).filter(Boolean)
+  const BUSCADORES_OPTS = [
+    { id:"oficio",         emoji:"🔧", label:"Buscador de Oficios",         desc:"Plomeros, electricistas, carpinteros..." },
+    { id:"profesional",    emoji:"👔", label:"Buscador de Profesionales",    desc:"Médicos, abogados, contadores..." },
+    { id:"emprendimiento", emoji:"🚀", label:"Buscador de Emprendimientos",  desc:"Locales, marcas y proyectos propios" },
+    { id:"cv",             emoji:"📄", label:"Buscador de CVs / Empleados",  desc:"Aparecés buscando trabajo" },
+    { id:"empresa",        emoji:"🏢", label:"Ofertas de Trabajo",           desc:"Publicás puestos y buscás empleados" },
+  ]
+  const buscadoresHtml = `
+    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 18px;margin-bottom:16px;">
+      <h3 style="margin:0 0 6px;font-size:16px;font-weight:800;">
+        <i class="fa-solid fa-magnifying-glass" style="color:#2563eb;"></i> ¿En qué buscadores querés aparecer?
+      </h3>
+      <p style="margin:0 0 14px;font-size:12px;color:#64748b;">Podés aparecer en varios a la vez. Tu formulario principal sigue siendo el que ya completaste.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${BUSCADORES_OPTS.map(b => `
+          <label style="display:flex;align-items:center;gap:12px;padding:10px 12px;
+            background:${tiposActivos.includes(b.id) ? '#eff6ff' : 'white'};
+            border:1.5px solid ${tiposActivos.includes(b.id) ? '#bfdbfe' : '#e2e8f0'};
+            border-radius:10px;cursor:pointer;transition:all .15s;"
+            onclick="toggleBuscador('${b.id}','${userId}')">
+            <span style="font-size:22px;flex-shrink:0;">${b.emoji}</span>
+            <div style="flex:1;">
+              <strong style="display:block;font-size:13px;color:#1e293b;">${b.label}</strong>
+              <span style="font-size:11px;color:#64748b;">${b.desc}</span>
+            </div>
+            <span id="check-buscador-${b.id}" style="
+              width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+              background:${tiposActivos.includes(b.id) ? '#2563eb' : '#e2e8f0'};
+              color:white;font-size:12px;flex-shrink:0;">
+              ${tiposActivos.includes(b.id) ? '<i class="fa-solid fa-check"></i>' : ''}
+            </span>
+          </label>`).join("")}
+      </div>
+    </div>`
+
   /* ── Disponibilidad + Estadísticas + Trabajos realizados (solo profesionales) ── */
   let disponibleHtml = ""
   let statsHtml      = ""
@@ -584,6 +621,7 @@ async function init(){
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;">
 
     ${statsHtml}
+    ${buscadoresHtml}
     ${disponibleHtml}
     ${trabajosHtml}
 
@@ -1347,6 +1385,42 @@ function montarFAQChat(){
       answerEl.classList.add('tc-open')
     }
   })
+}
+
+/* ══════════════════════════════════════
+   TOGGLE BUSCADOR (multi-tipo)
+══════════════════════════════════════ */
+window.toggleBuscador = async function(tipoToggle, userId) {
+  const { data: perfActual } = await supabase
+    .from("perfiles").select("tipo").eq("id", userId).single()
+  const tipoActual = perfActual?.tipo || ""
+  const tipos = tipoActual.split(",").map(t => t.trim()).filter(Boolean)
+
+  let nuevosTipos
+  if(tipos.includes(tipoToggle)){
+    if(tipos.length <= 1){ alert("Tenés que aparecer en al menos un buscador."); return }
+    nuevosTipos = tipos.filter(t => t !== tipoToggle)
+  } else {
+    nuevosTipos = [...tipos, tipoToggle]
+  }
+
+  const nuevoTipo = nuevosTipos.join(",")
+  const { error } = await supabase
+    .from("perfiles").update({ tipo: nuevoTipo }).eq("id", userId)
+  if(error){ alert("Error: " + error.message); return }
+
+  // Actualizar UI sin recargar
+  const checkEl = document.getElementById("check-buscador-" + tipoToggle)
+  const labelEl = checkEl?.closest("label")
+  const activo  = nuevosTipos.includes(tipoToggle)
+  if(checkEl){
+    checkEl.style.background = activo ? "#2563eb" : "#e2e8f0"
+    checkEl.innerHTML = activo ? '<i class="fa-solid fa-check"></i>' : ""
+  }
+  if(labelEl){
+    labelEl.style.background  = activo ? "#eff6ff" : "white"
+    labelEl.style.borderColor = activo ? "#bfdbfe" : "#e2e8f0"
+  }
 }
 
 init()

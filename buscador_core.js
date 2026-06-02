@@ -255,15 +255,17 @@ window.buscar = async function(){
     return
   }
 
-  // ── FILTRO PRINCIPAL: solo mostrar el tipo de esta página ──
+  // ── FILTRO PRINCIPAL: soporta tipo simple ("oficio") y multiples ("oficio,emprendimiento") ──
   if(TIPO === "profesional"){
-    data = data.filter(d => esProfesionalUni(d))
-  } else {
-    // Buscador de oficios: excluir empresa, emprendimiento, cv y profesionales universitarios
     data = data.filter(d => {
-      const tipo = d.perfiles?.tipo
-      if(tipo === "empresa" || tipo === "emprendimiento" || tipo === "cv") return false
-      return !esProfesionalUni(d)
+      const tipos = (d.perfiles?.tipo || "").split(",").map(t => t.trim())
+      return tipos.includes("profesional") || esProfesionalUni(d)
+    })
+  } else {
+    // Buscador de oficios: solo los que tienen "oficio" en su lista de tipos
+    data = data.filter(d => {
+      const tipos = (d.perfiles?.tipo || "").split(",").map(t => t.trim())
+      return tipos.includes("oficio")
     })
   }
 
