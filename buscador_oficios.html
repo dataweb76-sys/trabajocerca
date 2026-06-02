@@ -168,5 +168,83 @@
 <script src="/chat_widget.js"></script>
 <script src="/splash.js"></script>
 <script src="/analytics.js"></script>
+
+<!-- Banner inline entre perfiles -->
+<style>
+.banner-entre-perfiles{
+  display:block;
+  width:100%;
+  margin-bottom:14px;
+  border-radius:11px;
+  overflow:hidden;
+  box-shadow:0 2px 10px rgba(0,0,0,.10);
+  transition:transform .15s,box-shadow .15s;
+  line-height:0;
+  text-decoration:none;
+}
+.banner-entre-perfiles:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(0,0,0,.17);
+}
+.banner-entre-perfiles img{
+  width:100%;
+  height:auto;
+  display:block;
+}
+</style>
+<script>
+(function(){
+  var imagenes = [
+    '/banner-pub-albanil.jpg',
+    '/banner-pub-empresa.jpg',
+    '/banner-pub-profesional.jpg',
+    '/banner-pub-tech.jpg',
+    '/banner-pub-oficina.jpg'
+  ]
+  var imgIdx = 0
+
+  function crearBanner(){
+    var a = document.createElement('a')
+    a.href = '/perfil_servicio.html?tipo=oficio'
+    a.className = 'banner-entre-perfiles'
+    a.title = 'Publicita aquí en Trabajos Cerca'
+    var img = document.createElement('img')
+    img.src = imagenes[imgIdx % imagenes.length]
+    img.alt = 'Publicita aquí'
+    img.loading = 'lazy'
+    imgIdx++
+    a.appendChild(img)
+    return a
+  }
+
+  function inyectarBanners(){
+    var resultados = document.getElementById('resultados')
+    if(!resultados) return
+    // Quitar banners viejos para recalcular
+    resultados.querySelectorAll('.banner-entre-perfiles').forEach(function(b){ b.remove() })
+    imgIdx = 0
+    var cards = Array.from(resultados.querySelectorAll('.card'))
+    // Insertar después de cada 3ra card
+    cards.forEach(function(card, i){
+      if((i + 1) % 3 === 0 && i < cards.length - 1){
+        card.parentNode.insertBefore(crearBanner(), card.nextSibling)
+      }
+    })
+  }
+
+  // Observar cambios en #resultados
+  var observer = new MutationObserver(function(mutations){
+    var hayCards = mutations.some(function(m){
+      return Array.from(m.addedNodes).some(function(n){ return n.classList && n.classList.contains('card') })
+    })
+    if(hayCards) setTimeout(inyectarBanners, 50)
+  })
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var resultados = document.getElementById('resultados')
+    if(resultados) observer.observe(resultados, { childList:true, subtree:false })
+  })
+})()
+</script>
 </body>
 </html>
