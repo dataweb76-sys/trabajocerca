@@ -255,17 +255,25 @@ window.buscar = async function(){
     return
   }
 
-  // ── FILTRO PRINCIPAL: soporta tipo simple ("oficio") y multiples ("oficio,emprendimiento") ──
+  // ── FILTRO PRINCIPAL ──
   if(TIPO === "profesional"){
     data = data.filter(d => {
       const tipos = (d.perfiles?.tipo || "").split(",").map(t => t.trim())
-      return tipos.includes("profesional") || esProfesionalUni(d)
+      // CSV multi-tipo: si tiene "profesional" explícito en su lista
+      if(tipos.length > 1 && tipos.includes("profesional")) return true
+      // Lógica original por categoría (backwards compatible)
+      return esProfesionalUni(d)
     })
   } else {
-    // Buscador de oficios: solo los que tienen "oficio" en su lista de tipos
+    // Buscador de oficios
     data = data.filter(d => {
       const tipos = (d.perfiles?.tipo || "").split(",").map(t => t.trim())
-      return tipos.includes("oficio")
+      const tipoPrimario = tipos[0]
+      // CSV multi-tipo: si tiene "oficio" explícito en su lista adicional
+      if(tipos.length > 1 && tipos.includes("oficio")) return true
+      // Lógica original: excluir empresa/emprendimiento/cv y profesionales
+      if(tipoPrimario === "empresa" || tipoPrimario === "emprendimiento" || tipoPrimario === "cv") return false
+      return !esProfesionalUni(d)
     })
   }
 
