@@ -2904,10 +2904,16 @@ async function init() {
     document.getElementById('fotoCircle').innerHTML = '<img src="'+p.foto+'" alt="Foto">'
   }
 
-  // Precargar tipo
-  if(p.tipo) {
-    document.getElementById('selectorTipo').value = p.tipo
-    cambiarTipo(p.tipo)
+  // Precargar tipo: primero del perfil en DB, sino del query param ?tipo=
+  var tipoAUsar = p.tipo || new URLSearchParams(location.search).get('tipo') || ''
+  if(tipoAUsar) {
+    document.getElementById('selectorTipo').value = tipoAUsar
+    cambiarTipo(tipoAUsar)
+    // Si vino por query param (usuario nuevo), ocultar el selector de tipo
+    if(!p.tipo && new URLSearchParams(location.search).get('tipo')) {
+      var tipoWrap = document.querySelector('.tipo-select-wrap')
+      if(tipoWrap) tipoWrap.style.display = 'none'
+    }
   }
 
   // Precargar oficio

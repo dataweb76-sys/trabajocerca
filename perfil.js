@@ -47,12 +47,109 @@ async function init(){
   if(error || !data){
     document.getElementById("dash").innerHTML = `
       <div class="alerta alerta-err" style="margin-bottom:16px;">No se encontraron tus datos de perfil.</div>
-      <a href="/perfil_servicio.html?nuevo=1" class="btn btn-primary" style="margin-bottom:10px;">
-        <i class="fa-solid fa-tools"></i> Completar perfil de profesional
+      <a href="/perfil_servicio.html?tipo=oficio" class="btn btn-orange" style="margin-bottom:10px;">
+        <i class="fa-solid fa-wrench"></i> Completar como Oficio
       </a>
-      <a href="/perfil_cv.html?nuevo=1" class="btn btn-success">
-        <i class="fa-solid fa-file-lines"></i> Completar CV
+      <a href="/perfil_servicio.html?tipo=profesional" class="btn btn-primary" style="margin-bottom:10px;">
+        <i class="fa-solid fa-graduation-cap"></i> Completar como Profesional
       </a>`
+    return
+  }
+
+  /* ── Si no eligió tipo todavía, mostrar pantalla de elección ── */
+  if(!data.tipo){
+    const nombreBienvenida = data.nombre ? `, ${data.nombre}` : ""
+    document.getElementById("dash").innerHTML = `
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="font-size:48px;margin-bottom:12px;">👋</div>
+        <h2 style="font-size:22px;font-weight:900;color:#1e293b;margin-bottom:6px;">¡Bienvenido${nombreBienvenida}!</h2>
+        <p style="font-size:15px;color:#64748b;max-width:400px;margin:0 auto;">
+          Elegí cómo querés aparecer en Trabajos Cerca
+        </p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px;max-width:480px;margin:0 auto;">
+
+        <a href="/perfil_servicio.html?tipo=oficio" style="
+          display:flex;align-items:center;gap:16px;padding:18px 20px;
+          background:linear-gradient(135deg,#fef3c7,#fff);
+          border:2px solid #fde68a;border-radius:14px;text-decoration:none;
+          transition:all .18s;cursor:pointer;"
+          onmouseover="this.style.borderColor='#f59e0b';this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.borderColor='#fde68a';this.style.transform=''">
+          <span style="font-size:32px;flex-shrink:0;">🔧</span>
+          <div>
+            <strong style="display:block;font-size:16px;font-weight:800;color:#92400e;">Ofrezco un oficio</strong>
+            <span style="font-size:13px;color:#78350f;">Plomero, electricista, albañil, carpintero...</span>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#d97706;"></i>
+        </a>
+
+        <a href="/perfil_servicio.html?tipo=profesional" style="
+          display:flex;align-items:center;gap:16px;padding:18px 20px;
+          background:linear-gradient(135deg,#ede9fe,#fff);
+          border:2px solid #ddd6fe;border-radius:14px;text-decoration:none;
+          transition:all .18s;cursor:pointer;"
+          onmouseover="this.style.borderColor='#7c3aed';this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.borderColor='#ddd6fe';this.style.transform=''">
+          <span style="font-size:32px;flex-shrink:0;">👔</span>
+          <div>
+            <strong style="display:block;font-size:16px;font-weight:800;color:#5b21b6;">Soy profesional universitario</strong>
+            <span style="font-size:13px;color:#6d28d9;">Médico, abogado, contador, arquitecto...</span>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#7c3aed;"></i>
+        </a>
+
+        <a href="/perfil_servicio.html?tipo=emprendimiento" style="
+          display:flex;align-items:center;gap:16px;padding:18px 20px;
+          background:linear-gradient(135deg,#d1fae5,#fff);
+          border:2px solid #a7f3d0;border-radius:14px;text-decoration:none;
+          transition:all .18s;cursor:pointer;"
+          onmouseover="this.style.borderColor='#059669';this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.borderColor='#a7f3d0';this.style.transform=''">
+          <span style="font-size:32px;flex-shrink:0;">🚀</span>
+          <div>
+            <strong style="display:block;font-size:16px;font-weight:800;color:#065f46;">Tengo un emprendimiento</strong>
+            <span style="font-size:13px;color:#047857;">Local, marca o proyecto propio...</span>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#059669;"></i>
+        </a>
+
+        <a href="/perfil_servicio.html?tipo=cv" style="
+          display:flex;align-items:center;gap:16px;padding:18px 20px;
+          background:linear-gradient(135deg,#e0f2fe,#fff);
+          border:2px solid #bae6fd;border-radius:14px;text-decoration:none;
+          transition:all .18s;cursor:pointer;"
+          onmouseover="this.style.borderColor='#0369a1';this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.borderColor='#bae6fd';this.style.transform=''">
+          <span style="font-size:32px;flex-shrink:0;">📄</span>
+          <div>
+            <strong style="display:block;font-size:16px;font-weight:800;color:#0c4a6e;">Busco empleo — publicar mi CV</strong>
+            <span style="font-size:13px;color:#075985;">Subí tu CV y apareé en el buscador de empleados</span>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#0369a1;"></i>
+        </a>
+
+        <a href="/perfil_servicio.html?tipo=empresa" style="
+          display:flex;align-items:center;gap:16px;padding:18px 20px;
+          background:linear-gradient(135deg,#eff6ff,#fff);
+          border:2px solid #bfdbfe;border-radius:14px;text-decoration:none;
+          transition:all .18s;cursor:pointer;"
+          onmouseover="this.style.borderColor='#2563eb';this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.borderColor='#bfdbfe';this.style.transform=''">
+          <span style="font-size:32px;flex-shrink:0;">🏢</span>
+          <div>
+            <strong style="display:block;font-size:16px;font-weight:800;color:#1e40af;">Soy empresa o negocio</strong>
+            <span style="font-size:13px;color:#1d4ed8;">Publicá ofertas de trabajo y buscá empleados</span>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#2563eb;"></i>
+        </a>
+
+      </div>
+
+      <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:20px;">
+        Podés cambiar esto después desde tu perfil
+      </p>`
     return
   }
 
