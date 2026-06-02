@@ -289,142 +289,143 @@
 </section>
 
 <!-- ══════════════════════════════════════
-     CARRUSEL DE PUBLICIDADES
+     DOS CARRUSELES PUBLICITARIOS
 ══════════════════════════════════════ -->
 <style>
-.pub-carrusel-wrap{
-  width:100%;background:#0f172a;overflow:hidden;
-  position:relative;line-height:0;
+.pub-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  max-width:920px;
+  margin:20px auto;
+  padding:0 16px;
+  box-sizing:border-box;
 }
-.pub-carrusel-track{
+.pub-box{
+  position:relative;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 3px 16px rgba(0,0,0,.15);
+  line-height:0;
+}
+.pub-track{
   display:flex;
-  transition:transform .55s cubic-bezier(.4,0,.2,1);
+  transition:transform .5s cubic-bezier(.4,0,.2,1);
   will-change:transform;
 }
-.pub-slide{
-  min-width:100%;position:relative;cursor:pointer;
-}
-.pub-slide img{
-  width:100%;height:320px;object-fit:cover;object-position:center;
+.pub-item{ min-width:100%; }
+.pub-item img{
+  width:100%;
+  height:auto;
   display:block;
 }
-/* Botones nav */
-.pub-nav{
+/* Flechas */
+.pb-nav{
   position:absolute;top:50%;transform:translateY(-50%);
-  background:rgba(0,0,0,.42);backdrop-filter:blur(4px);
-  border:1.5px solid rgba(255,255,255,.25);border-radius:50%;
-  width:40px;height:40px;cursor:pointer;
+  background:rgba(0,0,0,.42);backdrop-filter:blur(3px);
+  border:1px solid rgba(255,255,255,.25);border-radius:50%;
+  width:28px;height:28px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  color:white;font-size:16px;z-index:10;
-  transition:background .15s;line-height:1;
+  color:white;font-size:13px;z-index:5;
+  transition:background .15s;line-height:1;padding:0;
 }
-.pub-nav:hover{background:rgba(0,0,0,.68);}
-.pub-nav-prev{left:12px;}
-.pub-nav-next{right:12px;}
+.pb-nav:hover{background:rgba(0,0,0,.7);}
+.pb-prev{left:6px;}
+.pb-next{right:6px;}
 /* Dots */
-.pub-dots{
-  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
-  display:flex;gap:7px;z-index:10;
+.pb-dots{
+  position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;z-index:5;
 }
-.pub-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:rgba(255,255,255,.45);cursor:pointer;
-  transition:background .2s,transform .2s;border:none;padding:0;
+.pb-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,255,.5);border:none;padding:0;cursor:pointer;
+  transition:background .2s,transform .2s;
 }
-.pub-dot.activo{background:white;transform:scale(1.3);}
-/* Badge "Publicita aquí" */
-.pub-badge{
-  position:absolute;bottom:28px;right:16px;
-  background:linear-gradient(135deg,#f97316,#ea580c);
-  color:white;font-size:11px;font-weight:800;
-  padding:5px 12px;border-radius:20px;
-  box-shadow:0 2px 10px rgba(249,115,22,.5);
-  letter-spacing:.04em;text-transform:uppercase;
-  pointer-events:none;
+.pb-dot.on{background:#fff;transform:scale(1.3);}
+@media(max-width:700px){
+  .pub-grid{ gap:10px; padding:0 12px; }
 }
-@media(max-width:600px){
-  .pub-slide img{height:200px;}
-  .pub-badge{font-size:10px;padding:4px 10px;bottom:22px;}
-  .pub-nav{width:32px;height:32px;font-size:13px;}
+@media(max-width:480px){
+  .pub-grid{ grid-template-columns:1fr; }
 }
 </style>
 
-<div class="pub-carrusel-wrap">
-  <div class="pub-carrusel-track" id="pubTrack">
-    <div class="pub-slide">
-      <img src="/banner-pub-albanil.jpg" alt="Publicita aquí — Oficios" loading="lazy">
+<div class="pub-grid">
+
+  <!-- Carrusel A -->
+  <div class="pub-box">
+    <div class="pub-track" id="pubTrackA">
+      <div class="pub-item"><img src="/banner-pub-albanil.jpg"     alt="Publicita aquí" loading="lazy"></div>
+      <div class="pub-item"><img src="/banner-pub-empresa.jpg"     alt="Publicita aquí" loading="lazy"></div>
+      <div class="pub-item"><img src="/banner-pub-profesional.jpg" alt="Publicita aquí" loading="lazy"></div>
+      <div class="pub-item"><img src="/banner-pub-tech.jpg"        alt="Publicita aquí" loading="lazy"></div>
+      <div class="pub-item"><img src="/banner-pub-oficina.jpg"     alt="Publicita aquí" loading="lazy"></div>
     </div>
-    <div class="pub-slide">
-      <img src="/banner-pub-empresa.jpg" alt="Publicita aquí — Empresas" loading="lazy">
-    </div>
-    <div class="pub-slide">
-      <img src="/banner-pub-profesional.jpg" alt="Publicita aquí — Profesionales" loading="lazy">
-    </div>
-    <div class="pub-slide">
-      <img src="/banner-pub-tech.jpg" alt="Publicita aquí — Tecnología" loading="lazy">
-    </div>
-    <div class="pub-slide">
-      <img src="/banner-pub-oficina.jpg" alt="Publicita aquí — Servicios" loading="lazy">
-    </div>
+    <button class="pb-nav pb-prev" data-dir="-1">&#8249;</button>
+    <button class="pb-nav pb-next" data-dir="1">&#8250;</button>
+    <div class="pb-dots" id="dotsA"></div>
   </div>
 
-  <!-- Navegación -->
-  <button class="pub-nav pub-nav-prev" id="pubPrev" aria-label="Anterior">&#8249;</button>
-  <button class="pub-nav pub-nav-next" id="pubNext" aria-label="Siguiente">&#8250;</button>
+  <!-- Carrusel B (desfasado 2 slides) -->
+  <div class="pub-box">
+    <div class="pub-track" id="pubTrackB">
+      <div class="pub-item"><img src="/banner-pub-empresa.jpg"     alt="Publicita aquí" loading="lazy"></div>
+      <div class="pub-item"><img src="/banner-pub-profesional.jpg" alt="Publicita aquí" loading="lazy"></div>
+      <div class="pub-item"><img src="/banner-pub-tech.jpg"        alt="Publicita aquí" loading="lazy"></div>
+      <div class="pub-item"><img src="/banner-pub-oficina.jpg"     alt="Publicita aquí" loading="lazy"></div>
+      <div class="pub-item"><img src="/banner-pub-albanil.jpg"     alt="Publicita aquí" loading="lazy"></div>
+    </div>
+    <button class="pb-nav pb-prev" data-dir="-1">&#8249;</button>
+    <button class="pb-nav pb-next" data-dir="1">&#8250;</button>
+    <div class="pb-dots" id="dotsB"></div>
+  </div>
 
-  <!-- Dots -->
-  <div class="pub-dots" id="pubDots"></div>
-
-  <!-- Badge contacto -->
-  <div class="pub-badge">📣 Publicita aquí</div>
 </div>
 
 <script>
 (function(){
-  var track  = document.getElementById('pubTrack')
-  var dotsEl = document.getElementById('pubDots')
-  var total  = 5
-  var actual = 0
-  var timer
+  function miniCarrusel(trackId, dotsId, delay){
+    var track  = document.getElementById(trackId)
+    var dotsEl = document.getElementById(dotsId)
+    var box    = track.parentElement
+    var total  = 5, actual = 0, timer
 
-  // Crear dots
-  for(var i = 0; i < total; i++){
-    var d = document.createElement('button')
-    d.className = 'pub-dot' + (i===0 ? ' activo' : '')
-    d.setAttribute('data-i', i)
-    d.addEventListener('click', function(){ irA(+this.dataset.i); reiniciar() })
-    dotsEl.appendChild(d)
-  }
+    for(var i = 0; i < total; i++){
+      var d = document.createElement('button')
+      d.className = 'pb-dot' + (i===0 ? ' on' : '')
+      ;(function(n){ d.addEventListener('click', function(){ irA(n); reiniciar() }) })(i)
+      dotsEl.appendChild(d)
+    }
 
-  function irA(n){
-    actual = (n + total) % total
-    track.style.transform = 'translateX(-' + (actual * 100) + '%)'
-    document.querySelectorAll('.pub-dot').forEach(function(d, idx){
-      d.classList.toggle('activo', idx === actual)
+    function irA(n){
+      actual = (n + total) % total
+      track.style.transform = 'translateX(-'+(actual*100)+'%)'
+      dotsEl.querySelectorAll('.pb-dot').forEach(function(d,i){ d.classList.toggle('on', i===actual) })
+    }
+    function reiniciar(){
+      clearInterval(timer)
+      timer = setInterval(function(){ irA(actual+1) }, delay)
+    }
+
+    box.querySelectorAll('.pb-nav').forEach(function(btn){
+      btn.addEventListener('click', function(){ irA(actual + parseInt(this.dataset.dir)); reiniciar() })
     })
+
+    var x0 = null
+    track.addEventListener('touchstart', function(e){ x0 = e.touches[0].clientX }, {passive:true})
+    track.addEventListener('touchend', function(e){
+      if(x0===null) return
+      var d = x0 - e.changedTouches[0].clientX
+      if(Math.abs(d)>40){ irA(actual+(d>0?1:-1)); reiniciar() }
+      x0 = null
+    }, {passive:true})
+
+    irA(0); reiniciar()
   }
 
-  function siguiente(){ irA(actual + 1) }
-
-  function reiniciar(){
-    clearInterval(timer)
-    timer = setInterval(siguiente, 4500)
-  }
-
-  document.getElementById('pubPrev').addEventListener('click', function(){ irA(actual - 1); reiniciar() })
-  document.getElementById('pubNext').addEventListener('click', function(){ irA(actual + 1); reiniciar() })
-
-  // Touch swipe mobile
-  var xStart = null
-  track.addEventListener('touchstart', function(e){ xStart = e.touches[0].clientX }, {passive:true})
-  track.addEventListener('touchend', function(e){
-    if(xStart === null) return
-    var diff = xStart - e.changedTouches[0].clientX
-    if(Math.abs(diff) > 40){ diff > 0 ? irA(actual+1) : irA(actual-1); reiniciar() }
-    xStart = null
-  }, {passive:true})
-
-  reiniciar()
+  miniCarrusel('pubTrackA', 'dotsA', 4000)
+  miniCarrusel('pubTrackB', 'dotsB', 5000)  // ritmo diferente → no sincronizan
 })()
 </script>
 

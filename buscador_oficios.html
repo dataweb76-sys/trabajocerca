@@ -13,6 +13,70 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<style>
+/* Layout con sidebar de publicidad */
+.buscador-layout{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  max-width:1140px;
+  margin:0 auto;
+  padding:0 16px;
+  box-sizing:border-box;
+}
+.buscador-main{ flex:1; min-width:0; }
+.buscador-sidebar{
+  width:190px;
+  flex-shrink:0;
+  position:sticky;
+  top:70px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding-top:8px;
+}
+.sb-pub{
+  display:block;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 2px 10px rgba(0,0,0,.13);
+  transition:transform .15s,box-shadow .15s;
+  line-height:0;
+}
+.sb-pub:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.2);}
+.sb-pub img{width:100%;height:auto;display:block;}
+.sb-pub-label{
+  font-size:9px;font-weight:700;letter-spacing:.08em;
+  text-align:center;color:#94a3b8;text-transform:uppercase;
+}
+/* Tablet */
+@media(max-width:860px){
+  .buscador-sidebar{ width:150px; }
+}
+/* Mobile: sidebar visible pero compacto al costado */
+@media(max-width:600px){
+  .buscador-layout{ gap:8px; padding:0 8px; }
+  .buscador-sidebar{
+    width:105px;
+    position:static;
+    gap:8px;
+    padding-top:0;
+  }
+  /* Cards más compactas para que entren bien */
+  .buscador-main .card{ padding:12px; margin-bottom:10px; }
+  .buscador-main .card h3{ font-size:14px !important; }
+  .buscador-main .card p{ font-size:12px !important; }
+  .buscador-main .card-actions{ gap:4px; margin-top:8px; }
+  .buscador-main .btn-sm{ font-size:10px !important; padding:5px 7px !important; }
+  /* Foto perfil más pequeña en mobile */
+  .buscador-main .card img[style*="64px"],
+  .buscador-main .card div[style*="64px"]{ width:48px!important;height:48px!important; }
+}
+/* Muy pequeño: ocultar 2 banners extra */
+@media(max-width:360px){
+  .sb-pub:nth-child(n+3){ display:none; }
+}
+</style>
 </head>
 <body>
 
@@ -29,38 +93,62 @@
   </nav>
 </header>
 
-<div class="container" style="max-width:900px;">
+<div class="buscador-layout">
 
-  <div id="cabeceraBuscador">
-    <h2 id="tituloBuscador"><i class="fa-solid fa-hammer" style="color:#f97316"></i> Buscador de Oficios</h2>
-    <p id="subtituloBuscador" style="color:#64748b;font-size:14px;margin:-10px 0 20px;">Plomeros, electricistas, albañiles y más oficios cerca tuyo</p>
+  <!-- COLUMNA PRINCIPAL -->
+  <div class="buscador-main">
+    <div class="container" style="max-width:100%;padding:0;">
+
+      <div id="cabeceraBuscador">
+        <h2 id="tituloBuscador"><i class="fa-solid fa-hammer" style="color:#f97316"></i> Buscador de Oficios</h2>
+        <p id="subtituloBuscador" style="color:#64748b;font-size:14px;margin:-10px 0 20px;">Plomeros, electricistas, albañiles y más oficios cerca tuyo</p>
+      </div>
+
+      <div class="filtros">
+        <div>
+          <label>¿Qué necesitás?</label>
+          <select id="buscar" class="cat-select">
+            <option value="">— Elegí una categoría —</option>
+          </select>
+        </div>
+        <div>
+          <label>Ciudad</label>
+          <input id="ciudad" placeholder="Ej: La Plata" onkeydown="if(event.key==='Enter') buscar()">
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" onclick="buscar()" style="white-space:nowrap;">
+            <i class="fa-solid fa-magnifying-glass"></i> Buscar
+          </button>
+        </div>
+      </div>
+
+      <div id="resultados">
+        <div style="text-align:center;padding:50px 20px;color:#94a3b8;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:36px;display:block;margin-bottom:14px;"></i>
+          <p>Cargando perfiles...</p>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <div class="filtros">
-    <div>
-      <label>¿Qué necesitás?</label>
-      <select id="buscar" class="cat-select">
-        <option value="">— Elegí una categoría —</option>
-      </select>
-    </div>
-    <div>
-      <label>Ciudad</label>
-      <input id="ciudad" placeholder="Ej: La Plata" onkeydown="if(event.key==='Enter') buscar()">
-    </div>
-    <div>
-      <label>&nbsp;</label>
-      <button class="btn btn-primary" onclick="buscar()" style="white-space:nowrap;">
-        <i class="fa-solid fa-magnifying-glass"></i> Buscar
-      </button>
-    </div>
-  </div>
-
-  <div id="resultados">
-    <div style="text-align:center;padding:50px 20px;color:#94a3b8;">
-      <i class="fa-solid fa-spinner fa-spin" style="font-size:36px;display:block;margin-bottom:14px;"></i>
-      <p>Cargando perfiles...</p>
-    </div>
-  </div>
+  <!-- SIDEBAR PUBLICIDAD -->
+  <aside class="buscador-sidebar">
+    <a href="/perfil_servicio.html?tipo=oficio" class="sb-pub">
+      <img src="/banner-pub-albanil.jpg" alt="Publicita aquí">
+    </a>
+    <a href="/perfil_servicio.html?tipo=profesional" class="sb-pub">
+      <img src="/banner-pub-profesional.jpg" alt="Publicita aquí">
+    </a>
+    <a href="/perfil_servicio.html?tipo=emprendimiento" class="sb-pub">
+      <img src="/banner-pub-empresa.jpg" alt="Publicita aquí">
+    </a>
+    <a href="/perfil_servicio.html?tipo=oficio" class="sb-pub">
+      <img src="/banner-pub-tech.jpg" alt="Publicita aquí">
+    </a>
+    <div class="sb-pub-label">📣 Publicita aquí</div>
+  </aside>
 
 </div>
 
