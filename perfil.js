@@ -56,108 +56,105 @@ async function init(){
     return
   }
 
-  /* ── Si no configuró su perfil todavía, mostrar pantalla de elección ── */
-  // Verifica si tiene algún servicio/perfil ya cargado
+  /* ── Verificar servicios cargados ── */
   const { data: srvCheck } = await supabase
     .from("servicios").select("id").eq("usuario_id", userId).maybeSingle()
 
-  const perfilSinConfigurar = !srvCheck && (!data.tipo || data.tipo === "profesional") &&
-    !data.movil && !data.localidad
+  /* ── Configuración de tipos de perfil ── */
+  const TIPOS_OPTS = [
+    { id:"oficio",         emoji:"🔧", label:"Oficio",          labelLargo:"Ofrezco un oficio",
+      desc:"Plomero, electricista, albañil, carpintero...",
+      color:"#92400e", bg:"#fef3c7", border:"#fde68a", hover:"#f59e0b" },
+    { id:"profesional",    emoji:"👔", label:"Profesional",      labelLargo:"Soy profesional universitario",
+      desc:"Médico, abogado, contador, arquitecto...",
+      color:"#5b21b6", bg:"#ede9fe", border:"#ddd6fe", hover:"#7c3aed" },
+    { id:"emprendimiento", emoji:"🚀", label:"Emprendimiento",   labelLargo:"Tengo un emprendimiento",
+      desc:"Local, marca propia, gastronomía, artesanías...",
+      color:"#065f46", bg:"#d1fae5", border:"#a7f3d0", hover:"#059669" },
+    { id:"cv",             emoji:"📄", label:"CV / Empleo",      labelLargo:"Busco empleo — publicar mi CV",
+      desc:"Aparecer en el buscador de empleados",
+      color:"#0c4a6e", bg:"#e0f2fe", border:"#bae6fd", hover:"#0369a1" },
+    { id:"empresa",        emoji:"🏢", label:"Empresa",          labelLargo:"Soy empresa o negocio",
+      desc:"Publicar ofertas de trabajo y buscar empleados",
+      color:"#1e40af", bg:"#eff6ff", border:"#bfdbfe", hover:"#2563eb" },
+  ]
 
-  if(perfilSinConfigurar){
-    const nombreBienvenida = data.nombre ? `, ${data.nombre}` : ""
-    document.getElementById("dash").innerHTML = `
-      <div style="text-align:center;margin-bottom:28px;">
-        <div style="font-size:48px;margin-bottom:12px;">👋</div>
-        <h2 style="font-size:22px;font-weight:900;color:#1e293b;margin-bottom:6px;">¡Bienvenido${nombreBienvenida}!</h2>
-        <p style="font-size:15px;color:#64748b;max-width:400px;margin:0 auto;">
-          Elegí cómo querés aparecer en Trabajos Cerca
+  // Tipos registrados = tiene servicios Y el tipo está en el CSV de tipo
+  const tieneServicio   = !!srvCheck
+  const tiposCSV        = (data.tipo || "").split(",").map(t => t.trim()).filter(t => t && t !== "profesional" || tieneServicio && t === "profesional")
+  // Si no tiene servicio configurado, no hay tipos registrados todavía
+  const tiposRegistrados = tieneServicio ? tiposCSV : []
+
+  const registrados  = TIPOS_OPTS.filter(t => tiposRegistrados.includes(t.id))
+  const pendientes   = TIPOS_OPTS.filter(t => !tiposRegistrados.includes(t.id))
+
+  const btnTipo = (t, esPrimero) => `
+    <a href="/perfil_servicio.html?tipo=${t.id}" style="
+      display:flex;align-items:center;gap:14px;padding:14px 16px;
+      background:${esPrimero ? t.bg : 'white'};
+      border:2px solid ${esPrimero ? t.border : '#e2e8f0'};
+      border-radius:12px;text-decoration:none;transition:all .18s;"
+      onmouseover="this.style.borderColor='${t.hover}';this.style.background='${t.bg}'"
+      onmouseout="this.style.borderColor='${esPrimero ? t.border : '#e2e8f0'}';this.style.background='${esPrimero ? t.bg : 'white'}'">
+      <span style="font-size:26px;flex-shrink:0;">${t.emoji}</span>
+      <div style="flex:1;">
+        <strong style="display:block;font-size:14px;font-weight:800;color:${t.color};">${t.labelLargo}</strong>
+        <span style="font-size:12px;color:#64748b;">${t.desc}</span>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;"></i>
+    </a>`
+
+  const btnModificar = (t) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;
+      background:${t.bg};border:2px solid ${t.border};border-radius:12px;">
+      <span style="font-size:22px;flex-shrink:0;">${t.emoji}</span>
+      <div style="flex:1;">
+        <strong style="display:block;font-size:13px;font-weight:800;color:${t.color};">
+          ✅ ${t.label} registrado
+        </strong>
+        <span style="font-size:11px;color:#64748b;">${t.desc}</span>
+      </div>
+      <a href="/perfil_servicio.html?tipo=${t.id}" style="
+        white-space:nowrap;font-size:12px;font-weight:700;color:${t.color};
+        background:white;border:1.5px solid ${t.border};border-radius:8px;
+        padding:5px 12px;text-decoration:none;">
+        <i class="fa-solid fa-pen"></i> Modificar
+      </a>
+    </div>`
+
+  let misPerfilesHtml = ""
+  if(registrados.length === 0) {
+    // Usuario nuevo — mostrar 5 botones de registro
+    misPerfilesHtml = `
+    <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:16px;">
+      <h3 style="margin:0 0 6px;font-size:16px;font-weight:800;">
+        <i class="fa-solid fa-id-card" style="color:#2563eb;"></i> ¿Cómo querés aparecer?
+      </h3>
+      <p style="margin:0 0 14px;font-size:13px;color:#64748b;">Elegí uno o más. Podés agregar más después.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${TIPOS_OPTS.map(t => btnTipo(t, true)).join("")}
+      </div>
+    </div>`
+  } else {
+    // Usuario con perfiles registrados
+    misPerfilesHtml = `
+    <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:18px;margin-bottom:16px;">
+      <h3 style="margin:0 0 14px;font-size:16px;font-weight:800;">
+        <i class="fa-solid fa-id-card" style="color:#2563eb;"></i> Mis perfiles
+      </h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${registrados.map(t => btnModificar(t)).join("")}
+      </div>
+      ${pendientes.length ? `
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9;">
+        <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#64748b;">
+          <i class="fa-solid fa-plus-circle" style="color:#2563eb;"></i> ¿Querés agregar algo más?
         </p>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:12px;max-width:480px;margin:0 auto;">
-
-        <a href="/perfil_servicio.html?tipo=oficio" style="
-          display:flex;align-items:center;gap:16px;padding:18px 20px;
-          background:linear-gradient(135deg,#fef3c7,#fff);
-          border:2px solid #fde68a;border-radius:14px;text-decoration:none;
-          transition:all .18s;cursor:pointer;"
-          onmouseover="this.style.borderColor='#f59e0b';this.style.transform='translateY(-2px)'"
-          onmouseout="this.style.borderColor='#fde68a';this.style.transform=''">
-          <span style="font-size:32px;flex-shrink:0;">🔧</span>
-          <div>
-            <strong style="display:block;font-size:16px;font-weight:800;color:#92400e;">Ofrezco un oficio</strong>
-            <span style="font-size:13px;color:#78350f;">Plomero, electricista, albañil, carpintero...</span>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#d97706;"></i>
-        </a>
-
-        <a href="/perfil_servicio.html?tipo=profesional" style="
-          display:flex;align-items:center;gap:16px;padding:18px 20px;
-          background:linear-gradient(135deg,#ede9fe,#fff);
-          border:2px solid #ddd6fe;border-radius:14px;text-decoration:none;
-          transition:all .18s;cursor:pointer;"
-          onmouseover="this.style.borderColor='#7c3aed';this.style.transform='translateY(-2px)'"
-          onmouseout="this.style.borderColor='#ddd6fe';this.style.transform=''">
-          <span style="font-size:32px;flex-shrink:0;">👔</span>
-          <div>
-            <strong style="display:block;font-size:16px;font-weight:800;color:#5b21b6;">Soy profesional universitario</strong>
-            <span style="font-size:13px;color:#6d28d9;">Médico, abogado, contador, arquitecto...</span>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#7c3aed;"></i>
-        </a>
-
-        <a href="/perfil_servicio.html?tipo=emprendimiento" style="
-          display:flex;align-items:center;gap:16px;padding:18px 20px;
-          background:linear-gradient(135deg,#d1fae5,#fff);
-          border:2px solid #a7f3d0;border-radius:14px;text-decoration:none;
-          transition:all .18s;cursor:pointer;"
-          onmouseover="this.style.borderColor='#059669';this.style.transform='translateY(-2px)'"
-          onmouseout="this.style.borderColor='#a7f3d0';this.style.transform=''">
-          <span style="font-size:32px;flex-shrink:0;">🚀</span>
-          <div>
-            <strong style="display:block;font-size:16px;font-weight:800;color:#065f46;">Tengo un emprendimiento</strong>
-            <span style="font-size:13px;color:#047857;">Local, marca o proyecto propio...</span>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#059669;"></i>
-        </a>
-
-        <a href="/perfil_servicio.html?tipo=cv" style="
-          display:flex;align-items:center;gap:16px;padding:18px 20px;
-          background:linear-gradient(135deg,#e0f2fe,#fff);
-          border:2px solid #bae6fd;border-radius:14px;text-decoration:none;
-          transition:all .18s;cursor:pointer;"
-          onmouseover="this.style.borderColor='#0369a1';this.style.transform='translateY(-2px)'"
-          onmouseout="this.style.borderColor='#bae6fd';this.style.transform=''">
-          <span style="font-size:32px;flex-shrink:0;">📄</span>
-          <div>
-            <strong style="display:block;font-size:16px;font-weight:800;color:#0c4a6e;">Busco empleo — publicar mi CV</strong>
-            <span style="font-size:13px;color:#075985;">Subí tu CV y apareé en el buscador de empleados</span>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#0369a1;"></i>
-        </a>
-
-        <a href="/perfil_servicio.html?tipo=empresa" style="
-          display:flex;align-items:center;gap:16px;padding:18px 20px;
-          background:linear-gradient(135deg,#eff6ff,#fff);
-          border:2px solid #bfdbfe;border-radius:14px;text-decoration:none;
-          transition:all .18s;cursor:pointer;"
-          onmouseover="this.style.borderColor='#2563eb';this.style.transform='translateY(-2px)'"
-          onmouseout="this.style.borderColor='#bfdbfe';this.style.transform=''">
-          <span style="font-size:32px;flex-shrink:0;">🏢</span>
-          <div>
-            <strong style="display:block;font-size:16px;font-weight:800;color:#1e40af;">Soy empresa o negocio</strong>
-            <span style="font-size:13px;color:#1d4ed8;">Publicá ofertas de trabajo y buscá empleados</span>
-          </div>
-          <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#2563eb;"></i>
-        </a>
-
-      </div>
-
-      <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:20px;">
-        Podés cambiar esto después desde tu perfil
-      </p>`
-    return
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${pendientes.map(t => btnTipo(t, false)).join("")}
+        </div>
+      </div>` : ""}
+    </div>`
   }
 
   /* ── Completitud del perfil ── */
@@ -620,6 +617,7 @@ async function init(){
 
     <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;">
 
+    ${misPerfilesHtml}
     ${statsHtml}
     ${buscadoresHtml}
     ${disponibleHtml}

@@ -366,6 +366,15 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
         <input type="email" id="rEmail" placeholder="juan@email.com" autocomplete="email">
       </div>
       <div class="campo">
+        <label for="rTelefono">Teléfono / WhatsApp <span style="color:#dc2626;">*</span></label>
+        <div style="display:flex;align-items:stretch;gap:0;">
+          <span style="background:#f1f5f9;border:1px solid #cbd5e1;border-right:none;border-radius:8px 0 0 8px;padding:10px 12px;font-size:14px;font-weight:700;color:#475569;display:flex;align-items:center;">+549</span>
+          <input type="tel" id="rTelefono" placeholder="Ej: 2214561234 (sin 0 ni 15)" autocomplete="tel"
+            style="border-radius:0 8px 8px 0!important;border-left:none!important;">
+        </div>
+        <span style="font-size:11px;color:#94a3b8;margin-top:3px;display:block;">Sin el 0 inicial ni el 15. Aparece en tu perfil para contacto.</span>
+      </div>
+      <div class="campo">
         <label for="rPass">Contraseña</label>
         <div class="pass-wrap">
           <input type="password" id="rPass" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
@@ -436,14 +445,18 @@ document.getElementById('formReg').addEventListener('submit', async function(e) 
   var nombre   = document.getElementById('rNombre').value.trim()
   var apellido = document.getElementById('rApellido').value.trim()
   var email    = document.getElementById('rEmail').value.trim()
+  var telRaw   = document.getElementById('rTelefono').value.trim().replace(/\D/g,'')
   var pass     = document.getElementById('rPass').value
   var terminos = document.getElementById('rTerminos').checked
 
   if(!nombre)         return mostrarError('Ingresá tu nombre.')
   if(!apellido)       return mostrarError('Ingresá tu apellido.')
   if(!email)          return mostrarError('Ingresá tu email.')
+  if(!telRaw || telRaw.length < 8) return mostrarError('Ingresá tu número de teléfono/WhatsApp.')
   if(pass.length < 6) return mostrarError('La contraseña debe tener al menos 6 caracteres.')
   if(!terminos)       return mostrarError('Tenés que aceptar los Términos y Condiciones.')
+
+  var movil = '+549' + telRaw
 
   var btn = document.getElementById('btnReg')
   btn.disabled = true
@@ -464,7 +477,10 @@ document.getElementById('formReg').addEventListener('submit', async function(e) 
 
   var userId = res.data?.user?.id
   if(userId) {
-    await supa.from('perfiles').upsert({ id: userId, nombre: nombre, apellido: apellido, email: email })
+    await supa.from('perfiles').upsert({
+      id: userId, nombre: nombre, apellido: apellido, email: email,
+      movil: movil, tipo: null
+    })
   }
 
   if(res.data?.session) {
