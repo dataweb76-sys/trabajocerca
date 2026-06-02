@@ -12,7 +12,9 @@ async function login(){
     return
   }
 
-  window.location.href = "/perfil.html"
+  // Si vino de auth_guard con ?next=, volver a esa página
+  var next = new URLSearchParams(location.search).get('next')
+  window.location.href = (next && next.startsWith('/')) ? next : '/perfil.html'
 }
 
 async function loginConGoogle(){
