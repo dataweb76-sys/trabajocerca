@@ -58,7 +58,7 @@ async function init(){
 
   /* ── Verificar servicios cargados ── */
   const { data: srvCheck } = await supabase
-    .from("servicios").select("id").eq("usuario_id", userId).maybeSingle()
+    .from("servicios").select("id,categoria").eq("usuario_id", userId).maybeSingle()
 
   /* ── Configuración de tipos de perfil ── */
   const TIPOS_OPTS = [
@@ -104,23 +104,39 @@ async function init(){
       <i class="fa-solid fa-chevron-right" style="color:#cbd5e1;"></i>
     </a>`
 
-  const btnModificar = (t) => `
+  // Categorías registradas como oficios (puede ser "Plomería, Electricidad, Informática")
+  const catsOficio = srvCheck?.categoria
+    ? srvCheck.categoria.split(',').map(c => c.trim()).filter(Boolean)
+    : []
+
+  const btnModificar = (t) => {
+    let labelActivo, subLabel
+    if(t.id === 'oficio' && catsOficio.length) {
+      const count = catsOficio.length
+      labelActivo = `✅ Registrado en ${count} oficio${count > 1 ? 's' : ''} — perfil activo`
+      subLabel = catsOficio.join(' · ')
+    } else {
+      labelActivo = `✅ ${t.label} registrado — perfil activo`
+      subLabel = t.desc
+    }
+    return `
     <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;
       background:${t.bg};border:2px solid ${t.border};border-radius:12px;">
       <span style="font-size:22px;flex-shrink:0;">${t.emoji}</span>
-      <div style="flex:1;">
-        <strong style="display:block;font-size:13px;font-weight:800;color:${t.color};">
-          ✅ ${t.label} registrado
+      <div style="flex:1;min-width:0;">
+        <strong style="display:block;font-size:13px;font-weight:700;color:${t.color};">
+          ${labelActivo}
         </strong>
-        <span style="font-size:11px;color:#64748b;">${t.desc}</span>
+        <span style="display:block;font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${subLabel}</span>
       </div>
       <a href="/perfil_servicio.html?tipo=${t.id}" style="
         white-space:nowrap;font-size:12px;font-weight:700;color:${t.color};
         background:white;border:1.5px solid ${t.border};border-radius:8px;
-        padding:5px 12px;text-decoration:none;">
+        padding:5px 12px;text-decoration:none;flex-shrink:0;">
         <i class="fa-solid fa-pen"></i> Modificar
       </a>
     </div>`
+  }
 
   let misPerfilesHtml = ""
   if(registrados.length === 0) {
@@ -1422,3 +1438,45 @@ window.toggleBuscador = async function(tipoToggle, userId) {
 }
 
 init()
+
+/* ── Toast de éxito al volver de perfil_servicio ── */
+;(function() {
+  const params = new URLSearchParams(location.search)
+  const saved  = params.get('saved')
+  const cat    = params.get('cat')
+  if(!saved) return
+
+  const msgs = {
+    oficio:         cat ? `¡Tu perfil de <strong>${cat}</strong> está activo en el buscador de oficios! 🔧` : '¡Tu perfil de oficio está activo en el buscador! 🔧',
+    profesional:    '¡Tu perfil profesional está activo en el buscador! 👔',
+    cv:             '¡Tu CV está publicado y visible para empleadores! 📄',
+    empresa:        '¡Tu oferta de trabajo está publicada! 🏢',
+    emprendimiento: '¡Tu emprendimiento está activo en el buscador! 🚀'
+  }
+  const msg = msgs[saved] || '¡Tu perfil está activo!'
+
+  const toast = document.createElement('div')
+  toast.style.cssText = `
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:#14532d;color:white;padding:14px 22px;border-radius:14px;
+    font-size:14px;font-weight:600;z-index:9999;max-width:90vw;text-align:center;
+    box-shadow:0 8px 32px rgba(0,0,0,.25);transition:transform .35s ease,opacity .35s ease;
+    opacity:0;line-height:1.5;
+  `
+  toast.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;margin-right:8px;"></i>' + msg
+  document.body.appendChild(toast)
+
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      toast.style.transform = 'translateX(-50%) translateY(0)'
+      toast.style.opacity = '1'
+    })
+  })
+  setTimeout(function() {
+    toast.style.transform = 'translateX(-50%) translateY(80px)'
+    toast.style.opacity = '0'
+    setTimeout(function(){ toast.remove() }, 400)
+  }, 5000)
+
+  history.replaceState({}, '', '/perfil.html')
+})()

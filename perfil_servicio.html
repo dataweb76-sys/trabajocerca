@@ -205,6 +205,37 @@ select{cursor:pointer;}
   .mtab{font-size:11px;padding:6px 10px;}
 }
 
+/* ══ HERO BANNER ══ */
+#heroSection{display:none;margin-bottom:0;}
+.hero-img{
+  height:210px;
+  background-size:cover;background-position:center center;
+  position:relative;overflow:hidden;
+}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.25) 60%,transparent 100%);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:22px 20px;
+}
+.hero-pretitle{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.75);text-transform:uppercase;margin-bottom:5px;}
+.hero-title{font-size:26px;font-weight:900;color:#fff;line-height:1.15;margin:0 0 5px;}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.88);margin:0;}
+
+/* ══ FORMAS DE PAGO ══ */
+.pago-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px;}
+@media(max-width:400px){.pago-grid{grid-template-columns:1fr;}}
+.pago-item{
+  border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  background:#f8fafc;transition:all .15s;font-size:13px;color:#374151;
+}
+.pago-item:has(input:checked){
+  border-color:#2563eb;background:#eff6ff;color:#1e40af;
+}
+.pago-item input[type=checkbox]{width:18px;height:18px;min-width:18px;accent-color:#2563eb;cursor:pointer;}
+.pago-icon{font-size:20px;line-height:1;}
+
 /* ── Tags de habilidades ── */
 .tags-input-wrap{border:1.5px solid #e2e8f0;border-radius:9px;padding:8px 10px;background:#f8fafc;min-height:46px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;transition:border-color .15s;}
 .tags-input-wrap:focus-within{border-color:#2563eb;background:#fff;box-shadow:0 0 0 3px #bfdbfe44;}
@@ -239,6 +270,17 @@ select{cursor:pointer;}
   <a href="/perfil.html" class="topbar-back">
     <i class="fa-solid fa-arrow-left"></i> Mi perfil
   </a>
+</div>
+
+<!-- HERO BANNER (aparece cuando se selecciona tipo) -->
+<div id="heroSection">
+  <div class="hero-img" id="heroImg">
+    <div class="hero-overlay">
+      <div class="hero-pretitle">Trabajos Cerca</div>
+      <h1 class="hero-title" id="heroTitle">Completá tu perfil</h1>
+      <p class="hero-sub" id="heroSub">Completá tus datos y aparecé en el buscador</p>
+    </div>
+  </div>
 </div>
 
 <div class="wrap">
@@ -301,14 +343,27 @@ select{cursor:pointer;}
     <div class="seccion">
       <h3><i class="fa-solid fa-wrench" style="color:#d97706;"></i> Oficios y especialidades</h3>
 
-      <label class="lbl">¿Cuántos oficios diferentes realizás?</label>
-      <select id="cantidadOficios" onchange="actualizarBloques()">
-        <option value="1">1 oficio</option>
-        <option value="2">2 oficios</option>
-        <option value="3">3 oficios</option>
-        <option value="4">4 oficios</option>
-        <option value="5">5 oficios</option>
-      </select>
+      <div id="oficiosHeaderWrap">
+        <label class="lbl" id="cantidadOficiosLabel">¿Cuántos oficios diferentes realizás?</label>
+        <select id="cantidadOficios" onchange="actualizarBloques()">
+          <option value="1">1 oficio</option>
+          <option value="2">2 oficios</option>
+          <option value="3">3 oficios</option>
+          <option value="4">4 oficios</option>
+          <option value="5">5 oficios</option>
+          <option value="6">6 oficios</option>
+          <option value="7">7 oficios</option>
+          <option value="8">8 oficios</option>
+          <option value="9">9 oficios</option>
+          <option value="10">10 oficios</option>
+        </select>
+      </div>
+
+      <!-- Badge de oficios ya registrados (se muestra solo si hay datos) -->
+      <div id="oficiosRegistradosBadge" style="display:none;margin-top:10px;padding:10px 13px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;font-size:13px;color:#166534;">
+        <i class="fa-solid fa-circle-check"></i> <strong id="oficiosRegistradosTxt"></strong>
+        <span style="color:#4b5563;font-weight:400;"> — podés agregar más abajo hasta completar 10.</span>
+      </div>
 
       <div id="bloquesOficios" style="margin-top:14px;"></div>
     </div>
@@ -364,6 +419,38 @@ select{cursor:pointer;}
 
       <label class="lbl" style="margin-top:12px;">Descripción / Presentación *</label>
       <textarea id="ofDescripcion" rows="4" placeholder="Contá sobre tu experiencia, tipo de trabajos que hacés, garantías, formas de pago..."></textarea>
+    </div>
+
+    <!-- Formas de pago -->
+    <div class="seccion">
+      <h3><i class="fa-solid fa-credit-card" style="color:#2563eb;"></i> Formas de pago aceptadas</h3>
+      <div class="pago-grid">
+        <label class="pago-item">
+          <input type="checkbox" id="ofPagoEfectivo" checked>
+          <span class="pago-icon">💵</span>
+          <span>Efectivo</span>
+        </label>
+        <label class="pago-item">
+          <input type="checkbox" id="ofPagoTarjeta">
+          <span class="pago-icon">💳</span>
+          <span>Tarjeta de débito/crédito</span>
+        </label>
+        <label class="pago-item">
+          <input type="checkbox" id="ofPagoMP">
+          <span class="pago-icon">📱</span>
+          <span>Mercado Pago</span>
+        </label>
+        <label class="pago-item">
+          <input type="checkbox" id="ofPagoCuotas">
+          <span class="pago-icon">📊</span>
+          <span>En cuotas</span>
+        </label>
+        <label class="pago-item" style="grid-column:1/-1;">
+          <input type="checkbox" id="ofPagoConvenir">
+          <span class="pago-icon">🤝</span>
+          <span>A convenir con el cliente</span>
+        </label>
+      </div>
     </div>
 
     <!-- Disponibilidad horaria -->
@@ -1509,27 +1596,38 @@ var CATS_LISTA = Object.keys(SUBCATS)
 
 function actualizarBloques() {
   var cantidad = parseInt(document.getElementById('cantidadOficios').value) || 1
+  // No bajar del mínimo (ya guardados)
+  if(cantidad < _ofCantMinima) {
+    cantidad = _ofCantMinima
+    document.getElementById('cantidadOficios').value = _ofCantMinima
+  }
   var cont = document.getElementById('bloquesOficios')
   // Preservar selecciones existentes
   var existentes = []
   var bloques = cont.querySelectorAll('.oficio-bloque')
   bloques.forEach(function(b) {
-    var sel = b.querySelector('select')
+    var sel  = b.querySelector('select')
     var subs = Array.from(b.querySelectorAll('input[type=checkbox]:checked')).map(function(c){return c.value})
-    existentes.push({ cat: sel ? sel.value : '', subs: subs })
+    var esGuardado = b.querySelector('[data-guardado]') !== null
+    existentes.push({ cat: sel ? sel.value : '', subs: subs, guardado: esGuardado })
   })
 
   var html = ''
   for(var i = 1; i <= cantidad; i++) {
-    var prev = existentes[i-1] || { cat: '', subs: [] }
-    html += generarBloqueOficio(i, prev.cat, prev.subs)
+    var prev = existentes[i-1] || { cat: '', subs: [], guardado: false }
+    var yaGuard = (i <= _ofCantMinima) // los primeros N son los ya guardados
+    html += generarBloqueOficio(i, prev.cat, prev.subs, yaGuard)
   }
   cont.innerHTML = html
 }
 
-function generarBloqueOficio(n, catSelec, subsSelec) {
-  catSelec  = catSelec  || ''
-  subsSelec = subsSelec || []
+var _ofCantMinima = 1  // mínimo = oficios ya guardados (no se puede bajar de eso)
+
+function generarBloqueOficio(n, catSelec, subsSelec, yaGuardado) {
+  catSelec   = catSelec  || ''
+  subsSelec  = subsSelec || []
+  yaGuardado = !!yaGuardado
+
   var opcionsCat = CATS_LISTA.map(function(cat) {
     return '<option value="'+cat+'"'+(cat===catSelec?' selected':'')+'>'+cat+'</option>'
   }).join('')
@@ -1538,14 +1636,18 @@ function generarBloqueOficio(n, catSelec, subsSelec) {
   if(catSelec && SUBCATS[catSelec]) {
     subsHtml = '<div class="checks-grid">' +
       SUBCATS[catSelec].map(function(sub) {
-        var chk = subsSelec.includes(sub) ? ' checked' : ''
+        var chk = subsSelec.indexOf(sub) !== -1 ? ' checked' : ''
         return '<label class="check-item"><input type="checkbox" name="ofSub'+n+'" value="'+sub+'"'+chk+'> <span>'+sub+'</span></label>'
       }).join('') + '</div>'
   }
 
-  var iconos = ['🔧','🪛','🔨','⚙️','🛠️']
+  var iconos = ['🔧','🪛','🔨','⚙️','🛠️','⚒️','🔩','🔩','🪚','🛠️']
+  var badgeGuardado = yaGuardado
+    ? '<span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid #a7f3d0;margin-left:6px;">✓ ya registrado</span>'
+    : '<span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid #fde68a;margin-left:6px;">nuevo</span>'
+
   return '<div class="oficio-bloque">' +
-    '<div class="oficio-bloque-titulo">'+iconos[n-1]+' Oficio '+n+'</div>' +
+    '<div class="oficio-bloque-titulo">Oficio '+n+' '+badgeGuardado+'</div>' +
     '<label class="lbl" style="margin-top:0;">Categoría *</label>' +
     '<select id="ofCategoria'+n+'" onchange="cargarSubcategoriasBloque('+n+')">' +
       '<option value="">— Seleccioná el oficio —</option>' +
@@ -1618,6 +1720,50 @@ document.addEventListener('change', function(e) {
 /* ════════════════════════════
    CAMBIAR TIPO
 ════════════════════════════ */
+var HERO_CONFIG = {
+  oficio: {
+    img: '/hero-oficios.jpg',
+    grad: 'linear-gradient(135deg,#f59e0b,#d97706,#b45309)',
+    title: 'Registrá tu Oficio',
+    sub: 'Completá tus datos y aparecé en el buscador de oficios'
+  },
+  profesional: {
+    img: '/hero-profesionales.jpg',
+    grad: 'linear-gradient(135deg,#7c3aed,#5b21b6,#4c1d95)',
+    title: 'Registrá tu Profesión',
+    sub: 'Completá tu perfil profesional y llegá a más pacientes y clientes'
+  },
+  cv: {
+    img: '/hero-cv.jpg',
+    grad: 'linear-gradient(135deg,#0369a1,#0c4a6e,#1e3a5f)',
+    title: 'Publicá tu CV',
+    sub: 'Hacé visible tu perfil para empresas y empleadores de tu zona'
+  },
+  empresa: {
+    img: '/hero-empresa.jpg',
+    grad: 'linear-gradient(135deg,#2563eb,#1d4ed8,#1e40af)',
+    title: 'Publicá una Oferta de Trabajo',
+    sub: 'Encontrá al empleado ideal para tu empresa o comercio'
+  },
+  emprendimiento: {
+    img: '/hero-emprendimientos.jpg',
+    grad: 'linear-gradient(135deg,#059669,#047857,#065f46)',
+    title: 'Registrá tu Emprendimiento',
+    sub: 'Mostrá tu marca y llegá a clientes de tu zona'
+  }
+}
+
+function actualizarHero(tipo) {
+  var cfg = HERO_CONFIG[tipo]
+  if(!cfg) { document.getElementById('heroSection').style.display = 'none'; return }
+  var img = document.getElementById('heroImg')
+  var bgImg = "url('"+cfg.img+"'), "+cfg.grad
+  img.style.backgroundImage = bgImg
+  document.getElementById('heroTitle').textContent = cfg.title
+  document.getElementById('heroSub').textContent   = cfg.sub
+  document.getElementById('heroSection').style.display = 'block'
+}
+
 async function cambiarTipo(tipo) {
   var forms = ['Oficio','Profesional','CV','Empresa','Emprendimiento']
   forms.forEach(function(f){ document.getElementById('form'+f).style.display = 'none' })
@@ -1625,7 +1771,6 @@ async function cambiarTipo(tipo) {
   else if(tipo === 'profesional')   document.getElementById('formProfesional').style.display = 'block'
   else if(tipo === 'cv') {
     document.getElementById('formCV').style.display = 'block'
-    // Inicializar tag input y primer idioma si no existen aún
     initCVTagInput()
     if(!document.getElementById('cvIdiomasContainer').children.length) agregarIdiomaCV()
   }
@@ -1638,19 +1783,19 @@ async function cambiarTipo(tipo) {
     initEmpTagInput2()
   }
 
+  actualizarHero(tipo)
+
   // Guardar el tipo en la DB preservando tipos secundarios
   if(currentUser && tipo) {
     var perRes = await supa.from('perfiles').select('tipo').eq('id', currentUser.id).maybeSingle()
     var tipoActualDB = perRes.data?.tipo || ''
     var tiposActuales = tipoActualDB.split(',').map(function(t){return t.trim()}).filter(Boolean)
-    // El primer elemento es el tipo primario; los restantes son secundarios
     var secundarios = tiposActuales.slice(1)
-    // Reemplazar solo el primario, conservar secundarios
     var nuevoTipoFull = [tipo].concat(secundarios.filter(function(s){return s !== tipo})).join(',')
     await supa.from('perfiles').update({ tipo: nuevoTipoFull }).eq('id', currentUser.id)
   }
 
-  document.getElementById('selectorTipo').scrollIntoView({ behavior:'smooth', block:'start' })
+  document.getElementById('heroSection').scrollIntoView({ behavior:'smooth', block:'start' })
 }
 
 /* ════════════════════════════
@@ -1714,10 +1859,19 @@ async function guardarOficio() {
     var cp          = document.getElementById('ofCP').value.trim() || null
     var direccion   = document.getElementById('ofDireccion').value.trim() || null
 
+    // Formas de pago
+    var pagos = []
+    if(document.getElementById('ofPagoEfectivo').checked)  pagos.push('Efectivo')
+    if(document.getElementById('ofPagoTarjeta').checked)   pagos.push('Tarjeta')
+    if(document.getElementById('ofPagoMP').checked)        pagos.push('Mercado Pago')
+    if(document.getElementById('ofPagoCuotas').checked)    pagos.push('Cuotas')
+    if(document.getElementById('ofPagoConvenir').checked)  pagos.push('A convenir')
+
     var descFull = descripcion
-    if(horario)   descFull += '\n⏰ Disponibilidad: ' + horario
-    if(matricula) descFull += '\n📋 Matrícula: ' + matricula
-    if(radio)     descFull += '\n📍 Zona de cobertura: ' + radio
+    if(horario)       descFull += '\n⏰ Disponibilidad: ' + horario
+    if(matricula)     descFull += '\n📋 Matrícula: ' + matricula
+    if(radio)         descFull += '\n📍 Zona de cobertura: ' + radio
+    if(pagos.length)  descFull += '\n💳 Formas de pago: ' + pagos.join(' · ')
     var extras = []
     if(presupuesto) extras.push('Presupuesto sin costo')
     if(factura)     extras.push('Emite factura')
@@ -1770,8 +1924,9 @@ async function guardarOficio() {
       await subirFoto(fotoInput.files[0])
     }
 
-    mostrarMsgOficio('ok', '✅ Perfil guardado. Redirigiendo...')
-    setTimeout(function(){ window.location.href = '/perfil.html' }, 1500)
+    mostrarMsgOficio('ok', '✅ ¡Perfil publicado! Redirigiendo...')
+    var catParam = encodeURIComponent(categoria.split(',')[0].trim())
+    setTimeout(function(){ window.location.href = '/perfil.html?saved=oficio&cat=' + catParam }, 1500)
 
   } catch(e) {
     console.error('guardarOficio error:', e)
@@ -2943,20 +3098,41 @@ async function init() {
     if(catVal) {
       var catsArr = catVal.split(', ').map(function(c){return c.trim()}).filter(Boolean)
       var subsArr = subsStr ? subsStr.split(', ').map(function(s){return s.trim()}).filter(Boolean) : []
+      var totalGuardados = Math.min(catsArr.length, 10)
 
-      // Ajustar el selector de cantidad
+      // Marcar el mínimo global (no se puede bajar de los ya guardados)
+      _ofCantMinima = totalGuardados
+
+      // Ajustar selector: valor = total ya guardados, opciones de totalGuardados a 10
       var cantSel = document.getElementById('cantidadOficios')
-      cantSel.value = Math.min(catsArr.length, 5)
+      cantSel.value = totalGuardados
+      // Deshabilitar opciones menores al mínimo
+      Array.from(cantSel.options).forEach(function(opt) {
+        opt.disabled = parseInt(opt.value) < totalGuardados
+      })
 
-      // Generar bloques con los datos guardados
+      // Actualizar label del selector
+      var lbl = document.getElementById('cantidadOficiosLabel')
+      if(lbl) lbl.textContent = 'Total de oficios (podés agregar hasta 10)'
+
+      // Mostrar badge de registrados
+      var badge = document.getElementById('oficiosRegistradosBadge')
+      var badgeTxt = document.getElementById('oficiosRegistradosTxt')
+      if(badge && badgeTxt) {
+        badgeTxt.textContent = 'Ya tenés ' + totalGuardados + ' oficio' + (totalGuardados > 1 ? 's' : '') + ' registrado' + (totalGuardados > 1 ? 's' : '') + ': ' + catsArr.join(', ')
+        badge.style.display = 'block'
+      }
+
+      // Generar bloques con datos guardados (marcados como ya guardados)
       var bloquesCont = document.getElementById('bloquesOficios')
       var html = ''
-      for(var bi = 1; bi <= catsArr.length; bi++) {
-        html += generarBloqueOficio(bi, catsArr[bi-1], subsArr)
+      for(var bi = 1; bi <= totalGuardados; bi++) {
+        html += generarBloqueOficio(bi, catsArr[bi-1], subsArr, true)
       }
       bloquesCont.innerHTML = html
     } else {
       // Sin datos previos: mostrar 1 bloque vacío
+      _ofCantMinima = 1
       actualizarBloques()
     }
 
@@ -2977,6 +3153,23 @@ async function init() {
       if(r2){ r2.checked = true; if(p.mostrar_como==='empresa') document.getElementById('ofNombreEmpresaWrap').style.display='block' }
     }
     document.getElementById('ofMostrarTel').checked = p.mostrar_telefono !== false
+
+    // Pre-poblar formas de pago desde la descripción guardada
+    if(descVal) {
+      var pagoLine = descVal.match(/💳 Formas de pago: (.+)/)
+      if(pagoLine) {
+        var pagosGuard = pagoLine[1].split(' · ')
+        document.getElementById('ofPagoEfectivo').checked = pagosGuard.indexOf('Efectivo') !== -1
+        document.getElementById('ofPagoTarjeta').checked  = pagosGuard.indexOf('Tarjeta') !== -1
+        document.getElementById('ofPagoMP').checked       = pagosGuard.indexOf('Mercado Pago') !== -1
+        document.getElementById('ofPagoCuotas').checked   = pagosGuard.indexOf('Cuotas') !== -1
+        document.getElementById('ofPagoConvenir').checked = pagosGuard.indexOf('A convenir') !== -1
+        // Limpiar la línea de la descripción visible
+        document.getElementById('ofDescripcion').value = descVal
+          .replace(/\n💳 Formas de pago: .+/, '')
+          .replace(/\n⏰[^\n]*/,'').replace(/\n📋[^\n]*/,'').replace(/\n📍[^\n]*/,'').replace(/\n✅[^\n]*/,'').trim()
+      }
+    }
 
     // Cargar sección Trabajos Realizados si tiene plan activo
     if((p.plan_nivel || 0) > 0) {
