@@ -56,8 +56,15 @@ async function init(){
     return
   }
 
-  /* ── Si no eligió tipo todavía, mostrar pantalla de elección ── */
-  if(!data.tipo){
+  /* ── Si no configuró su perfil todavía, mostrar pantalla de elección ── */
+  // Verifica si tiene algún servicio/perfil ya cargado
+  const { data: srvCheck } = await supabase
+    .from("servicios").select("id").eq("usuario_id", userId).maybeSingle()
+
+  const perfilSinConfigurar = !srvCheck && (!data.tipo || data.tipo === "profesional") &&
+    !data.movil && !data.localidad
+
+  if(perfilSinConfigurar){
     const nombreBienvenida = data.nombre ? `, ${data.nombre}` : ""
     document.getElementById("dash").innerHTML = `
       <div style="text-align:center;margin-bottom:28px;">
