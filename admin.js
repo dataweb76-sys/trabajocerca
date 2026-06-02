@@ -639,6 +639,157 @@ async function guardarCategorias() {
   if(error) alert('Error al guardar: ' + error.message)
 }
 
+/* ══════════════════════════════════════════════════════
+   GESTIÓN DE PUBLICIDADES
+══════════════════════════════════════════════════════ */
+
+const PUB_DEFAULTS = {
+  inicio_a: ['banner-pub-albanil.jpg','banner-pub-empresa.jpg','banner-pub-profesional.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg'],
+  inicio_b: ['banner-pub-empresa.jpg','banner-pub-profesional.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg','banner-pub-albanil.jpg'],
+  oficios:  ['banner-pub-albanil.jpg','banner-pub-empresa.jpg','banner-pub-profesional.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg']
+}
+
+let _pubConfig = {
+  inicio_a: { cantidad: 5, imagenes: [...PUB_DEFAULTS.inicio_a] },
+  inicio_b: { cantidad: 5, imagenes: [...PUB_DEFAULTS.inicio_b] },
+  oficios:  { cada: 3,    imagenes: [...PUB_DEFAULTS.oficios]  }
+}
+
+window.togglePub = function() {
+  const sec = document.getElementById('seccionPub')
+  const ch  = document.getElementById('pubChevron')
+  const abierto = sec.style.display !== 'none'
+  sec.style.display = abierto ? 'none' : 'block'
+  ch.className = abierto ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up'
+  if(!abierto) cargarPub()
+}
+
+window.abrirTabPub = function(tab) {
+  document.getElementById('tabContentInicio').style.display = tab === 'inicio' ? 'block' : 'none'
+  document.getElementById('tabContentOficios').style.display = tab === 'oficios' ? 'block' : 'none'
+  document.getElementById('tabPubInicio').style.cssText = tab === 'inicio'
+    ? 'background:#f59e0b;color:white;' : 'color:#f59e0b;border-color:#f59e0b;border:1.5px solid;background:white;'
+  document.getElementById('tabPubOficios').style.cssText = tab === 'oficios'
+    ? 'background:#ea580c;color:white;' : 'color:#ea580c;border-color:#ea580c;border:1.5px solid;background:white;'
+}
+
+async function cargarPub() {
+  // Cargar config guardada
+  const { data } = await supabase.from('configuracion').select('valor').eq('clave','pub_config').maybeSingle()
+  if(data?.valor) {
+    try { _pubConfig = { ..._pubConfig, ...JSON.parse(data.valor) } } catch(e){}
+  }
+  // Sincronizar selectores
+  const ca = document.getElementById('cantInicio_a')
+  const cb = document.getElementById('cantInicio_b')
+  const co = document.getElementById('cadaOficios')
+  if(ca) ca.value = _pubConfig.inicio_a?.cantidad || 5
+  if(cb) cb.value = _pubConfig.inicio_b?.cantidad || 5
+  if(co) co.value = _pubConfig.oficios?.cada || 3
+
+  renderSlots('inicio_a', 'slots_inicio_a', 5)
+  renderSlots('inicio_b', 'slots_inicio_b', 5)
+  renderSlots('oficios',  'slots_oficios',   5)
+}
+
+function renderSlots(seccion, contenedorId, total) {
+  const cont = document.getElementById(contenedorId)
+  if(!cont) return
+  const imgs = _pubConfig[seccion]?.imagenes || PUB_DEFAULTS[seccion]
+  let html = ''
+  for(let i = 0; i < total; i++) {
+    const url = imgs[i] || ''
+    // Si es URL relativa (archivo local) armarla, si es http usarla directo
+    const src = url.startsWith('http') ? url : ('/' + url)
+    html += `
+      <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;text-align:center;">
+        <div style="height:80px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+          ${src ? `<img src="${src}" style="width:100%;height:80px;object-fit:cover;" onerror="this.style.display='none'">` : '<i class="fa-solid fa-image" style="font-size:24px;color:#94a3b8;"></i>'}
+        </div>
+        <div style="padding:8px 6px 10px;">
+          <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px;">Imagen ${i+1}</div>
+          <label style="
+            display:inline-flex;align-items:center;gap:5px;cursor:pointer;
+            background:#2563eb;color:white;font-size:11px;font-weight:700;
+            padding:5px 10px;border-radius:7px;">
+            <i class="fa-solid fa-upload"></i> Subir
+            <input type="file" accept="image/*" style="display:none"
+              onchange="window.subirPub('${seccion}',${i},this)">
+          </label>
+        </div>
+      </div>`
+  }
+  cont.innerHTML = html
+}
+
+window.subirPub = async function(seccion, idx, input) {
+  if(!input.files?.length) return
+  const file    = input.files[0]
+  const ext     = file.name.split('.').pop()
+  const path    = `pub/${seccion}_${idx+1}.${ext}`
+  mostrarPubMsg('Subiendo imagen...', 'info')
+
+  // Comprimir si es muy grande (> 1MB)
+  let blob = file
+  if(file.size > 800000) {
+    try {
+      blob = await new Promise((res, rej) => {
+        const img = new Image()
+        img.onload = () => {
+          const cv = document.createElement('canvas')
+          const scale = Math.min(1, 1400 / img.width)
+          cv.width = img.width * scale; cv.height = img.height * scale
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height)
+          cv.toBlob(b => res(b), 'image/jpeg', 0.82)
+        }
+        img.onerror = rej
+        img.src = URL.createObjectURL(file)
+      })
+    } catch(e) { blob = file }
+  }
+
+  const { data: up, error } = await supabase.storage.from('trabajos').upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+  if(error) { mostrarPubMsg('❌ Error al subir: ' + error.message, 'err'); return }
+
+  const { data: urlData } = supabase.storage.from('trabajos').getPublicUrl(path)
+  const url = urlData.publicUrl
+
+  if(!_pubConfig[seccion]) _pubConfig[seccion] = { imagenes: [...PUB_DEFAULTS[seccion]] }
+  if(!_pubConfig[seccion].imagenes) _pubConfig[seccion].imagenes = [...PUB_DEFAULTS[seccion]]
+  _pubConfig[seccion].imagenes[idx] = url
+
+  await guardarConfig()
+  renderSlots(seccion, `slots_${seccion}`, 5)
+  mostrarPubMsg('✅ Imagen ' + (idx+1) + ' actualizada correctamente', 'ok')
+}
+
+window.guardarConfig = async function() {
+  // Leer los selectores
+  const ca = document.getElementById('cantInicio_a')
+  const cb = document.getElementById('cantInicio_b')
+  const co = document.getElementById('cadaOficios')
+  if(ca) _pubConfig.inicio_a.cantidad = parseInt(ca.value)
+  if(cb) _pubConfig.inicio_b.cantidad = parseInt(cb.value)
+  if(co) _pubConfig.oficios.cada      = parseInt(co.value)
+
+  const { error } = await supabase.from('configuracion')
+    .upsert({ clave: 'pub_config', valor: JSON.stringify(_pubConfig) })
+  if(error) { mostrarPubMsg('❌ Error al guardar configuración', 'err'); return }
+  mostrarPubMsg('✅ Configuración guardada', 'ok')
+  setTimeout(() => { const m = document.getElementById('pubMsg'); if(m) m.style.display='none' }, 3000)
+}
+
+function mostrarPubMsg(txt, tipo) {
+  const el = document.getElementById('pubMsg')
+  if(!el) return
+  el.textContent = txt
+  el.style.cssText = tipo === 'ok'
+    ? 'display:block;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;'
+    : tipo === 'err'
+    ? 'display:block;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;'
+    : 'display:block;background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;'
+}
+
 /* ── Init ── */
 async function init() {
   const ok = await verificarAdmin()

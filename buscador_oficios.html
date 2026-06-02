@@ -107,9 +107,12 @@
 <script src="/splash.js"></script>
 <script src="/analytics.js"></script>
 
-<!-- Banner inline entre perfiles -->
+<!-- Banner inline entre perfiles (usa config dinámica si existe) -->
 <script>
 (function(){
+  const SUPA_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+
   var imagenes = [
     '/banner-pub-albanil.jpg',
     '/banner-pub-empresa.jpg',
@@ -117,7 +120,20 @@
     '/banner-pub-tech.jpg',
     '/banner-pub-oficina.jpg'
   ]
+  var cadaCuantos = 3
   var imgIdx = 0
+
+  // Cargar config dinámica del admin
+  fetch(SUPA_URL + '/rest/v1/configuracion?clave=eq.pub_config&select=valor', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r){ return r.json() }).then(function(rows){
+    if(!rows?.[0]?.valor) return
+    try {
+      var cfg = JSON.parse(rows[0].valor)
+      if(cfg.oficios?.imagenes?.length) imagenes = cfg.oficios.imagenes
+      if(cfg.oficios?.cada) cadaCuantos = cfg.oficios.cada
+    } catch(e){}
+  }).catch(function(){})  // silencioso si falla
 
   function crearBanner(){
     var a = document.createElement('a')
@@ -140,7 +156,7 @@
     imgIdx = 0
     var cards = Array.from(resultados.querySelectorAll('.card'))
     cards.forEach(function(card, i){
-      if((i + 1) % 3 === 0 && i < cards.length - 1){
+      if((i + 1) % cadaCuantos === 0 && i < cards.length - 1){
         card.parentNode.insertBefore(crearBanner(), card.nextSibling)
       }
     })

@@ -424,8 +424,31 @@
     irA(0); reiniciar()
   }
 
+  const SUPA_URL2 = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+  const SUPA_KEY2 = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+
+  function aplicarImagenesCarrusel(trackId, imagenes){
+    var items = document.querySelectorAll('#'+trackId+' .pub-item img')
+    items.forEach(function(img, i){
+      if(imagenes[i]) img.src = imagenes[i]
+    })
+  }
+
+  // Lanzar carruseles con defaults
   miniCarrusel('pubTrackA', 'dotsA', 4000)
-  miniCarrusel('pubTrackB', 'dotsB', 5000)  // ritmo diferente → no sincronizan
+  miniCarrusel('pubTrackB', 'dotsB', 5000)
+
+  // Intentar aplicar config dinámica encima
+  fetch(SUPA_URL2 + '/rest/v1/configuracion?clave=eq.pub_config&select=valor', {
+    headers: { 'apikey': SUPA_KEY2, 'Authorization': 'Bearer ' + SUPA_KEY2 }
+  }).then(function(r){ return r.json() }).then(function(rows){
+    if(!rows?.[0]?.valor) return
+    try {
+      var cfg = JSON.parse(rows[0].valor)
+      if(cfg.inicio_a?.imagenes?.length) aplicarImagenesCarrusel('pubTrackA', cfg.inicio_a.imagenes)
+      if(cfg.inicio_b?.imagenes?.length) aplicarImagenesCarrusel('pubTrackB', cfg.inicio_b.imagenes)
+    } catch(e){}
+  }).catch(function(){})
 })()
 </script>
 
