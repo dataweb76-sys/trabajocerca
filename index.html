@@ -229,19 +229,19 @@
     <!-- Botones de búsqueda -->
     <div class="hero-buscar-btns">
       <a href="/buscador_oficios.html" class="hero-buscar-btn">
-        <span class="hb-ico">🔨</span> Buscar Oficios
+        <span class="hb-ico">🔧</span> Oficios
       </a>
       <a href="/buscador_profesionales.html" class="hero-buscar-btn">
-        <span class="hb-ico">🎓</span> Buscar Profesionales
+        <span class="hb-ico">🎓</span> Profesionales
       </a>
       <a href="/buscador_trabajos.html" class="hero-buscar-btn">
-        <span class="hb-ico">💼</span> Buscar Empleados
+        <span class="hb-ico">📄</span> CV Publicados
       </a>
       <a href="/buscador_emprendimientos.html" class="hero-buscar-btn">
-        <span class="hb-ico">💡</span> Buscar Emprendimientos
+        <span class="hb-ico">🚀</span> Emprendimientos
       </a>
-      <a href="/buscador_ofertas.html" class="hero-buscar-btn" style="border-color:#0369a1;color:#0369a1;">
-        <span class="hb-ico">💼</span> Ofertas de Trabajo
+      <a href="/buscador_ofertas.html" class="hero-buscar-btn">
+        <span class="hb-ico">💼</span> Mercado Laboral
       </a>
     </div>
 
@@ -288,6 +288,145 @@
   </div>
 </section>
 
+<!-- ══════════════════════════════════════
+     CARRUSEL DE PUBLICIDADES
+══════════════════════════════════════ -->
+<style>
+.pub-carrusel-wrap{
+  width:100%;background:#0f172a;overflow:hidden;
+  position:relative;line-height:0;
+}
+.pub-carrusel-track{
+  display:flex;
+  transition:transform .55s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+}
+.pub-slide{
+  min-width:100%;position:relative;cursor:pointer;
+}
+.pub-slide img{
+  width:100%;height:320px;object-fit:cover;object-position:center;
+  display:block;
+}
+/* Botones nav */
+.pub-nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  background:rgba(0,0,0,.42);backdrop-filter:blur(4px);
+  border:1.5px solid rgba(255,255,255,.25);border-radius:50%;
+  width:40px;height:40px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:white;font-size:16px;z-index:10;
+  transition:background .15s;line-height:1;
+}
+.pub-nav:hover{background:rgba(0,0,0,.68);}
+.pub-nav-prev{left:12px;}
+.pub-nav-next{right:12px;}
+/* Dots */
+.pub-dots{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  display:flex;gap:7px;z-index:10;
+}
+.pub-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,.45);cursor:pointer;
+  transition:background .2s,transform .2s;border:none;padding:0;
+}
+.pub-dot.activo{background:white;transform:scale(1.3);}
+/* Badge "Publicita aquí" */
+.pub-badge{
+  position:absolute;bottom:28px;right:16px;
+  background:linear-gradient(135deg,#f97316,#ea580c);
+  color:white;font-size:11px;font-weight:800;
+  padding:5px 12px;border-radius:20px;
+  box-shadow:0 2px 10px rgba(249,115,22,.5);
+  letter-spacing:.04em;text-transform:uppercase;
+  pointer-events:none;
+}
+@media(max-width:600px){
+  .pub-slide img{height:200px;}
+  .pub-badge{font-size:10px;padding:4px 10px;bottom:22px;}
+  .pub-nav{width:32px;height:32px;font-size:13px;}
+}
+</style>
+
+<div class="pub-carrusel-wrap">
+  <div class="pub-carrusel-track" id="pubTrack">
+    <div class="pub-slide">
+      <img src="/banner-pub-albanil.jpg" alt="Publicita aquí — Oficios" loading="lazy">
+    </div>
+    <div class="pub-slide">
+      <img src="/banner-pub-empresa.jpg" alt="Publicita aquí — Empresas" loading="lazy">
+    </div>
+    <div class="pub-slide">
+      <img src="/banner-pub-profesional.jpg" alt="Publicita aquí — Profesionales" loading="lazy">
+    </div>
+    <div class="pub-slide">
+      <img src="/banner-pub-tech.jpg" alt="Publicita aquí — Tecnología" loading="lazy">
+    </div>
+    <div class="pub-slide">
+      <img src="/banner-pub-oficina.jpg" alt="Publicita aquí — Servicios" loading="lazy">
+    </div>
+  </div>
+
+  <!-- Navegación -->
+  <button class="pub-nav pub-nav-prev" id="pubPrev" aria-label="Anterior">&#8249;</button>
+  <button class="pub-nav pub-nav-next" id="pubNext" aria-label="Siguiente">&#8250;</button>
+
+  <!-- Dots -->
+  <div class="pub-dots" id="pubDots"></div>
+
+  <!-- Badge contacto -->
+  <div class="pub-badge">📣 Publicita aquí</div>
+</div>
+
+<script>
+(function(){
+  var track  = document.getElementById('pubTrack')
+  var dotsEl = document.getElementById('pubDots')
+  var total  = 5
+  var actual = 0
+  var timer
+
+  // Crear dots
+  for(var i = 0; i < total; i++){
+    var d = document.createElement('button')
+    d.className = 'pub-dot' + (i===0 ? ' activo' : '')
+    d.setAttribute('data-i', i)
+    d.addEventListener('click', function(){ irA(+this.dataset.i); reiniciar() })
+    dotsEl.appendChild(d)
+  }
+
+  function irA(n){
+    actual = (n + total) % total
+    track.style.transform = 'translateX(-' + (actual * 100) + '%)'
+    document.querySelectorAll('.pub-dot').forEach(function(d, idx){
+      d.classList.toggle('activo', idx === actual)
+    })
+  }
+
+  function siguiente(){ irA(actual + 1) }
+
+  function reiniciar(){
+    clearInterval(timer)
+    timer = setInterval(siguiente, 4500)
+  }
+
+  document.getElementById('pubPrev').addEventListener('click', function(){ irA(actual - 1); reiniciar() })
+  document.getElementById('pubNext').addEventListener('click', function(){ irA(actual + 1); reiniciar() })
+
+  // Touch swipe mobile
+  var xStart = null
+  track.addEventListener('touchstart', function(e){ xStart = e.touches[0].clientX }, {passive:true})
+  track.addEventListener('touchend', function(e){
+    if(xStart === null) return
+    var diff = xStart - e.changedTouches[0].clientX
+    if(Math.abs(diff) > 40){ diff > 0 ? irA(actual+1) : irA(actual-1); reiniciar() }
+    xStart = null
+  }, {passive:true})
+
+  reiniciar()
+})()
+</script>
 
 <!-- ══ POPUP: ELEGÍ CÓMO REGISTRARTE ══ -->
 <div id="popupRegistroTipo" style="

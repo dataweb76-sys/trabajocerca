@@ -518,7 +518,6 @@ async function init(){
     </div>
 
     <div class="dash-actions">
-      ${accionPrincipal}
       <a href="/perfil_publico.html?id=${userId}" class="btn btn-outline" target="_blank" rel="noopener">
         <i class="fa-solid fa-eye"></i> Ver mi perfil público
       </a>
