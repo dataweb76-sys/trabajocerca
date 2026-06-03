@@ -575,6 +575,8 @@ async function renderCategorias() {
       .eq('clave', 'categorias_' + _catTipo)
       .single()
     _catData[_catTipo] = data?.valor || CAT_DEFAULTS[_catTipo]
+    // Actualizar localStorage para que el buscador lo lea sin auth
+    try { localStorage.setItem('tc_cats_' + _catTipo, JSON.stringify(_catData[_catTipo])) } catch(e) {}
   }
 
   const cats = _catData[_catTipo]

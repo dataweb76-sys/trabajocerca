@@ -284,9 +284,11 @@ window.filtrarCategoria = function(cat){
    BUSCAR
 ═══════════════════════════════════════════ */
 window.buscar = async function(){
-  // Cargar categorías desde DB (solo la primera vez)
+  // Cargar categorías desde localStorage/DB y re-renderizar el select
   await cargarChipsOficio()
   CATS_OFICIO = CHIPS_OFICIOS.slice(1).map(([,c]) => normStr(c))
+  inicializarBuscarSelect()  // re-puebla el select con las chips actualizadas
+  renderChips()              // re-puebla chips si existe el contenedor
 
   const palabra = document.getElementById("buscar").value.trim()
   const ciudad  = document.getElementById("ciudad").value.trim()
