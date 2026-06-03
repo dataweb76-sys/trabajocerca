@@ -1651,6 +1651,8 @@ async function cargarSubcatsDB() {
     if(valor && typeof valor === 'object' && Object.keys(valor).length > 0) {
       SUBCATS = valor
       CATS_LISTA = Object.keys(SUBCATS)
+      // También guardar en localStorage para que el buscador (sin auth) lo pueda leer
+      try { localStorage.setItem('tc_cats_oficio', JSON.stringify(valor)) } catch(e) {}
     }
   } catch(e) { console.warn('cargarSubcatsDB:', e) }
 }

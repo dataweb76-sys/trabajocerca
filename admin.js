@@ -643,12 +643,14 @@ window.eliminarCategoria = async function(cat) {
   renderCategorias()
 }
 
-/* ── Guardar en Supabase ── */
+/* ── Guardar en Supabase + localStorage (para que el buscador lo lea sin auth) ── */
 async function guardarCategorias() {
   const { error } = await supabase
     .from('configuracion')
     .upsert({ clave: 'categorias_' + _catTipo, valor: _catData[_catTipo] })
-  if(error) alert('Error al guardar: ' + error.message)
+  if(error) { alert('Error al guardar: ' + error.message); return }
+  // Guardar en localStorage para que el buscador público lo pueda leer
+  try { localStorage.setItem('tc_cats_' + _catTipo, JSON.stringify(_catData[_catTipo])) } catch(e) {}
 }
 
 /* ══════════════════════════════════════════════════════

@@ -136,24 +136,16 @@ async function cargarChipsOficio() {
   if(TIPO !== "oficio" || _chipsOficioCargados) return
   _chipsOficioCargados = true
 
-  // 1. Esperar la Promise pre-cargada por el HTML (sin carrera, sin RLS)
+  // 1. Leer de localStorage (guardado por admin.js o perfil_servicio.html — no tiene RLS)
   let valor = null
-  if(window._categoriasOficioPromise) {
-    valor = await window._categoriasOficioPromise
-  }
+  try {
+    const cached = localStorage.getItem('tc_cats_oficio')
+    if(cached) valor = JSON.parse(cached)
+  } catch(e) {}
 
-  // 2. Fallback: fetch directo si la Promise no existía
-  if(!valor) {
-    try {
-      const res = await fetch(
-        `${SB_URL}/rest/v1/configuracion?select=valor&clave=eq.categorias_oficio`,
-        { headers: SB_HEADERS }
-      )
-      if(res.ok) {
-        const arr = await res.json()
-        valor = arr?.[0]?.valor || null
-      }
-    } catch(e) { console.warn("cargarChipsOficio fetch:", e) }
+  // 2. Fallback: Promise pre-cargada por el HTML
+  if(!valor && window._categoriasOficioPromise) {
+    valor = await window._categoriasOficioPromise
   }
 
   if(!valor || typeof valor !== "object") return
