@@ -212,8 +212,7 @@
       total = arr.length
     }
     if(total > 0) {
-      var base = 500
-      var mostrar = Math.max(base, total)
+      var mostrar = 500 + total
       var txt = mostrar.toLocaleString('es-AR') + '+'
       // Topbar (puede no estar visible)
       var elTop = document.getElementById('numPerfiles')
