@@ -1601,43 +1601,63 @@ var currentUser = null
 /* ════════════════════════════
    SUBCATEGORÍAS POR OFICIO
 ════════════════════════════ */
-const SUBCATS = {
-  'Albañilería':              ['Construcción nueva','Remodelaciones','Pisos y revestimientos','Paredes y mampostería','Techos y azoteas','Impermeabilización','Escaleras','Reparaciones generales'],
-  'Plomería':                 ['Destapes','Instalaciones nuevas','Reparación de pérdidas','Calefón y termotanques','Conexiones de gas','Reparaciones generales'],
-  'Gasista':                  ['Instalación de gasoducto','Calefones y termotanques','Estufas y cocinas','Calderas y radiadores','Verificación de instalaciones'],
-  'Electricidad':             ['Instalaciones nuevas','Tableros eléctricos','Iluminación y luminarias','Reparaciones','Domótica','Instalaciones industriales'],
-  'Carpintería':              ['Muebles a medida','Puertas y ventanas','Placares y closets','Deck y pergolados','Escaleras de madera','Reparaciones'],
-  'Pintura':                  ['Pintura interior','Pintura exterior','Enduido y revoques finos','Empapelado','Impermeabilización','Pintura decorativa / texturada'],
-  'Herrería':                 ['Rejas y portones','Puertas de hierro','Estructuras metálicas','Escaleras de hierro','Reparaciones y soldaduras'],
-  'Cerrajería':               ['Apertura de puertas','Cambio de cerraduras','Puertas blindadas','Cajas fuertes','Copiado de llaves'],
-  'Jardinería':               ['Diseño de jardines','Mantenimiento de jardines','Poda de árboles','Sistemas de riego','Césped natural y artificial'],
-  'Limpieza':                 ['Casas y departamentos','Oficinas y comercios','Limpieza post obra','Tapizados y alfombras','Vidrios en altura'],
-  'Mudanzas / Fletes':        ['Mudanzas locales','Mudanzas larga distancia','Fletes y traslados','Embalaje profesional'],
-  'Refrigeración / Aire Acondicionado': ['Instalación de split','Mantenimiento y limpieza','Reparación de equipos','Aire central','Cámaras frigoríficas'],
-  'Informática / Tecnología': ['Reparación de PC y notebook','Reparación de celulares y tablets','Instalación de redes','Soporte técnico','Cámaras de seguridad'],
-  'Mecánica Automotriz':      ['Service general','Reparación de motor','Frenos y suspensión','Electricidad del auto','Chapería y pintura'],
-  'Tapicería':                ['Tapizado de autos','Tapizado de muebles','Cortinados y persianas','Reparaciones'],
+// SUBCATS — fallback hardcodeado (se sobreescribe con configuracion DB)
+// Nombres EXACTAMENTE iguales a CAT_DEFAULTS.oficio en admin.js
+var SUBCATS = {
+  'Albañilería':                 ['Construcción nueva','Remodelaciones','Pisos y revestimientos','Paredes y mampostería','Techos y azoteas','Impermeabilización','Reparaciones generales'],
+  'Plomería':                    ['Destapes','Instalaciones nuevas','Reparación de pérdidas','Calefón y termotanques','Conexiones de gas','Reparaciones generales'],
+  'Gasista':                     ['Instalación de gasoducto','Calefones y termotanques','Estufas y cocinas','Calderas y radiadores','Verificación de instalaciones'],
+  'Electricidad':                ['Instalaciones nuevas','Tableros eléctricos','Iluminación y luminarias','Reparaciones','Domótica','Instalaciones industriales'],
+  'Carpintería':                 ['Muebles a medida','Puertas y ventanas','Placares y closets','Deck y pergolados','Escaleras de madera','Reparaciones'],
+  'Pintura':                     ['Pintura interior','Pintura exterior','Enduido y revoques finos','Empapelado','Impermeabilización','Pintura decorativa'],
+  'Herrería':                    ['Rejas y portones','Puertas de hierro','Estructuras metálicas','Escaleras de hierro','Reparaciones y soldaduras'],
+  'Cerrajería':                  ['Apertura de puertas','Cambio de cerraduras','Puertas blindadas','Cajas fuertes','Copiado de llaves'],
+  'Jardinería':                  ['Diseño de jardines','Mantenimiento de jardines','Poda de árboles','Sistemas de riego','Césped natural y artificial'],
+  'Limpieza':                    ['Casas y departamentos','Oficinas y comercios','Limpieza post obra','Tapizados y alfombras','Vidrios en altura'],
+  'Mudanzas y Fletes':           ['Mudanzas locales','Mudanzas larga distancia','Fletes y traslados','Embalaje profesional'],
+  'Refrigeración / AC':          ['Instalación de split','Mantenimiento y limpieza','Reparación de equipos','Aire central','Cámaras frigoríficas'],
+  'Informática':                 ['Reparación de PC y notebook','Reparación de celulares','Instalación de redes','Soporte técnico','Cámaras de seguridad'],
+  'Mecánica Automotriz':         ['Service general','Reparación de motor','Frenos y suspensión','Electricidad del auto','Chapería y pintura'],
+  'Tapicería':                   ['Tapizado de autos','Tapizado de muebles','Cortinados y persianas','Reparaciones'],
   'Techos e Impermeabilización': ['Tejas cerámicas y calcáreas','Chapa y zinc','Membrana líquida y asfáltica','Policarbonato','Impermeabilización de terrazas'],
-  'Soldadura':                ['Soldadura MIG / TIG','Estructuras metálicas','Portones y rejas','Aluminio','Acero inoxidable'],
-  'Cadetería / Delivery':     ['Mensajería en moto','Paquetería y encomiendas','Delivery de comida','Trámites y diligencias'],
-  'Fotografía / Video':       ['Eventos sociales','Fotografía corporativa','Video y edición','Retratos y book'],
-  'Peluquería / Estética':    ['Corte y peinado','Coloración y mechas','Manicura y pedicura','Cejas y pestañas','Depilación'],
-  'Costura / Modistería':     ['Arreglos de ropa','Ropa a medida','Uniformes','Bordados'],
-  'Gastronomía / Catering':   ['Catering para eventos','Comida por encargo','Repostería y tortas','Servicio de mesa y mozos'],
-  'Mecánica del Hogar':       ['Arreglo de electrodomésticos','Instalación de artefactos','Climatización','Sanitarios'],
-  'Gestoría / Trámites':      ['Trámites vehiculares (VTV, transferencias)','Trámites AFIP / ARCA','Trámites municipales','Habilitaciones comerciales','Monotributo','Rentas y sellos','Sucesiones y escrituras','Jubilaciones y pensiones','Trámites migratorios'],
-  'Carnicería / Frigorífico': ['Cortes vacunos','Cortes porcinos','Achuras y menudencias','Embutidos artesanales','Delivery de carne','Venta por mayor'],
-  'Personal Trainer':         ['Entrenamiento funcional','Musculación','Cardio y HIIT','Pérdida de peso','Entrenamiento a domicilio','Online / videollamada','Adultos mayores','Rehabilitación deportiva'],
-  'Cuidado de personas':      ['Cuidado de niños (niñera)','Cuidado de adultos mayores','Acompañante terapéutico','Asistente geriátrico','Cuidado de enfermos'],
-  'Planchado / Lavandería':   ['Planchado a domicilio','Retiro y entrega','Lavado y planchado','Ropa de cama y manteles'],
-  'Enfermería':               ['Inyectables y curaciones','Control de presión y glucemia','Atención domiciliaria','Acompañamiento hospitalario','Cuidados post-operatorios'],
-  'Otro oficio':              ['Otro (descripción libre)']
+  'Soldadura':                   ['Soldadura MIG / TIG','Estructuras metálicas','Portones y rejas','Aluminio','Acero inoxidable'],
+  'Cadetería y Delivery':        ['Mensajería en moto','Paquetería y encomiendas','Delivery de comida','Trámites y diligencias'],
+  'Fotografía y Video':          ['Eventos sociales','Fotografía corporativa','Video y edición','Retratos y book'],
+  'Peluquería y Estética':       ['Corte y peinado','Coloración y mechas','Manicura y pedicura','Cejas y pestañas','Depilación','Micropigmentación'],
+  'Costura y Modistería':        ['Arreglos de ropa','Ropa a medida','Uniformes','Bordados'],
+  'Gastronomía y Catering':      ['Catering para eventos','Comida por encargo','Repostería y tortas','Servicio de mesa y mozos'],
+  'Gestoría y Trámites':         ['Trámites vehiculares (VTV, transferencias)','Trámites AFIP / ARCA','Trámites municipales','Habilitaciones comerciales','Monotributo','Jubilaciones y pensiones','Trámites migratorios'],
+  'Carnicería':                  ['Cortes vacunos','Cortes porcinos','Achuras y menudencias','Embutidos artesanales','Delivery de carne'],
+  'Personal Trainer':            ['Entrenamiento funcional','Musculación','Cardio y HIIT','Entrenamiento a domicilio','Online / videollamada','Adultos mayores'],
+  'Cuidado de personas':         ['Niñera','Cuidado de adultos mayores','Acompañante terapéutico','Asistente geriátrico','Cuidado de enfermos'],
+  'Planchado y Lavandería':      ['Planchado a domicilio','Retiro y entrega','Lavado y planchado','Ropa de cama y manteles'],
+  'Enfermería':                  ['Inyectables y curaciones','Control de presión y glucemia','Atención domiciliaria','Acompañamiento hospitalario','Cuidados post-operatorios'],
+  'Diseño':                      ['Diseño gráfico','Diseño web','UX/UI','Diseño de logo','Diseño editorial'],
+  'Clases y Tutorías':           ['Matemáticas','Inglés','Física y química','Apoyo escolar','Música','Idiomas'],
+  'Mecánica del Hogar':          ['Arreglo de electrodomésticos','Instalación de artefactos','Climatización','Sanitarios'],
+  'Otro oficio':                 []
+}
+
+/* ════════════════════════════
+   CARGAR SUBCATS DESDE DB
+════════════════════════════ */
+var CATS_LISTA = Object.keys(SUBCATS)
+
+async function cargarSubcatsDB() {
+  try {
+    var res = await supa.from('configuracion')
+      .select('valor').eq('clave', 'categorias_oficio').maybeSingle()
+    var valor = res.data?.valor
+    if(valor && typeof valor === 'object' && Object.keys(valor).length > 0) {
+      SUBCATS = valor
+      CATS_LISTA = Object.keys(SUBCATS)
+    }
+  } catch(e) { console.warn('cargarSubcatsDB:', e) }
 }
 
 /* ════════════════════════════
    BLOQUES DE OFICIOS MÚLTIPLES
 ════════════════════════════ */
-var CATS_LISTA = Object.keys(SUBCATS)
 
 function actualizarBloques() {
   var cantidad = parseInt(document.getElementById('cantidadOficios').value) || 1
@@ -3103,6 +3123,9 @@ window.eliminarTrabajo = async function(id) {
    INIT: CARGAR PERFIL EXISTENTE
 ════════════════════════════ */
 async function init() {
+  // Cargar categorías de oficio desde DB antes de todo
+  await cargarSubcatsDB()
+
   var sesRes  = await supa.auth.getSession()
   var session = sesRes.data?.session
   if(!session){ window.location.href = '/login.html'; return }

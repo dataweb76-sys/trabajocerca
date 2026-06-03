@@ -89,15 +89,35 @@ function displayName(p){
 function puedeVerTel(p){ return p.mostrar_telefono !== false }
 
 /* ── CATEGORÍAS POR TIPO ── */
-const CHIPS_OFICIOS = [
+
+// Emojis por nombre de categoría de oficio
+const EMOJI_OFICIO = {
+  'Albañilería':'🔨','Plomería':'💧','Gasista':'🔥','Electricidad':'⚡',
+  'Carpintería':'🪚','Pintura':'🎨','Herrería':'⚙️','Cerrajería':'🔑',
+  'Jardinería':'🌿','Limpieza':'🧹','Mudanzas y Fletes':'📦',
+  'Refrigeración / AC':'❄️','Informática':'💻','Mecánica Automotriz':'🚗',
+  'Tapicería':'🛋️','Techos e Impermeabilización':'🏠','Soldadura':'🔧',
+  'Cadetería y Delivery':'🛵','Fotografía y Video':'📷',
+  'Peluquería y Estética':'✂️','Costura y Modistería':'🧵',
+  'Gastronomía y Catering':'🍳','Gestoría y Trámites':'📋',
+  'Carnicería':'🥩','Personal Trainer':'💪',
+  'Cuidado de personas':'❤️','Planchado y Lavandería':'👕',
+  'Enfermería':'💊','Diseño':'🎭','Clases y Tutorías':'📚',
+  'Mecánica del Hogar':'🔩',
+}
+
+// Defaults hardcodeados como fallback (se sobreescriben con DB)
+let CHIPS_OFICIOS = [
   ["🟢","Disponible ahora"],
-  ["🔨","Albañilería"],["💧","Plomería"],["🔥","Gasista"],["⚡","Electricista"],
+  ["🔨","Albañilería"],["💧","Plomería"],["🔥","Gasista"],["⚡","Electricidad"],
   ["🎨","Pintura"],["🪚","Carpintería"],["🌿","Jardinería"],["⚙️","Herrería"],
-  ["🔑","Cerrajería"],["🧹","Limpieza"],["📦","Mudanzas"],["❄️","Refrigeración"],
-  ["💻","Informática"],["🍽️","Gastronomía"],["🥩","Carnicería"],["📋","Gestoría"],
-  ["🛵","Cadetería"],["🚗","Mecánico"],["🛋️","Tapicería"],["☀️","Instalaciones Fotovoltaicas"],
-  ["💪","Personal Trainer"],["💉","Enfermero"],["👶","Niñera"],["🛵","Delivery"],
-  ["👔","Planchado"],["✂️","Peluquería"],["📷","Fotógrafo"]
+  ["🔑","Cerrajería"],["🧹","Limpieza"],["📦","Mudanzas y Fletes"],["❄️","Refrigeración / AC"],
+  ["💻","Informática"],["🚗","Mecánica Automotriz"],["🛋️","Tapicería"],
+  ["🏠","Techos e Impermeabilización"],["🔧","Soldadura"],["🛵","Cadetería y Delivery"],
+  ["📷","Fotografía y Video"],["✂️","Peluquería y Estética"],["🧵","Costura y Modistería"],
+  ["🍳","Gastronomía y Catering"],["📋","Gestoría y Trámites"],["🥩","Carnicería"],
+  ["💪","Personal Trainer"],["❤️","Cuidado de personas"],["👕","Planchado y Lavandería"],
+  ["💊","Enfermería"],["🎭","Diseño"],["📚","Clases y Tutorías"],["🔩","Mecánica del Hogar"]
 ]
 const CHIPS_PROFESIONALES = [
   ["🟢","Disponible ahora"],
@@ -107,8 +127,35 @@ const CHIPS_PROFESIONALES = [
   ["💼","Administración"],["📡","Comunicación"],["🔬","Biólogo/Químico"]
 ]
 
-// Chips según página
-const CHIPS = TIPO === "profesional" ? CHIPS_PROFESIONALES : CHIPS_OFICIOS
+// Chips según página (let para poder actualizar desde DB)
+let CHIPS = TIPO === "profesional" ? CHIPS_PROFESIONALES : [...CHIPS_OFICIOS]
+
+/* ── Carga chips de oficios desde configuracion DB ── */
+let _chipsOficioCargados = false
+async function cargarChipsOficio() {
+  if(TIPO !== "oficio" || _chipsOficioCargados) return
+  _chipsOficioCargados = true
+  try {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/configuracion?select=valor&clave=eq.categorias_oficio`,
+      { headers: SB_HEADERS }
+    )
+    if(!res.ok) return
+    const arr = await res.json()
+    const valor = arr?.[0]?.valor
+    if(!valor || typeof valor !== "object") return
+    // Convertir claves del objeto a chips [emoji, nombre]
+    const nuevos = [
+      ["🟢","Disponible ahora"],
+      ...Object.keys(valor)
+        .filter(n => n !== "Otro oficio")
+        .map(n => [EMOJI_OFICIO[n] || "🔧", n]),
+      ["🔧","Otro oficio"]
+    ]
+    CHIPS_OFICIOS = nuevos
+    CHIPS = nuevos
+  } catch(e) { console.warn("cargarChipsOficio:", e) }
+}
 
 /* ── Ciudades por provincia ── */
 const CIUDADES_POR_PROVINCIA = {
@@ -144,9 +191,9 @@ function normStr(s){
     .replace(/á/g,"a").replace(/é/g,"e").replace(/í/g,"i")
     .replace(/ó/g,"o").replace(/ú/g,"u").replace(/ü/g,"u").replace(/ñ/g,"n")
 }
-// Listas de categorías normalizadas (sin "Disponible ahora")
+// Listas de categorías normalizadas (let — se recalculan tras carga de DB)
 const CATS_PROF   = CHIPS_PROFESIONALES.slice(1).map(([,c]) => normStr(c))
-const CATS_OFICIO = CHIPS_OFICIOS.slice(1).map(([,c]) => normStr(c))
+let   CATS_OFICIO = CHIPS_OFICIOS.slice(1).map(([,c]) => normStr(c))
 
 // ¿Este item es de un profesional universitario?
 // REGLA: la categoría del servicio manda sobre el campo tipo,
@@ -227,6 +274,10 @@ window.filtrarCategoria = function(cat){
    BUSCAR
 ═══════════════════════════════════════════ */
 window.buscar = async function(){
+  // Cargar categorías desde DB (solo la primera vez)
+  await cargarChipsOficio()
+  CATS_OFICIO = CHIPS_OFICIOS.slice(1).map(([,c]) => normStr(c))
+
   const palabra = document.getElementById("buscar").value.trim()
   const ciudad  = document.getElementById("ciudad").value.trim()
   const cont    = document.getElementById("resultados")
