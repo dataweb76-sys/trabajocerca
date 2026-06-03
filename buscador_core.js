@@ -344,20 +344,6 @@ window.buscar = async function(){
       if(tipoPrimario === "empresa" || tipoPrimario === "emprendimiento" || tipoPrimario === "cv") return false
       return !esProfesionalUni(d)
     })
-
-    // ── Actualizar chips con categorías REALES de los datos filtrados ──
-    // Una sola fuente de verdad: lo que está en la DB es lo que aparece como chip
-    const catsReales = [...new Set(data.map(d => d.categoria).filter(Boolean))].sort()
-    if(catsReales.length) {
-      const chipsReales = [
-        ["🟢","Disponible ahora"],
-        ...catsReales.map(c => [EMOJI_OFICIO[c] || "🔧", c])
-      ]
-      CHIPS_OFICIOS = chipsReales
-      CHIPS = chipsReales
-      inicializarBuscarSelect()
-      renderChips()
-    }
   }
 
   if(!data?.length){
