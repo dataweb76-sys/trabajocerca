@@ -284,11 +284,20 @@ window.filtrarCategoria = function(cat){
    BUSCAR
 ═══════════════════════════════════════════ */
 window.buscar = async function(){
-  // Cargar categorías desde localStorage/DB y re-renderizar el select
+  // Cargar categorías (solo la primera vez que se ejecuta buscar)
+  const chipsAntes = CHIPS_OFICIOS.length
   await cargarChipsOficio()
   CATS_OFICIO = CHIPS_OFICIOS.slice(1).map(([,c]) => normStr(c))
-  inicializarBuscarSelect()  // re-puebla el select con las chips actualizadas
-  renderChips()              // re-puebla chips si existe el contenedor
+  // Re-renderizar el select SOLO si las chips cambiaron (primera carga desde localStorage)
+  if(CHIPS_OFICIOS.length !== chipsAntes) {
+    const valActual = document.getElementById("buscar")?.value || ""
+    inicializarBuscarSelect()
+    renderChips()
+    if(valActual) {
+      const el = document.getElementById("buscar")
+      if(el) el.value = valActual
+    }
+  }
 
   const palabra = document.getElementById("buscar").value.trim()
   const ciudad  = document.getElementById("ciudad").value.trim()
