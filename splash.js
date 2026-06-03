@@ -566,6 +566,72 @@
     topbar.appendChild(center)
     topbar.appendChild(right)
 
+    // ── Botón instalar / actualizar PWA ──
+    ;(function(){
+      var CLAVE_INSTALADA = 'tc_app_instalada'
+      var _prompt = null
+
+      function crearBtnInstalar(modo) {
+        // modo: 'instalar' | 'actualizar'
+        var existente = document.getElementById('tnav-pwa-btn')
+        if(existente) existente.remove()
+
+        var btn = document.createElement('button')
+        btn.id = 'tnav-pwa-btn'
+        btn.style.cssText =
+          'display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:none;border-radius:8px;' +
+          'font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;' +
+          'animation:pulse-green 2s infinite;' +
+          (modo === 'instalar'
+            ? 'background:linear-gradient(135deg,#22c55e,#16a34a);color:white;'
+            : 'background:linear-gradient(135deg,#f97316,#ea580c);color:white;')
+
+        btn.innerHTML = modo === 'instalar'
+          ? '<i class="fa-solid fa-mobile-screen-button"></i><span> Instalar app</span>'
+          : '<i class="fa-solid fa-rotate"></i><span> Actualizar app</span>'
+
+        btn.onclick = function() {
+          if(modo === 'instalar' && _prompt) {
+            _prompt.prompt()
+            _prompt.userChoice.then(function(r) {
+              if(r.outcome === 'accepted') {
+                localStorage.setItem(CLAVE_INSTALADA, '1')
+                btn.remove()
+              }
+            })
+          } else if(modo === 'actualizar') {
+            location.reload(true)
+          }
+        }
+
+        // Insertar antes del botón ⚽
+        var btnProde = right.querySelector('.btn-prode')
+        if(btnProde) right.insertBefore(btn, btnProde)
+        else right.appendChild(btn)
+      }
+
+      // beforeinstallprompt → mostrar "Instalar"
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault()
+        _prompt = e
+        if(localStorage.getItem(CLAVE_INSTALADA) !== '1') {
+          crearBtnInstalar('instalar')
+        }
+      })
+
+      // Después de instalar → ocultar botón
+      window.addEventListener('appinstalled', function() {
+        localStorage.setItem(CLAVE_INSTALADA, '1')
+        var btn = document.getElementById('tnav-pwa-btn')
+        if(btn) btn.remove()
+      })
+
+      // SW_UPDATED → mostrar "Actualizar app"
+      navigator.serviceWorker?.addEventListener('message', function(e) {
+        if(e.data?.type === 'SW_UPDATED') crearBtnInstalar('actualizar')
+      })
+    })()
+
     // Polling badge mensajes no leídos
     if(loggedIn){
       const uid = getUserId()
