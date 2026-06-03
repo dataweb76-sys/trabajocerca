@@ -214,8 +214,13 @@
     if(total > 0) {
       var base = 500
       var mostrar = Math.max(base, total)
-      document.getElementById('numPerfiles').textContent = mostrar.toLocaleString('es-AR') + '+'
-      document.getElementById('contadorPerfiles').style.display = 'flex'
+      var txt = mostrar.toLocaleString('es-AR') + '+'
+      // Topbar (puede no estar visible)
+      var elTop = document.getElementById('numPerfiles')
+      if(elTop) { elTop.textContent = txt; document.getElementById('contadorPerfiles').style.display = 'flex' }
+      // Hero
+      var elHero = document.getElementById('numPerfilesHero')
+      if(elHero) { elHero.textContent = txt; document.getElementById('contadorHero').style.display = 'flex' }
     }
   } catch(e){}
 })()
@@ -225,6 +230,23 @@
   <div>
     <h1>El trabajo que buscás, en <span id="hero-prov-txt">tu ciudad</span></h1>
     <p>Conectamos profesionales, trabajadores y empleadores de toda Argentina</p>
+
+    <!-- Contador de perfiles -->
+    <div id="contadorHero" style="
+      display:none;align-items:center;gap:10px;
+      background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);
+      border-radius:14px;padding:10px 18px;margin:14px 0 0;
+      backdrop-filter:blur(6px);width:fit-content;animation:fadeInUp .5s ease;">
+      <div style="text-align:center;line-height:1;">
+        <div id="numPerfilesHero" style="font-size:26px;font-weight:900;color:white;letter-spacing:-.5px;">...</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.75);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;">perfiles registrados</div>
+      </div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,.25);flex-shrink:0;"></div>
+      <div style="font-size:13px;color:rgba(255,255,255,.9);font-weight:600;line-height:1.4;">
+        🇦🇷 Toda Argentina<br>
+        <span style="font-size:11px;color:rgba(255,255,255,.65);">y creciendo cada día</span>
+      </div>
+    </div>
 
     <!-- Selector de provincia -->
     <div class="prov-selector-wrap">
