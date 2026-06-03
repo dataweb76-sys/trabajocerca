@@ -862,7 +862,7 @@ async function init(){
 
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
 
-    ${data.email === 'datawebgames@gmail.com' ? `
+    ${data.admin ? `
     <a href="/admin.html" class="btn" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
       <i class="fa-solid fa-shield-halved"></i> Panel de Administración
     </a>

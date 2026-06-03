@@ -130,31 +130,41 @@ const CHIPS_PROFESIONALES = [
 // Chips según página (let para poder actualizar desde DB)
 let CHIPS = TIPO === "profesional" ? CHIPS_PROFESIONALES : [...CHIPS_OFICIOS]
 
-/* ── Carga chips de oficios desde configuracion DB ── */
+/* ── Carga chips de oficios desde DB (vía global pre-cargado o fetch directo) ── */
 let _chipsOficioCargados = false
 async function cargarChipsOficio() {
   if(TIPO !== "oficio" || _chipsOficioCargados) return
   _chipsOficioCargados = true
-  try {
-    const res = await fetch(
-      `${SB_URL}/rest/v1/configuracion?select=valor&clave=eq.categorias_oficio`,
-      { headers: SB_HEADERS }
-    )
-    if(!res.ok) return
-    const arr = await res.json()
-    const valor = arr?.[0]?.valor
-    if(!valor || typeof valor !== "object") return
-    // Convertir claves del objeto a chips [emoji, nombre]
-    const nuevos = [
-      ["🟢","Disponible ahora"],
-      ...Object.keys(valor)
-        .filter(n => n !== "Otro oficio")
-        .map(n => [EMOJI_OFICIO[n] || "🔧", n]),
-      ["🔧","Otro oficio"]
-    ]
-    CHIPS_OFICIOS = nuevos
-    CHIPS = nuevos
-  } catch(e) { console.warn("cargarChipsOficio:", e) }
+
+  // 1. Intentar leer del global pre-cargado por el HTML (más rápido y sin RLS)
+  let valor = window._categoriasOficio || null
+
+  // 2. Si no hay global, intentar fetch directo
+  if(!valor) {
+    try {
+      const res = await fetch(
+        `${SB_URL}/rest/v1/configuracion?select=valor&clave=eq.categorias_oficio`,
+        { headers: SB_HEADERS }
+      )
+      if(res.ok) {
+        const arr = await res.json()
+        valor = arr?.[0]?.valor || null
+      }
+    } catch(e) { console.warn("cargarChipsOficio fetch:", e) }
+  }
+
+  if(!valor || typeof valor !== "object") return
+
+  // Convertir claves del objeto a chips [emoji, nombre]
+  const nuevos = [
+    ["🟢","Disponible ahora"],
+    ...Object.keys(valor)
+      .filter(n => n !== "Otro oficio")
+      .map(n => [EMOJI_OFICIO[n] || "🔧", n]),
+    ["🔧","Otro oficio"]
+  ]
+  CHIPS_OFICIOS = nuevos
+  CHIPS = nuevos
 }
 
 /* ── Ciudades por provincia ── */
