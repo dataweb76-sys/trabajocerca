@@ -6,6 +6,22 @@
    ④ Guardar código de referido (?ref=UUID)
 ══════════════════════════════════════════════════════════ */
 
+/* ── Capturar beforeinstallprompt LO ANTES POSIBLE ──────
+   Este listener debe estar fuera de cualquier IIFE o DOMContentLoaded
+   para no perder el evento si dispara antes de que el DOM esté listo.
+─────────────────────────────────────────────────────────── */
+window._pwaInstallEvt = null
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault()
+  window._pwaInstallEvt = e
+  // Notificar al botón si ya fue creado
+  var btn = document.getElementById('tnav-pwa-btn')
+  if(btn && btn.dataset.modo === 'instalar') return // ya visible
+  if(localStorage.getItem('tc_app_instalada') !== '1') {
+    if(typeof window._mostrarBtnInstalar === 'function') window._mostrarBtnInstalar()
+  }
+})
+
 /* ─────────────────────────────────────────────────────────
    ④ REFERIDO — guardar código si viene en la URL
 ───────────────────────────────────────────────────────── */
@@ -569,31 +585,29 @@
     // ── Botón instalar / actualizar PWA ──
     ;(function(){
       var CLAVE_INSTALADA = 'tc_app_instalada'
-      var _prompt = null
 
-      function crearBtnInstalar(modo) {
-        // modo: 'instalar' | 'actualizar'
+      function crearBtnPWA(modo) {
         var existente = document.getElementById('tnav-pwa-btn')
         if(existente) existente.remove()
 
         var btn = document.createElement('button')
         btn.id = 'tnav-pwa-btn'
+        btn.dataset.modo = modo
         btn.style.cssText =
           'display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:none;border-radius:8px;' +
           'font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;' +
-          'animation:pulse-green 2s infinite;' +
           (modo === 'instalar'
-            ? 'background:linear-gradient(135deg,#22c55e,#16a34a);color:white;'
-            : 'background:linear-gradient(135deg,#f97316,#ea580c);color:white;')
+            ? 'background:linear-gradient(135deg,#22c55e,#16a34a);color:white;box-shadow:0 2px 8px rgba(34,197,94,.4);'
+            : 'background:linear-gradient(135deg,#f97316,#ea580c);color:white;box-shadow:0 2px 8px rgba(249,115,22,.4);')
 
         btn.innerHTML = modo === 'instalar'
           ? '<i class="fa-solid fa-mobile-screen-button"></i><span> Instalar app</span>'
           : '<i class="fa-solid fa-rotate"></i><span> Actualizar app</span>'
 
         btn.onclick = function() {
-          if(modo === 'instalar' && _prompt) {
-            _prompt.prompt()
-            _prompt.userChoice.then(function(r) {
+          if(modo === 'instalar' && window._pwaInstallEvt) {
+            window._pwaInstallEvt.prompt()
+            window._pwaInstallEvt.userChoice.then(function(r) {
               if(r.outcome === 'accepted') {
                 localStorage.setItem(CLAVE_INSTALADA, '1')
                 btn.remove()
@@ -604,22 +618,20 @@
           }
         }
 
-        // Insertar antes del botón ⚽
         var btnProde = right.querySelector('.btn-prode')
         if(btnProde) right.insertBefore(btn, btnProde)
         else right.appendChild(btn)
       }
 
-      // beforeinstallprompt → mostrar "Instalar"
-      window.addEventListener('beforeinstallprompt', function(e) {
-        e.preventDefault()
-        _prompt = e
-        if(localStorage.getItem(CLAVE_INSTALADA) !== '1') {
-          crearBtnInstalar('instalar')
-        }
-      })
+      // Exponer función para que el listener global la llame
+      window._mostrarBtnInstalar = function() { crearBtnPWA('instalar') }
 
-      // Después de instalar → ocultar botón
+      // Si el evento ya fue capturado antes de que buildNav() corriera
+      if(window._pwaInstallEvt && localStorage.getItem(CLAVE_INSTALADA) !== '1') {
+        crearBtnPWA('instalar')
+      }
+
+      // Después de instalar → ocultar
       window.addEventListener('appinstalled', function() {
         localStorage.setItem(CLAVE_INSTALADA, '1')
         var btn = document.getElementById('tnav-pwa-btn')
@@ -628,7 +640,7 @@
 
       // SW_UPDATED → mostrar "Actualizar app"
       navigator.serviceWorker?.addEventListener('message', function(e) {
-        if(e.data?.type === 'SW_UPDATED') crearBtnInstalar('actualizar')
+        if(e.data?.type === 'SW_UPDATED') crearBtnPWA('actualizar')
       })
     })()
 
