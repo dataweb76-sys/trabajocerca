@@ -183,7 +183,43 @@
 
 <header class="topbar">
   <div class="logo"></div>
+  <div id="contadorPerfiles" style="
+    display:none;align-items:center;gap:6px;
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+    border-radius:20px;padding:4px 12px;font-size:12px;color:white;font-weight:700;
+    white-space:nowrap;backdrop-filter:blur(4px);">
+    <span style="font-size:14px;">👥</span>
+    <span id="numPerfiles" style="font-size:15px;font-weight:900;">...</span>
+    <span style="font-weight:600;opacity:.85;">perfiles en Argentina</span>
+  </div>
 </header>
+
+<script>
+;(async function(){
+  try {
+    var r = await fetch(
+      'https://iqeiszkoifxgygoqvbem.supabase.co/rest/v1/perfiles?select=id',
+      { headers: {
+        'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs',
+        'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs',
+        'Prefer':'count=exact',
+        'Range':'0-0'
+      }}
+    )
+    var total = parseInt(r.headers.get('content-range')?.split('/')[1] || '0')
+    if(!total || isNaN(total)) {
+      var arr = await r.json()
+      total = arr.length
+    }
+    if(total > 0) {
+      var base = 500
+      var mostrar = Math.max(base, total)
+      document.getElementById('numPerfiles').textContent = mostrar.toLocaleString('es-AR') + '+'
+      document.getElementById('contadorPerfiles').style.display = 'flex'
+    }
+  } catch(e){}
+})()
+</script>
 
 <section class="hero">
   <div>
