@@ -136,10 +136,13 @@ async function cargarChipsOficio() {
   if(TIPO !== "oficio" || _chipsOficioCargados) return
   _chipsOficioCargados = true
 
-  // 1. Intentar leer del global pre-cargado por el HTML (más rápido y sin RLS)
-  let valor = window._categoriasOficio || null
+  // 1. Esperar la Promise pre-cargada por el HTML (sin carrera, sin RLS)
+  let valor = null
+  if(window._categoriasOficioPromise) {
+    valor = await window._categoriasOficioPromise
+  }
 
-  // 2. Si no hay global, intentar fetch directo
+  // 2. Fallback: fetch directo si la Promise no existía
   if(!valor) {
     try {
       const res = await fetch(
@@ -206,24 +209,29 @@ const CATS_PROF   = CHIPS_PROFESIONALES.slice(1).map(([,c]) => normStr(c))
 let   CATS_OFICIO = CHIPS_OFICIOS.slice(1).map(([,c]) => normStr(c))
 
 // ¿Este item es de un profesional universitario?
-// REGLA: la categoría del servicio manda sobre el campo tipo,
-// porque hay usuarios viejos con tipo='profesional' que son oficios.
+// REGLA: la categoría del servicio es el indicador más confiable.
+// tipo="profesional" es el DEFAULT de Supabase — muchos oficios lo tienen.
 function esProfesionalUni(item){
   const cat  = normStr(item.categoria || '')
-  const tipo = item.perfiles?.tipo
+  const tipos = (item.perfiles?.tipo || "").split(",").map(t => t.trim())
 
-  // 1. Si la categoría coincide con una categoría de OFICIO → siempre oficio
+  // CSV tipo incluye "oficio" explícito → siempre oficio
+  if(tipos.includes("oficio")) return false
+  // Tipos no-profesional → no es profesional universitario
+  if(tipos.includes("empresa") || tipos.includes("emprendimiento") || tipos.includes("cv")) return false
+
+  // 1. Categoría en lista de OFICIOS → oficio
   if(cat && CATS_OFICIO.some(c => cat.includes(c) || c.includes(cat))) return false
 
-  // 2. Si la categoría coincide con una categoría PROFESIONAL → siempre profesional
+  // 2. Categoría en lista de PROFESIONALES → profesional
   if(cat && CATS_PROF.some(c => cat.includes(c) || c.includes(cat))) return true
 
-  // 3. Categoría ambigua o vacía → usar campo tipo si está bien seteado
-  if(tipo === "profesional") return true
-  if(tipo === "oficio" || tipo === "emprendimiento" || tipo === "empresa" || tipo === "cv") return false
+  // 3. CATEGORÍA DESCONOCIDA pero tiene valor → ASUMIR OFICIO
+  // Si alguien se registró con cualquier categoría concreta, es un oficio
+  if(cat) return false
 
-  // 4. Sin tipo y sin categoría reconocida → no mostrar en ninguno
-  return false
+  // 4. Sin categoría → recién ahí usar el campo tipo
+  return tipos[0] === "profesional"
 }
 
 /* ── SELECTOR DE CIUDAD (según provincia elegida) ── */
