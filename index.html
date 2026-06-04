@@ -845,6 +845,19 @@ window.cerrarPopupMundial = function(e){
       Preguntas frecuentes
     </button>
 
+    <!-- Instalar / Actualizar app -->
+    <button id="btnInstalarHero" onclick="instalarAppHero()"
+      style="display:none;align-items:center;gap:9px;padding:13px 22px;
+        background:linear-gradient(135deg,#22c55e,#16a34a);color:white;
+        border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;
+        font-family:inherit;box-shadow:0 4px 14px rgba(34,197,94,.35);
+        transition:transform .15s,box-shadow .15s;"
+      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(34,197,94,.5)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(34,197,94,.35)'">
+      <i class="fa-solid fa-mobile-screen-button" style="font-size:18px;"></i>
+      <span id="btnInstalarHeroTxt">Instalar la app</span>
+    </button>
+
     <!-- Compartir en redes -->
     <button onclick="compartirEnRedes()"
       style="display:inline-flex;align-items:center;gap:9px;padding:13px 22px;
@@ -947,6 +960,62 @@ window.cerrarPopupMundial = function(e){
 </div>
 
 <script>
+// ── Instalar / Actualizar app desde el hero ──
+function mostrarBtnHero(modo) {
+  var btn = document.getElementById('btnInstalarHero')
+  var txt = document.getElementById('btnInstalarHeroTxt')
+  if(!btn) return
+  if(modo === 'actualizar') {
+    btn.style.background = 'linear-gradient(135deg,#f97316,#ea580c)'
+    btn.style.boxShadow  = '0 4px 14px rgba(249,115,22,.35)'
+    btn.querySelector('i').className = 'fa-solid fa-rotate'
+    txt.textContent = 'Actualizar app'
+  } else {
+    btn.querySelector('i').className = 'fa-solid fa-mobile-screen-button'
+    txt.textContent = 'Instalar la app'
+  }
+  btn.dataset.modo = modo
+  btn.style.display = 'inline-flex'
+}
+
+function instalarAppHero() {
+  var btn = document.getElementById('btnInstalarHero')
+  var modo = btn?.dataset.modo
+  if(modo === 'actualizar') { location.reload(true); return }
+  if(window._pwaInstallEvt) {
+    window._pwaInstallEvt.prompt()
+    window._pwaInstallEvt.userChoice.then(function(r) {
+      if(r.outcome === 'accepted') {
+        localStorage.setItem('tc_app_instalada', '1')
+        btn.style.display = 'none'
+      }
+    })
+  }
+}
+
+// Mostrar botón si el evento PWA ya fue capturado
+;(function() {
+  function checkInstalar() {
+    if(localStorage.getItem('tc_app_instalada') === '1') return
+    if(window._pwaInstallEvt) mostrarBtnHero('instalar')
+  }
+  // Checar inmediato y también en 2s por si el evento llega tarde
+  checkInstalar()
+  setTimeout(checkInstalar, 2000)
+
+  // Escuchar SW_UPDATED
+  navigator.serviceWorker?.addEventListener('message', function(e) {
+    if(e.data?.type === 'SW_UPDATED') mostrarBtnHero('actualizar')
+  })
+
+  // Si se instala desde otro lugar, ocultar
+  window.addEventListener('appinstalled', function() {
+    localStorage.setItem('tc_app_instalada', '1')
+    var btn = document.getElementById('btnInstalarHero')
+    if(btn) btn.style.display = 'none'
+  })
+})()
+
 function compartirEnRedes() {
   var url = 'https://www.trabajoscerca.com.ar'
   var texto = '¡Encontrá trabajo o conseguí clientes cerca tuyo! 🔧👔🚀 Trabajos Cerca — la plataforma gratuita de Argentina.'
