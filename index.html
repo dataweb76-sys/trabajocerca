@@ -815,23 +815,164 @@ window.cerrarPopupMundial = function(e){
   </div>
 </section>
 
-<section style="background:#1e293b; color:white; text-align:center;">
-  <h2 style="color:white;">¿Tenés un oficio o buscás trabajo?</h2>
-  <p style="opacity:0.8; max-width:500px; margin:0 auto 30px; font-size:16px;">
-    Publicá tu perfil gratis y empezá a recibir clientes o empleadores en tu zona
-  </p>
-  <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-    <a href="/registro.html?tipo=profesional" class="btn btn-orange" style="width:auto; padding:14px 30px;">
-      <i class="fa-solid fa-tools"></i> Publicar mi oficio
+<!-- ══ SECCIÓN 3 BOTONES ══ -->
+<section style="background:#1e293b;padding:36px 20px;text-align:center;">
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:700px;margin:0 auto;">
+
+    <!-- WhatsApp -->
+    <a href="https://wa.me/5492954368999?text=Hola%2C%20quiero%20consultar%20sobre%20Trabajos%20Cerca%20%F0%9F%91%8B"
+       target="_blank" rel="noopener"
+       style="display:inline-flex;align-items:center;gap:9px;padding:13px 22px;
+         background:#25d366;color:white;border-radius:12px;text-decoration:none;
+         font-size:14px;font-weight:800;box-shadow:0 4px 14px rgba(37,211,102,.35);
+         transition:transform .15s,box-shadow .15s;"
+       onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(37,211,102,.5)'"
+       onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(37,211,102,.35)'">
+      <i class="fa-brands fa-whatsapp" style="font-size:20px;"></i>
+      Consultanos por WhatsApp
     </a>
-    <a href="#" onclick="abrirModalCV(event)" class="btn btn-success" style="width:auto; padding:14px 30px;">
-      <i class="fa-solid fa-briefcase"></i> Busco trabajo / CV
-    </a>
-    <a href="#" onclick="abrirModalEmpresa(event)" class="btn" style="background:#7c3aed;color:white;width:auto;padding:14px 30px;">
-      <i class="fa-solid fa-building"></i> Busco personal
-    </a>
+
+    <!-- Preguntas frecuentes -->
+    <button onclick="document.getElementById('popupFAQ').style.display='flex'"
+      style="display:inline-flex;align-items:center;gap:9px;padding:13px 22px;
+        background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);
+        color:white;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;
+        font-family:inherit;backdrop-filter:blur(6px);
+        transition:background .15s,transform .15s;"
+      onmouseover="this.style.background='rgba(255,255,255,.22)';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.background='rgba(255,255,255,.12)';this.style.transform=''">
+      <i class="fa-solid fa-circle-question" style="font-size:18px;color:#38bdf8;"></i>
+      Preguntas frecuentes
+    </button>
+
+    <!-- Compartir en redes -->
+    <button onclick="compartirEnRedes()"
+      style="display:inline-flex;align-items:center;gap:9px;padding:13px 22px;
+        background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;
+        border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;
+        font-family:inherit;box-shadow:0 4px 14px rgba(124,58,237,.35);
+        transition:transform .15s,box-shadow .15s;"
+      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(124,58,237,.5)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(124,58,237,.35)'">
+      <i class="fa-solid fa-share-nodes" style="font-size:18px;"></i>
+      Compartir en redes
+    </button>
+
   </div>
 </section>
+
+<!-- ══ POPUP FAQ ══ -->
+<div id="popupFAQ" style="
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:9998;align-items:flex-start;justify-content:center;
+  padding:16px;overflow-y:auto;"
+  onclick="if(event.target===this)this.style.display='none'">
+  <div style="
+    background:white;border-radius:20px;max-width:560px;width:100%;
+    margin:auto;box-shadow:0 24px 80px rgba(0,0,0,.4);animation:slideUp .25s ease;overflow:hidden;">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1d4ed8,#0ea5e9);padding:22px 24px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.1em;text-transform:uppercase;">Trabajos Cerca</div>
+        <h2 style="margin:4px 0 0;font-size:20px;font-weight:900;color:white;">Preguntas frecuentes</h2>
+      </div>
+      <button onclick="document.getElementById('popupFAQ').style.display='none'"
+        style="background:rgba(255,255,255,.18);border:none;color:white;border-radius:50%;
+        width:34px;height:34px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
+
+    <!-- FAQ items -->
+    <div style="padding:16px 20px 24px;display:flex;flex-direction:column;gap:10px;">
+
+      <details style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+        <summary style="padding:13px 16px;font-size:14px;font-weight:700;color:#1e293b;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+          ¿Cómo me registro? <span style="color:#2563eb;font-size:18px;">+</span></summary>
+        <p style="margin:0;padding:0 16px 14px;font-size:13px;color:#475569;line-height:1.6;">
+          Hacé clic en "Registrarse" en la pantalla de inicio. Solo necesitás tu nombre, email y teléfono. Es 100% gratis y tardás menos de 2 minutos.
+        </p>
+      </details>
+
+      <details style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+        <summary style="padding:13px 16px;font-size:14px;font-weight:700;color:#1e293b;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+          ¿Cuánto cuesta publicar mi perfil? <span style="color:#2563eb;font-size:18px;">+</span></summary>
+        <p style="margin:0;padding:0 16px 14px;font-size:13px;color:#475569;line-height:1.6;">
+          Completamente gratis. Podés registrarte y aparecer en el buscador sin pagar nada. Hay planes opcionales de portfolio para mostrar tus trabajos con fotos.
+        </p>
+      </details>
+
+      <details style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+        <summary style="padding:13px 16px;font-size:14px;font-weight:700;color:#1e293b;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+          ¿En qué ciudades funciona? <span style="color:#2563eb;font-size:18px;">+</span></summary>
+        <p style="margin:0;padding:0 16px 14px;font-size:13px;color:#475569;line-height:1.6;">
+          En toda la Argentina. Podés filtrar por provincia y ciudad para encontrar profesionales o trabajo cerca tuyo.
+        </p>
+      </details>
+
+      <details style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+        <summary style="padding:13px 16px;font-size:14px;font-weight:700;color:#1e293b;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+          ¿Cómo me contactan los clientes? <span style="color:#2563eb;font-size:18px;">+</span></summary>
+        <p style="margin:0;padding:0 16px 14px;font-size:13px;color:#475569;line-height:1.6;">
+          Directo por WhatsApp al número que cargás en tu perfil. Sin intermediarios, sin comisiones.
+        </p>
+      </details>
+
+      <details style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+        <summary style="padding:13px 16px;font-size:14px;font-weight:700;color:#1e293b;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+          ¿Puedo registrarme como oficio Y emprendimiento? <span style="color:#2563eb;font-size:18px;">+</span></summary>
+        <p style="margin:0;padding:0 16px 14px;font-size:13px;color:#475569;line-height:1.6;">
+          Sí. Podés registrar múltiples perfiles (oficio, profesional, emprendimiento, CV, empresa) y elegir en qué buscadores querés aparecer.
+        </p>
+      </details>
+
+      <details style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+        <summary style="padding:13px 16px;font-size:14px;font-weight:700;color:#1e293b;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+          ¿Cómo participo en el Prode del Mundial 2026? <span style="color:#2563eb;font-size:18px;">+</span></summary>
+        <p style="margin:0;padding:0 16px 14pb;font-size:13px;color:#475569;line-height:1.6;">
+          Compartí la página en Instagram o Facebook y seguí a <strong>@datawebdigital</strong> en Instagram. Con eso podés completar el fixture y ganar premios.
+        </p>
+      </details>
+
+      <a href="https://wa.me/5492954368999?text=Hola%2C%20tengo%20una%20consulta%20sobre%20Trabajos%20Cerca"
+        target="_blank" rel="noopener"
+        style="display:flex;align-items:center;justify-content:center;gap:8px;
+          background:#25d366;color:white;border-radius:12px;padding:13px;
+          text-decoration:none;font-size:14px;font-weight:800;margin-top:4px;">
+        <i class="fa-brands fa-whatsapp" style="font-size:18px;"></i>
+        ¿Otra pregunta? Escribinos por WhatsApp
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function compartirEnRedes() {
+  var url = 'https://www.trabajoscerca.com.ar'
+  var texto = '¡Encontrá trabajo o conseguí clientes cerca tuyo! 🔧👔🚀 Trabajos Cerca — la plataforma gratuita de Argentina.'
+  if(navigator.share) {
+    navigator.share({ title: 'Trabajos Cerca', text: texto, url: url }).catch(function(){})
+  } else {
+    // Fallback: mostrar opciones
+    var menu = document.getElementById('shareMenu')
+    if(menu) { menu.style.display = menu.style.display === 'none' ? 'flex' : 'none'; return }
+    menu = document.createElement('div')
+    menu.id = 'shareMenu'
+    menu.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:white;border-radius:16px;padding:16px;box-shadow:0 8px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:10px;z-index:9999;min-width:240px;'
+    menu.innerHTML =
+      '<div style="font-size:13px;font-weight:700;color:#64748b;text-align:center;margin-bottom:4px;">Compartir en</div>' +
+      '<a href="https://www.instagram.com/datawebdigital/" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f0f9ff;border-radius:10px;text-decoration:none;color:#1e293b;font-weight:700;font-size:14px;">' +
+        '<i class="fa-brands fa-instagram" style="font-size:22px;color:#e1306c;"></i> Seguinos en Instagram</a>' +
+      '<a href="https://wa.me/?text=' + encodeURIComponent(texto + ' ' + url) + '" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f0fdf4;border-radius:10px;text-decoration:none;color:#1e293b;font-weight:700;font-size:14px;">' +
+        '<i class="fa-brands fa-whatsapp" style="font-size:22px;color:#25d366;"></i> Compartir por WhatsApp</a>' +
+      '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#eff6ff;border-radius:10px;text-decoration:none;color:#1e293b;font-weight:700;font-size:14px;">' +
+        '<i class="fa-brands fa-facebook" style="font-size:22px;color:#1877f2;"></i> Compartir en Facebook</a>' +
+      '<button onclick="this.parentElement.remove()" style="background:#f1f5f9;border:none;border-radius:8px;padding:8px;font-size:13px;cursor:pointer;color:#64748b;font-family:inherit;">Cerrar</button>'
+    document.body.appendChild(menu)
+    setTimeout(function(){ document.addEventListener('click', function rm(e){ if(!menu.contains(e.target)){ menu.remove(); document.removeEventListener('click',rm) } }) }, 100)
+  }
+}
+</script>
 
 <!-- MODAL REGISTRO OFICIO -->
 <div class="modal-overlay" id="modalOficio" onclick="cerrarModalOficioClick(event)">
