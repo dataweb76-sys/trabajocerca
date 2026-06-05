@@ -37,6 +37,7 @@ async function cargarPerfil(){
   const displayNombre = (perfil.mostrar_como === "empresa" && perfil.nombre_empresa)
     ? perfil.nombre_empresa
     : `${perfil.nombre||""} ${perfil.apellido||""}`.trim()
+  const displayNombreEsc = displayNombre.replace(/'/g, "\\'").replace(/"/g, "&quot;")
 
   document.title = `${displayNombre} — Trabajos Cerca`
 
@@ -157,7 +158,7 @@ async function cargarPerfil(){
           style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;font-weight:600;color:#475569;cursor:pointer;">
           <i class="fa-solid fa-link"></i> Copiar link
         </button>
-        <button onclick="compartirWA('${displayNombre}','${id}')"
+        <button onclick="compartirWA('${displayNombreEsc}','${id}')"
           style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:9px;font-size:13px;font-weight:600;color:#16a34a;cursor:pointer;">
           <i class="fa-brands fa-whatsapp"></i> WhatsApp
         </button>
@@ -165,7 +166,7 @@ async function cargarPerfil(){
           style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:9px;font-size:13px;font-weight:600;color:#1d4ed8;cursor:pointer;">
           <i class="fa-brands fa-facebook"></i> Facebook
         </button>
-        <button onclick="compartirX('${displayNombre}','${id}')"
+        <button onclick="compartirX('${displayNombreEsc}','${id}')"
           style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;font-weight:600;color:#0f172a;cursor:pointer;">
           <i class="fa-brands fa-x-twitter"></i> X
         </button>
@@ -182,7 +183,7 @@ async function cargarPerfil(){
       const map = L.map("mapaPub").setView([servicio.lat, servicio.lng], 13)
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map)
       L.marker([servicio.lat, servicio.lng]).addTo(map)
-        .bindPopup(`<b>${displayNombre}</b><br>${servicio.categoria}`).openPopup()
+        .bindPopup(`<b>${displayNombreEsc}</b><br>${servicio.categoria}`).openPopup()
     }, 60)
   }
 

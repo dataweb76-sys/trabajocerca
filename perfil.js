@@ -862,6 +862,34 @@ async function init(){
 
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
 
+    <!-- Cambiar contraseña -->
+    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;" id="cambPassHeader">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="fa-solid fa-key" style="color:#64748b;"></i>
+          <span style="font-size:14px;font-weight:700;color:#1e293b;">Cambiar contraseña</span>
+        </div>
+        <button onclick="toggleCambiarPass()" id="btnTogglePass"
+          style="background:none;border:none;color:#2563eb;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">
+          Cambiar
+        </button>
+      </div>
+      <div id="cambPassForm" style="display:none;margin-top:12px;">
+        <input type="password" id="nuevaPass" placeholder="Nueva contraseña (mín. 6 caracteres)"
+          style="width:100%;padding:10px 13px;border:1.5px solid #e2e8f0;border-radius:9px;
+          font-size:14px;margin-bottom:8px;font-family:inherit;box-sizing:border-box;">
+        <input type="password" id="nuevaPass2" placeholder="Repetir nueva contraseña"
+          style="width:100%;padding:10px 13px;border:1.5px solid #e2e8f0;border-radius:9px;
+          font-size:14px;margin-bottom:10px;font-family:inherit;box-sizing:border-box;">
+        <div id="msgCambPass" style="font-size:12px;margin-bottom:8px;"></div>
+        <button onclick="guardarNuevaPass()" id="btnGuardarPass"
+          style="width:100%;padding:10px;background:#2563eb;color:white;border:none;border-radius:9px;
+          font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+          <i class="fa-solid fa-check"></i> Guardar nueva contraseña
+        </button>
+      </div>
+    </div>
+
     ${data.admin ? `
     <a href="/admin.html" class="btn" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
       <i class="fa-solid fa-shield-halved"></i> Panel de Administración
@@ -877,6 +905,9 @@ async function init(){
 
   // Chatbox de preguntas frecuentes
   montarFAQChat()
+
+  // Recordatorio diario: compartir perfil
+  enviarRecordatorioCompartir(userId)
 
 }
 
@@ -1398,6 +1429,89 @@ function montarFAQChat(){
       answerEl.classList.add('tc-open')
     }
   })
+}
+
+/* ══════════════════════════════════════
+   CAMBIAR CONTRASEÑA
+══════════════════════════════════════ */
+window.toggleCambiarPass = function() {
+  const form = document.getElementById("cambPassForm")
+  const btn  = document.getElementById("btnTogglePass")
+  if(!form) return
+  const visible = form.style.display !== "none"
+  form.style.display = visible ? "none" : "block"
+  if(btn) btn.textContent = visible ? "Cambiar" : "Cancelar"
+}
+
+window.guardarNuevaPass = async function() {
+  const p1  = document.getElementById("nuevaPass")?.value || ""
+  const p2  = document.getElementById("nuevaPass2")?.value || ""
+  const msg = document.getElementById("msgCambPass")
+  const btn = document.getElementById("btnGuardarPass")
+  if(!msg) return
+
+  if(p1.length < 6) {
+    msg.innerHTML = '<span style="color:#dc2626;">La contraseña debe tener al menos 6 caracteres.</span>'
+    return
+  }
+  if(p1 !== p2) {
+    msg.innerHTML = '<span style="color:#dc2626;">Las contraseñas no coinciden.</span>'
+    return
+  }
+
+  btn.disabled = true
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
+  msg.innerHTML = ""
+
+  const { error } = await supabase.auth.updateUser({ password: p1 })
+  btn.disabled = false
+  btn.innerHTML = '<i class="fa-solid fa-check"></i> Guardar nueva contraseña'
+
+  if(error) {
+    msg.innerHTML = `<span style="color:#dc2626;">${error.message}</span>`
+  } else {
+    msg.innerHTML = '<span style="color:#16a34a;font-weight:700;">✓ Contraseña actualizada correctamente.</span>'
+    document.getElementById("nuevaPass").value  = ""
+    document.getElementById("nuevaPass2").value = ""
+    setTimeout(() => window.toggleCambiarPass(), 2000)
+  }
+}
+
+/* ══════════════════════════════════════
+   RECORDATORIO DIARIO — COMPARTIR
+══════════════════════════════════════ */
+async function enviarRecordatorioCompartir(userId) {
+  const CLAVE  = "tc_ult_recordatorio"
+  const ahora  = Date.now()
+  const ultimo = parseInt(localStorage.getItem(CLAVE) || "0")
+  const HORAS  = 20 * 60 * 60 * 1000  // cada ~20 horas
+
+  if(ahora - ultimo < HORAS) return  // ya se envió hoy
+
+  const mensajes = [
+    { titulo: "📢 ¡Compartí tu perfil y conseguí más clientes!",
+      cuerpo: "Cada vez que compartís Trabajos Cerca en redes, más personas te encuentran. ¡Solo te lleva 30 segundos!",
+      url: "/perfil.html" },
+    { titulo: "🚀 ¡Tu perfil puede llegar a más personas!",
+      cuerpo: "Compartí tu perfil en WhatsApp, Instagram o Facebook y multiplicá tus oportunidades de conseguir clientes.",
+      url: "/perfil.html" },
+    { titulo: "💡 Sabías que... los perfiles compartidos tienen 3× más visitas",
+      cuerpo: "Invitá a colegas o conocidos a registrarse y ambos se benefician. ¡La comunidad crece y vos ganás visibilidad!",
+      url: "/perfil.html" },
+  ]
+
+  const msg = mensajes[Math.floor(Math.random() * mensajes.length)]
+
+  try {
+    await supabase.from("notificaciones").insert({
+      usuario_id: userId,
+      tipo:       "sistema",
+      titulo:     msg.titulo,
+      cuerpo:     msg.cuerpo,
+      url:        msg.url
+    })
+    localStorage.setItem(CLAVE, String(ahora))
+  } catch(e) {}
 }
 
 /* ══════════════════════════════════════
