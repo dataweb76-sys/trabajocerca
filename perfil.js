@@ -909,6 +909,11 @@ async function init(){
   // Recordatorio diario: compartir perfil
   enviarRecordatorioCompartir(userId)
 
+  // Modal de bienvenida si no completó el tipo de perfil
+  if(registrados.length === 0 && data.tipo !== "cliente") {
+    mostrarBienvenida(userId)
+  }
+
 }
 
 /* ── LOGO EMPRESA ── */
@@ -1557,7 +1562,43 @@ init()
   const params = new URLSearchParams(location.search)
   const saved  = params.get('saved')
   const cat    = params.get('cat')
+  const bv     = params.get('bv')  // viene del modal de bienvenida
   if(!saved) return
+
+  // Si vino del flujo de bienvenida, verificar si hay más tipos pendientes
+  if(bv === '1') {
+    try {
+      const pendingRaw = localStorage.getItem("tc_pending_tipos")
+      if(pendingRaw) {
+        const pending = JSON.parse(pendingRaw)
+        // Quitar el tipo que acaba de guardar
+        const resto = pending.filter(t => t !== saved)
+        if(resto.length > 0) {
+          localStorage.setItem("tc_pending_tipos", JSON.stringify(resto))
+          // Mostrar mini toast y llevar al siguiente tipo
+          const next = resto[0]
+          const NOMBRES = { oficio:"oficio", profesional:"profesional", emprendimiento:"emprendimiento", cv:"CV", empresa:"empresa" }
+          const t = document.createElement("div")
+          t.style.cssText = "position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1d4ed8;color:white;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3);"
+          t.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#93c5fd;margin-right:6px;"></i>¡Guardado! Ahora completá tu perfil de ${NOMBRES[next]||next}…`
+          document.body.appendChild(t)
+          setTimeout(() => { window.location.href = `/perfil_servicio.html?tipo=${next}&bv=1` }, 1800)
+          return
+        } else {
+          localStorage.removeItem("tc_pending_tipos")
+          // Todos completados — mostrar toast de registro terminado
+          history.replaceState({}, '', '/perfil.html')
+          const t = document.createElement("div")
+          t.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#14532d;color:white;padding:16px 24px;border-radius:14px;font-size:15px;font-weight:700;z-index:9999;max-width:90vw;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.25);transition:transform .35s ease,opacity .35s ease;opacity:0;line-height:1.6;"
+          t.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;margin-right:8px;font-size:18px;"></i>¡Registro completado! Ya aparecés en el buscador.'
+          document.body.appendChild(t)
+          requestAnimationFrame(()=>requestAnimationFrame(()=>{ t.style.transform="translateX(-50%) translateY(0)"; t.style.opacity="1" }))
+          setTimeout(()=>{ t.style.transform="translateX(-50%) translateY(80px)"; t.style.opacity="0"; setTimeout(()=>t.remove(),400) }, 5000)
+          return
+        }
+      }
+    } catch(e) {}
+  }
 
   const msgs = {
     oficio:         cat ? `¡Tu perfil de <strong>${cat}</strong> está activo en el buscador de oficios! 🔧` : '¡Tu perfil de oficio está activo en el buscador! 🔧',
@@ -1593,3 +1634,221 @@ init()
 
   history.replaceState({}, '', '/perfil.html')
 })()
+
+/* ══════════════════════════════════════════════════════════
+   MODAL BIENVENIDA — Completar tipo de perfil
+══════════════════════════════════════════════════════════ */
+function mostrarBienvenida(userId) {
+
+  const OPCIONES = [
+    { id: "oficio",
+      emoji: "🔧",
+      titulo: "Ofrezco un oficio",
+      desc: "Plomero, electricista, albañil, carpintero, pintor, gasista..." },
+    { id: "profesional",
+      emoji: "👔",
+      titulo: "Soy profesional",
+      desc: "Médico, abogado, contador, arquitecto, diseñador..." },
+    { id: "emprendimiento",
+      emoji: "🚀",
+      titulo: "Tengo un emprendimiento",
+      desc: "Local propio, marca, gastronomía, artesanías, delivery..." },
+    { id: "cv",
+      emoji: "📄",
+      titulo: "Busco trabajo",
+      desc: "Quiero que empresas o personas me encuentren y me contraten" },
+    { id: "empresa",
+      emoji: "🏢",
+      titulo: "Soy empresa o negocio",
+      desc: "Quiero publicar puestos y buscar empleados para mi empresa" },
+    { id: "cliente",
+      emoji: "👤",
+      titulo: "Solo busco contratar",
+      desc: "No ofrezco servicios, solo busco profesionales u oficios" },
+  ]
+
+  const sel = new Set()
+
+  const css = `
+  #bv-overlay {
+    position:fixed; inset:0; z-index:9900;
+    background:rgba(15,23,42,.82); backdrop-filter:blur(3px);
+    display:flex; align-items:flex-start; justify-content:center;
+    overflow-y:auto; padding:20px 12px 40px;
+  }
+  #bv-box {
+    background:white; border-radius:24px; width:100%; max-width:500px;
+    box-shadow:0 32px 80px rgba(0,0,0,.45); overflow:hidden;
+    margin:auto;
+  }
+  #bv-header {
+    background:linear-gradient(135deg,#1d4ed8,#2563eb,#7c3aed);
+    padding:28px 24px 22px; text-align:center; position:relative;
+  }
+  #bv-header .bv-logo { font-size:38px; margin-bottom:8px; }
+  #bv-header h2 { margin:0 0 6px; font-size:20px; font-weight:900; color:white; line-height:1.25; }
+  #bv-header p  { margin:0; font-size:14px; color:rgba(255,255,255,.85); line-height:1.5; }
+  #bv-body { padding:20px 18px 0; }
+  #bv-body > p { margin:0 0 14px; font-size:14px; font-weight:700; color:#475569; text-align:center; }
+  .bv-op {
+    display:flex; align-items:center; gap:14px;
+    border:2px solid #e2e8f0; border-radius:14px; padding:14px 16px;
+    cursor:pointer; transition:all .18s; margin-bottom:10px;
+    background:white; user-select:none;
+  }
+  .bv-op:hover { border-color:#93c5fd; background:#f0f9ff; }
+  .bv-op.sel { border-color:#2563eb; background:#eff6ff; }
+  .bv-op.sel-cliente { border-color:#64748b; background:#f8fafc; }
+  .bv-emoji { font-size:32px; flex-shrink:0; }
+  .bv-txt { flex:1; min-width:0; }
+  .bv-txt strong { display:block; font-size:14px; color:#1e293b; font-weight:800; margin-bottom:2px; }
+  .bv-txt span   { font-size:12px; color:#64748b; line-height:1.4; }
+  .bv-check {
+    width:24px; height:24px; border-radius:50%; border:2px solid #e2e8f0;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; font-size:13px; transition:all .18s;
+  }
+  .bv-op.sel .bv-check, .bv-op.sel-cliente .bv-check {
+    background:#2563eb; border-color:#2563eb; color:white;
+  }
+  .bv-op.sel-cliente .bv-check { background:#64748b; border-color:#64748b; }
+  #bv-footer { padding:16px 18px 22px; }
+  #bv-msg { font-size:13px; color:#dc2626; text-align:center; min-height:18px; margin-bottom:8px; }
+  #bv-btn {
+    width:100%; padding:15px; border:none; border-radius:14px; cursor:pointer;
+    font-size:16px; font-weight:900; font-family:inherit;
+    background:linear-gradient(135deg,#2563eb,#7c3aed); color:white;
+    transition:opacity .15s; box-shadow:0 4px 16px rgba(37,99,235,.35);
+  }
+  #bv-btn:disabled { opacity:.5; cursor:default; }
+  #bv-btn:hover:not(:disabled) { opacity:.9; }
+  #bv-separador {
+    border:none; border-top:1px solid #e2e8f0; margin:6px 0 12px;
+  }
+  `
+  const styleEl = document.createElement("style")
+  styleEl.textContent = css
+  document.head.appendChild(styleEl)
+
+  const overlay = document.createElement("div")
+  overlay.id = "bv-overlay"
+  overlay.innerHTML = `
+    <div id="bv-box">
+      <div id="bv-header">
+        <div class="bv-logo">👋</div>
+        <h2>¡Bienvenido/a a Trabajos Cerca!</h2>
+        <p>Solo falta un paso para terminar tu registro.<br>Contanos qué vas a hacer en la plataforma.</p>
+      </div>
+      <div id="bv-body">
+        <p>¿Qué vas a ofrecer? <span style="font-weight:400;color:#94a3b8;">(podés elegir más de uno)</span></p>
+        ${OPCIONES.filter(o => o.id !== "cliente").map(o => `
+          <div class="bv-op" id="bvop-${o.id}" onclick="window._bvToggle('${o.id}')">
+            <span class="bv-emoji">${o.emoji}</span>
+            <div class="bv-txt">
+              <strong>${o.titulo}</strong>
+              <span>${o.desc}</span>
+            </div>
+            <div class="bv-check" id="bvchk-${o.id}"></div>
+          </div>`).join("")}
+        <hr id="bv-separador">
+        <div class="bv-op" id="bvop-cliente" onclick="window._bvToggle('cliente')">
+          <span class="bv-emoji">👤</span>
+          <div class="bv-txt">
+            <strong>Solo busco contratar</strong>
+            <span>No ofrezco servicios, solo busco profesionales u oficios</span>
+          </div>
+          <div class="bv-check" id="bvchk-cliente"></div>
+        </div>
+      </div>
+      <div id="bv-footer">
+        <div id="bv-msg"></div>
+        <button id="bv-btn" onclick="window._bvContinuar()" disabled>
+          Elegí al menos una opción para continuar →
+        </button>
+      </div>
+    </div>`
+
+  document.body.appendChild(overlay)
+  document.body.style.overflow = "hidden"
+
+  window._bvToggle = function(id) {
+    const esCliente = id === "cliente"
+
+    if(esCliente) {
+      // Solo cliente es exclusivo con el resto
+      const yaEstabaCliente = sel.has("cliente")
+      sel.clear()
+      if(!yaEstabaCliente) sel.add("cliente")
+    } else {
+      // Desmarcar "solo cliente" si elige otra cosa
+      sel.delete("cliente")
+      document.getElementById("bvop-cliente")?.classList.remove("sel-cliente")
+      document.getElementById("bvchk-cliente").innerHTML = ""
+
+      if(sel.has(id)) sel.delete(id)
+      else            sel.add(id)
+    }
+
+    // Actualizar UI de todas las opciones
+    OPCIONES.forEach(o => {
+      const opEl  = document.getElementById(`bvop-${o.id}`)
+      const chkEl = document.getElementById(`bvchk-${o.id}`)
+      if(!opEl || !chkEl) return
+      const activo = sel.has(o.id)
+      opEl.classList.remove("sel", "sel-cliente")
+      chkEl.innerHTML = ""
+      if(activo){
+        opEl.classList.add(o.id === "cliente" ? "sel-cliente" : "sel")
+        chkEl.innerHTML = `<i class="fa-solid fa-check"></i>`
+      }
+    })
+
+    // Actualizar botón
+    const btn = document.getElementById("bv-btn")
+    const msg = document.getElementById("bv-msg")
+    msg.textContent = ""
+    if(sel.size === 0){
+      btn.disabled = true
+      btn.textContent = "Elegí al menos una opción para continuar →"
+    } else if(sel.has("cliente")){
+      btn.disabled = false
+      btn.textContent = "✓ Terminar registro como cliente"
+    } else {
+      const labels = [...sel].map(id => OPCIONES.find(o=>o.id===id)?.titulo || id)
+      btn.disabled = false
+      btn.textContent = `Continuar con: ${labels.join(", ")} →`
+    }
+  }
+
+  window._bvContinuar = async function() {
+    if(sel.size === 0) return
+    const btn = document.getElementById("bv-btn")
+    const msg = document.getElementById("bv-msg")
+    btn.disabled = true
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
+
+    if(sel.has("cliente")) {
+      // Solo cliente: guardar en DB y mostrar éxito
+      await supabase.from("perfiles").update({ tipo: "cliente" }).eq("id", userId)
+      document.getElementById("bv-overlay").remove()
+      document.body.style.overflow = ""
+
+      // Toast de bienvenida
+      const toast = document.createElement("div")
+      toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#14532d;color:white;padding:14px 22px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;max-width:90vw;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.25);transition:transform .35s ease,opacity .35s ease;opacity:0;line-height:1.5;"
+      toast.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;margin-right:8px;"></i>¡Registro completado! Ya podés buscar profesionales.'
+      document.body.appendChild(toast)
+      requestAnimationFrame(() => requestAnimationFrame(() => { toast.style.transform="translateX(-50%) translateY(0)"; toast.style.opacity="1" }))
+      setTimeout(() => { toast.style.transform="translateX(-50%) translateY(80px)"; toast.style.opacity="0"; setTimeout(()=>toast.remove(),400) }, 4000)
+      return
+    }
+
+    // Guardar tipos seleccionados en localStorage para que perfil_servicio los muestre todos
+    const tipos = [...sel]
+    localStorage.setItem("tc_pending_tipos", JSON.stringify(tipos))
+
+    // Ir al primero
+    const primero = tipos[0]
+    window.location.href = `/perfil_servicio.html?tipo=${primero}&bv=1`
+  }
+}
