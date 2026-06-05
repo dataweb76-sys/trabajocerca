@@ -105,10 +105,13 @@ async function cargarPerfil(){
   /* ── Reviews ── */
   const reviewsHtml = reviews?.length
     ? `<div class="card"><h3><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Valoraciones</h3>
-        ${reviews.map(r=>`<div class="cv-item">
-          <span class="stars-show">${"★".repeat(r.rating)}${"☆".repeat(5-r.rating)}</span>
+        ${reviews.map(r=>{
+          const stars = Math.min(Math.max(Math.round(r.rating / 2), 1), 5)
+          return `<div class="cv-item">
+          <span class="stars-show">${"★".repeat(stars)}${"☆".repeat(5-stars)}</span>
+          <span style="font-size:13px;color:#64748b;margin-left:5px;">${r.rating}/10</span>
           ${r.comentario?`<p style="margin:6px 0 0;font-size:14px;">${r.comentario}</p>`:""}
-        </div>`).join("")}
+        </div>`}).join("")}
       </div>` : ""
 
   /* ── Formulario de puntuación (solo si está logueado y no es su propio perfil) ── */
@@ -193,7 +196,7 @@ async function cargarPerfil(){
   } catch(err){
     console.error("Error en cargarPerfil:", err)
     const el = document.getElementById("contenido")
-    if(el) el.innerHTML = `<div class="alerta alerta-err">Error: ${err?.message || err}<br><small style="opacity:.7;">${err?.stack?.split('\n')[1]||''}</small></div>`
+    if(el) el.innerHTML = '<div class="alerta alerta-err">Ocurrió un error al cargar el perfil. Intentá de nuevo.</div>'
   }
 }
 
