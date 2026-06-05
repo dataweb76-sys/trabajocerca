@@ -454,11 +454,23 @@ async function cargarPortfolioModal(uid){
     if(!res.ok) return
     const items = await res.json()
     if(!items?.length){ sec.innerHTML=""; return }
+
+    const allImgs = []
+    items.forEach(item => {
+      const fotos = [item.foto1,item.foto2,item.foto3].filter(Boolean)
+      fotos.forEach(f => allImgs.push({ src: f, titulo: item.titulo || "" }))
+    })
+    window._tcImgs = allImgs
+    if(typeof tcInitLightbox === "function") tcInitLightbox()
+
     let html=`<div style="margin-bottom:16px;"><p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 10px;"><i class="fa-solid fa-images" style="color:#f97316;"></i> Trabajos realizados</p>`
     items.forEach(item=>{
       const fotos=[item.foto1,item.foto2,item.foto3].filter(Boolean)
       html+=`<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:10px;">
-        ${fotos.length?`<div style="display:flex;gap:2px;height:130px;background:#f1f5f9;">${fotos.map(f=>`<img src="${f}" style="flex:1;object-fit:cover;cursor:pointer;" onclick="window.open('${f}','_blank')">`).join("")}</div>`:""}
+        ${fotos.length?`<div style="display:flex;gap:2px;height:130px;background:#f1f5f9;">${fotos.map(f=>{
+          const idx = allImgs.findIndex(i=>i.src===f)
+          return `<img src="${f}" style="flex:1;object-fit:cover;cursor:zoom-in;" onclick="window._tcAbrirLightbox(${idx})">`
+        }).join("")}</div>`:""}
         <div style="padding:10px 12px;"><strong style="font-size:14px;">${item.titulo}</strong>${item.descripcion?`<p style="font-size:12px;color:#64748b;margin:2px 0 0;">${item.descripcion}</p>`:""}</div></div>`
     })
     html+=`</div>`; sec.innerHTML=html

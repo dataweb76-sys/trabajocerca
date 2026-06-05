@@ -581,15 +581,121 @@ async function cargarPortfolioModal(uid){
     if(!res.ok) return
     const items = await res.json()
     if(!items?.length){ sec.innerHTML=""; return }
+
+    // Armar lista plana para el lightbox
+    const allImgs = []
+    items.forEach(it => {
+      const fotos = [it.foto1,it.foto2,it.foto3].filter(Boolean)
+      fotos.forEach(f => allImgs.push({ src: f, titulo: it.titulo || "" }))
+    })
+    window._tcImgs = allImgs
+    tcInitLightbox()
+
     let html=`<div style="margin-bottom:16px;"><p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 10px;"><i class="fa-solid fa-images" style="color:#f97316;"></i> Trabajos realizados</p>`
     items.forEach(it=>{
       const fotos=[it.foto1,it.foto2,it.foto3].filter(Boolean)
       html+=`<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:10px;">
-        ${fotos.length?`<div style="display:flex;gap:2px;height:130px;background:#f1f5f9;">${fotos.map(f=>`<img src="${f}" style="flex:1;object-fit:cover;cursor:pointer;" onclick="window.open('${f}','_blank')">`).join("")}</div>`:""}
+        ${fotos.length?`<div style="display:flex;gap:2px;height:130px;background:#f1f5f9;">${fotos.map(f=>{
+          const idx = allImgs.findIndex(i=>i.src===f)
+          return `<img src="${f}" style="flex:1;object-fit:cover;cursor:zoom-in;" onclick="window._tcAbrirLightbox(${idx})">`
+        }).join("")}</div>`:""}
         <div style="padding:10px 12px;"><strong style="font-size:14px;">${it.titulo}</strong>${it.descripcion?`<p style="font-size:12px;color:#64748b;margin:2px 0 0;">${it.descripcion}</p>`:""}</div></div>`
     })
     html+=`</div>`; sec.innerHTML=html
   } catch(e){}
+}
+
+/* ── LIGHTBOX (compartido con perfil_publico) ── */
+function tcInitLightbox(){
+  if(document.getElementById("tc-lightbox")) return
+  const css=`#tc-lightbox{display:none;position:fixed;inset:0;z-index:9800;background:rgba(0,0,0,.88);align-items:center;justify-content:center;}
+  #tc-lightbox.abierto{display:flex;}
+  #tc-lb-box{background:white;border-radius:20px;width:100%;max-width:520px;margin:16px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5);}
+  #tc-lb-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px 11px;border-bottom:1px solid #f1f5f9;flex-shrink:0;}
+  #tc-lb-titulo{font-size:14px;font-weight:800;color:#1e293b;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #tc-lb-contador{font-size:12px;color:#94a3b8;margin:0 10px;flex-shrink:0;}
+  #tc-lb-cerrar{background:none;border:none;font-size:22px;color:#94a3b8;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;font-family:inherit;line-height:1;}
+  #tc-lb-cerrar:hover{background:#f1f5f9;color:#1e293b;}
+  #tc-lb-scroll{overflow-y:auto;flex:1;}
+  #tc-lb-img-wrap{position:relative;background:#000;min-height:240px;display:flex;align-items:center;justify-content:center;}
+  #tc-lb-img{width:100%;max-height:60vh;object-fit:contain;display:block;}
+  .tc-lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.18);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:background .15s;}
+  .tc-lb-nav:hover{background:rgba(255,255,255,.35);}
+  #tc-lb-prev{left:10px;}#tc-lb-next{right:10px;}
+  #tc-lb-dots{display:flex;justify-content:center;gap:6px;padding:10px 16px 4px;}
+  .tc-lb-dot{width:7px;height:7px;border-radius:50%;background:#e2e8f0;cursor:pointer;transition:background .15s;border:none;padding:0;}
+  .tc-lb-dot.activo{background:#2563eb;transform:scale(1.2);}
+  #tc-lb-cta{padding:18px 18px 20px;border-top:1px solid #f1f5f9;flex-shrink:0;background:linear-gradient(to bottom,#fff,#f8fafc);}
+  #tc-lb-cta p{margin:0 0 12px;font-size:15px;font-weight:800;color:#1e293b;text-align:center;}
+  #tc-lb-cta p span{color:#f97316;}
+  #tc-lb-btns{display:flex;gap:10px;}
+  #tc-lb-btns button{flex:1;padding:12px 10px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .15s;}
+  #tc-lb-btns button:hover{opacity:.88;}
+  #tc-lb-btn-compartir{background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;}
+  #tc-lb-btn-valorar{background:#2563eb;color:white;}
+  @media(max-width:400px){#tc-lb-box{margin:8px;border-radius:16px;}}`
+  const s=document.createElement("style"); s.textContent=css; document.head.appendChild(s)
+  const el=document.createElement("div"); el.id="tc-lightbox"
+  el.innerHTML=`<div id="tc-lb-box">
+    <div id="tc-lb-header">
+      <span id="tc-lb-titulo"></span>
+      <span id="tc-lb-contador"></span>
+      <button id="tc-lb-cerrar" onclick="window._tcCerrarLightbox()">×</button>
+    </div>
+    <div id="tc-lb-scroll">
+      <div id="tc-lb-img-wrap">
+        <img id="tc-lb-img" src="" alt="">
+        <button class="tc-lb-nav" id="tc-lb-prev" onclick="window._tcLbNav(-1)">‹</button>
+        <button class="tc-lb-nav" id="tc-lb-next" onclick="window._tcLbNav(1)">›</button>
+      </div>
+      <div id="tc-lb-dots"></div>
+    </div>
+    <div id="tc-lb-cta">
+      <p>¿Te gustaron mis trabajos? <span>¡Valorame o compartí mi perfil!</span></p>
+      <div id="tc-lb-btns">
+        <button id="tc-lb-btn-compartir" onclick="window._tcLbCompartir()"><i class="fa-solid fa-share-nodes"></i> Compartir perfil</button>
+        <button id="tc-lb-btn-valorar" onclick="window._tcLbValorar()"><i class="fa-solid fa-star"></i> Valorame</button>
+      </div>
+      <div id="tc-lb-msg-comp" style="margin-top:10px;font-size:13px;text-align:center;color:#16a34a;display:none;"></div>
+    </div>
+  </div>`
+  document.body.appendChild(el)
+  el.addEventListener("click", e=>{ if(e.target===el) window._tcCerrarLightbox() })
+  document.addEventListener("keydown", e=>{
+    if(!el.classList.contains("abierto")) return
+    if(e.key==="ArrowLeft")  window._tcLbNav(-1)
+    if(e.key==="ArrowRight") window._tcLbNav(1)
+    if(e.key==="Escape")     window._tcCerrarLightbox()
+  })
+  let _idx=0
+  function renderImg(){
+    const imgs=window._tcImgs||[]; const total=imgs.length; if(!total) return
+    _idx=Math.max(0,Math.min(_idx,total-1)); const cur=imgs[_idx]
+    document.getElementById("tc-lb-img").src=cur.src
+    document.getElementById("tc-lb-img").alt=cur.titulo
+    document.getElementById("tc-lb-titulo").textContent=cur.titulo||"Trabajo realizado"
+    document.getElementById("tc-lb-contador").textContent=`${_idx+1} / ${total}`
+    document.getElementById("tc-lb-prev").style.display=_idx>0?"flex":"none"
+    document.getElementById("tc-lb-next").style.display=_idx<total-1?"flex":"none"
+    const d=document.getElementById("tc-lb-dots")
+    d.innerHTML=total>1?imgs.map((_,i)=>`<button class="tc-lb-dot ${i===_idx?"activo":""}" onclick="window._tcLbIr(${i})"></button>`).join(""): ""
+  }
+  window._tcAbrirLightbox=function(idx){ _idx=idx||0; document.getElementById("tc-lb-msg-comp").style.display="none"; renderImg(); el.classList.add("abierto"); document.body.style.overflow="hidden" }
+  window._tcCerrarLightbox=function(){ el.classList.remove("abierto"); document.body.style.overflow="" }
+  window._tcLbNav=function(dir){ _idx=Math.max(0,Math.min(_idx+dir,(window._tcImgs||[]).length-1)); renderImg() }
+  window._tcLbIr=function(i){ _idx=i; renderImg() }
+  window._tcLbCompartir=async function(){
+    const url=location.href; const msg=document.getElementById("tc-lb-msg-comp")
+    if(navigator.share){ try{ await navigator.share({title:"Mirá estos trabajos en Trabajos Cerca",url}); return }catch(e){} }
+    try{ await navigator.clipboard.writeText(url) }catch(e){}
+    msg.style.display="block"; msg.innerHTML="<i class='fa-solid fa-check'></i> ¡Link copiado!"
+    setTimeout(()=>{ msg.style.display="none" },3000)
+  }
+  window._tcLbValorar=function(){
+    window._tcCerrarLightbox()
+    const formEl=document.getElementById("formRating")||document.getElementById("reviewsSection")
+    if(formEl){ formEl.scrollIntoView({behavior:"smooth",block:"center"}); formEl.style.outline="2.5px solid #2563eb"; formEl.style.borderRadius="14px"; setTimeout(()=>{ formEl.style.outline="" },2000) }
+  }
 }
 
 /* ── REVIEWS ── */
