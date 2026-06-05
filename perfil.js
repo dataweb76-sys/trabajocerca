@@ -1483,29 +1483,63 @@ window.guardarNuevaPass = async function() {
 }
 
 /* ══════════════════════════════════════
-   RECORDATORIO DIARIO — COMPARTIR
+   RECORDATORIO DIARIO — COMPARTIR + MÚLTIPLES OFICIOS
 ══════════════════════════════════════ */
 async function enviarRecordatorioCompartir(userId) {
   const CLAVE  = "tc_ult_recordatorio"
   const ahora  = Date.now()
   const ultimo = parseInt(localStorage.getItem(CLAVE) || "0")
-  const HORAS  = 20 * 60 * 60 * 1000  // cada ~20 horas
+  const HORAS  = 22 * 60 * 60 * 1000  // una vez por día
 
-  if(ahora - ultimo < HORAS) return  // ya se envió hoy
+  if(ahora - ultimo < HORAS) return
 
-  const mensajes = [
-    { titulo: "📢 ¡Compartí tu perfil y conseguí más clientes!",
-      cuerpo: "Cada vez que compartís Trabajos Cerca en redes, más personas te encuentran. ¡Solo te lleva 30 segundos!",
-      url: "/perfil.html" },
-    { titulo: "🚀 ¡Tu perfil puede llegar a más personas!",
-      cuerpo: "Compartí tu perfil en WhatsApp, Instagram o Facebook y multiplicá tus oportunidades de conseguir clientes.",
-      url: "/perfil.html" },
-    { titulo: "💡 Sabías que... los perfiles compartidos tienen 3× más visitas",
-      cuerpo: "Invitá a colegas o conocidos a registrarse y ambos se benefician. ¡La comunidad crece y vos ganás visibilidad!",
-      url: "/perfil.html" },
+  // Elegir entre dos pools: compartir O agregar servicios (alternados)
+  const turno = parseInt(localStorage.getItem("tc_rec_turno") || "0")
+
+  const mensajesCompartir = [
+    {
+      titulo: "👋 ¡Hola! Somos de Trabajos Cerca",
+      cuerpo: "Acordate de compartir tu perfil hoy. Cuanta más gente lo vea, más chances tenés de que te contacten. ¡30 segundos pueden traerte un nuevo cliente! 🚀",
+      url: "/perfil.html"
+    },
+    {
+      titulo: "📲 ¡Compartí y hacé crecer la comunidad!",
+      cuerpo: "Cada persona que se suma a Trabajos Cerca es un potencial cliente tuyo. Mandá tu link de perfil por WhatsApp a tus contactos hoy. ¡Vale la pena!",
+      url: "/perfil.html"
+    },
+    {
+      titulo: "🌟 Tu perfil merece más visitas",
+      cuerpo: "Compartí Trabajos Cerca en tu Instagram, Facebook o grupos de WhatsApp. La comunidad crece y vos aparecés antes que la competencia.",
+      url: "/perfil.html"
+    },
   ]
 
-  const msg = mensajes[Math.floor(Math.random() * mensajes.length)]
+  const mensajesOficios = [
+    {
+      titulo: "🔧 ¿Sabés hacer más de una cosa? ¡Registralo!",
+      cuerpo: "En Trabajos Cerca podés tener VARIOS perfiles a la vez. Si sos cerrajero pero también plomero, electricista o carpintero — agregá todos tus oficios y aparecés en más búsquedas.",
+      url: "/perfil.html"
+    },
+    {
+      titulo: "💡 ¿Tenés un emprendimiento además de tu oficio?",
+      cuerpo: "¡Podés registrar los dos! Un perfil de oficio y uno de emprendimiento al mismo tiempo. Más perfiles = más visibilidad = más clientes. Entrá a tu perfil y agregalo.",
+      url: "/perfil.html"
+    },
+    {
+      titulo: "🚀 ¡Muchos profesionales tienen 2 o 3 perfiles activos!",
+      cuerpo: "¿Sos plomero y también hacés trabajos de albañilería? ¿Tenés un negocio además? Registrá todo lo que sabés hacer — es gratis y aparecés en más búsquedas.",
+      url: "/perfil.html"
+    },
+    {
+      titulo: "👷 ¿Ya registraste todos tus oficios?",
+      cuerpo: "Muchos usuarios solo se registraron en uno y se olvidan del resto. Si hacés más de una cosa, agregala desde tu perfil. ¡Cada oficio extra te da más chances de conseguir trabajo!",
+      url: "/perfil.html"
+    },
+  ]
+
+  // Alternar entre pools
+  const pool = turno % 2 === 0 ? mensajesCompartir : mensajesOficios
+  const msg  = pool[Math.floor(Math.random() * pool.length)]
 
   try {
     await supabase.from("notificaciones").insert({
@@ -1516,6 +1550,7 @@ async function enviarRecordatorioCompartir(userId) {
       url:        msg.url
     })
     localStorage.setItem(CLAVE, String(ahora))
+    localStorage.setItem("tc_rec_turno", String(turno + 1))
   } catch(e) {}
 }
 
