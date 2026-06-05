@@ -6,16 +6,41 @@
 
   /* ── Auth helpers ── */
   function getToken(){
-    try { return JSON.parse(localStorage.getItem("sb-iqeiszkoifxgygoqvbem-auth-token"))?.access_token || null }
-    catch(e){ return null }
+    // Intentar varias claves posibles de Supabase v2
+    const claves = [
+      "sb-iqeiszkoifxgygoqvbem-auth-token",
+      "supabase.auth.token"
+    ]
+    for(const clave of claves){
+      try {
+        const raw = localStorage.getItem(clave)
+        if(!raw) continue
+        const parsed = JSON.parse(raw)
+        const token = parsed?.access_token || parsed?.currentSession?.access_token || null
+        if(token) return token
+      } catch(e){}
+    }
+    // Escanear todas las claves buscando un token de Supabase
+    try {
+      for(let i = 0; i < localStorage.length; i++){
+        const k = localStorage.key(i)
+        if(!k || !k.includes("supabase") && !k.includes("sb-")) continue
+        const raw = localStorage.getItem(k)
+        if(!raw) continue
+        const parsed = JSON.parse(raw)
+        const token = parsed?.access_token || null
+        if(token) return token
+      }
+    } catch(e){}
+    return null
   }
   function getUserId(){
     const t = getToken(); if(!t) return null
     try { return JSON.parse(atob(t.split(".")[1])).sub || null } catch(e){ return null }
   }
 
-  const userId = getUserId()
-  if(!userId) return   // no logueado → no mostrar campana
+  // Montar campana siempre — verificar auth después (Supabase puede no estar listo aún)
+  let userId = getUserId()
 
   function hdrs(){
     return {
@@ -116,13 +141,16 @@
       </div>
     </div>`
 
-  /* ── Soporte para navbar unificada (tnav-right) y nav clásico ── */
+  /* ── Soporte para navbar unificada (tnav-right), anchor fijo y nav clásico ── */
   function montarBell(){
+    const anchor   = document.getElementById("notif-bell-anchor")
     const tnavRight = document.querySelector(".tnav-right")
     const legacyNav = document.querySelector(".topbar nav")
-    if(!tnavRight && !legacyNav){ setTimeout(montarBell, 150); return }
-    if(tnavRight){
-      // Insertar antes del botón ⚽ (btn-prode) o antes del btn-salir
+    if(!anchor && !tnavRight && !legacyNav){ setTimeout(montarBell, 150); return }
+
+    if(anchor){
+      anchor.replaceWith(wrap)
+    } else if(tnavRight){
       const prodeBtn = tnavRight.querySelector(".btn-prode")
       if(prodeBtn) tnavRight.insertBefore(wrap, prodeBtn)
       else tnavRight.appendChild(wrap)
@@ -279,9 +307,29 @@
     } catch(e){}
   }
 
-  /* Carga inicial + polling cada 30s */
-  cargarConNotif()   // usa notificarSiHayNuevas para establecer la línea base
-  setInterval(() => cargarConNotif(), 30000)
+  /* Carga inicial + polling cada 30s
+     Si userId no estaba disponible al inicio, reintenta hasta que Supabase inicialice */
+  let _intervalo = null
+  async function arrancar(){
+    if(!userId){
+      userId = getUserId()
+      if(!userId) return  // todavía no disponible, esperar el próximo intento
+    }
+    cargarConNotif()
+    chequearMensajes()
+    chequearAdmin()
+    if(_intervalo) clearInterval(_intervalo)
+    _intervalo = setInterval(() => cargarConNotif(), 30000)
+    setInterval(() => chequearMensajes(), 15000)
+  }
+
+  // Intentar ahora; si userId es null, reintentar cada 500ms hasta 5 segundos
+  arrancar()
+  const _retry = setInterval(() => {
+    if(userId){ clearInterval(_retry); return }
+    arrancar()
+  }, 500)
+  setTimeout(() => clearInterval(_retry), 5000)
 
   /* ── Badge + notificación de mensajes no leídos ── */
   let _ultimoConteoMensajes = -1  // -1 = aún no inicializado
@@ -334,9 +382,6 @@
     } catch(e){}
   }
 
-  chequearMensajes()
-  setInterval(() => chequearMensajes(), 15000)
-
   /* ── Ícono admin (solo si es admin) ── */
   async function chequearAdmin(){
     try {
@@ -365,7 +410,5 @@
       nav.insertBefore(adminLink, wrap)
     } catch(e){}
   }
-
-  chequearAdmin()
 
 })()
