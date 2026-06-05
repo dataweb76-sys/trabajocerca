@@ -193,7 +193,7 @@ async function cargarPerfil(){
   } catch(err){
     console.error("Error en cargarPerfil:", err)
     const el = document.getElementById("contenido")
-    if(el) el.innerHTML = '<div class="alerta alerta-err">Ocurrió un error al cargar el perfil. Intentá de nuevo.</div>'
+    if(el) el.innerHTML = `<div class="alerta alerta-err">Error: ${err?.message || err}<br><small style="opacity:.7;">${err?.stack?.split('\n')[1]||''}</small></div>`
   }
 }
 
