@@ -44,13 +44,26 @@ async function init(){
 }
 
 /* ── CARGAR CONSULTAS ── */
+function tiempoRestante(createdAt){
+  const expira = new Date(new Date(createdAt).getTime() + 48*3600*1000)
+  const diff   = expira - Date.now()
+  if(diff <= 0) return { label:"Expirada", color:"#94a3b8", urgente:false }
+  const h = Math.floor(diff/3600000)
+  const m = Math.floor((diff%3600000)/60000)
+  if(h < 6)  return { label:`⚠️ Vence en ${h}h ${m}m`, color:"#dc2626", urgente:true }
+  if(h < 24) return { label:`⏱ Vence en ${h}h`, color:"#f59e0b", urgente:false }
+  return { label:`⏱ Vence en ${h}h`, color:"#64748b", urgente:false }
+}
+
 async function cargarConsultas(){
   const cont = document.getElementById("listaConsultas")
+  const hace48h = new Date(Date.now() - 48*3600*1000).toISOString()
 
   let q = supabase
     .from("consultas_urgentes")
     .select("*, ayudas_consulta(count)")
     .eq("activo", true)
+    .gt("created_at", hace48h)
     .order("created_at", { ascending: false })
     .limit(50)
 
@@ -78,6 +91,8 @@ async function cargarConsultas(){
     const ayudasCount = c.ayudas_consulta?.[0]?.count || 0
     const fechaStr    = new Date(c.created_at).toLocaleDateString("es-AR",{day:"2-digit",month:"short"})
     const tipoLabel   = tiposLabel[c.tipo] || c.tipo || ""
+    const { label: tiempoLabel, color: tiempoColor } = tiempoRestante(c.created_at)
+    const esOwner     = c.usuario_id === _user?.id
 
     const card = document.createElement("div")
     card.className = "cu-card"
@@ -97,13 +112,18 @@ async function cargarConsultas(){
       </div>
       <div class="cu-necesita">${c.necesita || "Sin descripción."}</div>
       <p class="cu-location"><i class="fa-solid fa-location-dot"></i> ${[c.ciudad, c.provincia].filter(Boolean).join(", ") || "Sin ubicación"}</p>
+      <p style="margin:4px 0 10px;font-size:11px;font-weight:700;color:${tiempoColor};">${tiempoLabel}</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        ${c.usuario_id === _user?.id ? `
+        ${esOwner ? `
           <a href="/perfil.html#mis-consultas"
             style="display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#1d4ed8,#1e40af);color:white;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">
             <i class="fa-solid fa-lightbulb"></i>
-            ${ayudasCount > 0 ? `Ver ${ayudasCount} solución${ayudasCount!==1?"es":""}` : "Mis soluciones"}
-          </a>` : `
+            ${ayudasCount > 0 ? `Ver ${ayudasCount} solución${ayudasCount!==1?"es":""}` : "Ver soluciones"}
+          </a>
+          <button onclick="marcarResuelta('${c.id}','${(c.categoria||"").replace(/'/g,"\\'")}',this)"
+            style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;padding:9px 14px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+            <i class="fa-solid fa-circle-check"></i> Ya lo encontré
+          </button>` : `
           <button class="btn-ayudar" onclick="abrirAyudar(${JSON.stringify(c).replace(/"/g,"&quot;")})">
             <i class="fa-solid fa-hands-helping"></i> Ayudar a encontrar
           </button>`}
@@ -251,6 +271,66 @@ window.enviarAyuda = async function(){
       header.appendChild(badge)
     }
   }
+}
+
+/* ── MARCAR COMO RESUELTA ── */
+window.marcarResuelta = async function(id, categoria, btn){
+  if(!_user) return
+  btn.disabled = true
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`
+
+  const { error } = await supabase
+    .from("consultas_urgentes")
+    .update({ activo: false })
+    .eq("id", id)
+    .eq("usuario_id", _user.id)
+
+  if(error){
+    btn.disabled = false
+    btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Ya lo encontré`
+    mostrarToast("❌ No se pudo guardar. Intentá de nuevo.")
+    return
+  }
+
+  // Quitar card con animación
+  const card = document.getElementById(`cu-card-${id}`)
+  if(card){
+    card.style.transition = "opacity .4s,transform .4s"
+    card.style.opacity = "0"
+    card.style.transform = "scale(.95)"
+    setTimeout(() => card.remove(), 420)
+  }
+
+  // Modal de cierre feliz
+  mostrarModalResuelto(categoria)
+}
+
+function mostrarModalResuelto(categoria){
+  const overlay = document.createElement("div")
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .2s ease;`
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:24px;max-width:400px;width:100%;padding:32px 28px 24px;
+                text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:scaleIn .25s ease;">
+      <div style="font-size:52px;margin-bottom:12px;">🎉</div>
+      <h2 style="margin:0 0 10px;font-size:20px;color:#16a34a;">¡Qué buena noticia!</h2>
+      <p style="margin:0 0 20px;font-size:14px;color:#475569;line-height:1.65;">
+        Nos alegramos de que hayas encontrado tu <strong>${categoria || "profesional"}</strong>.
+        <br><br>
+        Tu consulta fue archivada. Si en algún momento necesitás algo de nuevo,
+        podés crear una nueva consulta urgente cuando quieras.
+        <br><br>
+        <span style="color:#1e293b;font-weight:700;">— Trabajos Cerca 💪</span>
+      </p>
+      <button onclick="this.closest('div').parentElement.remove()"
+        style="background:linear-gradient(135deg,#16a34a,#15803d);color:white;border:none;
+               padding:12px 32px;border-radius:12px;font-size:15px;font-weight:700;
+               cursor:pointer;font-family:inherit;width:100%;">
+        ¡Gracias!
+      </button>
+    </div>`
+  overlay.addEventListener("click", e => { if(e.target===overlay) overlay.remove() })
+  document.body.appendChild(overlay)
 }
 
 /* ── COMPARTIR CONSULTA ── */

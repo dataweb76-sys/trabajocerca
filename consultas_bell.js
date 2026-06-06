@@ -55,7 +55,8 @@ async function init(){
   inyectarCampanita(nuevas || 0, provincia, ciudad, total || 0)
 
   // ── Inyectar sección en el dashboard del perfil ──
-  await inyectarSeccionPerfil(uid, provincia, ciudad, nuevas || 0, `${perfil.nombre||""} ${perfil.apellido||""}`.trim())
+  const nombreCompleto = `${perfil.nombre||""} ${perfil.apellido||""}`.trim()
+  await inyectarSeccionPerfil(uid, provincia, ciudad, nuevas || 0, nombreCompleto)
 }
 
 function inyectarCampanita(nuevas, provincia, ciudad, total){
@@ -112,11 +113,14 @@ async function inyectarSeccionPerfil(uid, provincia, ciudad, nuevas, nombrePerfi
     .order("created_at", { ascending: false })
     .limit(5)
 
-  // Cargar MIS consultas con sus ayudas
+  // Cargar MIS consultas activas (con ayudas) — solo últimas 48h + las que tienen ayudas
+  const hace48h = new Date(Date.now() - 48*3600*1000).toISOString()
   const { data: misConsultas } = await supabase
     .from("consultas_urgentes")
     .select("id,nombre,categoria,ciudad,provincia,necesita,created_at,activo,ayudas_consulta(id,ayudante_nombre,comentario,contacto_numero,created_at)")
     .eq("usuario_id", uid)
+    .eq("activo", true)
+    .gt("created_at", hace48h)
     .order("created_at", { ascending: false })
     .limit(10)
 
@@ -202,6 +206,151 @@ async function inyectarSeccionPerfil(uid, provincia, ciudad, nuevas, nombrePerfi
   } else {
     container.appendChild(section)
   }
+
+  // ── Banner/modal de alerta si hay ayudas nuevas no vistas ──
+  const LS_SEEN = "tc_ayudas_seen_" + uid
+  const lastSeen = localStorage.getItem(LS_SEEN) || ""
+  const hayAyudasNuevas = totalAyudasNuevas > 0 &&
+    (misConsultas || []).some(c =>
+      (c.ayudas_consulta || []).some(a => a.created_at > lastSeen)
+    )
+
+  if(hayAyudasNuevas){
+    mostrarModalAyudasPerfil(misConsultas || [], nombrePerfil, uid)
+    localStorage.setItem(LS_SEEN, new Date().toISOString())
+  }
+}
+
+/* ── MODAL ALERTA: tenés respuestas a tus consultas ── */
+function mostrarModalAyudasPerfil(misConsultas, nombrePerfil, uid){
+  const conAyudas = misConsultas.filter(c => c.ayudas_consulta?.length > 0)
+  if(!conAyudas.length) return
+
+  const totalAyudas = conAyudas.reduce((s, c) => s + c.ayudas_consulta.length, 0)
+
+  const cardsHtml = conAyudas.map(c => {
+    const ayudasHtml = c.ayudas_consulta.map(a => {
+      const waNum = (a.contacto_numero || "").replace(/\D/g,"")
+      const waMsg = encodeURIComponent(
+        `¡Hola! Me llamo ${nombrePerfil}. Te escribo desde trabajoscerca.com.ar porque un usuario me recomendó tu número — estoy buscando un ${c.categoria}${c.necesita ? ` porque ${c.necesita.substring(0,100)}` : ""}. ¿Podés ayudarme? ¡Y si te registrás en la página podés conseguir más clientes como yo! 👉 www.trabajoscerca.com.ar`
+      )
+      const waLink = waNum ? `https://wa.me/54${waNum}?text=${waMsg}` : null
+      return `
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 12px;margin-bottom:8px;">
+          <p style="margin:0 0 4px;font-size:13px;font-weight:800;color:#1e293b;">
+            <i class="fa-solid fa-user" style="color:#16a34a;"></i> ${a.ayudante_nombre || "Anónimo"}
+            <span style="font-weight:400;color:#64748b;font-size:12px;"> · te dejó un contacto</span>
+          </p>
+          ${a.comentario ? `<p style="margin:0 0 8px;font-size:12px;color:#475569;font-style:italic;">"${a.comentario}"</p>` : ""}
+          ${waLink ? `
+            <a href="${waLink}" target="_blank" rel="noopener"
+              style="display:inline-flex;align-items:center;gap:7px;background:#25D366;color:white;
+                     padding:9px 16px;border-radius:10px;font-size:13px;font-weight:800;
+                     text-decoration:none;width:100%;box-sizing:border-box;justify-content:center;">
+              <i class="fa-brands fa-whatsapp"></i> Enviar WhatsApp al ${c.categoria}
+            </a>` : `<p style="font-size:12px;color:#dc2626;margin:0;">Sin número de contacto.</p>`}
+        </div>`
+    }).join("")
+
+    return `
+      <div style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;margin-bottom:14px;">
+        <div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0;">
+          <span style="font-size:13px;font-weight:800;color:#dc2626;">
+            <i class="fa-solid fa-bolt"></i> ${c.categoria}
+          </span>
+          <span style="font-size:11px;color:#94a3b8;margin-left:8px;">${c.ciudad || c.provincia || ""}</span>
+          <span style="float:right;font-size:11px;font-weight:800;color:#16a34a;">
+            ${c.ayudas_consulta.length} solución${c.ayudas_consulta.length!==1?"es":""}
+          </span>
+        </div>
+        <div style="padding:12px 14px;">${ayudasHtml}</div>
+        <div style="padding:0 14px 12px;">
+          <button data-cid="${c.id}" data-cat="${c.categoria||""}"
+            onclick="tcMarcarResueltaModal(this)"
+            style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;color:#16a34a;
+                   border:1.5px solid #bbf7d0;padding:8px 14px;border-radius:10px;font-size:12px;
+                   font-weight:700;cursor:pointer;font-family:inherit;width:100%;justify-content:center;">
+            <i class="fa-solid fa-circle-check"></i> Ya encontré mi ${c.categoria} — cerrar consulta
+          </button>
+        </div>
+      </div>`
+  }).join("")
+
+  const overlay = document.createElement("div")
+  overlay.id = "tcModalAyudasPerfil"
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:16px;animation:tcFadeIn .2s ease;`
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:24px;max-width:460px;width:100%;
+                max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);
+                animation:tcScaleIn .25s ease;">
+      <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:20px 22px 16px;border-radius:24px 24px 0 0;position:sticky;top:0;z-index:1;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <h2 style="margin:0;font-size:18px;color:white;display:flex;align-items:center;gap:10px;">
+            <i class="fa-solid fa-bell fa-shake"></i>
+            ¡Tenés ${totalAyudas} respuesta${totalAyudas!==1?"s":""} a tus consultas!
+          </h2>
+          <button onclick="document.getElementById('tcModalAyudasPerfil').remove()"
+            style="background:rgba(255,255,255,.2);border:none;color:white;width:32px;height:32px;
+                   border-radius:50%;font-size:18px;cursor:pointer;font-family:inherit;
+                   display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+        <p style="margin:6px 0 0;font-size:13px;color:rgba(255,255,255,.85);">
+          Usuarios de tu zona te dejaron contactos para ayudarte a encontrar lo que buscás.
+        </p>
+      </div>
+      <div style="padding:18px 18px 20px;">
+        ${cardsHtml}
+        <button onclick="document.getElementById('tcModalAyudasPerfil').remove()"
+          style="background:#f1f5f9;border:none;padding:12px;border-radius:12px;font-size:14px;
+                 font-weight:700;cursor:pointer;font-family:inherit;width:100%;color:#475569;">
+          Ver después
+        </button>
+      </div>
+    </div>
+    <style>
+      @keyframes tcFadeIn  { from{opacity:0} to{opacity:1} }
+      @keyframes tcScaleIn { from{transform:scale(.92);opacity:0} to{transform:scale(1);opacity:1} }
+    </style>
+  `
+  overlay.addEventListener("click", e => { if(e.target===overlay) overlay.remove() })
+  document.body.appendChild(overlay)
+}
+
+/* ── MARCAR RESUELTA DESDE MODAL PERFIL ── */
+window.tcMarcarResueltaModal = async function(btn){
+  const cid = btn.dataset.cid
+  const cat = btn.dataset.cat
+  if(!cid) return
+  btn.disabled = true
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Guardando...`
+
+  const tok = JSON.parse(localStorage.getItem("sb-iqeiszkoifxgygoqvbem-auth-token"))?.access_token
+  if(!tok){ btn.disabled=false; return }
+
+  const res = await fetch(
+    `https://iqeiszkoifxgygoqvbem.supabase.co/rest/v1/consultas_urgentes?id=eq.${cid}`,
+    { method:"PATCH",
+      headers:{
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs",
+        "Authorization": `Bearer ${tok}`,
+        "Content-Type":"application/json",
+        "Prefer":"return=minimal"
+      },
+      body: JSON.stringify({ activo: false })
+    }
+  )
+  if(res.ok){
+    // Quitar card padre
+    const card = btn.closest("[data-cid]")?.parentElement?.parentElement
+    card?.remove()
+    // Si no quedan más consultas con ayudas, cerrar el modal
+    const modal = document.getElementById("tcModalAyudasPerfil")
+    if(modal && !modal.querySelectorAll("[data-cid]").length) modal.remove()
+  } else {
+    btn.disabled = false
+    btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Ya encontré mi ${cat} — cerrar consulta`
+  }
 }
 
 function renderMiConsulta(consulta, nombrePerfil){
@@ -252,6 +401,15 @@ function renderMiConsulta(consulta, nombrePerfil){
         </div>
       </div>
       ${ayudas.length > 0 ? `<div style="padding:10px 14px;">${ayudasHtml}</div>` : ""}
+      <div style="padding:4px 14px 12px;">
+        <button data-cid="${consulta.id}" data-cat="${catLabel}"
+          onclick="tcMarcarResueltaModal(this)"
+          style="display:inline-flex;align-items:center;gap:6px;background:#f0fdf4;color:#16a34a;
+                 border:1.5px solid #bbf7d0;padding:7px 14px;border-radius:10px;font-size:12px;
+                 font-weight:700;cursor:pointer;font-family:inherit;width:100%;justify-content:center;">
+          <i class="fa-solid fa-circle-check"></i> Ya lo encontré — cerrar consulta
+        </button>
+      </div>
     </div>`
 }
 
