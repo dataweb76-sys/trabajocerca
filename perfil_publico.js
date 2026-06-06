@@ -122,42 +122,62 @@ async function cargarPerfil(){
         <p style="margin:4px 0 0;font-size:12px;color:#cbd5e1;">Este profesional aún no subió fotos de sus trabajos</p>
       </div>`
 
-  /* ── Reviews ── */
-  const reviewsHtml = reviews?.length
-    ? `<div class="card"><h3><i class="fa-solid fa-star" style="color:#f59e0b;"></i> Valoraciones</h3>
-        ${reviews.map(r=>{
-          const stars = Math.min(Math.max(Math.round(r.rating / 2), 1), 5)
-          return `<div class="cv-item">
-          <span class="stars-show">${"★".repeat(stars)}${"☆".repeat(5-stars)}</span>
-          <span style="font-size:13px;color:#64748b;margin-left:5px;">${r.rating}/10</span>
-          ${r.comentario?`<p style="margin:6px 0 0;font-size:14px;">${r.comentario}</p>`:""}
-        </div>`}).join("")}
-      </div>` : ""
-
-  /* ── Formulario de puntuación (solo si está logueado y no es su propio perfil) ── */
+  /* ── Reviews + Calificación (todo en una card) ── */
+  const puntosTotal = reviews?.reduce((a,r) => a + r.rating, 0) || 0
   const yaVoto = reviews?.some(r => r.autor_id === usuarioActual)
   const puedeVotar = usuarioActual && usuarioActual !== id && !yaVoto
 
-  const formRating = puedeVotar ? `
-    <div class="card" id="formRating">
-      <h3><i class="fa-solid fa-star-half-stroke" style="color:#f59e0b;"></i> Dejar valoración</h3>
-      <p style="font-size:14px;color:#64748b;margin-top:-4px;">¿Trabajaste con ${displayNombre}? Contale a otros cómo fue tu experiencia.</p>
-      <label>Puntuación *</label>
-      <div class="stars-input" id="starsInput">
-        ${[1,2,3,4,5].map(n=>`<i class="fa-solid fa-star" data-v="${n}" onclick="setEstrella(${n})" onmouseover="hoverEstrella(${n})" onmouseout="resetHover()"></i>`).join("")}
+  const reviewsHtml = ""  // incluido en formRating abajo
+
+  const formRating = `<div class="card" id="formRating">
+    <h3><i class="fa-solid fa-trophy" style="color:#f59e0b;"></i> Puntaje y calificaciones</h3>
+
+    ${reviews?.length ? `
+      <div class="puntos-total-box">
+        <div class="puntos-total-num">${puntosTotal}</div>
+        <div class="puntos-total-label">puntos acumulados · ${reviews.length} calificación${reviews.length!==1?"es":""}</div>
       </div>
-      <label>Comentario</label>
-      <textarea id="comentarioRating" rows="3" placeholder="Contá cómo fue el trabajo, la puntualidad, la calidad..."></textarea>
-      <div id="msgRating"></div>
-      <button class="btn btn-primary" onclick="enviarRating('${id}')">
-        <i class="fa-solid fa-paper-plane"></i> Enviar valoración
+      ${reviews.slice(0,5).map(r => {
+        const col = r.rating<=3?"#dc2626":r.rating<=6?"#d97706":"#16a34a"
+        return `<div class="review-item" style="margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:${col};color:white;font-weight:800;font-size:13px;padding:2px 9px;border-radius:20px;">${r.rating}/10</span>
+            ${r.comentario?`<span style="font-size:13px;color:#475569;font-style:italic;">"${r.comentario.substring(0,80)}"</span>`:""}
+          </div>
+        </div>`
+      }).join("")}
+    ` : `<p style="font-size:13px;color:#94a3b8;text-align:center;margin-bottom:14px;">Sin calificaciones aún — ¡sé el primero!</p>`}
+
+    ${puedeVotar ? `
+      <button class="btn-calificar" id="btnCalPub" onclick="mostrarFormPub()">
+        <i class="fa-solid fa-star"></i> Calificar a ${displayNombre}
       </button>
-    </div>` : (usuarioActual && yaVoto
-      ? `<div class="alerta alerta-ok" style="margin-bottom:16px;"><i class="fa-solid fa-check"></i> Ya dejaste tu valoración</div>`
-      : (!usuarioActual ? `<div class="card" style="text-align:center;padding:20px;">
-          <p style="margin:0;color:#64748b;font-size:14px;">
-            <a href="/login.html">Iniciá sesión</a> para dejar una valoración
-          </p></div>` : ""))
+      <div id="formRevPub" style="display:none;">
+        <div class="form-review" style="margin-top:0;">
+          <h4 style="margin:0 0 4px;"><i class="fa-solid fa-pen"></i> Tu calificación</h4>
+          <p style="font-size:11px;color:#94a3b8;margin:0 0 8px;">1 = Muy malo · 10 = Excelente</p>
+          <div class="rating-10" id="rating10Pub">
+            ${[1,2,3,4,5,6,7,8,9,10].map(i=>`<button class="rating-num ${i<=3?"r-bad":i<=6?"r-ok":"r-good"}" onclick="selPub(${i})">${i}</button>`).join("")}
+          </div>
+          <div id="lblRevPub" style="font-size:13px;min-height:20px;margin-bottom:8px;"></div>
+          <textarea id="comentRevPub" rows="3" placeholder="Contá tu experiencia (opcional)"
+            style="width:100%;border:1px solid #bfdbfe;border-radius:8px;padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:10px;font-family:inherit;"></textarea>
+          <div id="msgRevPub"></div>
+          <button class="btn btn-primary btn-sm" onclick="enviarRatingPub('${id}','${displayNombreEsc}')">
+            <i class="fa-solid fa-paper-plane"></i> Enviar calificación
+          </button>
+        </div>
+      </div>
+    ` : yaVoto
+      ? `<p style="font-size:13px;color:#16a34a;text-align:center;margin:8px 0 0;"><i class="fa-solid fa-check-circle"></i> Ya calificaste a esta persona — ¡gracias!</p>`
+      : `<div style="background:#eff6ff;border-radius:10px;padding:14px;text-align:center;margin-top:8px;">
+          <p style="margin:0 0 8px;font-size:14px;color:#1e40af;"><strong>¿Trabajaste o contrataste a ${displayNombre}?</strong></p>
+          <p style="margin:0 0 10px;font-size:13px;color:#475569;">Iniciá sesión y dejá tu calificación — cada punto suma.</p>
+          <a href="/login.html?next=${encodeURIComponent(location.pathname+location.search)}" class="btn btn-primary btn-sm" style="text-decoration:none;">
+            <i class="fa-solid fa-right-to-bracket"></i> Iniciá sesión
+          </a>
+        </div>`}
+  </div>`
 
   /* ── Sección "Impulsá tu búsqueda" — sólo para perfiles con CV ── */
   const esPropioPerfilCV = usuarioActual === id && !!curriculum
@@ -303,8 +323,8 @@ async function cargarPerfil(){
     ${servicioHtml}
     ${fotosHtml}
     ${impulsarCVHtml}
-    ${formRating}
     ${reviewsHtml}
+    ${formRating}
   `
 
   if(servicio?.lat && servicio?.lng){
@@ -326,62 +346,59 @@ async function cargarPerfil(){
   }
 }
 
-/* ── ESTRELLAS ── */
+/* ── CALIFICACIÓN 1-10 (mismo sistema que buscador_cv) ── */
 
-window.setEstrella = function(n){
-  estrellaSeleccionada = n
-  document.querySelectorAll("#starsInput i").forEach((el,i) => {
-    el.classList.toggle("activa", i < n)
-  })
+let _pubRating = 0
+
+window.mostrarFormPub = function(){
+  const btn = document.getElementById("btnCalPub")
+  const form = document.getElementById("formRevPub")
+  if(btn) btn.style.display = "none"
+  if(form) form.style.display = "block"
 }
 
-window.hoverEstrella = function(n){
-  document.querySelectorAll("#starsInput i").forEach((el,i) => {
-    el.classList.toggle("hover", i < n)
-  })
+window.selPub = function(n){
+  _pubRating = n
+  document.querySelectorAll("#rating10Pub .rating-num").forEach((el,i) => el.classList.toggle("selected", i < n))
+  const col = n<=3?"#dc2626":n<=6?"#d97706":"#16a34a"
+  const labels = {1:"Muy malo",2:"Malo",3:"Por debajo de lo esperado",4:"Regular",5:"Puede mejorar",6:"Aceptable",7:"Bueno",8:"Muy bueno",9:"Excelente",10:"¡Perfecto!"}
+  const lbl = document.getElementById("lblRevPub")
+  if(lbl) lbl.innerHTML = `<span style="color:${col};font-weight:700;">${n}/10 — ${labels[n]}</span>`
 }
 
-window.resetHover = function(){
-  document.querySelectorAll("#starsInput i").forEach(el => el.classList.remove("hover"))
-}
-
-/* ── ENVIAR RATING ── */
-
-window.enviarRating = async function(trabajadorId){
-  const msg = document.getElementById("msgRating")
-
-  if(!estrellaSeleccionada){
-    msg.innerHTML = '<div class="alerta alerta-err">Seleccioná una puntuación</div>'
+window.enviarRatingPub = async function(trabajadorId, nombre){
+  const msg = document.getElementById("msgRevPub")
+  if(!_pubRating){
+    msg.innerHTML = '<div class="alerta alerta-err" style="font-size:13px;padding:8px;">Elegí un puntaje del 1 al 10</div>'
     return
   }
-
   const { data: authData } = await supabase.auth.getUser()
-  if(!authData.user){ msg.innerHTML = '<div class="alerta alerta-err">Debés estar logueado</div>'; return }
+  if(!authData?.user){ msg.innerHTML = '<div class="alerta alerta-err" style="font-size:13px;padding:8px;">Debés estar logueado</div>'; return }
 
-  const ratingVal = estrellaSeleccionada * 2  // convertir 1-5 estrellas → escala 1-10
+  msg.innerHTML = '<div style="font-size:13px;color:#64748b;"><i class="fa-solid fa-spinner fa-spin"></i> Enviando...</div>'
 
+  const comentario = document.getElementById("comentRevPub")?.value?.trim() || ""
   const { error } = await supabase.from("reviews").insert({
     trabajador_id: trabajadorId,
     autor_id:      authData.user.id,
-    rating:        ratingVal,
-    comentario:    document.getElementById("comentarioRating").value.trim(),
+    rating:        _pubRating,
+    comentario,
     tipo:          "servicio"
   })
 
-  if(error){ msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`; return }
+  if(error){ msg.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px;">${error.message}</div>`; return }
 
-  // Notificación para el profesional
-  const comentario = document.getElementById("comentarioRating")?.value?.trim() || ""
+  // Notificación al profesional
   supabase.from("notificaciones").insert({
     usuario_id: trabajadorId,
     tipo: "review",
-    titulo: `Recibiste una calificación de ${estrellaSeleccionada} estrella${estrellaSeleccionada!==1?"s":""}`,
-    cuerpo: comentario ? `"${comentario.substring(0,80)}"` : "¡Alguien valoró tu trabajo!",
+    titulo: `¡Recibiste una calificación de ${_pubRating}/10!`,
+    cuerpo: comentario ? `"${comentario.substring(0,80)}"` : "¡Alguien valoró tu perfil en Trabajos Cerca!",
     url: "/perfil.html"
   }).catch(()=>{})
 
-  document.getElementById("formRating").innerHTML =
-    '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> ¡Gracias! Tu valoración fue enviada.</div>'
+  document.querySelector("#formRevPub .form-review").innerHTML =
+    `<div class="alerta alerta-ok"><i class="fa-solid fa-check-circle"></i> ¡Gracias! Sumaste <strong>${_pubRating} punto${_pubRating!==1?"s":""}</strong> al perfil de ${nombre}.</div>`
 }
 
 cargarPerfil()
