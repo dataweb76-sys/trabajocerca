@@ -36,12 +36,8 @@ async function cargarPerfil(){
     supabase.from("perfil_eventos").select("*", { count: "exact", head: true }).eq("profesional_id", id).eq("tipo", "apoyo_cv")
   ])
 
-  // Intentar leer cv_publico por separado (puede no existir la columna aún)
-  let cvPublico = true
-  try {
-    const { data: cvPriv } = await supabase.from("curriculum").select("cv_publico").eq("usuario_id", id).maybeSingle()
-    if(cvPriv && cvPriv.cv_publico === false) cvPublico = false
-  } catch(e){}
+  // cv_publico: si la columna existe en DB viene en el objeto, si no existe es undefined → true por defecto
+  const cvPublico = curriculum?.cv_publico !== false
 
   const yaApoyo = localStorage.getItem(`tc_apoyo_cv_${id}`) === "1"
   // Si el usuario ya apoyó localmente, ajustar el conteo mínimo a 1
