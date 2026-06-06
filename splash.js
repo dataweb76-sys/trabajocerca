@@ -551,7 +551,7 @@ window.addEventListener('beforeinstallprompt', function(e) {
     center.innerHTML =
       `<a href="/buscador_oficios.html"${path.includes('buscador_oficios') ? ' class="activo"':''}>🔨 <span>Oficios</span></a>` +
       `<a href="/buscador_profesionales.html"${path.includes('buscador_profesionales') ? ' class="activo"':''}>🎓 <span>Profesionales</span></a>` +
-      `<a href="/buscador_cv.html"${path.includes('buscador_cv') ? ' class="activo"':''}>📄 <span>CVs</span></a>` +
+      `<a href="/buscador_trabajos.html"${path.includes('buscador_trabajos') ? ' class="activo"':''}>📄 <span>CVs</span></a>` +
       `<a href="/buscador_emprendimientos.html"${path.includes('buscador_emprendimientos') ? ' class="activo"':''}>💡 <span>Emprendimientos</span></a>` +
       `<a href="/buscador_ofertas.html"${path.includes('buscador_ofertas') ? ' class="activo"':''}>🏢 <span>Ofertas</span></a>`
 
