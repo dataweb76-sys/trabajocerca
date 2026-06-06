@@ -626,16 +626,16 @@ cargarPerfil()
   const css = `
   #tcCVModal {
     display:none; position:fixed; inset:0; z-index:9850;
-    background:rgba(0,0,0,.75); align-items:flex-end; justify-content:center;
-    padding:0; box-sizing:border-box;
+    background:rgba(0,0,0,.7); align-items:center; justify-content:center;
+    padding:16px; box-sizing:border-box;
   }
   #tcCVModal.abierto { display:flex; }
   #tcCVBox {
-    background:white; border-radius:20px 20px 0 0; width:100%; max-width:600px;
-    max-height:92vh; display:flex; flex-direction:column; overflow:hidden;
-    box-shadow:0 -8px 40px rgba(0,0,0,.25); animation:tcCVSlide .28s ease;
+    background:white; border-radius:20px; width:100%; max-width:600px;
+    max-height:90vh; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 24px 60px rgba(0,0,0,.35); animation:tcCVSlide .25s ease;
   }
-  @keyframes tcCVSlide { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
+  @keyframes tcCVSlide { from{transform:scale(.95);opacity:0} to{transform:scale(1);opacity:1} }
   #tcCVHeader {
     padding:16px 18px 12px; border-bottom:1px solid #f1f5f9;
     display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
