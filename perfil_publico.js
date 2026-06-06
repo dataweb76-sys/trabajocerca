@@ -31,11 +31,21 @@ async function cargarPerfil(){
     supabase.from("servicios").select("*").eq("usuario_id", id).maybeSingle(),
     supabase.from("reviews").select("*").eq("trabajador_id", id).order("created_at", { ascending: false }),
     supabase.from("portfolio").select("*").eq("usuario_id", id),
-    supabase.from("curriculum").select("titulo_profesional,rubros,disponibilidad,modalidad,resumen,habilidades,educacion,experiencia,cv_archivo,cv_publico").eq("usuario_id", id).maybeSingle(),
+    // cv_publico se fetchea aparte para no romper si la columna aún no existe en DB
+    supabase.from("curriculum").select("titulo_profesional,rubros,disponibilidad,modalidad,resumen,habilidades,educacion,experiencia,cv_archivo").eq("usuario_id", id).maybeSingle(),
     supabase.from("perfil_eventos").select("*", { count: "exact", head: true }).eq("profesional_id", id).eq("tipo", "apoyo_cv")
   ])
 
+  // Intentar leer cv_publico por separado (puede no existir la columna aún)
+  let cvPublico = true
+  try {
+    const { data: cvPriv } = await supabase.from("curriculum").select("cv_publico").eq("usuario_id", id).maybeSingle()
+    if(cvPriv && cvPriv.cv_publico === false) cvPublico = false
+  } catch(e){}
+
   const yaApoyo = localStorage.getItem(`tc_apoyo_cv_${id}`) === "1"
+  // Si el usuario ya apoyó localmente, ajustar el conteo mínimo a 1
+  const apoyoMin = (yaApoyo && (apoyoCount || 0) === 0) ? 1 : (apoyoCount || 0)
 
   if(!perfil){ document.getElementById("contenido").innerHTML = '<div class="alerta alerta-err">Perfil no encontrado.</div>'; return }
 
@@ -186,7 +196,7 @@ async function cargarPerfil(){
   const rubrosCVstr = rubrosCV.slice(0, 4).join(" · ")
 
   const impulsarCVHtml = curriculum ? (() => {
-    const total = apoyoCount || 0
+    const total = apoyoMin
     const waNum = (perfil.movil || "").replace(/\D/g,"")
     const waLinkContacto = waNum
       ? `https://wa.me/${waNum}?text=${encodeURIComponent(`Hola${perfil.nombre?" "+perfil.nombre:""}! Vi tu CV en Trabajos Cerca y me interesa contactarte. ¿Podemos hablar? 👋`)}`
@@ -300,7 +310,7 @@ async function cargarPerfil(){
       </p>
       ${ratingHtml}
       ${curriculum ? `
-      <button onclick="abrirVerCV('${id}','${displayNombreEsc}','${(perfil.movil||"").replace(/\D/g,"")}',${curriculum.cv_publico !== false},'${curriculum.cv_archivo||""}')"
+      <button onclick="abrirVerCV('${id}','${displayNombreEsc}','${(perfil.movil||"").replace(/\D/g,"")}',${cvPublico},'${curriculum.cv_archivo||""}')"
         style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:white;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;margin:10px auto 4px;font-family:inherit;box-shadow:0 4px 14px rgba(37,99,235,.3);">
         <i class="fa-solid fa-file-lines"></i> Ver CV completo
       </button>` : ""}
@@ -326,6 +336,19 @@ async function cargarPerfil(){
       </div>
     </div>
     ${servicioHtml}
+    ${curriculum ? `
+    <div class="card" style="text-align:center;padding:22px 20px;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:2px solid #bfdbfe;">
+      <p style="margin:0 0 6px;font-size:14px;color:#475569;line-height:1.5;">
+        ${curriculum.cv_archivo
+          ? `<i class="fa-solid fa-paperclip" style="color:#2563eb;"></i> Este candidato tiene un <strong>CV adjunto</strong> y un perfil completo`
+          : `<i class="fa-solid fa-file-lines" style="color:#2563eb;"></i> Este candidato tiene su <strong>CV cargado</strong> en la plataforma`}
+      </p>
+      <button onclick="abrirVerCV('${id}','${displayNombreEsc}','${(perfil.movil||"").replace(/\D/g,"")}',${cvPublico},'${curriculum.cv_archivo||""}')"
+        style="display:inline-flex;align-items:center;gap:9px;padding:13px 28px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:white;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(37,99,235,.35);margin-top:8px;">
+        <i class="fa-solid fa-file-lines"></i> Ver CV completo
+      </button>
+      ${!cvPublico ? `<p style="margin:8px 0 0;font-size:12px;color:#64748b;"><i class="fa-solid fa-lock" style="color:#f97316;"></i> Requiere autorización del candidato</p>` : ""}
+    </div>` : ""}
     ${fotosHtml}
     ${impulsarCVHtml}
     ${reviewsHtml}
