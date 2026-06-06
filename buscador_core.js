@@ -367,7 +367,7 @@ window.buscar = async function(){
   if(profileIds.length){
     try {
       const rRes = await fetch(
-        `${SB_URL}/rest/v1/reviews?trabajador_id=in.(${profileIds.join(",")})&tipo=neq.cliente&select=trabajador_id,rating`,
+        `${SB_URL}/rest/v1/reviews?trabajador_id=in.(${profileIds.join(",")})&or=(tipo.is.null,tipo.neq.cliente)&select=trabajador_id,rating`,
         { headers: SB_HEADERS }
       )
       if(rRes.ok){
@@ -704,7 +704,7 @@ async function cargarReviews(profileId, nombre, autoAbrirForm=false){
   let reviews = []
   try {
     const res = await fetch(
-      `${SB_URL}/rest/v1/reviews?trabajador_id=eq.${profileId}&tipo=neq.cliente&select=id,rating,comentario,created_at,autor_id&order=created_at.desc`,
+      `${SB_URL}/rest/v1/reviews?trabajador_id=eq.${profileId}&or=(tipo.is.null,tipo.neq.cliente)&select=id,rating,comentario,created_at,autor_id&order=created_at.desc`,
       { headers: SB_HEADERS }
     )
     if(res.ok) reviews = await res.json()

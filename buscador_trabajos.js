@@ -85,7 +85,7 @@ async function cargarCVs(){
   try {
     const url = `${SB_URL}/rest/v1/curriculum` +
       `?select=usuario_id,titulo_profesional,rubros,disponibilidad,modalidad,edad,habilidades,resumen` +
-      `,perfiles!usuario_id(nombre,apellido,foto,localidad,provincia,movil)` +
+      `,perfiles!usuario_id(id,nombre,apellido,foto,localidad,provincia,movil,destacado,verificado)` +
       `&order=created_at.desc`
 
     const res = await fetch(url, { headers: SB_HEADERS })
@@ -95,6 +95,30 @@ async function cargarCVs(){
     cont.innerHTML = `<div class="alerta alerta-err">Error al cargar candidatos: ${e.message}</div>`
     return
   }
+
+  // ── Cargar puntajes para ordenar por calificación ──
+  const profileIds = todosLosCVs.map(cv => cv.perfiles?.id).filter(Boolean)
+  if(profileIds.length){
+    try {
+      const rRes = await fetch(
+        `${SB_URL}/rest/v1/reviews?trabajador_id=in.(${profileIds.join(",")})&or=(tipo.is.null,tipo.neq.cliente)&select=trabajador_id,rating`,
+        { headers: SB_HEADERS }
+      )
+      if(rRes.ok){
+        const revs = await rRes.json()
+        const puntajesMap = {}
+        revs.forEach(r => {
+          if(!puntajesMap[r.trabajador_id]) puntajesMap[r.trabajador_id] = 0
+          puntajesMap[r.trabajador_id] += r.rating
+        })
+        todosLosCVs.forEach(cv => {
+          const pid = cv.perfiles?.id
+          cv._puntos = pid ? (puntajesMap[pid] || 0) : 0
+        })
+      }
+    } catch(e){}
+  }
+
   aplicarFiltros()
 }
 
@@ -157,6 +181,14 @@ window.aplicarFiltros = function(){
       divSug.style.display = "none"
     }
   }
+
+  // ── Ordenar: destacados primero, luego por puntaje ──
+  filtrados.sort((a, b) => {
+    const da = a.perfiles?.destacado ? 1 : 0
+    const db = b.perfiles?.destacado ? 1 : 0
+    if(db !== da) return db - da
+    return (b._puntos || 0) - (a._puntos || 0)
+  })
 
   renderResultados(filtrados)
 }
@@ -235,8 +267,14 @@ function renderResultados(cvs){
 
   cont.innerHTML = `
     ${bannerHtml}
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+      <i class="fa-solid fa-trophy" style="color:#f59e0b;font-size:20px;flex-shrink:0;"></i>
+      <p style="margin:0;font-size:13px;color:#92400e;">
+        <strong>¿Conocés a esta persona?</strong> Valorala del 1 al 10 desde su perfil — cada punto la sube en el ranking.
+      </p>
+    </div>
     <p style="color:#64748b;margin-bottom:16px;font-size:14px;">
-      <strong>${total}</strong> candidato${total!==1?"s":""} encontrado${total!==1?"s":""}
+      <strong>${total}</strong> candidato${total!==1?"s":""} encontrado${total!==1?"s":""} · ordenados por puntaje
       ${rubroActivo ? `· rubro: <strong>${rubroActivo}</strong>` : ""}
     </p>`
 
@@ -245,7 +283,9 @@ function renderResultados(cvs){
     const rubros = Array.isArray(cv.rubros) ? cv.rubros : []
 
     const nombre   = `${p.nombre || ""} ${p.apellido || ""}`.trim() || "Candidato"
-    const fotoHtml = `<div class="cv-avatar-ph"><i class="fa-solid fa-user"></i></div>`
+    const fotoHtml = p.foto
+      ? `<img src="${p.foto}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid #2563eb;flex-shrink:0;">`
+      : `<div class="cv-avatar-ph"><i class="fa-solid fa-user"></i></div>`
 
     const rubrosHtml = rubros.length
       ? `<div class="cv-rubros">${rubros.map(r => `<span class="cv-rubro-tag">${r}</span>`).join("")}</div>`
@@ -257,6 +297,20 @@ function renderResultados(cvs){
       cv.disponibilidad ? `<i class="fa-solid fa-calendar-check"></i> ${cv.disponibilidad.replace(/_/g," ")}` : "",
       cv.modalidad      ? `<i class="fa-solid fa-laptop-house"></i> ${cv.modalidad}` : ""
     ].filter(Boolean).join("  ·  ")
+
+    // Badge puntaje / verificado / destacado
+    const puntos = cv._puntos || 0
+    const badgePuntos = puntos > 0
+      ? `<span style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;border:1px solid #f59e0b;color:#92400e;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:4px;">
+           <i class="fa-solid fa-star" style="color:#f59e0b;font-size:9px;"></i> ${puntos} pto${puntos!==1?"s":""}
+         </span> `
+      : ""
+    const badgeDest = p.destacado
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#f59e0b;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:4px;"><i class="fa-solid fa-crown" style="font-size:9px;"></i> DESTACADO</span> `
+      : ""
+    const badgeVerif = p.verificado
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:4px;"><i class="fa-solid fa-circle-check" style="font-size:9px;"></i> VERIFICADO</span>`
+      : ""
 
     // Botones según estado del usuario
     let accionesHtml
@@ -298,7 +352,8 @@ function renderResultados(cvs){
       <div class="cv-card-header">
         ${fotoHtml}
         <div style="flex:1;min-width:0;">
-          <p class="cv-nombre">${nombre}</p>
+          <div style="margin-bottom:3px;">${badgeDest}${badgePuntos}${badgeVerif}</div>
+          <p class="cv-nombre" style="margin:0 0 2px;">${nombre}</p>
           <p class="cv-titulo"><i class="fa-solid fa-briefcase"></i> ${cv.titulo_profesional}</p>
           <p class="cv-meta">${metaItems}</p>
         </div>
