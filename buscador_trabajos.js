@@ -28,7 +28,8 @@ function getCurrentUserId(){
   const t = getAccessToken(); if(!t) return null
   try { return JSON.parse(atob(t.split(".")[1])).sub || null } catch(e){ return null }
 }
-function esEmpleador(){ return _userTipo === "empleador" }
+// Cualquier usuario logueado puede ver CVs y contactar
+function esEmpleador(){ return _userTipo !== null && _userTipo !== undefined }
 
 async function cargarUserTipo(){
   const uid = getCurrentUserId()
@@ -207,8 +208,8 @@ function renderResultados(cvs){
           </p>
           <p style="margin:0 0 14px;font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;">
             Estás viendo <strong style="color:white;">${total} persona${total!==1?"s":""}</strong> que buscan trabajo cerca tuyo.
-            Con una cuenta de empresa accedés al <strong style="color:white;">CV completo</strong>,
-            <strong style="color:white;">datos de contacto</strong> y podés escribirles por
+            Registrate gratis para acceder al <strong style="color:white;">CV completo</strong>,
+            <strong style="color:white;">datos de contacto</strong> y escribirles por
             <strong style="color:white;">WhatsApp</strong> directamente. <strong style="color:white;">100% gratis.</strong>
           </p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
@@ -220,7 +221,7 @@ function renderResultados(cvs){
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <a href="/registro.html"
               style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:white;color:#7c3aed;border-radius:12px;font-weight:800;font-size:14px;text-decoration:none;">
-              <i class="fa-solid fa-building"></i> Registrá tu empresa gratis
+              <i class="fa-solid fa-user-plus"></i> Registrarme gratis
             </a>
             <a href="/login.html?redirect=/buscador_trabajos.html"
               style="display:inline-flex;align-items:center;gap:8px;padding:12px 18px;background:rgba(255,255,255,.15);color:white;border-radius:12px;font-weight:700;font-size:13px;text-decoration:none;border:1.5px solid rgba(255,255,255,.4);">
@@ -275,17 +276,6 @@ function renderResultados(cvs){
             class="btn btn-sm" style="background:#25D366;color:white;display:inline-flex;align-items:center;gap:6px;">
             <i class="fa-brands fa-whatsapp"></i> WhatsApp
           </a>` : ""}
-        </div>`
-    } else if(uid){
-      // ── Logueado pero NO es empleador ──
-      accionesHtml = `
-        <div style="margin-top:12px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <i class="fa-solid fa-lock" style="color:#7c3aed;flex-shrink:0;"></i>
-          <span style="font-size:13px;color:#4c1d95;flex:1;">Necesitás una <strong>cuenta de empresa</strong> para ver el CV y contactar.</span>
-          <a href="/registro.html"
-            style="display:inline-flex;align-items:center;gap:5px;padding:8px 14px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;">
-            <i class="fa-solid fa-building"></i> Registrar empresa
-          </a>
         </div>`
     } else {
       // ── Sin sesión: invitar a registrarse ──
