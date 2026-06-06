@@ -295,7 +295,99 @@ window.guardarCV = async function(){
     mostrar_telefono: mostrarTel
   }).eq("id", userId)
 
-  msg.innerHTML = '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> CV guardado correctamente</div>'
+  // Notificación interna incentivando a compartir el CV
+  supabase.from("notificaciones").insert({
+    usuario_id: userId,
+    tipo: "compartir_cv",
+    titulo: "🚀 ¡Tu CV está publicado! Compartilo para que más empresas te encuentren",
+    cuerpo: "Cuanto más lo compartas en grupos de WhatsApp, Facebook y LinkedIn, más chances tenés de conseguir trabajo. ¡Cada compartido cuenta!",
+    url: "/perfil.html"
+  }).catch(()=>{})
+
+  msg.innerHTML = '<div class="alerta alerta-ok"><i class="fa-solid fa-check"></i> ¡CV guardado! Ahora compartí tu perfil para que más empresas te vean.</div>'
+
+  // Mostrar modal de compartir antes de redirigir
+  mostrarModalCompartirCV(userId)
+}
+
+function mostrarModalCompartirCV(userId){
+  const url = `${location.origin}/perfil_publico.html?id=${userId}`
+  const msgWA = encodeURIComponent(`🔍 Estoy buscando trabajo y publiqué mi CV en Trabajos Cerca.\n¡Miralo y compartilo si conocés a alguien que necesite mis servicios! 💪\n👉 ${url}`)
+
+  const overlay = document.createElement("div")
+  overlay.id = "cvShareModal"
+  overlay.style.cssText = "position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;"
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:20px;width:100%;max-width:440px;box-shadow:0 24px 80px rgba(0,0,0,.4);overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#15803d,#1d4ed8);padding:24px 20px 20px;text-align:center;">
+        <div style="font-size:42px;margin-bottom:8px;">🚀</div>
+        <h3 style="margin:0 0 6px;color:white;font-size:20px;">¡Tu CV está publicado!</h3>
+        <p style="margin:0;color:rgba(255,255,255,.85);font-size:14px;line-height:1.5;">
+          Ahora compartilo para que más empresas y personas te encuentren.<br>
+          <strong style="color:white;">¡Cada compartido puede ser tu próxima oportunidad!</strong>
+        </p>
+      </div>
+      <div style="padding:20px;">
+
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+          <a href="https://wa.me/?text=${msgWA}" target="_blank" rel="noopener"
+            style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#25D366;color:white;border-radius:12px;text-decoration:none;font-weight:700;font-size:15px;">
+            <i class="fa-brands fa-whatsapp" style="font-size:20px;"></i>
+            <div>
+              <div>Compartir en WhatsApp</div>
+              <div style="font-size:12px;font-weight:400;opacity:.9;">Grupos, contactos, estados</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="margin-left:auto;opacity:.7;"></i>
+          </a>
+          <button onclick="cvShareFB('${userId}')"
+            style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#1877f2;color:white;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:15px;width:100%;font-family:inherit;">
+            <i class="fa-brands fa-facebook" style="font-size:20px;"></i>
+            <div style="text-align:left;">
+              <div>Compartir en Facebook</div>
+              <div style="font-size:12px;font-weight:400;opacity:.9;">Grupos de trabajo y empleo</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="margin-left:auto;opacity:.7;"></i>
+          </button>
+          <button onclick="cvCopiarLink('${userId}')" id="cvCopiarBtn"
+            style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#f1f5f9;color:#1e293b;border-radius:12px;border:1.5px solid #e2e8f0;cursor:pointer;font-weight:700;font-size:15px;width:100%;font-family:inherit;">
+            <i class="fa-solid fa-link" style="font-size:18px;color:#475569;"></i>
+            <div style="text-align:left;">
+              <div>Copiar link de mi perfil</div>
+              <div style="font-size:12px;font-weight:400;color:#64748b;">Pegalo en cualquier red social</div>
+            </div>
+          </button>
+        </div>
+
+        <div style="background:#fffbeb;border-radius:10px;padding:12px 14px;margin-bottom:14px;border:1px solid #fde68a;">
+          <p style="margin:0;font-size:13px;color:#92400e;line-height:1.6;">
+            <strong>💡 Tip:</strong> Compartilo en grupos de WhatsApp de tu barrio, rubro o ciudad. ¡Son los más efectivos para encontrar trabajo!
+          </p>
+        </div>
+
+        <button onclick="document.getElementById('cvShareModal').remove();window.location.href='/perfil.html'"
+          style="width:100%;padding:12px;background:#f1f5f9;color:#64748b;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">
+          Ahora no, ir a mi perfil
+        </button>
+      </div>
+    </div>`
+  document.body.appendChild(overlay)
+  overlay.onclick = e => { if(e.target === overlay){ overlay.remove(); window.location.href = "/perfil.html" } }
+}
+
+window.cvShareFB = function(userId){
+  const url = encodeURIComponent(`${location.origin}/perfil_publico.html?id=${userId}`)
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank", "width=640,height=460")
+}
+window.cvCopiarLink = function(userId){
+  const url = `${location.origin}/perfil_publico.html?id=${userId}`
+  const btn = document.getElementById("cvCopiarBtn")
+  navigator.clipboard?.writeText(url).then(() => {
+    if(btn){ btn.querySelector("div > div:first-child").textContent = "¡Link copiado!"; setTimeout(() => { if(btn) btn.querySelector("div > div:first-child").textContent = "Copiar link de mi perfil" }, 2200) }
+  })
+}
+
+// Función auxiliar para el timeout original - no se ejecuta, reemplazada por modal
+function _cvOriginalRedirect(){
   setTimeout(() => window.location.href = "/perfil.html", 1800)
 }
 
