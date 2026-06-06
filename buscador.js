@@ -252,10 +252,19 @@ window.buscar = async function(){
   }
 
   if(!data?.length){
-    cont.innerHTML=`<div style="text-align:center;padding:50px 20px;color:#64748b;">
-      <i class="fa-solid fa-face-sad-tear" style="font-size:44px;opacity:.3;display:block;margin-bottom:14px;"></i>
-      <p style="font-size:16px;margin-bottom:8px;">No encontramos resultados${palabra?` para <strong>${palabra}</strong>`:""}.</p>
-      <p><a href="/registro.html?tipo=profesional">¿Sos profesional? Publicá tu servicio gratis</a></p></div>`
+    const catBusq = encodeURIComponent(palabra || "")
+    const catLabel = palabra || "esta categoría"
+    cont.innerHTML=`
+      <div style="text-align:center;padding:30px 20px 10px;color:#64748b;">
+        <i class="fa-solid fa-face-sad-tear" style="font-size:44px;opacity:.3;display:block;margin-bottom:14px;"></i>
+        <p style="font-size:16px;margin-bottom:6px;color:#1e293b;font-weight:700;">En este momento no hay ningún perfil registrado en ${catLabel}.</p>
+        <p style="font-size:14px;margin-bottom:20px;">¿Querés dejar un aviso urgente de lo que necesitás?</p>
+        <a href="/consultas_urgentes.html${catBusq?`?categoria=${catBusq}`:""}"
+          style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;padding:13px 26px;border-radius:14px;font-size:15px;font-weight:800;text-decoration:none;box-shadow:0 4px 16px rgba(220,38,38,.3);">
+          <i class="fa-solid fa-bolt"></i> Necesito con urgencia un ${palabra || "profesional"}
+        </a>
+        <p style="font-size:12px;margin-top:16px;"><a href="/registro.html" style="color:#2563eb;">¿Sos de este rubro? Registrate gratis y aparecé acá</a></p>
+      </div>`
     return
   }
 

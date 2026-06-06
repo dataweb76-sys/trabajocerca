@@ -217,11 +217,19 @@ function renderResultados(cvs){
   const uid       = getCurrentUserId()
 
   if(!cvs.length){
-    cont.innerHTML = `<div style="text-align:center;padding:50px 20px;color:#94a3b8;">
-      <i class="fa-solid fa-user-slash" style="font-size:44px;opacity:.3;display:block;margin-bottom:14px;"></i>
-      <p style="font-size:16px;margin-bottom:8px;">No hay candidatos para esta búsqueda.</p>
-      ${rubroActivo ? `<p style="font-size:14px;">Probá seleccionando <strong>"Todos"</strong> o cambiando el rubro.</p>` : ""}
-    </div>`
+    const catLabel = rubroActivo || "este rubro"
+    const catParam = rubroActivo ? `?categoria=${encodeURIComponent(rubroActivo)}` : ""
+    cont.innerHTML = `
+      <div style="text-align:center;padding:30px 20px 10px;color:#64748b;">
+        <i class="fa-solid fa-user-slash" style="font-size:44px;opacity:.3;display:block;margin-bottom:14px;"></i>
+        <p style="font-size:16px;margin-bottom:6px;color:#1e293b;font-weight:700;">En este momento no hay ningún CV registrado en ${catLabel}.</p>
+        <p style="font-size:14px;margin-bottom:20px;">¿Necesitás alguien con urgencia? Dejá tu aviso y la comunidad te ayuda.</p>
+        <a href="/consultas_urgentes.html${catParam}"
+          style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;padding:13px 26px;border-radius:14px;font-size:15px;font-weight:800;text-decoration:none;box-shadow:0 4px 16px rgba(220,38,38,.3);">
+          <i class="fa-solid fa-bolt"></i> Necesito con urgencia un ${rubroActivo || "candidato"}
+        </a>
+        <p style="font-size:12px;margin-top:16px;"><a href="/perfil_cv.html" style="color:#2563eb;">¿Buscás trabajo? Cargá tu CV gratis</a></p>
+      </div>`
     return
   }
 

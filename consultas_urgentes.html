@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#dc2626">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Trabajos Cerca">
+<title>Consultas urgentes — Trabajos Cerca</title>
+<meta name="description" content="Pedís lo que necesitás y la comunidad te ayuda a encontrarlo.">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.cu-hero {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border-radius: 18px;
+  padding: 28px 24px 24px;
+  margin-bottom: 24px;
+  color: white;
+  text-align: center;
+}
+.cu-hero h1 { margin: 0 0 8px; font-size: 22px; font-weight: 900; }
+.cu-hero p  { margin: 0 0 18px; font-size: 14px; opacity: .9; line-height: 1.6; }
+.cu-hero .categoria-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.2); border: 1.5px solid rgba(255,255,255,.4);
+  border-radius: 30px; padding: 6px 18px; font-size: 15px; font-weight: 800;
+  margin-bottom: 18px;
+}
+.cu-card {
+  background: white; border-radius: 16px; border: 1.5px solid #fecaca;
+  padding: 18px 18px 14px; margin-bottom: 14px;
+  box-shadow: 0 2px 12px rgba(220,38,38,.08);
+}
+.cu-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.cu-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg,#fecaca,#fee2e2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0; color: #dc2626;
+}
+.cu-nombre { margin: 0 0 2px; font-size: 16px; font-weight: 800; color: #1e293b; }
+.cu-meta   { margin: 0; font-size: 12px; color: #94a3b8; }
+.cu-categoria-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #fff1f2; color: #dc2626; border: 1px solid #fecaca;
+  border-radius: 20px; padding: 3px 12px; font-size: 12px; font-weight: 700; margin-bottom: 8px;
+}
+.cu-necesita {
+  font-size: 14px; color: #334155; line-height: 1.65;
+  background: #fafafa; border-radius: 10px; padding: 10px 14px;
+  border-left: 3px solid #dc2626; margin-bottom: 12px;
+}
+.cu-location { font-size: 12px; color: #64748b; margin-bottom: 10px; }
+.cu-ayudas-count {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #16a34a; font-weight: 700;
+  background: #f0fdf4; border-radius: 20px; padding: 3px 10px;
+}
+.btn-ayudar {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: linear-gradient(135deg,#16a34a,#15803d);
+  color: white; border: none; border-radius: 10px;
+  padding: 9px 18px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: opacity .15s;
+}
+.btn-ayudar:hover { opacity: .88; }
+.btn-compartir-cu {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);
+  color: white; border: none; border-radius: 10px;
+  padding: 9px 16px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: opacity .15s;
+}
+.btn-compartir-cu:hover { opacity: .88; }
+
+/* Modal genérico */
+.cu-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9900;
+  background: rgba(0,0,0,.72); align-items: center; justify-content: center;
+  padding: 16px; box-sizing: border-box;
+}
+.cu-overlay.abierto { display: flex; }
+.cu-modal {
+  background: white; border-radius: 20px; width: 100%; max-width: 520px;
+  max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,.3); animation: cuPop .25s ease;
+}
+@keyframes cuPop { from{transform:scale(.95);opacity:0} to{transform:scale(1);opacity:1} }
+.cu-modal-header {
+  padding: 16px 18px 12px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 1px solid #f1f5f9; flex-shrink: 0;
+}
+.cu-modal-header h3 { margin: 0; font-size: 17px; color: #1e293b; }
+.cu-modal-cerrar {
+  background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%;
+  font-size: 20px; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; color: #64748b; font-family: inherit; line-height: 1; transition: background .15s;
+}
+.cu-modal-cerrar:hover { background: #e2e8f0; color: #1e293b; }
+.cu-modal-body { overflow-y: auto; flex: 1; padding: 18px; }
+.cu-modal-footer { padding: 14px 18px 18px; border-top: 1px solid #f1f5f9; flex-shrink: 0; }
+.cu-field { margin-bottom: 14px; }
+.cu-field label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 5px; }
+.cu-field input, .cu-field select, .cu-field textarea {
+  width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+  font-size: 14px; font-family: inherit; box-sizing: border-box; color: #1e293b;
+  transition: border-color .15s; background: white;
+}
+.cu-field input:focus, .cu-field select:focus, .cu-field textarea:focus {
+  outline: none; border-color: #dc2626;
+}
+.cu-field textarea { resize: vertical; min-height: 80px; }
+.cu-btn-primary {
+  width: 100%; padding: 13px; background: linear-gradient(135deg,#dc2626,#b91c1c);
+  color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 800;
+  cursor: pointer; font-family: inherit; transition: opacity .15s;
+}
+.cu-btn-primary:hover { opacity: .88; }
+.cu-btn-green {
+  width: 100%; padding: 13px; background: linear-gradient(135deg,#16a34a,#15803d);
+  color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 800;
+  cursor: pointer; font-family: inherit; transition: opacity .15s;
+}
+.cu-btn-green:hover { opacity: .88; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo"><a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a></div>
+  <nav>
+    <a href="/buscador.html"><i class="fa-solid fa-arrow-left"></i> <span>Volver al buscador</span></a>
+  </nav>
+</header>
+
+<div class="container" style="max-width:700px;padding-top:20px;">
+
+  <!-- Hero -->
+  <div class="cu-hero">
+    <div id="heroCatBadge" style="display:none;" class="categoria-badge">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span id="heroCatNombre"></span>
+    </div>
+    <h1 id="heroTitulo">🔍 Consultas urgentes</h1>
+    <p id="heroDesc">En este momento no encontrás lo que buscás. Dejá tu consulta y la comunidad te ayuda a encontrarlo.</p>
+    <button class="cu-btn-primary" id="btnNuevaConsulta" style="max-width:320px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px;">
+      <i class="fa-solid fa-bolt"></i> Crear consulta urgente
+    </button>
+  </div>
+
+  <!-- Resultados -->
+  <div id="listaConsultas">
+    <div style="text-align:center;padding:40px;color:#94a3b8;">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i>
+      <p>Cargando consultas...</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+  MODAL: CREAR CONSULTA URGENTE
+═══════════════════════════════════════ -->
+<div class="cu-overlay" id="modalCrear">
+  <div class="cu-modal">
+    <div class="cu-modal-header" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
+      <h3 style="color:white;display:flex;align-items:center;gap:9px;">
+        <i class="fa-solid fa-bolt"></i> Nueva consulta urgente
+      </h3>
+      <button class="cu-modal-cerrar" onclick="cerrarModal('modalCrear')" style="background:rgba(255,255,255,.2);color:white;">×</button>
+    </div>
+    <div class="cu-modal-body">
+      <p style="font-size:13px;color:#64748b;margin:0 0 18px;line-height:1.6;">
+        Completá los datos de lo que necesitás. La comunidad va a ver tu consulta y te ayuda a encontrar a la persona indicada.
+      </p>
+      <div class="cu-field">
+        <label><i class="fa-solid fa-user"></i> Tu nombre *</label>
+        <input id="crNombre" placeholder="Ej: María González">
+      </div>
+      <div class="cu-field">
+        <label><i class="fa-solid fa-phone"></i> Tu teléfono / WhatsApp *</label>
+        <input id="crTelefono" type="tel" placeholder="Ej: 1123456789">
+      </div>
+      <div class="cu-field">
+        <label><i class="fa-solid fa-tag"></i> ¿Qué tipo de perfil necesitás? *</label>
+        <select id="crTipo">
+          <option value="">— Seleccioná —</option>
+          <option value="oficio">Oficio (plomero, electricista, albañil...)</option>
+          <option value="profesion">Profesión (médico, contador, abogado...)</option>
+          <option value="emprendimiento">Emprendimiento / comercio / negocio</option>
+        </select>
+      </div>
+      <div class="cu-field">
+        <label><i class="fa-solid fa-list"></i> Categoría / especialidad *</label>
+        <input id="crCategoria" placeholder="Ej: Plomero, Electricista, Contador...">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="cu-field">
+          <label><i class="fa-solid fa-map"></i> Provincia *</label>
+          <input id="crProvincia" placeholder="Ej: Buenos Aires">
+        </div>
+        <div class="cu-field">
+          <label><i class="fa-solid fa-location-dot"></i> Ciudad *</label>
+          <input id="crCiudad" placeholder="Ej: La Plata">
+        </div>
+      </div>
+      <div class="cu-field">
+        <label><i class="fa-solid fa-comment-dots"></i> ¿Qué necesitás exactamente? *</label>
+        <textarea id="crNecesita" placeholder="Contá con detalle qué necesitás: tipo de trabajo, urgencia, horario, etc."></textarea>
+      </div>
+      <div id="msgCrear" style="margin-top:4px;"></div>
+    </div>
+    <div class="cu-modal-footer">
+      <button class="cu-btn-primary" onclick="enviarConsulta()">
+        <i class="fa-solid fa-paper-plane"></i> Enviar consulta
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+  MODAL: AYUDAR A ENCONTRAR
+═══════════════════════════════════════ -->
+<div class="cu-overlay" id="modalAyudar">
+  <div class="cu-modal">
+    <div class="cu-modal-header" style="background:linear-gradient(135deg,#16a34a,#15803d);">
+      <h3 style="color:white;display:flex;align-items:center;gap:9px;">
+        <i class="fa-solid fa-hands-helping"></i> Ayudar a encontrar
+      </h3>
+      <button class="cu-modal-cerrar" onclick="cerrarModal('modalAyudar')" style="background:rgba(255,255,255,.2);color:white;">×</button>
+    </div>
+    <div class="cu-modal-body">
+      <div id="ayudarInfoConsulta" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#15803d;"></div>
+      <p style="font-size:13px;color:#64748b;margin:0 0 16px;line-height:1.6;">
+        Si conocés a alguien que pueda ayudar, dejá su número. Le vamos a avisar a quien lo necesita para que lo contacte.
+      </p>
+      <div class="cu-field">
+        <label><i class="fa-solid fa-user"></i> Tu nombre</label>
+        <input id="ayNombre" placeholder="Ej: Juan Pérez">
+      </div>
+      <div class="cu-field">
+        <label><i class="fa-solid fa-comment"></i> Comentario (opcional)</label>
+        <textarea id="ayComentario" rows="3" placeholder="Ej: Conozco a un plomero excelente en esa zona..."></textarea>
+      </div>
+      <div class="cu-field">
+        <label><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> Número de WhatsApp de quien puede ayudar *</label>
+        <input id="ayContacto" type="tel" placeholder="Ej: 1145678900 (sin +54 ni 0)">
+      </div>
+      <div id="msgAyudar" style="margin-top:4px;"></div>
+    </div>
+    <div class="cu-modal-footer" style="display:flex;flex-direction:column;gap:10px;">
+      <button class="cu-btn-green" onclick="enviarAyuda()">
+        <i class="fa-solid fa-paper-plane"></i> Enviar ayuda
+      </button>
+      <button id="btnCompartirAyuda" class="btn-compartir-cu" style="width:100%;justify-content:center;padding:12px;" onclick="compartirConsulta()">
+        <i class="fa-solid fa-share-nodes"></i> Compartir en redes sociales
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+  MODAL: VER SOLUCIONES RECIBIDAS
+═══════════════════════════════════════ -->
+<div class="cu-overlay" id="modalSoluciones">
+  <div class="cu-modal">
+    <div class="cu-modal-header" style="background:linear-gradient(135deg,#1d4ed8,#1e40af);">
+      <h3 style="color:white;display:flex;align-items:center;gap:9px;">
+        <i class="fa-solid fa-lightbulb"></i> Soluciones recibidas
+      </h3>
+      <button class="cu-modal-cerrar" onclick="cerrarModal('modalSoluciones')" style="background:rgba(255,255,255,.2);color:white;">×</button>
+    </div>
+    <div class="cu-modal-body" id="modalSolucionesBody">
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/consultas_urgentes.js?v=1"></script>
+<script src="/splash.js"></script>
+<script src="/notif_widget.js"></script>
+<script src="/chat_widget.js"></script>
+</body>
+</html>
