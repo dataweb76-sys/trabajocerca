@@ -31,7 +31,7 @@ async function cargarPerfil(){
     supabase.from("servicios").select("*").eq("usuario_id", id).maybeSingle(),
     supabase.from("reviews").select("*").eq("trabajador_id", id).order("created_at", { ascending: false }),
     supabase.from("portfolio").select("*").eq("usuario_id", id),
-    supabase.from("curriculum").select("titulo_profesional,rubros,disponibilidad,modalidad,resumen").eq("usuario_id", id).maybeSingle(),
+    supabase.from("curriculum").select("titulo_profesional,rubros,disponibilidad,modalidad,resumen,habilidades,educacion,experiencia,cv_archivo,cv_publico").eq("usuario_id", id).maybeSingle(),
     supabase.from("perfil_eventos").select("*", { count: "exact", head: true }).eq("profesional_id", id).eq("tipo", "apoyo_cv")
   ])
 
@@ -299,6 +299,11 @@ async function cargarPerfil(){
         ${perfil.localidad||""}${perfil.provincia?", "+perfil.provincia:""}
       </p>
       ${ratingHtml}
+      ${curriculum ? `
+      <button onclick="abrirVerCV('${id}','${displayNombreEsc}','${(perfil.movil||"").replace(/\D/g,"")}',${curriculum.cv_publico !== false},'${curriculum.cv_archivo||""}')"
+        style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:white;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;margin:10px auto 4px;font-family:inherit;box-shadow:0 4px 14px rgba(37,99,235,.3);">
+        <i class="fa-solid fa-file-lines"></i> Ver CV completo
+      </button>` : ""}
       ${wa?`<a class="btn-whatsapp" href="${wa}" target="_blank" rel="noopener">
         <i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</a>`:""}
       <div style="display:flex;gap:7px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
@@ -592,6 +597,309 @@ cargarPerfil()
   }
 
 })();
+
+/* ══════════════════════════════════════════════════════
+   CV VIEWER — popup completo con privacidad y mensajes
+══════════════════════════════════════════════════════ */
+;(function(){
+
+  // Inyectar CSS una sola vez
+  const css = `
+  #tcCVModal {
+    display:none; position:fixed; inset:0; z-index:9850;
+    background:rgba(0,0,0,.75); align-items:flex-end; justify-content:center;
+    padding:0; box-sizing:border-box;
+  }
+  #tcCVModal.abierto { display:flex; }
+  #tcCVBox {
+    background:white; border-radius:20px 20px 0 0; width:100%; max-width:600px;
+    max-height:92vh; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 -8px 40px rgba(0,0,0,.25); animation:tcCVSlide .28s ease;
+  }
+  @keyframes tcCVSlide { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
+  #tcCVHeader {
+    padding:16px 18px 12px; border-bottom:1px solid #f1f5f9;
+    display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+    background:linear-gradient(135deg,#1e3a5f,#1d4ed8);
+  }
+  #tcCVHeader h3 { margin:0; color:white; font-size:17px; display:flex; align-items:center; gap:9px; }
+  #tcCVHeader button { background:rgba(255,255,255,.2); border:none; color:white; width:32px; height:32px;
+    border-radius:50%; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:inherit; line-height:1; }
+  #tcCVHeader button:hover { background:rgba(255,255,255,.35); }
+  #tcCVScroll { overflow-y:auto; flex:1; padding:18px 18px 0; }
+  #tcCVFooter { padding:14px 18px 20px; border-top:1px solid #f1f5f9; flex-shrink:0; background:#fafafa; }
+  .cv-seccion { margin-bottom:18px; }
+  .cv-seccion h4 { margin:0 0 8px; font-size:13px; font-weight:800; color:#64748b;
+    text-transform:uppercase; letter-spacing:.5px; display:flex; align-items:center; gap:6px; }
+  .cv-seccion p { margin:0; font-size:14px; color:#1e293b; line-height:1.65; }
+  .cv-exp-item { border-left:3px solid #2563eb; padding:6px 0 6px 12px; margin-bottom:10px; }
+  .cv-exp-item strong { font-size:14px; color:#1e293b; display:block; }
+  .cv-exp-item span { font-size:12px; color:#64748b; }
+  .cv-exp-item p { font-size:13px; color:#475569; margin:4px 0 0; }
+  .cv-hab-tag { display:inline-block; background:#eff6ff; color:#1d4ed8; border-radius:20px;
+    padding:3px 11px; font-size:12px; font-weight:600; margin:3px 4px 3px 0; }
+  .cv-rubro-tag2 { display:inline-block; background:#f0fdf4; color:#15803d; border-radius:20px;
+    padding:3px 11px; font-size:12px; font-weight:600; margin:3px 4px 3px 0; }
+  `
+  const st = document.createElement("style")
+  st.textContent = css
+  document.head.appendChild(st)
+
+  // Crear estructura del modal
+  const el = document.createElement("div")
+  el.id = "tcCVModal"
+  el.innerHTML = `
+    <div id="tcCVBox">
+      <div id="tcCVHeader">
+        <h3><i class="fa-solid fa-file-lines"></i> <span id="tcCVNombreHeader">CV</span></h3>
+        <button onclick="window._tcCerrarCV()">×</button>
+      </div>
+      <div id="tcCVScroll"></div>
+      <div id="tcCVFooter" id="tcCVFooter"></div>
+    </div>`
+  document.body.appendChild(el)
+  el.addEventListener("click", e => { if(e.target === el) window._tcCerrarCV() })
+
+  window._tcCerrarCV = function(){
+    el.classList.remove("abierto")
+    document.body.style.overflow = ""
+  }
+
+})();
+
+window.abrirVerCV = async function(userId, nombre, waNum, esPublico, cvArchivo){
+  const modal = document.getElementById("tcCVModal")
+  const scroll = document.getElementById("tcCVScroll")
+  const footer = document.getElementById("tcCVFooter")
+  if(!modal || !scroll || !footer) return
+
+  document.getElementById("tcCVNombreHeader").textContent = `CV de ${decodeHTMLEntities(nombre)}`
+  scroll.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin" style="font-size:30px;"></i></div>`
+  footer.innerHTML = ""
+  modal.classList.add("abierto")
+  document.body.style.overflow = "hidden"
+
+  // Verificar usuario actual
+  const { data: authData } = await supabase.auth.getUser()
+  const miId = authData?.user?.id || null
+
+  // Si es privado y no es el dueño
+  if(!esPublico && miId !== userId){
+    const waReq = waNum
+      ? `https://wa.me/${waNum}?text=${encodeURIComponent(`Hola${nombre?" "+decodeHTMLEntities(nombre):""}! Vi tu perfil en Trabajos Cerca y me gustaría ver tu CV completo. ¿Me autorizás? 🙏\n${location.href}`)}`
+      : null
+    scroll.innerHTML = `
+      <div style="text-align:center;padding:32px 20px;">
+        <div style="font-size:54px;margin-bottom:16px;">🔒</div>
+        <h3 style="margin:0 0 8px;color:#1e293b;">CV privado</h3>
+        <p style="margin:0 0 18px;font-size:14px;color:#64748b;line-height:1.6;">
+          Este candidato eligió que su CV sea privado.<br>
+          Podés solicitar autorización directamente por WhatsApp.
+        </p>
+        ${waReq ? `
+        <a href="${waReq}" target="_blank" rel="noopener"
+          style="display:inline-flex;align-items:center;gap:8px;padding:13px 24px;background:#25D366;color:white;border-radius:12px;font-size:15px;font-weight:800;text-decoration:none;margin-bottom:8px;">
+          <i class="fa-brands fa-whatsapp"></i> Solicitar acceso por WhatsApp
+        </a>
+        <p style="font-size:12px;color:#94a3b8;margin:8px 0 0;">Le llegará un mensaje para que autorice o rechace</p>
+        ` : `<p style="color:#94a3b8;font-size:13px;">Este candidato no tiene WhatsApp visible.</p>`}
+      </div>`
+    footer.innerHTML = ""
+    return
+  }
+
+  // CV público — traer datos completos
+  let cv = null
+  try {
+    const res = await fetch(
+      `https://iqeiszkoifxgygoqvbem.supabase.co/rest/v1/curriculum?usuario_id=eq.${userId}&select=titulo_profesional,resumen,habilidades,disponibilidad,modalidad,rubros,experiencia,educacion,cv_archivo&limit=1`,
+      { headers: {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs",
+        "Content-Type": "application/json"
+      }}
+    )
+    if(res.ok){ const d = await res.json(); cv = d?.[0] || null }
+  } catch(e){}
+
+  if(!cv){
+    scroll.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:14px;">No se pudo cargar el CV.</div>`
+    return
+  }
+
+  const DISP = { inmediata:"Disponibilidad inmediata", part_time:"Part-time", full_time:"Full-time", weekends:"Fines de semana", flexible:"Flexible" }
+  const MOD  = { presencial:"Presencial", remoto:"Remoto", hibrido:"Híbrido" }
+  const rubros = Array.isArray(cv.rubros) ? cv.rubros : []
+  const habs   = cv.habilidades ? cv.habilidades.split(",").map(h=>h.trim()).filter(Boolean) : []
+  const exps   = Array.isArray(cv.experiencia) ? cv.experiencia : []
+  const edus   = Array.isArray(cv.educacion)   ? cv.educacion   : []
+
+  scroll.innerHTML = `
+    ${cv.titulo_profesional ? `
+    <div class="cv-seccion">
+      <h4><i class="fa-solid fa-briefcase"></i> Título / Profesión</h4>
+      <p style="font-size:17px;font-weight:800;color:#1d4ed8;">${cv.titulo_profesional}</p>
+    </div>` : ""}
+
+    ${cv.resumen ? `
+    <div class="cv-seccion">
+      <h4><i class="fa-solid fa-user"></i> Presentación</h4>
+      <p>${cv.resumen}</p>
+    </div>` : ""}
+
+    ${rubros.length ? `
+    <div class="cv-seccion">
+      <h4><i class="fa-solid fa-tags"></i> Rubros</h4>
+      <div>${rubros.map(r=>`<span class="cv-rubro-tag2">${r}</span>`).join("")}</div>
+    </div>` : ""}
+
+    ${(cv.disponibilidad || cv.modalidad) ? `
+    <div class="cv-seccion">
+      <h4><i class="fa-solid fa-clock"></i> Disponibilidad</h4>
+      <p>${[DISP[cv.disponibilidad]||cv.disponibilidad, MOD[cv.modalidad]||cv.modalidad].filter(Boolean).join(" · ")}</p>
+    </div>` : ""}
+
+    ${habs.length ? `
+    <div class="cv-seccion">
+      <h4><i class="fa-solid fa-star"></i> Habilidades</h4>
+      <div>${habs.map(h=>`<span class="cv-hab-tag">${h}</span>`).join("")}</div>
+    </div>` : ""}
+
+    ${exps.length ? `
+    <div class="cv-seccion">
+      <h4><i class="fa-solid fa-building"></i> Experiencia</h4>
+      ${exps.map(e=>`<div class="cv-exp-item">
+        <strong>${e.puesto||e.empresa||""}</strong>
+        <span>${[e.empresa, e.periodo].filter(Boolean).join(" · ")}</span>
+        ${e.descripcion?`<p>${e.descripcion}</p>`:""}
+      </div>`).join("")}
+    </div>` : ""}
+
+    ${edus.length ? `
+    <div class="cv-seccion">
+      <h4><i class="fa-solid fa-graduation-cap"></i> Educación</h4>
+      ${edus.map(e=>`<div class="cv-exp-item">
+        <strong>${e.titulo||e.institucion||""}</strong>
+        <span>${[e.institucion, e.año||e.anio].filter(Boolean).join(" · ")}</span>
+      </div>`).join("")}
+    </div>` : ""}
+
+    ${cv.cv_archivo ? `
+    <div class="cv-seccion" style="border:2px dashed #bfdbfe;border-radius:12px;padding:14px;text-align:center;background:#eff6ff;">
+      <p style="margin:0 0 10px;font-size:14px;color:#1e40af;font-weight:700;"><i class="fa-solid fa-paperclip"></i> CV adjunto en PDF</p>
+      <a href="${cv.cv_archivo}" target="_blank" rel="noopener"
+        style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#1d4ed8;color:white;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">
+        <i class="fa-solid fa-file-pdf"></i> Abrir / descargar PDF
+      </a>
+    </div>` : ""}
+    <div style="height:16px;"></div>
+  `
+
+  // Footer: contacto + mensaje privado
+  const waLink = waNum
+    ? `https://wa.me/${waNum}?text=${encodeURIComponent(`Hola${nombre?" "+decodeHTMLEntities(nombre):""}! Vi tu CV en Trabajos Cerca y me interesa contactarte. ¿Podemos hablar? 👋`)}`
+    : null
+
+  const puedeEnviar = miId && miId !== userId
+
+  footer.innerHTML = `
+    <div style="display:flex;gap:10px;margin-bottom:${puedeEnviar?"14px":"0"};flex-wrap:wrap;">
+      ${waLink ? `
+      <a href="${waLink}" target="_blank" rel="noopener"
+        style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;background:#25D366;color:white;border-radius:11px;font-size:14px;font-weight:800;text-decoration:none;min-width:140px;">
+        <i class="fa-brands fa-whatsapp"></i> Contactar
+      </a>` : ""}
+      <button onclick="window._tcCerrarCV();window.location.href='/mensajes.html?dest=${userId}'"
+        style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;background:#eff6ff;color:#1d4ed8;border:1.5px solid #bfdbfe;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;min-width:140px;">
+        <i class="fa-solid fa-comment-dots"></i> Mensaje privado
+      </button>
+    </div>
+
+    ${puedeEnviar ? `
+    <div style="background:#f8fafc;border-radius:12px;padding:14px;border:1px solid #e2e8f0;">
+      <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#1e293b;">
+        <i class="fa-solid fa-bullhorn" style="color:#f97316;"></i> Recomendarle una oferta de trabajo
+      </p>
+      <p style="margin:0 0 8px;font-size:12px;color:#64748b;">Pegá el link de una oferta que encontraste y mandáselo directamente</p>
+      <textarea id="tcCVMsgTxt" rows="3" placeholder="Ej: Vi esta oferta en InfoJobs y pensé en vos: https://... ¿Te interesa?"
+        style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;font-size:13px;resize:vertical;box-sizing:border-box;margin-bottom:8px;font-family:inherit;"></textarea>
+      <div id="tcCVMsgStatus"></div>
+      <button onclick="enviarMsgDesdeCV('${userId}','${displayNombreEsc||nombre}')"
+        style="width:100%;padding:11px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;">
+        <i class="fa-solid fa-paper-plane"></i> Enviar mensaje
+      </button>
+    </div>` : ""}
+  `
+}
+
+window.enviarMsgDesdeCV = async function(destinoId, destNombre){
+  const txt = document.getElementById("tcCVMsgTxt")
+  const status = document.getElementById("tcCVMsgStatus")
+  const texto = txt?.value?.trim()
+  if(!texto){ if(status) status.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px;margin-bottom:8px;">Escribí un mensaje antes de enviar</div>`; return }
+  if(status) status.innerHTML = `<div style="font-size:13px;color:#64748b;margin-bottom:8px;"><i class="fa-solid fa-spinner fa-spin"></i> Enviando...</div>`
+
+  const { data: authData } = await supabase.auth.getUser()
+  const miId = authData?.user?.id
+  if(!miId){
+    if(status) status.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px;margin-bottom:8px;">Iniciá sesión para enviar mensajes</div>`
+    return
+  }
+
+  const SB_URL = "https://iqeiszkoifxgygoqvbem.supabase.co"
+  const { data: sess } = await supabase.auth.getSession()
+  const token = sess?.session?.access_token
+  const hdrs = {
+    "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs",
+    "Authorization": `Bearer ${token}`,
+    "Content-Type": "application/json"
+  }
+
+  // Buscar conversación existente
+  let convId = null
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/conversaciones?or=(and(usuario1_id.eq.${miId},usuario2_id.eq.${destinoId}),and(usuario1_id.eq.${destinoId},usuario2_id.eq.${miId}))&select=id&limit=1`, { headers: hdrs })
+    if(r.ok){ const d = await r.json(); convId = d?.[0]?.id || null }
+  } catch(e){}
+
+  // Crear si no existe
+  if(!convId){
+    try {
+      const r = await fetch(`${SB_URL}/rest/v1/conversaciones`, {
+        method: "POST",
+        headers: { ...hdrs, "Prefer": "return=representation" },
+        body: JSON.stringify({ usuario1_id: miId, usuario2_id: destinoId, ultimo_mensaje: "", ultimo_mensaje_at: new Date().toISOString(), no_leidos_u1: 0, no_leidos_u2: 0 })
+      })
+      if(r.ok){ const d = await r.json(); convId = Array.isArray(d) ? d[0]?.id : d?.id }
+    } catch(e){}
+  }
+
+  if(!convId){
+    if(status) status.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px;margin-bottom:8px;">No se pudo crear la conversación. Intentá de nuevo.</div>`
+    return
+  }
+
+  // Enviar mensaje
+  const { error } = await supabase.from("mensajes").insert({ conversacion_id: convId, emisor_id: miId, texto })
+  if(error){
+    if(status) status.innerHTML = `<div class="alerta alerta-err" style="font-size:13px;padding:8px;margin-bottom:8px;">${error.message}</div>`
+    return
+  }
+
+  // Actualizar conversación
+  await supabase.from("conversaciones").update({ ultimo_mensaje: texto.substring(0,80), ultimo_mensaje_at: new Date().toISOString(), no_leidos_u2: 1 }).eq("id", convId)
+
+  // Notificación
+  supabase.from("notificaciones").insert({
+    usuario_id: destinoId,
+    tipo: "mensaje",
+    titulo: "📩 Te recomendaron una oferta de trabajo",
+    cuerpo: texto.substring(0,80),
+    url: `/mensajes.html?conv=${convId}`
+  }).catch(()=>{})
+
+  if(txt) txt.value = ""
+  if(status) status.innerHTML = `<div class="alerta alerta-ok" style="font-size:13px;padding:8px;margin-bottom:8px;"><i class="fa-solid fa-check-circle"></i> ¡Mensaje enviado! También podés verlo en <a href="/mensajes.html?conv=${convId}" style="font-weight:700;">Mensajes</a>.</div>`
+}
 
 /* ── Tracking de vistas ── */
 async function registrarVista(profesionalId){

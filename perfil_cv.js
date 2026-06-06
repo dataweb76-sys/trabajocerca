@@ -114,6 +114,11 @@ async function init(){
 
   educaciones = Array.isArray(cv.educacion) ? cv.educacion : []
   renderEducaciones()
+
+  // Cargar privacidad guardada
+  const privVal = cv.cv_publico === false ? "privado" : "publico"
+  const radioPriv = document.querySelector(`input[name="cvPrivacidad"][value="${privVal}"]`)
+  if(radioPriv) radioPriv.checked = true
 }
 
 /* ── TAGS / HABILIDADES ── */
@@ -256,6 +261,8 @@ window.guardarCV = async function(){
 
   const edadVal = parseInt(document.getElementById("edad").value) || null
 
+  const privacidad = document.querySelector('input[name="cvPrivacidad"]:checked')?.value || "publico"
+
   const payload = {
     usuario_id:         userId,
     titulo_profesional: titulo,
@@ -266,7 +273,8 @@ window.guardarCV = async function(){
     habilidades:        habilidades.join(", "),
     rubros:             getRubrosSeleccionados(),
     experiencia:        experiencias,
-    educacion:          educaciones
+    educacion:          educaciones,
+    cv_publico:         privacidad === "publico"
   }
 
   const { data: existing } = await supabase

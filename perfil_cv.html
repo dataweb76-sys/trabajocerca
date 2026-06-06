@@ -198,6 +198,26 @@
         Mostrar mi teléfono/WhatsApp en el perfil público
       </label>
     </div>
+
+    <div style="margin-top:14px;padding:14px;background:#f8fafc;border-radius:12px;border:1.5px solid #e2e8f0;">
+      <p style="margin:0 0 10px;font-weight:800;font-size:14px;color:#1e293b;">
+        <i class="fa-solid fa-lock" style="color:#f97316;"></i> Privacidad del CV
+      </p>
+      <label class="check-opt" style="margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;">
+        <input type="radio" name="cvPrivacidad" value="publico" checked style="margin-top:3px;">
+        <div>
+          <strong style="font-size:14px;">🌐 CV público</strong>
+          <p style="margin:2px 0 0;font-size:12px;color:#64748b;">Cualquier persona puede ver tu CV completo con un clic</p>
+        </div>
+      </label>
+      <label class="check-opt" style="display:flex;align-items:flex-start;gap:10px;">
+        <input type="radio" name="cvPrivacidad" value="privado" style="margin-top:3px;">
+        <div>
+          <strong style="font-size:14px;">🔒 Solicitar autorización</strong>
+          <p style="margin:2px 0 0;font-size:12px;color:#64748b;">Cuando alguien quiera ver tu CV, te llegará un mensaje por WhatsApp para que lo autorices o rechaces</p>
+        </div>
+      </label>
+    </div>
   </div>
 
   <div id="msg"></div>
@@ -208,7 +228,7 @@
 
 </div>
 
-<script type="module" src="/perfil_cv.js?v=2"></script>
+<script type="module" src="/perfil_cv.js?v=3"></script>
 <script src="/notif_widget.js"></script>
 <script src="/push_widget.js"></script>
 <script src="/chat_widget.js"></script>
