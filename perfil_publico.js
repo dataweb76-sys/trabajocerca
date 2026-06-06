@@ -584,63 +584,63 @@ async function registrarVista(profesionalId){
 }
 
 /* ── Apoyo CV ── */
-window.darApoyo = async function(id, nombre){
+window.darApoyo = function(id){
   const btn = document.getElementById("btnApoyo")
   if(!btn) return
-  const yaApoyo = localStorage.getItem(`tc_apoyo_cv_${id}`) === "1"
-  if(yaApoyo){
+
+  // Si ya apoyó (localStorage) → mostrar estado y salir
+  if(localStorage.getItem(`tc_apoyo_cv_${id}`) === "1"){
     btn.innerHTML = `<i class="fa-solid fa-check"></i> Ya apoyaste este perfil`
     setTimeout(() => { btn.innerHTML = `<i class="fa-solid fa-check"></i> Apoyado` }, 2000)
     return
   }
-  btn.disabled = true
-  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Apoyando...`
 
-  // Guardar en perfil_eventos
-  const { data: authData } = await supabase.auth.getUser()
-  supabase.from("perfil_eventos").insert({ profesional_id: id, tipo: "apoyo_cv" }).catch(()=>{})
-
-  // Notificar al titular si está logueado
-  if(authData?.user?.id){
-    supabase.from("notificaciones").insert({
-      usuario_id: id,
-      tipo: "apoyo",
-      titulo: "¡Alguien apoyó tu búsqueda laboral! 👏",
-      cuerpo: "Tu perfil de CV recibió un apoyo. ¡Más gente lo está viendo!",
-      url: "/perfil.html"
-    }).catch(()=>{})
-  }
-
+  // ── Actualizar UI INMEDIATAMENTE (sin esperar BD) ──
   localStorage.setItem(`tc_apoyo_cv_${id}`, "1")
 
-  try {
-    const numEl = document.getElementById("apoyoNum")
-    if(numEl){
-      const n = (parseInt(numEl.textContent) || 0) + 1
-      numEl.textContent = n
-      const labelEl = document.getElementById("apoyoLabel")
-      if(labelEl) labelEl.textContent = `persona${n!==1?"s":""} ya apoyaron este perfil`
-    }
-  } catch(e){}
-
   btn.disabled = false
-  btn.style.background = "#dcfce7"
-  btn.style.color = "#15803d"
-  btn.style.border = "2px solid #86efac"
+  btn.style.cssText = "background:#dcfce7;color:#15803d;border:2px solid #86efac;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:inherit;"
   btn.innerHTML = `<i class="fa-solid fa-check"></i> Apoyado`
 
-  // Mini confetti
+  // Contador +1
+  const numEl = document.getElementById("apoyoNum")
+  if(numEl){
+    const n = (parseInt(numEl.textContent) || 0) + 1
+    numEl.textContent = n
+    const labelEl = document.getElementById("apoyoLabel")
+    if(labelEl) labelEl.textContent = `persona${n!==1?"s":""} ya apoyaron este perfil`
+  }
+
+  // Mini confetti 👏
   const conf = document.createElement("div")
-  conf.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;z-index:9999;pointer-events:none;animation:tcPop .6s ease forwards;"
+  conf.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:52px;z-index:9999;pointer-events:none;animation:tcPop .65s ease forwards;"
   conf.textContent = "👏"
   document.body.appendChild(conf)
   if(!document.getElementById("tcPopStyle")){
     const s = document.createElement("style")
     s.id = "tcPopStyle"
-    s.textContent = "@keyframes tcPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.5)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}"
+    s.textContent = "@keyframes tcPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.4)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.4)}100%{opacity:0;transform:translate(-50%,-90%) scale(1)}}"
     document.head.appendChild(s)
   }
-  setTimeout(() => conf.remove(), 700)
+  setTimeout(() => conf.remove(), 750)
+
+  // ── Guardar en BD en segundo plano (no bloquea UI) ──
+  supabase.auth.getUser().then(({ data: authData }) => {
+    // Registrar evento
+    supabase.from("perfil_eventos")
+      .insert({ profesional_id: id, tipo: "apoyo_cv" })
+      .then(()=>{}).catch(()=>{})
+    // Notificar al titular del perfil
+    if(authData?.user?.id){
+      supabase.from("notificaciones").insert({
+        usuario_id: id,
+        tipo: "apoyo",
+        titulo: "¡Alguien apoyó tu búsqueda laboral! 👏",
+        cuerpo: "Tu perfil de CV recibió un apoyo. ¡Más gente lo está viendo!",
+        url: "/perfil.html"
+      }).then(()=>{}).catch(()=>{})
+    }
+  }).catch(()=>{}) // Si falla la auth, no importa — el localStorage ya quedó guardado
 }
 
 /* ── Copiar link CV ── */
