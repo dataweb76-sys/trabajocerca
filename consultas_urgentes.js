@@ -230,6 +230,7 @@ window.enviarAyuda = async function(){
       cuerpo:     `Te dejó el número ${contacto} para que lo contactes por WhatsApp. Entrá a tu perfil para verlo.`,
       url:        `/perfil.html#mis-consultas`
     }).catch(()=>{})
+  }
 
   cerrarModal("modalAyudar")
   mostrarToast("🙌 ¡Gracias! Tu ayuda fue enviada al solicitante.")
