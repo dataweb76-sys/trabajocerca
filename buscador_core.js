@@ -307,7 +307,7 @@ window.buscar = async function(){
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
   const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,disponible_ahora,perfiles(id,tipo,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,verificado,profesion_universitaria,plan_nivel)"
-  let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=500`
+  let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=3000`
 
   if(palabra && palabra === "Disponible ahora"){
     url += `&disponible_ahora=eq.true`
@@ -346,6 +346,19 @@ window.buscar = async function(){
       // Lógica original: excluir empresa/emprendimiento/cv y profesionales
       if(tipoPrimario === "empresa" || tipoPrimario === "emprendimiento" || tipoPrimario === "cv") return false
       return !esProfesionalUni(d)
+    })
+  }
+
+  // ── DEDUPLICAR por perfil: un perfil puede tener varios servicios,
+  //    quedarse con el primero (más reciente) por tipo para evitar duplicados
+  {
+    const seenProfiles = new Set()
+    data = data.filter(item => {
+      const pid = item.perfiles?.id
+      if(!pid) return true
+      if(seenProfiles.has(pid)) return false
+      seenProfiles.add(pid)
+      return true
     })
   }
 
