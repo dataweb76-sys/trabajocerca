@@ -171,8 +171,8 @@ window.enviarConsulta = async function(){
   document.getElementById("listaConsultas").innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin" style="font-size:24px;"></i></div>`
   await cargarConsultas()
 
-  // Toast
-  mostrarToast("✅ ¡Consulta publicada! La comunidad ya puede ayudarte.")
+  // Modal de éxito con mensaje personalizado
+  mostrarModalExito(categoria)
 }
 
 /* ── ABRIR MODAL AYUDAR ── */
@@ -221,15 +221,15 @@ window.enviarAyuda = async function(){
     return
   }
 
-  // Notificar al solicitante si tiene cuenta
+  // Notificar al solicitante (fire and forget — no await para no bloquear)
   if(_consulta_activa.usuario_id){
-    await supabase.from("notificaciones").insert({
+    supabase.from("notificaciones").insert({
       usuario_id: _consulta_activa.usuario_id,
       tipo:       "ayuda_consulta",
       titulo:     `💡 ${nombre} te ayudó a encontrar un ${_consulta_activa.categoria}`,
       cuerpo:     `Te dejó el número ${contacto} para que lo contactes por WhatsApp. Entrá a tu perfil para verlo.`,
       url:        `/perfil.html#mis-consultas`
-    }).catch(()=>{})
+    }).then(()=>{}).catch(()=>{})
   }
 
   cerrarModal("modalAyudar")
@@ -282,6 +282,55 @@ window.compartirConsultaDirecta = function(c){
     document.body.appendChild(d)
     setTimeout(() => d.remove(), 8000)
   }
+}
+
+/* ── MODAL ÉXITO CONSULTA CREADA ── */
+function mostrarModalExito(categoria){
+  // Quitar si ya existe
+  document.getElementById("modalExitoConsulta")?.remove()
+
+  const overlay = document.createElement("div")
+  overlay.id = "modalExitoConsulta"
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:16px;
+    animation:fadeIn .2s ease;
+  `
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:24px;max-width:420px;width:100%;
+                padding:32px 28px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);
+                animation:scaleIn .25s ease;">
+      <div style="width:64px;height:64px;background:linear-gradient(135deg,#16a34a,#15803d);
+                  border-radius:50%;display:flex;align-items:center;justify-content:center;
+                  margin:0 auto 18px;font-size:28px;">✅</div>
+      <h2 style="margin:0 0 10px;font-size:20px;color:#1e293b;">¡Consulta publicada!</h2>
+      <p style="margin:0 0 16px;font-size:14px;color:#475569;line-height:1.65;">
+        Tu búsqueda de <strong style="color:#dc2626;">${categoria || "este servicio"}</strong> ya es visible para toda la comunidad.
+        <br><br>
+        Si alguien conoce a alguien o si un profesional se registra en tu zona con ese oficio,
+        <strong>te va a aparecer la solución en tu perfil</strong>, en el botón
+        <span style="background:#fff1f2;color:#dc2626;border-radius:6px;padding:1px 7px;font-weight:700;">⚡ Urgentes</span>.
+        <br><br>
+        <span style="font-style:italic;color:#64748b;">Esperamos que encuentres la ayuda que necesitás. ¡Mucha suerte!</span>
+        <br><br>
+        <span style="color:#1e293b;font-weight:700;">— Trabajos Cerca, siempre para servir 💪</span>
+      </p>
+      <button onclick="document.getElementById('modalExitoConsulta').remove()"
+        style="background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;
+               padding:12px 32px;border-radius:12px;font-size:15px;font-weight:700;
+               cursor:pointer;font-family:inherit;width:100%;transition:opacity .15s;"
+        onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+        ¡Entendido, gracias!
+      </button>
+    </div>
+    <style>
+      @keyframes scaleIn { from{transform:scale(.9);opacity:0} to{transform:scale(1);opacity:1} }
+      @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+    </style>
+  `
+  // Cerrar al click fuera
+  overlay.addEventListener("click", e => { if(e.target === overlay) overlay.remove() })
+  document.body.appendChild(overlay)
 }
 
 /* ── TOAST ── */
