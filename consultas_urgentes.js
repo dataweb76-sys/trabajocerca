@@ -98,9 +98,15 @@ async function cargarConsultas(){
       <div class="cu-necesita">${c.necesita || "Sin descripción."}</div>
       <p class="cu-location"><i class="fa-solid fa-location-dot"></i> ${[c.ciudad, c.provincia].filter(Boolean).join(", ") || "Sin ubicación"}</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn-ayudar" onclick="abrirAyudar(${JSON.stringify(c).replace(/"/g,"&quot;")})">
-          <i class="fa-solid fa-hands-helping"></i> Ayudar a encontrar
-        </button>
+        ${c.usuario_id === _user?.id ? `
+          <a href="/perfil.html#mis-consultas"
+            style="display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#1d4ed8,#1e40af);color:white;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">
+            <i class="fa-solid fa-lightbulb"></i>
+            ${ayudasCount > 0 ? `Ver ${ayudasCount} solución${ayudasCount!==1?"es":""}` : "Mis soluciones"}
+          </a>` : `
+          <button class="btn-ayudar" onclick="abrirAyudar(${JSON.stringify(c).replace(/"/g,"&quot;")})">
+            <i class="fa-solid fa-hands-helping"></i> Ayudar a encontrar
+          </button>`}
         <button class="btn-compartir-cu" onclick="compartirConsultaDirecta(${JSON.stringify(c).replace(/"/g,"&quot;")})">
           <i class="fa-solid fa-share-nodes"></i> Compartir
         </button>
@@ -217,15 +223,13 @@ window.enviarAyuda = async function(){
 
   // Notificar al solicitante si tiene cuenta
   if(_consulta_activa.usuario_id){
-    const waMsg = `Hola ${_consulta_activa.nombre}, alguien te dejó un contacto de ${_consulta_activa.categoria} en Trabajos Cerca. Entrá a ver: ${location.origin}/consultas_urgentes.html?categoria=${encodeURIComponent(_consulta_activa.categoria)}`
     await supabase.from("notificaciones").insert({
       usuario_id: _consulta_activa.usuario_id,
       tipo:       "ayuda_consulta",
-      titulo:     `💡 ¡Alguien te ayudó a encontrar un ${_consulta_activa.categoria}!`,
-      cuerpo:     `${nombre} te dejó un contacto. Entrá a ver la solución.`,
-      url:        `/consultas_urgentes.html?categoria=${encodeURIComponent(_consulta_activa.categoria)}&soluciones=1`
+      titulo:     `💡 ${nombre} te ayudó a encontrar un ${_consulta_activa.categoria}`,
+      cuerpo:     `Te dejó el número ${contacto} para que lo contactes por WhatsApp. Entrá a tu perfil para verlo.`,
+      url:        `/perfil.html#mis-consultas`
     }).catch(()=>{})
-  }
 
   cerrarModal("modalAyudar")
   mostrarToast("🙌 ¡Gracias! Tu ayuda fue enviada al solicitante.")
