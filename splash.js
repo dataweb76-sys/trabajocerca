@@ -555,11 +555,16 @@ window.addEventListener('beforeinstallprompt', function(e) {
       `<a href="/buscador_emprendimientos.html"${path.includes('buscador_emprendimientos') ? ' class="activo"':''}>💡 <span>Emprendimientos</span></a>` +
       `<a href="/buscador_ofertas.html"${path.includes('buscador_ofertas') ? ' class="activo"':''}>🏢 <span>Ofertas</span></a>`
 
-    // ── Derecha: Inicio | Perfil (si logueado) | ⚽ Prode ──
+    // ── Derecha: Inicio | Consultas | Perfil | Mensajes | Salir | ⚽ ──
     const right = document.createElement('div')
     right.className = 'tnav-right'
     right.innerHTML =
       `<a href="/index.html"><i class="fa-solid fa-house"></i><span> Inicio</span></a>` +
+      `<a href="/consultas_urgentes.html" id="tnav-cu-link" title="Consultas urgentes"
+          style="position:relative;display:inline-flex;align-items:center;gap:5px;">
+          <i class="fa-solid fa-bolt" style="color:#fbbf24;"></i><span> Urgentes</span>
+          <span id="tnav-cu-badge" style="display:none;position:absolute;top:0px;right:-4px;background:#dc2626;color:white;font-size:9px;font-weight:800;min-width:14px;height:14px;border-radius:20px;padding:0 3px;align-items:center;justify-content:center;border:1.5px solid rgba(30,41,59,.3);line-height:1;pointer-events:none;"></span>
+       </a>` +
       (loggedIn
         ? `<a href="/perfil.html" class="btn-perfil"><i class="fa-solid fa-user"></i><span> Perfil</span></a>`
         : '') +
@@ -581,6 +586,22 @@ window.addEventListener('beforeinstallprompt', function(e) {
 
     topbar.appendChild(center)
     topbar.appendChild(right)
+
+    // ── Cargar cantidad de consultas urgentes activas ──
+    ;(function(){
+      var SB = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+      var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+      fetch(SB + '/rest/v1/consultas_urgentes?activo=eq.true&select=id', {
+        headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Prefer': 'count=exact', 'Range': '0-0' }
+      }).then(function(r){
+        var cnt = parseInt(r.headers.get('content-range')?.split('/')[1] || '0', 10)
+        var badge = document.getElementById('tnav-cu-badge')
+        if(badge && cnt > 0){
+          badge.textContent = cnt > 99 ? '99+' : String(cnt)
+          badge.style.display = 'inline-flex'
+        }
+      }).catch(function(){})
+    })()
 
     // ── Botón instalar / actualizar PWA ──
     ;(function(){

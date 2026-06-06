@@ -99,8 +99,8 @@ async function inyectarSeccionPerfil(uid, provincia, ciudad, nuevas, nombrePerfi
   // Solo inyectar en perfil.html
   if(!location.pathname.includes("perfil.html") && !location.pathname.endsWith("/perfil")) return
 
-  // Esperar a que el dashboard cargue
-  await esperarElemento("#dash")
+  // Esperar a que el dashboard cargue con contenido real (no solo el spinner)
+  await new Promise(resolve => setTimeout(resolve, 1800))
 
   // Cargar consultas recientes en la zona (excluir las propias)
   const { data: consultasZona } = await supabase
@@ -192,10 +192,16 @@ async function inyectarSeccionPerfil(uid, provincia, ciudad, nuevas, nombrePerfi
     </style>
   `
 
-  // Insertar al final del dashboard
+  // Insertar al final del contenedor principal (después del dash)
   const dash = document.getElementById("dash")
-  if(dash) dash.appendChild(section)
-  else document.querySelector(".container")?.appendChild(section)
+  const container = document.querySelector(".container") || document.body
+  if(dash && dash.parentNode === container){
+    container.insertBefore(section, dash.nextSibling)
+  } else if(dash){
+    dash.appendChild(section)
+  } else {
+    container.appendChild(section)
+  }
 }
 
 function renderMiConsulta(consulta, nombrePerfil){
