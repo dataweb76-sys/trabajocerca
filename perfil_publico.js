@@ -201,7 +201,7 @@ async function cargarPerfil(){
         <div style="font-size:28px;">👏</div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:22px;font-weight:900;color:#15803d;line-height:1;" id="apoyoNum">${total}</div>
-          <div style="font-size:12px;color:#64748b;">persona${total!==1?"s":""} ya apoyaron este perfil</div>
+          <div style="font-size:12px;color:#64748b;" id="apoyoLabel">persona${total!==1?"s":""} ya apoyaron este perfil</div>
         </div>
         <button id="btnApoyo" onclick="darApoyo('${id}','${displayNombreEsc}')"
           style="${apoyadoStyle}padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:inherit;transition:opacity .15s;">
@@ -358,10 +358,12 @@ window.enviarRating = async function(trabajadorId){
   const { data: authData } = await supabase.auth.getUser()
   if(!authData.user){ msg.innerHTML = '<div class="alerta alerta-err">Debés estar logueado</div>'; return }
 
+  const ratingVal = estrellaSeleccionada * 2  // convertir 1-5 estrellas → escala 1-10
+
   const { error } = await supabase.from("reviews").insert({
     trabajador_id: trabajadorId,
     autor_id:      authData.user.id,
-    rating:        estrellaSeleccionada,
+    rating:        ratingVal,
     comentario:    document.getElementById("comentarioRating").value.trim(),
     tipo:          "servicio"
   })
@@ -373,7 +375,7 @@ window.enviarRating = async function(trabajadorId){
   supabase.from("notificaciones").insert({
     usuario_id: trabajadorId,
     tipo: "review",
-    titulo: `Recibiste una calificación de ${estrellaSeleccionada}/10`,
+    titulo: `Recibiste una calificación de ${estrellaSeleccionada} estrella${estrellaSeleccionada!==1?"s":""}`,
     cuerpo: comentario ? `"${comentario.substring(0,80)}"` : "¡Alguien valoró tu trabajo!",
     url: "/perfil.html"
   }).catch(()=>{})
@@ -611,13 +613,15 @@ window.darApoyo = async function(id, nombre){
 
   localStorage.setItem(`tc_apoyo_cv_${id}`, "1")
 
-  const numEl = document.getElementById("apoyoNum")
-  if(numEl){
-    const n = parseInt(numEl.textContent) || 0
-    numEl.textContent = n + 1
-    numEl.closest("div[style]").querySelector("div[style*='font-size:12px']").textContent =
-      `persona${(n+1)!==1?"s":""} ya apoyaron este perfil`
-  }
+  try {
+    const numEl = document.getElementById("apoyoNum")
+    if(numEl){
+      const n = (parseInt(numEl.textContent) || 0) + 1
+      numEl.textContent = n
+      const labelEl = document.getElementById("apoyoLabel")
+      if(labelEl) labelEl.textContent = `persona${n!==1?"s":""} ya apoyaron este perfil`
+    }
+  } catch(e){}
 
   btn.disabled = false
   btn.style.background = "#dcfce7"
