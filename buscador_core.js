@@ -349,19 +349,6 @@ window.buscar = async function(){
     })
   }
 
-  // ── DEDUPLICAR por perfil: un perfil puede tener varios servicios,
-  //    quedarse con el primero (más reciente) por tipo para evitar duplicados
-  {
-    const seenProfiles = new Set()
-    data = data.filter(item => {
-      const pid = item.perfiles?.id
-      if(!pid) return true
-      if(seenProfiles.has(pid)) return false
-      seenProfiles.add(pid)
-      return true
-    })
-  }
-
   if(!data?.length){
     const linkReg = `/registro.html`
     cont.innerHTML=`<div style="text-align:center;padding:50px 20px;color:#64748b;">
@@ -380,7 +367,7 @@ window.buscar = async function(){
   if(profileIds.length){
     try {
       const rRes = await fetch(
-        `${SB_URL}/rest/v1/reviews?trabajador_id=in.(${profileIds.join(",")})&or=(tipo.is.null,tipo.neq.cliente)&select=trabajador_id,rating`,
+        `${SB_URL}/rest/v1/reviews?trabajador_id=in.(${profileIds.join(",")})&select=trabajador_id,rating`,
         { headers: SB_HEADERS }
       )
       if(rRes.ok){
@@ -717,7 +704,7 @@ async function cargarReviews(profileId, nombre, autoAbrirForm=false){
   let reviews = []
   try {
     const res = await fetch(
-      `${SB_URL}/rest/v1/reviews?trabajador_id=eq.${profileId}&or=(tipo.is.null,tipo.neq.cliente)&select=id,rating,comentario,created_at,autor_id&order=created_at.desc`,
+      `${SB_URL}/rest/v1/reviews?trabajador_id=eq.${profileId}&select=id,rating,comentario,created_at,autor_id&order=created_at.desc`,
       { headers: SB_HEADERS }
     )
     if(res.ok) reviews = await res.json()

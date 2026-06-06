@@ -101,7 +101,7 @@ async function cargarCVs(){
   if(profileIds.length){
     try {
       const rRes = await fetch(
-        `${SB_URL}/rest/v1/reviews?trabajador_id=in.(${profileIds.join(",")})&or=(tipo.is.null,tipo.neq.cliente)&select=trabajador_id,rating`,
+        `${SB_URL}/rest/v1/reviews?trabajador_id=in.(${profileIds.join(",")})&select=trabajador_id,rating`,
         { headers: SB_HEADERS }
       )
       if(rRes.ok){
