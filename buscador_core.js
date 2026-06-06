@@ -307,7 +307,7 @@ window.buscar = async function(){
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
   const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,disponible_ahora,perfiles(id,tipo,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,verificado,profesion_universitaria,plan_nivel)"
-  let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=3000`
+  let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=800`
 
   if(palabra && palabra === "Disponible ahora"){
     url += `&disponible_ahora=eq.true`
@@ -337,14 +337,18 @@ window.buscar = async function(){
       return esProfesionalUni(d)
     })
   } else {
-    // Buscador de oficios
+    // Buscador de oficios — incluye empresa y emprendimiento (son prestadores de servicios)
+    // Solo excluye: cv (busca empleo) y profesionales universitarios
     data = data.filter(d => {
       const tipos = (d.perfiles?.tipo || "").split(",").map(t => t.trim())
       const tipoPrimario = tipos[0]
-      // CSV multi-tipo: si tiene "oficio" explícito en su lista adicional
+      // CV = busca trabajo, no presta servicios → excluir
+      if(tipoPrimario === "cv") return false
+      // Empresa y emprendimiento prestan servicios → incluir siempre
+      if(tipoPrimario === "empresa" || tipoPrimario === "emprendimiento") return true
+      // CSV multi-tipo con oficio explícito → incluir
       if(tipos.length > 1 && tipos.includes("oficio")) return true
-      // Lógica original: excluir empresa/emprendimiento/cv y profesionales
-      if(tipoPrimario === "empresa" || tipoPrimario === "emprendimiento" || tipoPrimario === "cv") return false
+      // Profesionales universitarios van al otro buscador
       return !esProfesionalUni(d)
     })
   }
