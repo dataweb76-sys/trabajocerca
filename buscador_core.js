@@ -337,18 +337,14 @@ window.buscar = async function(){
       return esProfesionalUni(d)
     })
   } else {
-    // Buscador de oficios — incluye empresa y emprendimiento (son prestadores de servicios)
-    // Solo excluye: cv (busca empleo) y profesionales universitarios
+    // Buscador de oficios
     data = data.filter(d => {
       const tipos = (d.perfiles?.tipo || "").split(",").map(t => t.trim())
       const tipoPrimario = tipos[0]
-      // CV = busca trabajo, no presta servicios → excluir
-      if(tipoPrimario === "cv") return false
-      // Empresa y emprendimiento prestan servicios → incluir siempre
-      if(tipoPrimario === "empresa" || tipoPrimario === "emprendimiento") return true
-      // CSV multi-tipo con oficio explícito → incluir
+      // CSV multi-tipo: si tiene "oficio" explícito en su lista adicional
       if(tipos.length > 1 && tipos.includes("oficio")) return true
-      // Profesionales universitarios van al otro buscador
+      // Excluir empresa/emprendimiento/cv y profesionales
+      if(tipoPrimario === "empresa" || tipoPrimario === "emprendimiento" || tipoPrimario === "cv") return false
       return !esProfesionalUni(d)
     })
   }
