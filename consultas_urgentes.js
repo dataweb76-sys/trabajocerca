@@ -181,6 +181,21 @@ window.enviarConsulta = async function(){
   }
 
   cerrarModal("modalCrear")
+
+  // Notificar a Make.com para publicar en Instagram (fire and forget)
+  const MAKE_WEBHOOK = "https://hook.us2.make.com/0jksjob747s9j0v0xhk951xe4o0r0npq"
+  const caption = `🚨 ¡CONSULTA URGENTE en ${provincia}!\n\nAlguien busca un/a ${categoria} en ${ciudad}.\n\n"${necesita.substring(0,100)}"\n\n¿Conocés a alguien? Ayudalo en 👇\nwww.trabajoscerca.com.ar\n\n#TrabajosArgentina #${categoria.replace(/\s+/g,"")} #${provincia.replace(/\s+/g,"")} #trabajoscerca #empleos #oficio`
+  fetch(MAKE_WEBHOOK, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      tipo: "consulta_urgente",
+      nombre, categoria, ciudad, provincia, necesita,
+      imagen_url: "https://trabajoscerca.com.ar/banner-comunidad.jpg",
+      caption
+    })
+  }).catch(() => {})
+
   // Limpiar form
   ;["crNombre","crTelefono","crCategoria","crProvincia","crCiudad","crNecesita"].forEach(id => {
     document.getElementById(id).value = ""
