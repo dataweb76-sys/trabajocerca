@@ -17,7 +17,7 @@
 <style>
 .banner-entre-perfiles{
   display:block;
-  max-width:480px;       /* ancho que da altura natural razonable (~268px) */
+  max-width:480px;
   margin:0 auto 16px;
   border-radius:10px;
   overflow:hidden;
@@ -25,6 +25,8 @@
   transition:transform .15s,box-shadow .15s;
   line-height:0;
   text-decoration:none;
+  aspect-ratio:8/3;
+  background:#f1f5f9;
 }
 .banner-entre-perfiles:hover{
   transform:translateY(-2px);
@@ -32,10 +34,10 @@
 }
 .banner-entre-perfiles img{
   width:100%;
-  height:auto;           /* proporcional — imagen completa sin recorte */
+  height:100%;
   display:block;
+  object-fit:contain;
 }
-/* Mobile: ancho completo */
 @media(max-width:520px){
   .banner-entre-perfiles{ max-width:100%; }
 }

@@ -25,6 +25,8 @@
   transition:transform .15s,box-shadow .15s;
   line-height:0;
   text-decoration:none;
+  aspect-ratio:8/3;
+  background:#f1f5f9;
 }
 .banner-entre-perfiles:hover{
   transform:translateY(-2px);
@@ -32,8 +34,9 @@
 }
 .banner-entre-perfiles img{
   width:100%;
-  height:auto;
+  height:100%;
   display:block;
+  object-fit:contain;
 }
 @media(max-width:520px){
   .banner-entre-perfiles{ max-width:100%; }

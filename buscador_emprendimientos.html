@@ -58,17 +58,22 @@
 /* ── Banners entre cards ── */
 .banner-emp{
   display:block;
-  max-width:100%;
-  margin:0 0 14px;
+  max-width:480px;
+  margin:0 auto 14px;
   border-radius:10px;
   overflow:hidden;
   box-shadow:0 2px 12px rgba(0,0,0,.10);
   transition:transform .15s,box-shadow .15s;
   line-height:0;
   text-decoration:none;
+  aspect-ratio:8/3;
+  background:#f1f5f9;
 }
 .banner-emp:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.16);}
-.banner-emp img{width:100%;height:auto;display:block;}
+.banner-emp img{width:100%;height:100%;display:block;object-fit:contain;}
+@media(max-width:520px){
+  .banner-emp{ max-width:100%; }
+}
 </style>
 </head>
 <body>
