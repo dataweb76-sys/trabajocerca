@@ -475,7 +475,6 @@ window._camiToggleAudio = function(){
 /* ─────────────────────────────────────────────────────
    UI — abrir / cerrar burbuja
 ───────────────────────────────────────────────────────*/
-let _burbujaVisible = false
 function abrirBurbuja(){ document.getElementById('cami-burbuja')?.classList.add('visible'); _burbujaVisible=true }
 function cerrarBurbuja(){ document.getElementById('cami-burbuja')?.classList.remove('visible'); _burbujaVisible=false }
 
