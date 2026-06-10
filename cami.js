@@ -77,22 +77,31 @@ function crearWidget() {
   <style>
   #cami-widget {
     position: fixed;
-    bottom: 20px;
-    right: 16px;
+    bottom: 16px;
+    right: 12px;
     z-index: 9999;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 10px;
+    gap: 8px;
     pointer-events: none;
+  }
+  /* En celular con teclado abierto: solo el avatar, sin burbuja */
+  #cami-widget.teclado-abierto #cami-burbuja {
+    display: none !important;
+  }
+  #cami-widget.teclado-abierto #cami-avatar-wrap {
+    width: 52px;
+    height: 60px;
+    opacity: .85;
   }
   #cami-burbuja {
     background: white;
     border: 2px solid #6366f1;
     border-radius: 18px 18px 4px 18px;
-    padding: 14px 16px;
-    max-width: 240px;
-    font-size: 14px;
+    padding: 12px 14px;
+    max-width: 220px;
+    font-size: 13px;
     color: #1e293b;
     line-height: 1.5;
     box-shadow: 0 6px 24px rgba(99,102,241,.25);
@@ -100,6 +109,11 @@ function crearWidget() {
     opacity: 0;
     transform: translateY(10px) scale(.95);
     transition: opacity .3s ease, transform .3s ease;
+  }
+  /* Móvil: burbuja más pequeña y avatar más chico */
+  @media (max-width: 480px) {
+    #cami-burbuja { max-width: 190px; font-size: 12px; padding: 10px 12px; }
+    #cami-avatar-wrap { width: 62px; height: 72px; }
   }
   #cami-burbuja.visible {
     opacity: 1;
@@ -145,14 +159,14 @@ function crearWidget() {
   .cami-btn-mic:hover { background: #fecaca; }
 
   #cami-avatar-wrap {
-    width: 76px;
-    height: 88px;
+    width: 70px;
+    height: 82px;
     position: relative;
     cursor: pointer;
     pointer-events: all;
     filter: drop-shadow(0 4px 12px rgba(99,102,241,.3));
     transform: translateY(0);
-    transition: transform .2s ease;
+    transition: transform .2s ease, width .2s, height .2s, opacity .2s;
   }
   #cami-avatar-wrap:hover { transform: translateY(-4px); }
   #cami-avatar-wrap.habla #cami-boca {
@@ -397,6 +411,29 @@ window._cami.rechazarAyuda = function() {
 }
 
 /* ══════════════════════════════════════════════════════
+   TECLADO VIRTUAL (móvil) — detectar apertura/cierre
+══════════════════════════════════════════════════════ */
+function bindTeclado() {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  if(!isMobile) return
+
+  // En mobile, cuando se abre el teclado el viewport encoge
+  let alturaOriginal = window.innerHeight
+  window.addEventListener('resize', () => {
+    const widget = document.getElementById('cami-widget')
+    if(!widget) return
+    if(window.innerHeight < alturaOriginal * 0.75) {
+      // Teclado abierto: minimizar Cami
+      widget.classList.add('teclado-abierto')
+    } else {
+      // Teclado cerrado: restaurar Cami
+      widget.classList.remove('teclado-abierto')
+      alturaOriginal = window.innerHeight
+    }
+  })
+}
+
+/* ══════════════════════════════════════════════════════
    ESCUCHAR FOCUS EN LOS CAMPOS DEL FORM
 ══════════════════════════════════════════════════════ */
 function bindCampos() {
@@ -408,6 +445,17 @@ function bindCampos() {
       const msg = GUIA[id]
       mostrarEnBurbuja(msg, btnsMic())
       hablar(msg)
+    })
+    // En desktop: al perder el foco cerramos la burbuja después de un rato
+    el.addEventListener('blur', () => {
+      if(!_ayudandoActivo) return
+      setTimeout(() => {
+        // Solo cerrar si ningún otro campo del form tiene foco
+        const hayFoco = Object.keys(GUIA).some(fid => document.getElementById(fid) === document.activeElement)
+        if(!hayFoco) {
+          // No cerramos del todo, dejamos el último mensaje
+        }
+      }, 200)
     })
   })
 
@@ -457,6 +505,7 @@ function init() {
 
   crearWidget()
   bindCampos()
+  bindTeclado()
 
   // Aparece después del delay con el saludo
   setTimeout(() => {
