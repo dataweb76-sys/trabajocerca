@@ -128,6 +128,36 @@ async function cargarPerfil(){
         <p style="margin:4px 0 0;font-size:12px;color:#cbd5e1;">Este profesional aún no subió fotos de sus trabajos</p>
       </div>`
 
+  /* ── Banner publicitario entre info y calificaciones ── */
+  const bannerPubHtml = `
+  <div id="banner-perfil-pub" style="margin-bottom:16px;">
+    <a href="/perfil_servicio.html" id="banner-perfil-link"
+      style="display:block;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.10);line-height:0;text-decoration:none;transition:transform .15s,box-shadow .15s;"
+      title="Publicita aquí en Trabajos Cerca"
+      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,0,0,.16)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 2px 12px rgba(0,0,0,.10)'">
+      <img id="banner-perfil-img" src="/banner-pub-profesional.jpg" alt="Publicita aquí"
+        style="width:100%;height:auto;display:block;">
+    </a>
+  </div>`
+
+  /* Cargar banner dinámico del admin (sin bloquear el render) */
+  ;(function(){
+    var SUPA_URL2 = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+    var SUPA_KEY2 = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+    fetch(SUPA_URL2 + '/rest/v1/configuracion?clave=eq.pub_config&select=valor', {
+      headers: { 'apikey': SUPA_KEY2, 'Authorization': 'Bearer ' + SUPA_KEY2 }
+    }).then(function(r){ return r.json() }).then(function(rows){
+      if(!rows?.[0]?.valor) return
+      var cfg = JSON.parse(rows[0].valor)
+      // Tomar del carrusel inicio_a (primero disponible)
+      var imgs = (cfg.inicio_a?.imagenes || cfg.oficios?.imagenes || []).filter(Boolean)
+      if(!imgs.length) return
+      var img = document.getElementById('banner-perfil-img')
+      if(img) img.src = imgs[Math.floor(Math.random() * imgs.length)]
+    }).catch(function(){})
+  })()
+
   /* ── Reviews + Calificación (todo en una card) ── */
   const puntosTotal = reviews?.reduce((a,r) => a + r.rating, 0) || 0
   const yaVoto = reviews?.some(r => r.autor_id === usuarioActual)
@@ -348,6 +378,7 @@ async function cargarPerfil(){
     ${fotosHtml}
     ${impulsarCVHtml}
     ${reviewsHtml}
+    ${bannerPubHtml}
     ${formRating}
   `
 

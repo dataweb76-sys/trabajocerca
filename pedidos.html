@@ -123,6 +123,18 @@
     </button>
   </div>
 
+  <!-- Banner publicitario -->
+  <div id="banner-pedidos" style="margin-bottom:18px;">
+    <a id="banner-pedidos-link" href="/perfil_servicio.html"
+      style="display:block;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.10);line-height:0;text-decoration:none;transition:transform .15s,box-shadow .15s;"
+      title="Publicita aquí en Trabajos Cerca"
+      onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,0,0,.16)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 2px 12px rgba(0,0,0,.10)'">
+      <img id="banner-pedidos-img" src="/banner-pub-empresa.jpg" alt="Publicita aquí en Trabajos Cerca"
+        style="width:100%;height:auto;display:block;">
+    </a>
+  </div>
+
   <!-- Lista de pedidos -->
   <div id="lista-pedidos">
     <div style="text-align:center;padding:40px;color:#64748b;">
@@ -211,6 +223,22 @@
 </div>
 
 <script type="module" src="/pedidos.js"></script>
+<script>
+(function(){
+  var SUPA_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+  fetch(SUPA_URL + '/rest/v1/configuracion?clave=eq.pub_config&select=valor', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r){ return r.json() }).then(function(rows){
+    if(!rows?.[0]?.valor) return
+    var cfg = JSON.parse(rows[0].valor)
+    var imgs = (cfg.inicio_b?.imagenes || cfg.inicio_a?.imagenes || []).filter(Boolean)
+    if(!imgs.length) return
+    var img = document.getElementById('banner-pedidos-img')
+    if(img) img.src = imgs[Math.floor(Math.random() * imgs.length)]
+  }).catch(function(){})
+})()
+</script>
 <script src="/notif_widget.js"></script>
 <script src="/push_widget.js"></script>
 <script src="/chat_widget.js"></script>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview Banners — Trabajos Cerca</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; color: #1e293b; }
+
+.page-title {
+  background: #1e3a8a;
+  color: white;
+  text-align: center;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 800;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+.page-title span { font-size: 13px; font-weight: 400; opacity: .8; margin-left: 12px; }
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 0 20px 60px;
+}
+
+.phone-frame {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.15);
+  overflow: hidden;
+  border: 3px solid #1e3a8a;
+}
+
+.phone-label {
+  background: #1e3a8a;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── PEDIDOS MOCK ── */
+.topbar-mock {
+  background: #1d4ed8;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar-mock img { width: 28px; height: 28px; border-radius: 6px; }
+.topbar-mock span { color: white; font-size: 13px; font-weight: 800; }
+.topbar-nav { display: flex; gap: 16px; margin-left: auto; }
+.topbar-nav i { color: rgba(255,255,255,.8); font-size: 14px; }
+
+.hero-pedidos {
+  background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+  padding: 22px 18px;
+  color: white;
+  text-align: center;
+}
+.hero-pedidos .icon { font-size: 28px; margin-bottom: 8px; }
+.hero-pedidos h2 { font-size: 17px; font-weight: 900; margin-bottom: 6px; }
+.hero-pedidos p { font-size: 12px; opacity: .88; margin-bottom: 14px; line-height: 1.5; }
+.hero-pedidos .btn-pub {
+  background: white;
+  color: #1d4ed8;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.filtros-mock {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+.filtros-mock select, .filtros-mock input {
+  flex: 1;
+  min-width: 100px;
+  padding: 6px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 7px;
+  font-size: 12px;
+  background: #f8fafc;
+}
+.filtros-mock .btn-buscar {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Banner pedidos */
+.banner-pedidos-wrap {
+  padding: 12px;
+  background: #f8fafc;
+}
+.banner-link {
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,.12);
+  line-height: 0;
+}
+.banner-link img { width: 100%; height: auto; display: block; }
+.banner-label {
+  text-align: center;
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.pedido-card-mock {
+  margin: 0 12px 10px;
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.pedido-card-mock h4 { font-size: 13px; font-weight: 800; margin-bottom: 3px; }
+.pedido-card-mock p { font-size: 11px; color: #64748b; margin-bottom: 8px; }
+.pedido-chip {
+  display: inline-block;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #93c5fd;
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+.btn-interesa {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #25D366;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 11px;
+  margin-top: 8px;
+  text-decoration: none;
+}
+
+/* ── PERFIL PÚBLICO MOCK ── */
+.perfil-header {
+  background: linear-gradient(145deg, #1e3a8a, #2563eb);
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: white;
+}
+.perfil-avatar {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  border: 3px solid rgba(255,255,255,.4);
+}
+.perfil-nombre { font-size: 16px; font-weight: 800; }
+.perfil-cat { font-size: 12px; opacity: .85; margin-top: 2px; }
+.perfil-badges { display: flex; gap: 5px; margin-top: 6px; }
+.badge { background: rgba(255,255,255,.2); color: white; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
+.badge.verde { background: #16a34a; }
+
+.perfil-info-card {
+  margin: 10px 12px;
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.fotos-mock {
+  margin: 0 12px 10px;
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.fotos-mock h4 { font-size: 12px; font-weight: 800; margin-bottom: 8px; color: #1e293b; }
+.fotos-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+.foto-thumb {
+  height: 48px;
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #93c5fd;
+  font-size: 16px;
+}
+
+.banner-perfil-wrap {
+  padding: 0 12px 10px;
+}
+.banner-label-top {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+  text-align: right;
+  font-style: italic;
+}
+
+.calificaciones-card {
+  margin: 0 12px 16px;
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.calificaciones-card h4 { font-size: 12px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.puntos-box {
+  text-align: center;
+  padding: 10px;
+  background: #fffbeb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.puntos-num { font-size: 28px; font-weight: 900; color: #f59e0b; }
+.puntos-label { font-size: 10px; color: #92400e; margin-top: 2px; }
+
+.review-item-mock {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+}
+.review-pts { background: #16a34a; color: white; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 20px; }
+.review-txt { font-size: 11px; color: #64748b; font-style: italic; }
+
+@media(max-width: 600px) {
+  .preview-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  👁 Preview de nuevos banners
+  <span>Pedidos · Perfil público</span>
+</div>
+
+<div class="preview-grid">
+
+  <!-- ══ PEDIDOS ══ -->
+  <div>
+    <div style="text-align:center;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:#1e3a8a;">📋 Página de Pedidos</div>
+      <div style="font-size:11px;color:#64748b;">Banner entre los filtros y la lista de pedidos</div>
+    </div>
+    <div class="phone-frame">
+      <div class="phone-label">
+        <i class="fa-solid fa-mobile-alt"></i> Vista móvil — Pedidos
+      </div>
+
+      <!-- Topbar -->
+      <div class="topbar-mock">
+        <img src="/logo.png" alt="">
+        <span>Trabajos Cerca</span>
+        <div class="topbar-nav">
+          <i class="fa-solid fa-house"></i>
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </div>
+
+      <!-- Hero -->
+      <div class="hero-pedidos">
+        <div class="icon">📋</div>
+        <h2>Pedidos de trabajo</h2>
+        <p>¿Necesitás un profesional? Publicá tu pedido.<br>¿Sos profesional? Encontrá clientes cerca.</p>
+        <button class="btn-pub"><i class="fa-solid fa-plus"></i> Publicar mi pedido</button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filtros-mock">
+        <select><option>Todas las categorías</option></select>
+        <input placeholder="Ciudad...">
+        <button class="btn-buscar"><i class="fa-solid fa-magnifying-glass"></i></button>
+      </div>
+
+      <!-- ★ BANNER NUEVO ★ -->
+      <div class="banner-pedidos-wrap">
+        <div class="banner-link">
+          <img src="/banner-pub-empresa.jpg" alt="Publicita aquí">
+        </div>
+        <div class="banner-label">↑ Banner publicitario (imagen configurable desde el admin)</div>
+      </div>
+
+      <!-- Lista de pedidos (mock) -->
+      <div class="pedido-card-mock">
+        <h4>🔧 Necesito plomero urgente</h4>
+        <p>Pérdida de agua en baño, necesito reparación rápida</p>
+        <span class="pedido-chip">Plomería</span>
+        <span class="pedido-chip">Urgente</span>
+        <a class="btn-interesa" href="#"><i class="fa-brands fa-whatsapp"></i> Me interesa</a>
+      </div>
+
+      <div class="pedido-card-mock">
+        <h4>🎨 Pintura interior depto</h4>
+        <p>Departamento de 3 ambientes, paredes y cielorraso</p>
+        <span class="pedido-chip">Pintura</span>
+        <a class="btn-interesa" href="#"><i class="fa-brands fa-whatsapp"></i> Me interesa</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ PERFIL PÚBLICO ══ -->
+  <div>
+    <div style="text-align:center;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:#1e3a8a;">👤 Perfil Público</div>
+      <div style="font-size:11px;color:#64748b;">Banner entre trabajos realizados y calificaciones</div>
+    </div>
+    <div class="phone-frame">
+      <div class="phone-label">
+        <i class="fa-solid fa-mobile-alt"></i> Vista móvil — Perfil público
+      </div>
+
+      <!-- Header del perfil -->
+      <div class="perfil-header">
+        <div class="perfil-avatar">👨‍🔧</div>
+        <div>
+          <div class="perfil-nombre">M y N Refrigeración</div>
+          <div class="perfil-cat">Climatización · Santa Rosa, La Pampa</div>
+          <div class="perfil-badges">
+            <span class="badge verde"><i class="fa-solid fa-circle-check" style="font-size:9px;"></i> Verificado</span>
+            <span class="badge"><i class="fa-solid fa-images" style="font-size:9px;"></i> Trabajos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="perfil-info-card">
+        <strong>Instalación y reparación de aires acondicionados</strong><br>
+        Split, multi-split, ventilación, frío-calor. Atención en toda La Pampa.
+        Presupuesto sin cargo.
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <a href="#" style="background:#25D366;color:white;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+          <a href="#" style="background:#eff6ff;color:#2563eb;border:1.5px solid #93c5fd;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;"><i class="fa-solid fa-envelope"></i> Mensaje</a>
+        </div>
+      </div>
+
+      <!-- Fotos de trabajos -->
+      <div class="fotos-mock">
+        <h4><i class="fa-solid fa-images" style="color:#2563eb;"></i> Trabajos realizados</h4>
+        <div class="fotos-grid">
+          <div class="foto-thumb"><i class="fa-solid fa-image"></i></div>
+          <div class="foto-thumb"><i class="fa-solid fa-image"></i></div>
+          <div class="foto-thumb"><i class="fa-solid fa-image"></i></div>
+        </div>
+      </div>
+
+      <!-- ★ BANNER NUEVO ★ -->
+      <div class="banner-perfil-wrap">
+        <div class="banner-label-top">Publicidad</div>
+        <div class="banner-link">
+          <img src="/banner-pub-profesional.jpg" alt="Publicita aquí">
+        </div>
+        <div class="banner-label">↑ Banner publicitario (imagen aleatoria del carrusel del admin)</div>
+      </div>
+
+      <!-- Calificaciones -->
+      <div class="calificaciones-card">
+        <h4><i class="fa-solid fa-trophy" style="color:#f59e0b;"></i> Puntaje y calificaciones</h4>
+        <div class="puntos-box">
+          <div class="puntos-num">30</div>
+          <div class="puntos-label">puntos acumulados · 3 calificaciones</div>
+        </div>
+        <div class="review-item-mock">
+          <span class="review-pts">10/10</span>
+          <span class="review-txt">"Excelente servicio, muy puntual"</span>
+        </div>
+        <div class="review-item-mock">
+          <span class="review-pts">10/10</span>
+          <span class="review-txt">"Muy recomendable, buen precio"</span>
+        </div>
+        <div class="review-item-mock">
+          <span class="review-pts">10/10</span>
+          <span class="review-txt">"Resolvió el problema rápido"</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
