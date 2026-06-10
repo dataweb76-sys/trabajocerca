@@ -1806,6 +1806,11 @@ function mostrarBienvenida(userId) {
   document.body.appendChild(overlay)
   document.body.style.overflow = "hidden"
 
+  // Activar Cami en el overlay de bienvenida
+  setTimeout(function(){
+    if(window._camiActivarBienvenida) window._camiActivarBienvenida()
+  }, 600)
+
   window._bvToggle = function(id) {
     const esCliente = id === "cliente"
 

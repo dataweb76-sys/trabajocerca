@@ -1,48 +1,82 @@
 /*  ══════════════════════════════════════════════════════
     CAMI — Asistente IA · Trabajos Cerca
-    Funciona en: registro.html  +  perfil_servicio.html
+    Páginas: registro.html · perfil.html · perfil_servicio.html
     ══════════════════════════════════════════════════════ */
 ;(function(){
 'use strict'
 
 /* ─────────────────────────────────────────────────────
-   TEXTOS  (tono pampeano — tuteo argentino casual)
+   DETECCIÓN DE PÁGINA
+───────────────────────────────────────────────────────*/
+const _path        = location.pathname.replace(/\/$/, '').replace(/\.html$/, '')
+const EN_REGISTRO  = !!document.getElementById('formReg')
+const EN_SERVICIO  = !!document.getElementById('selectorTipo')
+const EN_PERFIL    = !EN_REGISTRO && !EN_SERVICIO && _path.endsWith('/perfil')
+
+// Solo cargar en las 3 páginas objetivo
+if(!EN_REGISTRO && !EN_SERVICIO && !EN_PERFIL) return
+
+/* ─────────────────────────────────────────────────────
+   MEMORIA DE SESIÓN — ¿ya me presenté?
+   (persiste entre registro → bienvenida → formulario)
+───────────────────────────────────────────────────────*/
+const YA_SALUDE = !!localStorage.getItem('tc_cami_saludo')
+
+function marcarSaludo(){ localStorage.setItem('tc_cami_saludo', '1') }
+function limpiarSaludo(){ localStorage.removeItem('tc_cami_saludo') }
+
+/* ─────────────────────────────────────────────────────
+   TEXTOS
 ───────────────────────────────────────────────────────*/
 const T = {
-  saludo:    '¡Hola! Soy Cami, tu asistente de Trabajos Cerca. ¿Querés que te ayude a registrarte?',
-  siAyuda:   'Dale, arranquemos. Hacé clic en el primer campo y yo te voy guiando.',
-  noAyuda:   '¡Genial, qué bueno que sabés cómo hacerlo! Cualquier cosa estoy acá.',
-  micInfo:   'También podés hablarme. Decime qué oficio o profesión tenés.',
-  exito:     '¡Listo! Cuenta creada. Ahora revisá tu correo para activarla.',
-  google:    'Buena elección. Con Google es más rápido, solo confirmá tu cuenta.',
+  // Registro — saludo inicial (solo la primera vez)
+  saludo:       '¡Hola! Soy Cami, tu asistente de Trabajos Cerca. ¿Querés que te ayude a registrarte?',
+  siAyuda:      'Dale, arranquemos. Hacé clic en el primer campo y yo te voy guiando.',
+  noAyuda:      '¡Genial, qué bueno que sabés cómo hacerlo! Cualquier cosa estoy acá.',
+  micInfo:      'También podés hablarme. Decime qué oficio o profesión tenés.',
+
+  // Páginas siguientes — saludo corto
+  saludoCorto:  '¿Querés que acá te siga ayudando?',
+
+  // Registro — guía por campo
   campo: {
     rNombre:   'Escribí tu nombre, el que usás normalmente.',
     rApellido: 'Ahora el apellido, tal cual figura en el DNI.',
-    rEmail:    'El email lo vas a usar para entrar. Tiene que ser uno que uses seguido.',
-    rTelefono: 'El número de WhatsApp, sin el cero ni el quince. Por ejemplo: 2214561234.',
+    rEmail:    'El email lo vas a usar para entrar. Usá uno que revises seguido.',
+    rTelefono: 'El número de WhatsApp, sin el cero ni el quince. Ejemplo: 2214561234.',
     rPass:     'Elegí una contraseña de al menos seis caracteres. Combiná letras y números.',
     rTerminos: 'Ya casi terminamos. Aceptá los términos y después apretá el botón azul.',
   },
-  tipoIntro: '¡Bienvenido! Ahora elegís cómo querés aparecer en Trabajos Cerca. ¿Qué sos vos?',
-  tipos: {
-    oficio:         'Perfecto. Seleccioná "Como oficio" y completá tus datos. Cuanto más completo, más clientes.',
-    profesional:    'Buenísimo. Elegí "Como profesional" y completá tu especialidad.',
-    cv:             'Entendido. Seleccioná "Busco empleo" y armamos tu CV juntos.',
-    empresa:        'Genial. Elegí "Soy empresa o comercio" y publicás tus búsquedas.',
-    emprendimiento: '¡Qué bueno! Elegí "Tengo un emprendimiento" y mostrás tu proyecto.',
-  },
-  fotoTip:   'Subí una foto clara tuya o de tu logo. Es lo primero que ven los clientes.',
-  descripTip:'Describí lo que hacés en pocas palabras. Eso es lo primero que ven los clientes.',
-  ciudadTip: 'Indicá tu ciudad para que te encuentren los clientes de tu zona.',
-  guardaTip: 'Ya tenés todo. Apretá "Guardar perfil" y ya aparecés en el buscador.',
-}
 
-/* ─────────────────────────────────────────────────────
-   DETECCIÓN DE PÁGINA
-───────────────────────────────────────────────────────*/
-const EN_REGISTRO = !!document.getElementById('formReg')
-const EN_SERVICIO = !!document.getElementById('selectorTipo')
-if(!EN_REGISTRO && !EN_SERVICIO) return
+  // Bienvenida — selector de tipo
+  bvIntro: '¡Bienvenido/a! Acá elegís cómo aparecer en Trabajos Cerca. Te recomiendo empezar con una sola opción, y una vez que tengas el perfil listo podés agregar más desde tu cuenta.',
+  bvOpciones: {
+    oficio:         '🔧 Elegí "Ofrezco un oficio" si sos plomero, electricista, pintor, carpintero u otro oficio similar.',
+    profesional:    '👔 "Soy profesional" es para médicos, abogados, contadores, arquitectos y similares.',
+    emprendimiento: '🚀 "Tengo un emprendimiento" es para locales, marcas, gastronomía o proyectos propios.',
+    cv:             '📄 "Busco trabajo" te pone visible para que empresas y personas te encuentren.',
+    empresa:        '🏢 "Soy empresa o negocio" es para publicar puestos de trabajo y buscar empleados.',
+    cliente:        '👤 "Solo busco contratar" es si necesitás un profesional y no vas a ofrecer servicios vos.',
+  },
+  bvClienteTip: 'Perfecto. Si solo buscás contratar no es necesario subir foto ni completar más datos. Hacé clic en "Terminar registro como cliente" y listo.',
+  bvContinuarTip: 'Muy bien. Hacé clic en "Continuar" y te llevo a completar tu perfil. Solo te va a pedir una foto y algunos datos básicos.',
+  bvMultiTip: 'Elegiste varias opciones. Te recomiendo completar primero la que más uses, y después desde tu perfil agregás las demás. ¿Listo para continuar?',
+
+  // perfil_servicio — formulario
+  tipoIntro:  '¿Qué tipo de perfil querés crear? Elegí en la lista y te explico qué datos necesitás.',
+  tipos: {
+    oficio:         'Perfecto. Completá tu categoría, una foto tuya o de tu trabajo, tu localidad y una descripción. Cuanto más completo, más clientes te encuentran.',
+    profesional:    'Buenísimo. Completá tu especialidad, subí una foto profesional, tu localidad y una breve descripción de tu servicio.',
+    cv:             'Entendido. Completá tus datos, una foto y describí tu experiencia. Las empresas te van a poder encontrar y contactar.',
+    empresa:        'Genial. Completá el nombre de tu empresa, el rubro, tu localidad y una descripción. Así podés publicar búsquedas de empleados.',
+    emprendimiento: '¡Qué bueno! Completá el nombre, una foto del producto o local, tu localidad y una descripción atractiva. Eso es lo primero que ven los clientes.',
+  },
+  fotoTip:    'La foto es clave. Si ofrecés un servicio, subí una imagen tuya o de tu trabajo para que los clientes confíen más en vos.',
+  fotoClienteTip: 'Si solo buscás contratar, la foto no es obligatoria. Pero si la ponés, es más fácil que los profesionales te respondan.',
+  descripTip: 'Describí en pocas palabras qué hacés. Eso es lo primero que ven los clientes.',
+  ciudadTip:  'Indicá tu ciudad para aparecer en búsquedas de tu zona.',
+  guardaTip:  '¡Ya tenés todo! Apretá "Guardar perfil" y en segundos vas a aparecer en el buscador.',
+}
 
 /* ─────────────────────────────────────────────────────
    ESTADO
@@ -53,6 +87,7 @@ let _audioOn        = true
 let _escuchaModo    = false
 let _escuchando     = false
 let _vozElegida     = null
+let _modoActual     = EN_REGISTRO ? 'registro' : EN_SERVICIO ? 'servicio' : 'perfil'
 
 /* ─────────────────────────────────────────────────────
    AVATAR SVG
@@ -84,7 +119,7 @@ const AVATAR_SVG = `<svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg
 </svg>`
 
 /* ─────────────────────────────────────────────────────
-   CREAR WIDGET  — posición ARRIBA a la derecha
+   CREAR WIDGET
 ───────────────────────────────────────────────────────*/
 function crearWidget(){
   const div = document.createElement('div')
@@ -116,7 +151,6 @@ function crearWidget(){
   margin-bottom:5px;display:flex;align-items:center;
   justify-content:space-between;
 }
-.cami-titulo-left{display:flex;align-items:center;gap:4px;}
 .cami-txt-wrap{font-size:13px;color:#374151;line-height:1.55;}
 #cami-btns{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;}
 #cami-btns button{
@@ -158,7 +192,7 @@ function crearWidget(){
 }
 @keyframes cami-ring{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4);}55%{box-shadow:0 0 0 6px rgba(99,102,241,0);}}
 #cami-widget.teclado-on #cami-burbuja{display:none!important;}
-#cami-widget.teclado-on #cami-av{width:44px;height:51px;opacity:.75;}
+#cami-widget.teclado-on #cami-av-wrap{width:44px;height:51px;opacity:.75;}
 @media(max-width:480px){
   #cami-widget{top:58px;right:6px;}
   #cami-burbuja{width:192px;font-size:12px;padding:9px 10px;}
@@ -168,7 +202,7 @@ function crearWidget(){
 
 <div id="cami-burbuja">
   <div class="cami-titulo">
-    <span class="cami-titulo-left">✨ <strong>Cami</strong></span>
+    <span>✨ <strong>Cami</strong></span>
     <button id="cami-audio-btn" onclick="_camiToggleAudio()" title="Activar/desactivar voz">🔊</button>
   </div>
   <div class="cami-txt-wrap" id="cami-txt">…</div>
@@ -191,7 +225,7 @@ window._camiToggleAudio = function(){
 }
 
 /* ─────────────────────────────────────────────────────
-   VOZ — síntesis (prioriza Google Neural, luego Microsoft)
+   VOZ — síntesis
 ───────────────────────────────────────────────────────*/
 function cargarVoces(){
   const voces = window.speechSynthesis?.getVoices() || []
@@ -255,7 +289,7 @@ function iniciarEscucha(){
     procesarVoz(dicho.toLowerCase())
   }
   _rec.onerror = err => {
-    hint(err.error === 'not-allowed' ? '🔒 Permití el micrófono en el navegador' : '')
+    hint(err.error === 'not-allowed' ? '🔒 Permití el micrófono' : '')
     _escuchando = false; btnMicOn(false)
   }
   _rec.onend = () => { _escuchando = false; btnMicOn(false) }
@@ -278,45 +312,69 @@ function toggleMic(){
 }
 
 /* ─────────────────────────────────────────────────────
-   PROCESAMIENTO DE VOZ
+   PROCESAMIENTO DE VOZ — según modo actual
 ───────────────────────────────────────────────────────*/
 function procesarVoz(txt){
+  // Respuesta al saludo (sí/no)
   if(!_ayudando){
-    if(/s[ií]|dale|buen|claro|ayud|obvio/i.test(txt)){ aceptarAyuda(); return }
+    if(/s[ií]|dale|buen|claro|ayud|obvio|quiero/i.test(txt)){ aceptarAyuda(); return }
     if(/no\b|gracias|solo|ya s[eé]/i.test(txt)){ rechazarAyuda(); return }
   }
-  if(EN_SERVICIO){
+
+  // Modo bienvenida — explicar opciones por voz
+  if(_modoActual === 'bv'){
+    const op = detectarOpcionBV(txt)
+    if(op){ explicarOpcionBV(op); return }
+    if(/continuar|siguiente|listo|ya elegí|seguir/i.test(txt)){
+      document.getElementById('bv-btn')?.click(); return
+    }
+  }
+
+  // Modo servicio
+  if(_modoActual === 'servicio'){
     const t = detectarTipo(txt)
     if(t){ seleccionarTipo(t); return }
   }
-  if(/nombre/i.test(txt))                  { document.getElementById('rNombre')?.focus(); return }
-  if(/apellido/i.test(txt))                { document.getElementById('rApellido')?.focus(); return }
-  if(/email|correo/i.test(txt))            { document.getElementById('rEmail')?.focus(); return }
-  if(/tel[eé]fono|whatsapp|cel/i.test(txt)){ document.getElementById('rTelefono')?.focus(); return }
-  if(/contraseña|clave/i.test(txt))        { document.getElementById('rPass')?.focus(); return }
+
+  // Campos de registro
+  if(/nombre/i.test(txt))                   { document.getElementById('rNombre')?.focus(); return }
+  if(/apellido/i.test(txt))                 { document.getElementById('rApellido')?.focus(); return }
+  if(/email|correo/i.test(txt))             { document.getElementById('rEmail')?.focus(); return }
+  if(/tel[eé]fono|whatsapp|cel/i.test(txt)) { document.getElementById('rTelefono')?.focus(); return }
+  if(/contraseña|clave/i.test(txt))         { document.getElementById('rPass')?.focus(); return }
+
+  // Tipo en registro
   const t = detectarTipo(txt)
   if(t){ decir('Anotado. Cuando llegues al perfil elegís ' + t + '. Por ahora terminemos el registro.'); return }
+
   decir('No te entendí bien. Seguí completando y cualquier duda me preguntás.')
 }
 
+function detectarOpcionBV(txt){
+  if(/(electricista|plomer|alban|pintor|gasista|carpintero|jardinero|oficio|técnico|mecán)/i.test(txt)) return 'oficio'
+  if(/(m[eé]dico|abogad|contador|psic|arquitecto|ingeniero|profesional|universitari)/i.test(txt)) return 'profesional'
+  if(/(emprendimiento|emprendedor|negocio|marca|local|gastronom)/i.test(txt)) return 'emprendimiento'
+  if(/(cv|currículum|busco trabajo|empleo)/i.test(txt)) return 'cv'
+  if(/(empresa|comercio|contratar empleado)/i.test(txt)) return 'empresa'
+  if(/(cliente|solo busco|contratar|busco profesional)/i.test(txt)) return 'cliente'
+  return null
+}
+
+function explicarOpcionBV(op){
+  const msg = T.bvOpciones[op] || ''
+  if(!msg) return
+  decir(msg)
+  // Seleccionar visualmente la opción
+  const el = document.getElementById('bvop-' + op)
+  if(el && window._bvToggle) window._bvToggle(op)
+}
+
 function detectarTipo(txt){
-  if(/(electricista|electricidad)/i.test(txt)) return 'oficio'
-  if(/(plomer)/i.test(txt))                   return 'oficio'
-  if(/(alban[ií]l|construcci)/i.test(txt))    return 'oficio'
-  if(/(pintor|pintura)/i.test(txt))           return 'oficio'
-  if(/(gasista)/i.test(txt))                  return 'oficio'
-  if(/(carpintero)/i.test(txt))               return 'oficio'
-  if(/(jardinero)/i.test(txt))               return 'oficio'
-  if(/(oficio|técnico|mecán)/i.test(txt))     return 'oficio'
-  if(/(m[eé]dico|doctor|medicina)/i.test(txt))return 'profesional'
-  if(/(abogad)/i.test(txt))                   return 'profesional'
-  if(/(contador|contabilidad)/i.test(txt))    return 'profesional'
-  if(/(psic[oó]log)/i.test(txt))              return 'profesional'
-  if(/(arquitecto|ingeniero)/i.test(txt))     return 'profesional'
-  if(/(profesional)/i.test(txt))              return 'profesional'
+  if(/(electricista|electricidad|plomer|alban[ií]l|pintor|gasista|carpintero|jardinero|oficio|técnico|mecán)/i.test(txt)) return 'oficio'
+  if(/(m[eé]dico|doctor|abogad|contador|psic[oó]log|arquitecto|ingeniero|profesional)/i.test(txt)) return 'profesional'
   if(/(emprendimiento|emprendedor|negocio|marca)/i.test(txt)) return 'emprendimiento'
-  if(/(empresa|comercio|empleado|contratar)/i.test(txt))      return 'empresa'
-  if(/(cv|currículum|empleo|trabajo\s+busc)/i.test(txt))      return 'cv'
+  if(/(empresa|comercio)/i.test(txt))       return 'empresa'
+  if(/(cv|currículum|busco trabajo)/i.test(txt)) return 'cv'
   return null
 }
 
@@ -337,10 +395,7 @@ function decir(txt, btns){
   abrirBurbuja(); hablar(txt)
 }
 
-function hint(txt){
-  const el = document.getElementById('cami-mic-hint')
-  if(el) el.textContent = txt
-}
+function hint(txt){ const el = document.getElementById('cami-mic-hint'); if(el) el.textContent = txt }
 
 function abrirBurbuja(){
   document.getElementById('cami-burbuja')?.classList.add('visible')
@@ -354,24 +409,38 @@ function cerrarBurbuja(){
 window._cami = { toggleBurbuja(){ _burbujaVisible ? cerrarBurbuja() : abrirBurbuja() } }
 
 function btnSiNo(){
-  return `<button class="cb-si" onclick="aceptarAyuda()">👍 Sí, ayudame</button>
+  return `<button class="cb-si" onclick="aceptarAyuda()">👍 Sí</button>
           <button class="cb-no" onclick="rechazarAyuda()">No, gracias</button>`
 }
 function btnMic(){
   return SR ? `<button id="cb-mic" class="cb-mic" onclick="toggleMic()" title="Hablar con Cami">🎤</button>` : ''
 }
 
+/* ─────────────────────────────────────────────────────
+   ACEPTAR / RECHAZAR AYUDA
+───────────────────────────────────────────────────────*/
 window.aceptarAyuda = function(){
-  _ayudando=true; _escuchaModo=true
-  const txt = T.siAyuda + ' ' + T.micInfo
-  document.getElementById('cami-txt').textContent = txt
-  document.getElementById('cami-btns').innerHTML = btnMic()
-  hablar(txt)
-  if(EN_REGISTRO) document.getElementById('rNombre')?.focus()
+  _ayudando = true; _escuchaModo = true
+  if(_modoActual === 'registro'){
+    const txt = T.siAyuda + ' ' + T.micInfo
+    document.getElementById('cami-txt').textContent = txt
+    document.getElementById('cami-btns').innerHTML = btnMic()
+    hablar(txt)
+    document.getElementById('rNombre')?.focus()
+  } else if(_modoActual === 'bv'){
+    document.getElementById('cami-txt').textContent = T.bvIntro
+    document.getElementById('cami-btns').innerHTML = btnMic()
+    hablar(T.bvIntro)
+  } else if(_modoActual === 'servicio'){
+    const txt = 'Bárbaro. Completá los datos del formulario y yo te voy guiando en cada paso. ' + T.micInfo
+    document.getElementById('cami-txt').textContent = txt
+    document.getElementById('cami-btns').innerHTML = btnMic()
+    hablar(txt)
+  }
 }
 
 window.rechazarAyuda = function(){
-  _ayudando=false; _escuchaModo=false
+  _ayudando = false; _escuchaModo = false
   document.getElementById('cami-txt').textContent = T.noAyuda
   document.getElementById('cami-btns').innerHTML = btnMic()
   hablar(T.noAyuda)
@@ -398,8 +467,62 @@ function bindRegistro(){
     document.getElementById('cami-txt').textContent = msg; hablar(msg)
   })
   document.querySelector('.btn-google')?.addEventListener('click', () => {
-    if(_ayudando){ document.getElementById('cami-txt').textContent = T.google; hablar(T.google) }
+    if(_ayudando){ document.getElementById('cami-txt').textContent = '¡Buena! Con Google es más rápido.'; hablar('Buena elección. Con Google es más rápido, solo confirmá tu cuenta.') }
   })
+}
+
+/* ─────────────────────────────────────────────────────
+   BIND OVERLAY BIENVENIDA — perfil.html
+   (Cami aparece dentro del overlay #bv-overlay)
+───────────────────────────────────────────────────────*/
+window._camiActivarBienvenida = function(){
+  _modoActual = 'bv'
+
+  // Reposicionar: en el overlay queremos Cami dentro
+  const widget = document.getElementById('cami-widget')
+  if(widget){
+    widget.style.top    = 'auto'
+    widget.style.bottom = '12px'
+    widget.style.right  = '12px'
+    widget.style.zIndex = '9999'
+  }
+
+  // Escuchar clicks en opciones para guiar
+  setTimeout(() => {
+    document.querySelectorAll('.bv-op').forEach(el => {
+      el.addEventListener('click', () => {
+        if(!_ayudando) return
+        const id = el.id.replace('bvop-', '')
+        const msg = T.bvOpciones[id] || ''
+        if(msg){
+          setTimeout(() => {
+            document.getElementById('cami-txt').textContent = msg
+            document.getElementById('cami-btns').innerHTML = btnMic()
+            hablar(msg)
+          }, 200)
+        }
+        // Detectar cliente → tip especial
+        if(id === 'cliente'){
+          setTimeout(() => decir(T.bvClienteTip), 400)
+        }
+      })
+    })
+
+    // Observar el botón Continuar para dar tip de múltiple selección
+    document.getElementById('bv-btn')?.addEventListener('click', () => {
+      if(!_ayudando) return
+      const btn = document.getElementById('bv-btn')
+      if(btn?.textContent?.includes(',')) decir(T.bvMultiTip)
+    }, { once: false })
+  }, 500)
+
+  const txtSaludo = YA_SALUDE ? T.saludoCorto : T.saludo
+  setTimeout(() => {
+    document.getElementById('cami-txt').textContent = txtSaludo
+    document.getElementById('cami-btns').innerHTML = btnSiNo()
+    abrirBurbuja(); _escuchaModo = true; hablar(txtSaludo)
+    marcarSaludo()
+  }, 800)
 }
 
 /* ─────────────────────────────────────────────────────
@@ -415,11 +538,52 @@ function bindServicio(){
       if(msg){ document.getElementById('cami-txt').textContent = msg; hablar(msg) }
     })
   }
-  document.getElementById('inputFoto')?.addEventListener('change', () => { if(_ayudando) decir(T.fotoTip) })
-  document.getElementById('fotoCircle')?.addEventListener('click', () => { if(_ayudando) decir(T.fotoTip) })
+
+  // Foto — detectar si es cliente (no necesita foto)
+  const fotoListener = () => {
+    if(!_ayudando) return
+    const params = new URLSearchParams(location.search)
+    const tipo   = params.get('tipo') || ''
+    decir(tipo === 'cliente' ? T.fotoClienteTip : T.fotoTip)
+  }
+  document.getElementById('inputFoto')?.addEventListener('change', fotoListener)
+  document.getElementById('fotoCircle')?.addEventListener('click',  fotoListener)
+
+  // Localidad
+  ;['localidad','ciudad','rLocalidad'].forEach(id => {
+    document.getElementById(id)?.addEventListener('focus', () => {
+      if(_ayudando){ document.getElementById('cami-txt').textContent = T.ciudadTip; hablar(T.ciudadTip) }
+    })
+  })
+
+  // Descripción
+  ;['descripcion','descripcion2','titulo'].forEach(id => {
+    document.getElementById(id)?.addEventListener('focus', () => {
+      if(_ayudando){ document.getElementById('cami-txt').textContent = T.descripTip; hablar(T.descripTip) }
+    })
+  })
+
+  // Guardar
   document.querySelectorAll('button[type="submit"],[onclick*="guardar"]').forEach(btn => {
     btn.addEventListener('click', () => { if(_ayudando) setTimeout(() => decir(T.guardaTip), 300) })
   })
+
+  // Pre-llenar tip según ?tipo= en la URL (viene de bienvenida con ?bv=1)
+  const params  = new URLSearchParams(location.search)
+  const tipoUrl = params.get('tipo')
+  const desvBv  = params.get('bv') === '1'
+  if(tipoUrl && T.tipos[tipoUrl]){
+    // Dar tip del tipo 2s después de aceptar ayuda
+    const _origAceptar = window.aceptarAyuda
+    window.aceptarAyuda = function(){
+      _origAceptar()
+      setTimeout(() => {
+        if(_ayudando && tipoUrl){
+          decir(T.tipos[tipoUrl])
+        }
+      }, 2000)
+    }
+  }
 }
 
 /* ─────────────────────────────────────────────────────
@@ -437,17 +601,41 @@ function bindTeclado(){
 }
 
 /* ─────────────────────────────────────────────────────
-   INIT
+   INIT por página
 ───────────────────────────────────────────────────────*/
 function init(){
-  crearWidget(); bindTeclado()
-  if(EN_REGISTRO) bindRegistro()
-  if(EN_SERVICIO) bindServicio()
-  setTimeout(() => {
-    document.getElementById('cami-txt').textContent = T.saludo
-    document.getElementById('cami-btns').innerHTML = btnSiNo()
-    abrirBurbuja(); _escuchaModo=true; hablar(T.saludo)
-  }, EN_SERVICIO ? 1200 : 1800)
+  crearWidget()
+  bindTeclado()
+
+  if(EN_REGISTRO){
+    _modoActual = 'registro'
+    bindRegistro()
+    // Primera vez o regresó a registro → limpiar bandera para que no salude de nuevo
+    const txtSaludo = YA_SALUDE ? T.saludoCorto : T.saludo
+    setTimeout(() => {
+      document.getElementById('cami-txt').textContent = txtSaludo
+      document.getElementById('cami-btns').innerHTML = btnSiNo()
+      abrirBurbuja(); _escuchaModo = true; hablar(txtSaludo)
+      marcarSaludo()
+    }, 1800)
+
+  } else if(EN_SERVICIO){
+    _modoActual = 'servicio'
+    bindServicio()
+    const txtSaludo = YA_SALUDE ? T.saludoCorto : T.saludo
+    setTimeout(() => {
+      document.getElementById('cami-txt').textContent = txtSaludo
+      document.getElementById('cami-btns').innerHTML = btnSiNo()
+      abrirBurbuja(); _escuchaModo = true; hablar(txtSaludo)
+      marcarSaludo()
+    }, 1200)
+
+  } else if(EN_PERFIL){
+    _modoActual = 'perfil'
+    // En perfil.html solo se activa cuando aparece el overlay de bienvenida
+    // El hook _camiActivarBienvenida() lo llama mostrarBienvenida() en perfil.js
+    // No hacemos nada acá — esperamos que perfil.js lo invoque
+  }
 }
 
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init)
