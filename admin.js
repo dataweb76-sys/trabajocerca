@@ -726,11 +726,17 @@ async function cargarPub() {
 function renderSlots(seccion, contenedorId, total) {
   const cont = document.getElementById(contenedorId)
   if(!cont) return
-  const imgs = _pubConfig[seccion]?.imagenes || PUB_DEFAULTS[seccion]
+  const imgs  = _pubConfig[seccion]?.imagenes || PUB_DEFAULTS[seccion]
+  const links = _pubConfig[seccion]?.links    || []
   let html = ''
   for(let i = 0; i < total; i++) {
-    const url = imgs[i] || ''
-    const src = url ? (url.startsWith('http') ? url : ('/' + url)) : ''
+    const url      = imgs[i]  || ''
+    const link     = links[i] || ''
+    // Cache-bust para GIFs (evita que el browser muestre versión estática cacheada)
+    const esGifUrl = url.includes('.gif')
+    const src      = url
+      ? (url.startsWith('http') ? url : ('/' + url)) + (esGifUrl ? '?t=' + Date.now() : '')
+      : ''
     const tieneImg = !!src
     html += `
       <div style="background:#f8fafc;border:1.5px solid ${tieneImg?'#bfdbfe':'#e2e8f0'};border-radius:10px;overflow:hidden;text-align:center;">
@@ -741,6 +747,17 @@ function renderSlots(seccion, contenedorId, total) {
         </div>
         <div style="padding:8px 6px 10px;display:flex;flex-direction:column;gap:5px;align-items:center;">
           <div style="font-size:11px;font-weight:700;color:#64748b;">Slot ${i+1}</div>
+
+          <!-- Campo de link / Instagram -->
+          <input type="url"
+            id="link_${seccion}_${i}"
+            placeholder="https:// o instagram.com/usuario"
+            value="${link}"
+            style="width:100%;padding:5px 7px;border:1.5px solid #e2e8f0;border-radius:7px;
+                   font-size:10px;color:#374151;outline:none;"
+            onchange="window.guardarLink('${seccion}',${i},this.value)"
+            onblur="window.guardarLink('${seccion}',${i},this.value)">
+
           <label style="
             display:inline-flex;align-items:center;gap:5px;cursor:pointer;
             background:#2563eb;color:white;font-size:11px;font-weight:700;
@@ -762,13 +779,28 @@ function renderSlots(seccion, contenedorId, total) {
   cont.innerHTML = html
 }
 
+/* Guardar link de un slot sin recargar toda la vista */
+window.guardarLink = async function(seccion, idx, valor) {
+  if(!_pubConfig[seccion]) _pubConfig[seccion] = { imagenes: [...(PUB_DEFAULTS[seccion]||[])] }
+  if(!_pubConfig[seccion].links) _pubConfig[seccion].links = []
+  _pubConfig[seccion].links[idx] = valor.trim()
+  await guardarConfig()
+}
+
 window.subirPub = async function(seccion, idx, input) {
   if(!input.files?.length) return
   const file    = input.files[0]
   const esGif   = file.type === 'image/gif'
   const ext     = esGif ? 'gif' : 'jpg'
-  const path    = `pub/${seccion}_${idx+1}.${ext}`
+  // Timestamp en nombre → rompe caché del browser y del CDN
+  const ts      = Date.now()
+  const path    = `pub/${seccion}_${idx+1}_${ts}.${ext}`
   mostrarPubMsg('Subiendo imagen...', 'info')
+  // Borrar archivos anteriores del mismo slot (limpieza)
+  await Promise.allSettled([
+    supabase.storage.from('trabajos').remove([`pub/${seccion}_${idx+1}.jpg`]),
+    supabase.storage.from('trabajos').remove([`pub/${seccion}_${idx+1}.gif`]),
+  ])
 
   // GIFs: subir sin tocar (preserva animación)
   // Otras imágenes: redimensionar a formato banner (960×360 px, cropeado centrado)
@@ -820,7 +852,13 @@ window.borrarPub = async function(seccion, idx) {
   if(!confirm(`¿Borrar la imagen del slot ${idx+1} de "${seccion}"?`)) return
   mostrarPubMsg('Borrando...', 'info')
 
-  // Borrar del storage (intentar jpg y gif)
+  // Borrar del storage: la URL guardada tiene el nombre real con timestamp
+  const urlActual = _pubConfig[seccion]?.imagenes?.[idx] || ''
+  if(urlActual) {
+    const pathMatch = urlActual.match(/\/trabajos\/(.+)$/)
+    if(pathMatch) await supabase.storage.from('trabajos').remove([decodeURIComponent(pathMatch[1])])
+  }
+  // Fallback: intentar nombres sin timestamp
   await Promise.allSettled([
     supabase.storage.from('trabajos').remove([`pub/${seccion}_${idx+1}.jpg`]),
     supabase.storage.from('trabajos').remove([`pub/${seccion}_${idx+1}.gif`])

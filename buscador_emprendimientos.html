@@ -287,15 +287,16 @@ function renderEmprendimientos(lista) {
 }
 
 /* ── Banners entre emprendimientos ── */
-var _bannerImgsEmp = [
+var _bannerImgsEmp  = [
   '/banner-pub-empresa.jpg',
   '/banner-pub-tech.jpg',
   '/banner-pub-oficina.jpg',
   '/banner-pub-albanil.jpg',
   '/banner-pub-profesional.jpg'
 ]
-var _bannerCadaEmp = 3
-var _bannerIdxEmp  = 0
+var _bannerLinksEmp = []
+var _bannerCadaEmp  = 3
+var _bannerIdxEmp   = 0
 
 // Cargar config dinámica del admin
 fetch(SB_URL + '/rest/v1/configuracion?clave=eq.pub_config&select=valor', {
@@ -304,8 +305,9 @@ fetch(SB_URL + '/rest/v1/configuracion?clave=eq.pub_config&select=valor', {
   if(!rows?.[0]?.valor) return
   try {
     var cfg = JSON.parse(rows[0].valor)
-    if(cfg.emprendimientos?.imagenes?.length) _bannerImgsEmp = cfg.emprendimientos.imagenes.filter(Boolean)
-    if(cfg.emprendimientos?.cada) _bannerCadaEmp = cfg.emprendimientos.cada
+    if(cfg.emprendimientos?.imagenes?.length) _bannerImgsEmp  = cfg.emprendimientos.imagenes.filter(Boolean)
+    if(cfg.emprendimientos?.links?.length)    _bannerLinksEmp = cfg.emprendimientos.links
+    if(cfg.emprendimientos?.cada)             _bannerCadaEmp  = cfg.emprendimientos.cada
   } catch(e){}
 }).catch(function(){})
 
@@ -317,12 +319,16 @@ function inyectarBannersEmp(){
   var cards = Array.from(cont.querySelectorAll('.emp-card'))
   cards.forEach(function(card, i){
     if((i + 1) % _bannerCadaEmp === 0 && i < cards.length - 1){
+      var idx2 = _bannerIdxEmp % _bannerImgsEmp.length
+      var link = _bannerLinksEmp[idx2] || ''
       var a   = document.createElement('a')
-      a.href  = '/perfil_servicio.html?tipo=emprendimiento'
+      a.href  = link ? (link.startsWith('http') ? link : 'https://' + link) : '/perfil_servicio.html?tipo=emprendimiento'
+      a.target = link ? '_blank' : '_self'
+      a.rel    = link ? 'noopener noreferrer' : ''
       a.className = 'banner-emp'
       a.title = 'Publicita tu emprendimiento aquí'
       var img = document.createElement('img')
-      img.src = _bannerImgsEmp[_bannerIdxEmp % _bannerImgsEmp.length]
+      img.src = _bannerImgsEmp[idx2]
       img.alt = 'Publicita aquí'
       _bannerIdxEmp++
       a.appendChild(img)

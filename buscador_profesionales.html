@@ -115,8 +115,9 @@
     '/banner-pub-oficina.jpg',
     '/banner-pub-albanil.jpg'
   ]
+  var links       = []
   var cadaCuantos = 3
-  var imgIdx = 0
+  var imgIdx      = 0
 
   fetch(SUPA_URL + '/rest/v1/configuracion?clave=eq.pub_config&select=valor', {
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
@@ -125,20 +126,23 @@
     try {
       var cfg = JSON.parse(rows[0].valor)
       if(cfg.profesionales?.imagenes?.length) imagenes = cfg.profesionales.imagenes.filter(Boolean)
-      if(cfg.profesionales?.cada) cadaCuantos = cfg.profesionales.cada
+      if(cfg.profesionales?.links?.length)    links    = cfg.profesionales.links
+      if(cfg.profesionales?.cada)             cadaCuantos = cfg.profesionales.cada
     } catch(e){}
   }).catch(function(){})
 
   function crearBanner(){
+    var idx2 = imgIdx % imagenes.length
     var a = document.createElement('a')
-    a.href = '/perfil_servicio.html?tipo=profesional'
+    var link = links[idx2] || ''
+    a.href   = link ? (link.startsWith('http') ? link : 'https://' + link) : '/perfil_servicio.html?tipo=profesional'
+    a.target = link ? '_blank' : '_self'
+    a.rel    = link ? 'noopener noreferrer' : ''
     a.className = 'banner-entre-perfiles'
     a.title = 'Publicita aquí en Trabajos Cerca'
     var img = document.createElement('img')
-    var src = imagenes[imgIdx % imagenes.length]
-    img.src = src
+    img.src = imagenes[idx2]
     img.alt = 'Publicita aquí'
-    // Los GIFs usan img directo para preservar animación
     imgIdx++
     a.appendChild(img)
     return a

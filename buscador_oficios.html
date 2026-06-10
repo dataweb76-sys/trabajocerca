@@ -133,8 +133,9 @@ window._categoriasOficioPromise = fetch(
     '/banner-pub-tech.jpg',
     '/banner-pub-oficina.jpg'
   ]
+  var links       = []
   var cadaCuantos = 3
-  var imgIdx = 0
+  var imgIdx      = 0
 
   // Cargar config dinámica del admin
   fetch(SUPA_URL + '/rest/v1/configuracion?clave=eq.pub_config&select=valor', {
@@ -144,17 +145,22 @@ window._categoriasOficioPromise = fetch(
     try {
       var cfg = JSON.parse(rows[0].valor)
       if(cfg.oficios?.imagenes?.length) imagenes = cfg.oficios.imagenes
-      if(cfg.oficios?.cada) cadaCuantos = cfg.oficios.cada
+      if(cfg.oficios?.links?.length)    links    = cfg.oficios.links
+      if(cfg.oficios?.cada)             cadaCuantos = cfg.oficios.cada
     } catch(e){}
-  }).catch(function(){})  // silencioso si falla
+  }).catch(function(){})
 
   function crearBanner(){
+    var idx2 = imgIdx % imagenes.length
     var a = document.createElement('a')
-    a.href = '/perfil_servicio.html?tipo=oficio'
+    var link = links[idx2] || ''
+    a.href   = link ? (link.startsWith('http') ? link : 'https://' + link) : '/perfil_servicio.html?tipo=oficio'
+    a.target = link ? '_blank' : '_self'
+    a.rel    = link ? 'noopener noreferrer' : ''
     a.className = 'banner-entre-perfiles'
     a.title = 'Publicita aquí en Trabajos Cerca'
     var img = document.createElement('img')
-    img.src = imagenes[imgIdx % imagenes.length]
+    img.src = imagenes[idx2]
     img.alt = 'Publicita aquí'
     img.loading = 'lazy'
     imgIdx++

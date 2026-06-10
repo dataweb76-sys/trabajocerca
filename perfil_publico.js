@@ -149,12 +149,21 @@ async function cargarPerfil(){
       headers: { 'apikey': SUPA_KEY2, 'Authorization': 'Bearer ' + SUPA_KEY2 }
     }).then(function(r){ return r.json() }).then(function(rows){
       if(!rows?.[0]?.valor) return
-      var cfg = JSON.parse(rows[0].valor)
-      // Tomar del carrusel inicio_a (primero disponible)
-      var imgs = (cfg.inicio_a?.imagenes || cfg.oficios?.imagenes || []).filter(Boolean)
+      var cfg  = JSON.parse(rows[0].valor)
+      var sec  = cfg.inicio_a || cfg.oficios || {}
+      var imgs = (sec.imagenes || []).filter(Boolean)
+      var lnks = sec.links || []
       if(!imgs.length) return
-      var img = document.getElementById('banner-perfil-img')
-      if(img) img.src = imgs[Math.floor(Math.random() * imgs.length)]
+      var idx  = Math.floor(Math.random() * imgs.length)
+      var img  = document.getElementById('banner-perfil-img')
+      var a    = document.getElementById('banner-perfil-link')
+      if(img) img.src = imgs[idx]
+      if(a && lnks[idx]) {
+        var l = lnks[idx]
+        a.href   = l.startsWith('http') ? l : 'https://' + l
+        a.target = '_blank'
+        a.rel    = 'noopener noreferrer'
+      }
     }).catch(function(){})
   })()
 

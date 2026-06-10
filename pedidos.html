@@ -231,11 +231,21 @@
     headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
   }).then(function(r){ return r.json() }).then(function(rows){
     if(!rows?.[0]?.valor) return
-    var cfg = JSON.parse(rows[0].valor)
-    var imgs = (cfg.inicio_b?.imagenes || cfg.inicio_a?.imagenes || []).filter(Boolean)
+    var cfg  = JSON.parse(rows[0].valor)
+    var sec  = cfg.inicio_b || cfg.inicio_a || {}
+    var imgs = (sec.imagenes || []).filter(Boolean)
+    var lnks = sec.links || []
     if(!imgs.length) return
-    var img = document.getElementById('banner-pedidos-img')
-    if(img) img.src = imgs[Math.floor(Math.random() * imgs.length)]
+    var idx  = Math.floor(Math.random() * imgs.length)
+    var img  = document.getElementById('banner-pedidos-img')
+    var a    = document.getElementById('banner-pedidos-link')
+    if(img) img.src = imgs[idx]
+    if(a && lnks[idx]) {
+      var l = lnks[idx]
+      a.href   = l.startsWith('http') ? l : 'https://' + l
+      a.target = '_blank'
+      a.rel    = 'noopener noreferrer'
+    }
   }).catch(function(){})
 })()
 </script>
