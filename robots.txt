@@ -14,4 +14,4 @@ Disallow: /admin.html
 Disallow: /login
 Disallow: /login.html
 
-Sitemap: https://trabajocerca.vercel.app/sitemap.xml
+Sitemap: https://www.trabajoscerca.com.ar/sitemap.xml
