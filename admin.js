@@ -660,15 +660,19 @@ async function guardarCategorias() {
 ══════════════════════════════════════════════════════ */
 
 const PUB_DEFAULTS = {
-  inicio_a: ['banner-pub-albanil.jpg','banner-pub-empresa.jpg','banner-pub-profesional.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg'],
-  inicio_b: ['banner-pub-empresa.jpg','banner-pub-profesional.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg','banner-pub-albanil.jpg'],
-  oficios:  ['banner-pub-albanil.jpg','banner-pub-empresa.jpg','banner-pub-profesional.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg']
+  inicio_a:       ['banner-pub-albanil.jpg','banner-pub-empresa.jpg','banner-pub-profesional.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg'],
+  inicio_b:       ['banner-pub-empresa.jpg','banner-pub-profesional.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg','banner-pub-albanil.jpg'],
+  oficios:        ['banner-pub-albanil.jpg','banner-pub-empresa.jpg','banner-pub-profesional.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg'],
+  profesionales:  ['banner-pub-profesional.jpg','banner-pub-empresa.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg','banner-pub-albanil.jpg'],
+  emprendimientos:['banner-pub-empresa.jpg','banner-pub-tech.jpg','banner-pub-oficina.jpg','banner-pub-albanil.jpg','banner-pub-profesional.jpg']
 }
 
 let _pubConfig = {
-  inicio_a: { cantidad: 5, imagenes: [...PUB_DEFAULTS.inicio_a] },
-  inicio_b: { cantidad: 5, imagenes: [...PUB_DEFAULTS.inicio_b] },
-  oficios:  { cada: 3,    imagenes: [...PUB_DEFAULTS.oficios]  }
+  inicio_a:       { cantidad: 5, imagenes: [...PUB_DEFAULTS.inicio_a] },
+  inicio_b:       { cantidad: 5, imagenes: [...PUB_DEFAULTS.inicio_b] },
+  oficios:        { cada: 3,    imagenes: [...PUB_DEFAULTS.oficios]       },
+  profesionales:  { cada: 3,    imagenes: [...PUB_DEFAULTS.profesionales] },
+  emprendimientos:{ cada: 3,    imagenes: [...PUB_DEFAULTS.emprendimientos]}
 }
 
 window.togglePub = function() {
@@ -681,12 +685,16 @@ window.togglePub = function() {
 }
 
 window.abrirTabPub = function(tab) {
-  document.getElementById('tabContentInicio').style.display = tab === 'inicio' ? 'block' : 'none'
-  document.getElementById('tabContentOficios').style.display = tab === 'oficios' ? 'block' : 'none'
-  document.getElementById('tabPubInicio').style.cssText = tab === 'inicio'
-    ? 'background:#f59e0b;color:white;' : 'color:#f59e0b;border-color:#f59e0b;border:1.5px solid;background:white;'
-  document.getElementById('tabPubOficios').style.cssText = tab === 'oficios'
-    ? 'background:#ea580c;color:white;' : 'color:#ea580c;border-color:#ea580c;border:1.5px solid;background:white;'
+  const tabs = ['inicio','oficios','profesionales','emprendimientos']
+  const colores = { inicio:'#f59e0b', oficios:'#ea580c', profesionales:'#7c3aed', emprendimientos:'#059669' }
+  tabs.forEach(t => {
+    const cont = document.getElementById('tabContent_' + t)
+    const btn  = document.getElementById('tabPub_' + t)
+    if(cont) cont.style.display = t === tab ? 'block' : 'none'
+    if(btn)  btn.style.cssText  = t === tab
+      ? `background:${colores[t]};color:white;border-color:${colores[t]};`
+      : `color:${colores[t]};border-color:${colores[t]};border:1.5px solid;background:white;`
+  })
 }
 
 async function cargarPub() {
@@ -703,9 +711,16 @@ async function cargarPub() {
   if(cb) cb.value = _pubConfig.inicio_b?.cantidad || 5
   if(co) co.value = _pubConfig.oficios?.cada || 3
 
-  renderSlots('inicio_a', 'slots_inicio_a', 5)
-  renderSlots('inicio_b', 'slots_inicio_b', 5)
-  renderSlots('oficios',  'slots_oficios',   5)
+  const cp = document.getElementById('cadaProfesionales')
+  const ce = document.getElementById('cadaEmprendimientos')
+  if(cp) cp.value = _pubConfig.profesionales?.cada || 3
+  if(ce) ce.value = _pubConfig.emprendimientos?.cada || 3
+
+  renderSlots('inicio_a',       'slots_inicio_a',       5)
+  renderSlots('inicio_b',       'slots_inicio_b',       5)
+  renderSlots('oficios',        'slots_oficios',         5)
+  renderSlots('profesionales',  'slots_profesionales',   5)
+  renderSlots('emprendimientos','slots_emprendimientos',  5)
 }
 
 function renderSlots(seccion, contenedorId, total) {
@@ -715,23 +730,32 @@ function renderSlots(seccion, contenedorId, total) {
   let html = ''
   for(let i = 0; i < total; i++) {
     const url = imgs[i] || ''
-    // Si es URL relativa (archivo local) armarla, si es http usarla directo
-    const src = url.startsWith('http') ? url : ('/' + url)
+    const src = url ? (url.startsWith('http') ? url : ('/' + url)) : ''
+    const tieneImg = !!src
     html += `
-      <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;text-align:center;">
-        <div style="height:80px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-          ${src ? `<img src="${src}" style="width:100%;height:80px;object-fit:cover;" onerror="this.style.display='none'">` : '<i class="fa-solid fa-image" style="font-size:24px;color:#94a3b8;"></i>'}
+      <div style="background:#f8fafc;border:1.5px solid ${tieneImg?'#bfdbfe':'#e2e8f0'};border-radius:10px;overflow:hidden;text-align:center;">
+        <div style="height:80px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+          ${tieneImg
+            ? `<img src="${src}" style="width:100%;height:80px;object-fit:cover;" onerror="this.parentNode.innerHTML='<i class=\\'fa-solid fa-image\\' style=\\'font-size:24px;color:#94a3b8;\\'></i>'">`
+            : '<i class="fa-solid fa-image" style="font-size:24px;color:#94a3b8;"></i>'}
         </div>
-        <div style="padding:8px 6px 10px;">
-          <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px;">Imagen ${i+1}</div>
+        <div style="padding:8px 6px 10px;display:flex;flex-direction:column;gap:5px;align-items:center;">
+          <div style="font-size:11px;font-weight:700;color:#64748b;">Slot ${i+1}</div>
           <label style="
             display:inline-flex;align-items:center;gap:5px;cursor:pointer;
             background:#2563eb;color:white;font-size:11px;font-weight:700;
-            padding:5px 10px;border-radius:7px;">
-            <i class="fa-solid fa-upload"></i> Subir
-            <input type="file" accept="image/*" style="display:none"
+            padding:5px 10px;border-radius:7px;width:100%;justify-content:center;">
+            <i class="fa-solid fa-upload"></i> ${tieneImg ? 'Cambiar' : 'Subir'}
+            <input type="file" accept="image/*,image/gif" style="display:none"
               onchange="window.subirPub('${seccion}',${i},this)">
           </label>
+          ${tieneImg ? `
+          <button onclick="window.borrarPub('${seccion}',${i})"
+            style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;
+            background:#fee2e2;color:#dc2626;font-size:11px;font-weight:700;
+            padding:4px 10px;border-radius:7px;border:1.5px solid #fca5a5;width:100%;justify-content:center;">
+            <i class="fa-solid fa-trash"></i> Borrar
+          </button>` : ''}
         </div>
       </div>`
   }
@@ -741,22 +765,33 @@ function renderSlots(seccion, contenedorId, total) {
 window.subirPub = async function(seccion, idx, input) {
   if(!input.files?.length) return
   const file    = input.files[0]
-  const ext     = file.name.split('.').pop()
+  const esGif   = file.type === 'image/gif'
+  const ext     = esGif ? 'gif' : 'jpg'
   const path    = `pub/${seccion}_${idx+1}.${ext}`
   mostrarPubMsg('Subiendo imagen...', 'info')
 
-  // Comprimir si es muy grande (> 1MB)
+  // GIFs: subir sin tocar (preserva animación)
+  // Otras imágenes: redimensionar a formato banner (960×360 px, cropeado centrado)
   let blob = file
-  if(file.size > 800000) {
+  if(!esGif) {
     try {
       blob = await new Promise((res, rej) => {
         const img = new Image()
         img.onload = () => {
+          const BANNER_W = 960, BANNER_H = 360
           const cv = document.createElement('canvas')
-          const scale = Math.min(1, 1400 / img.width)
-          cv.width = img.width * scale; cv.height = img.height * scale
-          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height)
-          cv.toBlob(b => res(b), 'image/jpeg', 0.82)
+          cv.width = BANNER_W; cv.height = BANNER_H
+          const ctx = cv.getContext('2d')
+          // Escalar para cubrir el banner (cover)
+          const escalaW = BANNER_W / img.width
+          const escalaH = BANNER_H / img.height
+          const escala  = Math.max(escalaW, escalaH)
+          const dw = img.width  * escala
+          const dh = img.height * escala
+          const dx = (BANNER_W - dw) / 2
+          const dy = (BANNER_H - dh) / 2
+          ctx.drawImage(img, dx, dy, dw, dh)
+          cv.toBlob(b => res(b), 'image/jpeg', 0.85)
         }
         img.onerror = rej
         img.src = URL.createObjectURL(file)
@@ -764,19 +799,41 @@ window.subirPub = async function(seccion, idx, input) {
     } catch(e) { blob = file }
   }
 
-  const { data: up, error } = await supabase.storage.from('trabajos').upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
+  const contentType = esGif ? 'image/gif' : 'image/jpeg'
+  const { error } = await supabase.storage.from('trabajos').upload(path, blob, { upsert: true, contentType })
   if(error) { mostrarPubMsg('❌ Error al subir: ' + error.message, 'err'); return }
 
   const { data: urlData } = supabase.storage.from('trabajos').getPublicUrl(path)
   const url = urlData.publicUrl
 
-  if(!_pubConfig[seccion]) _pubConfig[seccion] = { imagenes: [...PUB_DEFAULTS[seccion]] }
-  if(!_pubConfig[seccion].imagenes) _pubConfig[seccion].imagenes = [...PUB_DEFAULTS[seccion]]
+  if(!_pubConfig[seccion]) _pubConfig[seccion] = { imagenes: [...(PUB_DEFAULTS[seccion]||[])] }
+  if(!_pubConfig[seccion].imagenes) _pubConfig[seccion].imagenes = [...(PUB_DEFAULTS[seccion]||[])]
   _pubConfig[seccion].imagenes[idx] = url
 
   await guardarConfig()
   renderSlots(seccion, `slots_${seccion}`, 5)
-  mostrarPubMsg('✅ Imagen ' + (idx+1) + ' actualizada correctamente', 'ok')
+  mostrarPubMsg('✅ Imagen ' + (idx+1) + ' actualizada' + (esGif ? ' (GIF animado)' : ' y redimensionada al formato banner'), 'ok')
+}
+
+/* ── Borrar imagen de un slot ── */
+window.borrarPub = async function(seccion, idx) {
+  if(!confirm(`¿Borrar la imagen del slot ${idx+1} de "${seccion}"?`)) return
+  mostrarPubMsg('Borrando...', 'info')
+
+  // Borrar del storage (intentar jpg y gif)
+  await Promise.allSettled([
+    supabase.storage.from('trabajos').remove([`pub/${seccion}_${idx+1}.jpg`]),
+    supabase.storage.from('trabajos').remove([`pub/${seccion}_${idx+1}.gif`])
+  ])
+
+  // Limpiar la URL de la config
+  if(_pubConfig[seccion]?.imagenes) {
+    _pubConfig[seccion].imagenes[idx] = ''
+  }
+
+  await guardarConfig()
+  renderSlots(seccion, `slots_${seccion}`, 5)
+  mostrarPubMsg('✅ Imagen del slot ' + (idx+1) + ' eliminada', 'ok')
 }
 
 window.guardarConfig = async function() {
@@ -784,9 +841,13 @@ window.guardarConfig = async function() {
   const ca = document.getElementById('cantInicio_a')
   const cb = document.getElementById('cantInicio_b')
   const co = document.getElementById('cadaOficios')
-  if(ca) _pubConfig.inicio_a.cantidad = parseInt(ca.value)
-  if(cb) _pubConfig.inicio_b.cantidad = parseInt(cb.value)
-  if(co) _pubConfig.oficios.cada      = parseInt(co.value)
+  const cp = document.getElementById('cadaProfesionales')
+  const ce = document.getElementById('cadaEmprendimientos')
+  if(ca) _pubConfig.inicio_a.cantidad       = parseInt(ca.value)
+  if(cb) _pubConfig.inicio_b.cantidad       = parseInt(cb.value)
+  if(co) _pubConfig.oficios.cada            = parseInt(co.value)
+  if(cp) _pubConfig.profesionales.cada      = parseInt(cp.value)
+  if(ce) _pubConfig.emprendimientos.cada    = parseInt(ce.value)
 
   const { error } = await supabase.from('configuracion')
     .upsert({ clave: 'pub_config', valor: JSON.stringify(_pubConfig) })

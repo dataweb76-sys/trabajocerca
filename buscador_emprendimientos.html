@@ -54,6 +54,21 @@
 .sin-resultados{text-align:center;padding:50px 20px;color:#64748b;}
 .sin-resultados i{font-size:36px;margin-bottom:10px;display:block;}
 .spinner{text-align:center;padding:40px;color:#059669;}
+
+/* ── Banners entre cards ── */
+.banner-emp{
+  display:block;
+  max-width:100%;
+  margin:0 0 14px;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,.10);
+  transition:transform .15s,box-shadow .15s;
+  line-height:0;
+  text-decoration:none;
+}
+.banner-emp:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.16);}
+.banner-emp img{width:100%;height:auto;display:block;}
 </style>
 </head>
 <body>
@@ -266,6 +281,54 @@ function renderEmprendimientos(lista) {
   })
 
   cont.innerHTML = html
+
+  // Inyectar banners entre cards
+  inyectarBannersEmp()
+}
+
+/* ── Banners entre emprendimientos ── */
+var _bannerImgsEmp = [
+  '/banner-pub-empresa.jpg',
+  '/banner-pub-tech.jpg',
+  '/banner-pub-oficina.jpg',
+  '/banner-pub-albanil.jpg',
+  '/banner-pub-profesional.jpg'
+]
+var _bannerCadaEmp = 3
+var _bannerIdxEmp  = 0
+
+// Cargar config dinámica del admin
+fetch(SB_URL + '/rest/v1/configuracion?clave=eq.pub_config&select=valor', {
+  headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+}).then(function(r){ return r.json() }).then(function(rows){
+  if(!rows?.[0]?.valor) return
+  try {
+    var cfg = JSON.parse(rows[0].valor)
+    if(cfg.emprendimientos?.imagenes?.length) _bannerImgsEmp = cfg.emprendimientos.imagenes.filter(Boolean)
+    if(cfg.emprendimientos?.cada) _bannerCadaEmp = cfg.emprendimientos.cada
+  } catch(e){}
+}).catch(function(){})
+
+function inyectarBannersEmp(){
+  var cont  = document.getElementById('resultados')
+  if(!cont) return
+  cont.querySelectorAll('.banner-emp').forEach(function(b){ b.remove() })
+  _bannerIdxEmp = 0
+  var cards = Array.from(cont.querySelectorAll('.emp-card'))
+  cards.forEach(function(card, i){
+    if((i + 1) % _bannerCadaEmp === 0 && i < cards.length - 1){
+      var a   = document.createElement('a')
+      a.href  = '/perfil_servicio.html?tipo=emprendimiento'
+      a.className = 'banner-emp'
+      a.title = 'Publicita tu emprendimiento aquí'
+      var img = document.createElement('img')
+      img.src = _bannerImgsEmp[_bannerIdxEmp % _bannerImgsEmp.length]
+      img.alt = 'Publicita aquí'
+      _bannerIdxEmp++
+      a.appendChild(img)
+      card.parentNode.insertBefore(a, card.nextSibling)
+    }
+  })
 }
 
 /* ── Init ── */

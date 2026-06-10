@@ -14,6 +14,31 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<style>
+.banner-entre-perfiles{
+  display:block;
+  max-width:480px;
+  margin:0 auto 16px;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,.12);
+  transition:transform .15s,box-shadow .15s;
+  line-height:0;
+  text-decoration:none;
+}
+.banner-entre-perfiles:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+}
+.banner-entre-perfiles img{
+  width:100%;
+  height:auto;
+  display:block;
+}
+@media(max-width:520px){
+  .banner-entre-perfiles{ max-width:100%; }
+}
+</style>
 </head>
 <body>
 
@@ -76,6 +101,75 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>window._TC_TIPO = "profesional"</script>
 <script type="module" src="/buscador_core.js"></script>
+
+<!-- Banners entre perfiles (config dinámica desde admin) -->
+<script>
+(function(){
+  var SUPA_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+
+  var imagenes = [
+    '/banner-pub-profesional.jpg',
+    '/banner-pub-empresa.jpg',
+    '/banner-pub-tech.jpg',
+    '/banner-pub-oficina.jpg',
+    '/banner-pub-albanil.jpg'
+  ]
+  var cadaCuantos = 3
+  var imgIdx = 0
+
+  fetch(SUPA_URL + '/rest/v1/configuracion?clave=eq.pub_config&select=valor', {
+    headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY }
+  }).then(function(r){ return r.json() }).then(function(rows){
+    if(!rows?.[0]?.valor) return
+    try {
+      var cfg = JSON.parse(rows[0].valor)
+      if(cfg.profesionales?.imagenes?.length) imagenes = cfg.profesionales.imagenes.filter(Boolean)
+      if(cfg.profesionales?.cada) cadaCuantos = cfg.profesionales.cada
+    } catch(e){}
+  }).catch(function(){})
+
+  function crearBanner(){
+    var a = document.createElement('a')
+    a.href = '/perfil_servicio.html?tipo=profesional'
+    a.className = 'banner-entre-perfiles'
+    a.title = 'Publicita aquí en Trabajos Cerca'
+    var img = document.createElement('img')
+    var src = imagenes[imgIdx % imagenes.length]
+    img.src = src
+    img.alt = 'Publicita aquí'
+    // Los GIFs usan img directo para preservar animación
+    imgIdx++
+    a.appendChild(img)
+    return a
+  }
+
+  function inyectarBanners(){
+    var resultados = document.getElementById('resultados')
+    if(!resultados) return
+    resultados.querySelectorAll('.banner-entre-perfiles').forEach(function(b){ b.remove() })
+    imgIdx = 0
+    var cards = Array.from(resultados.querySelectorAll('.card'))
+    cards.forEach(function(card, i){
+      if((i + 1) % cadaCuantos === 0 && i < cards.length - 1){
+        card.parentNode.insertBefore(crearBanner(), card.nextSibling)
+      }
+    })
+  }
+
+  var observer = new MutationObserver(function(mutations){
+    var hayCards = mutations.some(function(m){
+      return Array.from(m.addedNodes).some(function(n){ return n.classList && n.classList.contains('card') })
+    })
+    if(hayCards) setTimeout(inyectarBanners, 50)
+  })
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var resultados = document.getElementById('resultados')
+    if(resultados) observer.observe(resultados, { childList: true, subtree: false })
+  })
+})()
+</script>
 <script src="/notif_widget.js"></script>
 <script src="/push_widget.js"></script>
 <script src="/chat_widget.js"></script>
