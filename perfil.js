@@ -565,6 +565,34 @@ async function init(){
         </button>
       </div>
 
+      <!-- ── PRÓXIMO PARTIDO ── -->
+      <div id="prodePartidoWrap" style="
+        display:none;margin-bottom:14px;
+        background:rgba(250,204,21,.08);border:1.5px solid rgba(250,204,21,.35);
+        border-radius:14px;padding:13px 15px;
+      ">
+        <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:#fbbf24;text-transform:uppercase;margin-bottom:8px;">
+          🗓 Próximo partido
+        </div>
+        <div id="prodePartidoInfo" style="font-size:15px;font-weight:900;color:white;text-align:center;line-height:1.6;">…</div>
+        <div id="prodePartidoHora" style="font-size:11px;color:rgba(255,255,255,.55);text-align:center;margin-top:3px;"></div>
+        <!-- Resultado si terminó -->
+        <div id="prodeResultado" style="display:none;margin-top:10px;text-align:center;">
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:4px;">Resultado final</div>
+          <div id="prodeResultadoScore" style="font-size:22px;font-weight:900;color:white;"></div>
+          <div id="prodeMiPred" style="font-size:11px;margin-top:5px;"></div>
+        </div>
+        <!-- Bloqueo -->
+        <div id="prodeBloqueado" style="display:none;margin-top:8px;text-align:center;
+          background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.4);
+          border-radius:8px;padding:5px 10px;font-size:11px;color:#fca5a5;font-weight:700;">
+          🔒 Predicciones cerradas · El partido está por comenzar
+        </div>
+        <!-- Tiempo restante para predecir -->
+        <div id="prodeTiempoRestante" style="display:none;margin-top:8px;text-align:center;
+          font-size:11px;color:#6ee7b7;font-weight:700;"></div>
+      </div>
+
       <!-- Requisitos -->
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
 
@@ -902,6 +930,7 @@ async function init(){
 
   // Cargar datos del prode en la card (async, no bloquea render)
   cargarProdeCard(userId)
+  cargarPartidoProde(userId)
 
   // Chatbox de preguntas frecuentes
   montarFAQChat()
@@ -1273,6 +1302,111 @@ function cargarProdeCard(userId){
   const btnWrap = document.getElementById("prodeBtnWrap")
   if(succ)    succ.style.display    = ambos ? "block" : "none"
   if(btnWrap) btnWrap.style.display = ambos ? "none"  : "block"
+}
+
+/* ── PRODE: cargar próximo partido desde Supabase ── */
+async function cargarPartidoProde(userId){
+  try {
+    const ahora = new Date()
+
+    // Primero buscar partido en curso o de hoy sin resultado
+    const { data: proximos } = await supabase
+      .from("mundial_partidos")
+      .select("*, equipo_local:mundial_equipos!equipo_local_id(nombre,bandera), equipo_visit:mundial_equipos!equipo_visitante_id(nombre,bandera)")
+      .is("goles_local", null)
+      .gte("fecha_inicio", new Date(ahora.getTime() - 120*60*1000).toISOString()) // hasta 2h pasados
+      .order("fecha_inicio")
+      .limit(1)
+
+    // Si no hay próximo sin resultado, mostrar el último jugado
+    const { data: terminados } = await supabase
+      .from("mundial_partidos")
+      .select("*, equipo_local:mundial_equipos!equipo_local_id(nombre,bandera), equipo_visit:mundial_equipos!equipo_visitante_id(nombre,bandera)")
+      .not("goles_local", "is", null)
+      .order("fecha_inicio", { ascending: false })
+      .limit(1)
+
+    let partido = proximos?.[0] || null
+    let esTerminado = false
+
+    if(!partido && terminados?.[0]){
+      // Solo mostrar el último terminado si fue en las últimas 24h
+      const ultFecha = new Date(terminados[0].fecha_inicio)
+      if(ahora - ultFecha < 24*60*60*1000){
+        partido = terminados[0]
+        esTerminado = true
+      }
+    }
+
+    if(!partido) return
+
+    const wrap    = document.getElementById("prodePartidoWrap")
+    const infoEl  = document.getElementById("prodePartidoInfo")
+    const horaEl  = document.getElementById("prodePartidoHora")
+    const bloqEl  = document.getElementById("prodeBloqueado")
+    const tResEl  = document.getElementById("prodeTiempoRestante")
+    const resWrap = document.getElementById("prodeResultado")
+    const resScore= document.getElementById("prodeResultadoScore")
+    const miPred  = document.getElementById("prodeMiPred")
+    if(!wrap || !infoEl) return
+
+    const kick  = new Date(partido.fecha_inicio)
+    const flagL = partido.equipo_local?.bandera  || "🏳️"
+    const flagV = partido.equipo_visit?.bandera  || "🏳️"
+    const nomL  = partido.equipo_local?.nombre   || partido.desc_local    || "Por definir"
+    const nomV  = partido.equipo_visit?.nombre   || partido.desc_visitante || "Por definir"
+    const hora  = kick.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
+    const fecha = kick.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long",timeZone:"America/Argentina/Buenos_Aires"})
+
+    infoEl.innerHTML = `${flagL} <strong>${nomL}</strong> <span style="color:#fbbf24;font-size:12px;">vs</span> <strong>${nomV}</strong> ${flagV}`
+
+    if(esTerminado){
+      // Mostrar resultado final
+      horaEl.textContent = `Terminó · ${fecha}`
+      if(resWrap) resWrap.style.display = "block"
+      if(resScore) resScore.textContent = `${partido.goles_local} - ${partido.goles_visitante}`
+
+      // Buscar mi predicción
+      if(userId && miPred){
+        const { data: pred } = await supabase
+          .from("mundial_predicciones")
+          .select("goles_local,goles_visitante,puntos_obtenidos")
+          .eq("user_id", userId)
+          .eq("partido_id", partido.id)
+          .single()
+
+        if(pred){
+          const pts = pred.puntos_obtenidos || 0
+          const color = pts >= 3 ? "#4ade80" : pts >= 1 ? "#fbbf24" : "#f87171"
+          const label = pts >= 3 ? "🎯 ¡Resultado exacto! +3 pts" : pts >= 1 ? "👍 Tendencia correcta +1 pt" : "❌ No acertaste"
+          miPred.innerHTML = `<span style="color:rgba(255,255,255,.5);">Tu pred: ${pred.goles_local}-${pred.goles_visitante}</span>
+            <span style="margin-left:8px;color:${color};font-weight:800;">${label}</span>`
+        }
+      }
+    } else {
+      // Partido próximo
+      const bloqueado = ahora >= new Date(kick.getTime() - 60*60*1000)
+
+      if(bloqueado){
+        horaEl.textContent = `Hoy a las ${hora}hs · ¡Ya está por comenzar!`
+        if(bloqEl) bloqEl.style.display = "block"
+      } else {
+        // Tiempo restante
+        const msRestantes = kick.getTime() - 60*60*1000 - ahora.getTime()
+        const hRest = Math.floor(msRestantes / 3600000)
+        const mRest = Math.floor((msRestantes % 3600000) / 60000)
+        const tiempoStr = hRest > 0 ? `${hRest}h ${mRest}min` : `${mRest} minutos`
+
+        horaEl.textContent = `${fecha} a las ${hora}hs`
+        if(tResEl){
+          tResEl.textContent = `⏱ Podés predecir por ${tiempoStr} más`
+          tResEl.style.display = "block"
+        }
+      }
+    }
+
+    wrap.style.display = "block"
+  } catch(e){ /* silencioso */ }
 }
 
 /* ── Helpers globales para marcar desde onclick ── */
