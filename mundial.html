@@ -1930,337 +1930,299 @@ init()
 <script type="module">
 import { supabase } from "/supabase.js"
 
+/* ─── helpers ─────────────────────────────────────── */
+const vacioMsg = (el, txt) => { if(el) el.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">${txt}</div>` }
+
 /* ══════════════════════════════════
    PARTIDOS DE HOY
 ══════════════════════════════════ */
 async function cargarPartidosHoy(){
-  const ahora  = new Date()
-  const hoyIni = new Date(ahora); hoyIni.setHours(0,0,0,0)
-  const hoyFin = new Date(ahora); hoyFin.setHours(23,59,59,999)
-
-  let { data: partidos } = await supabase
-    .from("mundial_partidos")
-    .select("*, equipo_local:mundial_equipos!equipo_local_id(id,nombre,bandera,codigo_fifa), equipo_visit:mundial_equipos!equipo_visitante_id(id,nombre,bandera,codigo_fifa)")
-    .gte("fecha_inicio", hoyIni.toISOString())
-    .lte("fecha_inicio", hoyFin.toISOString())
-    .order("fecha_inicio")
-
-  const titulo = document.getElementById("tituloPartidosHoy")
   const lista  = document.getElementById("listaPartidosHoy")
+  const titulo = document.getElementById("tituloPartidosHoy")
+  try {
+    const ahora = new Date()
+    // Rango día Argentina (UTC-3)
+    const dStr  = new Date(ahora.getTime() - 3*3600000).toISOString().slice(0,10)
+    const ini   = new Date(dStr + "T03:00:00.000Z")   // medianoche AR = 03:00 UTC
+    const fin   = new Date(dStr + "T26:59:59.000Z")   // 23:59 AR = 02:59 UTC siguiente
 
-  if(!partidos || !partidos.length){
-    // Sin partidos hoy → mostrar próximos 3
-    const { data: prox } = await supabase
+    let { data: partidos } = await supabase
       .from("mundial_partidos")
-      .select("*, equipo_local:mundial_equipos!equipo_local_id(id,nombre,bandera,codigo_fifa), equipo_visit:mundial_equipos!equipo_visitante_id(id,nombre,bandera,codigo_fifa)")
-      .is("goles_local", null)
-      .gte("fecha_inicio", ahora.toISOString())
+      .select("id,fecha_inicio,grupo,fase,desc_local,desc_visitante,goles_local,goles_visitante,equipo_local_id,equipo_visitante_id")
+      .gte("fecha_inicio", ini.toISOString())
+      .lte("fecha_inicio", fin.toISOString())
       .order("fecha_inicio")
-      .limit(3)
-    partidos = prox
-    if(titulo) titulo.textContent = "Próximos partidos"
-  }
 
-  if(!partidos || !partidos.length){
-    lista.innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;">No hay partidos programados por ahora.</div>`
-    return
-  }
+    if(!partidos || !partidos.length){
+      // No hay hoy → próximos 4
+      const { data: prox } = await supabase
+        .from("mundial_partidos")
+        .select("id,fecha_inicio,grupo,fase,desc_local,desc_visitante,goles_local,goles_visitante,equipo_local_id,equipo_visitante_id")
+        .is("goles_local", null)
+        .gte("fecha_inicio", ahora.toISOString())
+        .order("fecha_inicio")
+        .limit(4)
+      partidos = prox
+      if(titulo) titulo.textContent = "Próximos partidos"
+    }
 
-  // Predicciones del usuario para estos partidos
-  const { data: { user } } = await supabase.auth.getUser()
-  let misPreds = {}
-  if(user){
-    const ids = partidos.map(p => p.id)
-    const { data: preds } = await supabase
-      .from("mundial_predicciones")
-      .select("partido_id,goles_local,goles_visitante,puntos_obtenidos")
-      .eq("user_id", user.id)
-      .in("partido_id", ids)
-    if(preds) preds.forEach(p => misPreds[p.partido_id] = p)
-  }
+    if(!partidos || !partidos.length){
+      vacioMsg(lista, "No hay partidos programados por ahora.")
+      return
+    }
 
-  lista.innerHTML = partidos.map(p => {
-    const kick      = new Date(p.fecha_inicio)
-    const hora      = kick.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
-    const terminado = p.goles_local !== null && p.goles_local !== undefined
-    const enCurso   = !terminado && ahora >= kick && ahora < new Date(kick.getTime() + 120*60*1000)
-    const bloqueado = !terminado && ahora >= new Date(kick.getTime() - 60*60*1000)
-    const pred      = misPreds[p.id]
+    // Cargar equipos y predicciones
+    const eqIds = [...new Set([
+      ...partidos.map(p => p.equipo_local_id),
+      ...partidos.map(p => p.equipo_visitante_id)
+    ].filter(Boolean))]
 
-    const nomL = p.equipo_local?.nombre  || p.desc_local    || "Por definir"
-    const nomV = p.equipo_visit?.nombre  || p.desc_visitante || "Por definir"
-    const flagL = p.equipo_local?.bandera || "🏳️"
-    const flagV = p.equipo_visit?.bandera || "🏳️"
+    const { data: eqData } = eqIds.length
+      ? await supabase.from("mundial_equipos").select("id,nombre,bandera").in("id", eqIds)
+      : { data: [] }
+    const EQ = {}; (eqData||[]).forEach(e => EQ[e.id] = e)
 
-    let claseCard = terminado ? "terminado" : bloqueado ? "bloqueado" : ""
-    let badge = ""
-    if(enCurso)   badge = `<div class="partido-badge badge-vivo">🔴 En vivo</div>`
-    else if(terminado) badge = `<div class="partido-badge badge-final">Finalizado</div>`
-    else if(bloqueado) badge = `<div class="partido-badge badge-bloq">🔒 Cerrado</div>`
-    else badge = `<div class="partido-badge badge-abierto">⏱ ${hora}hs</div>`
+    const { data: { user } } = await supabase.auth.getUser()
+    let PREDS = {}
+    if(user){
+      const { data: preds } = await supabase
+        .from("mundial_predicciones")
+        .select("partido_id,goles_local,goles_visitante,puntos_obtenidos")
+        .eq("user_id", user.id)
+        .in("partido_id", partidos.map(p => p.id))
+      ;(preds||[]).forEach(p => PREDS[p.partido_id] = p)
+    }
 
-    let centroHTML = ""
-    if(terminado){
-      let predHTML = ""
-      if(pred){
-        const pts = pred.puntos_obtenidos || 0
-        const col = pts>=3?"#15803d":pts>=1?"#d97706":"#dc2626"
-        const lbl = pts>=3?"🎯 +3":"👍 +1":"❌ 0"
-        predHTML = `<div style="font-size:11px;color:${col};font-weight:800;">${lbl}</div>`
-      }
-      centroHTML = `
-        <div class="partido-vs">
+    lista.innerHTML = partidos.map(p => {
+      const kick      = new Date(p.fecha_inicio)
+      const hora      = kick.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
+      const terminado = p.goles_local !== null && p.goles_local !== undefined
+      const bloqueado = !terminado && ahora >= new Date(kick.getTime() - 3600000)
+      const pred      = PREDS[p.id]
+      const nomL      = EQ[p.equipo_local_id]?.nombre   || p.desc_local      || "Por definir"
+      const nomV      = EQ[p.equipo_visitante_id]?.nombre|| p.desc_visitante  || "Por definir"
+      const flagL     = EQ[p.equipo_local_id]?.bandera   || "🏳️"
+      const flagV     = EQ[p.equipo_visitante_id]?.bandera|| "🏳️"
+
+      let badge
+      if(terminado)   badge = `<div class="partido-badge badge-final">Finalizado</div>`
+      else if(bloqueado) badge = `<div class="partido-badge badge-bloq">🔒 Cerrado</div>`
+      else            badge = `<div class="partido-badge badge-abierto">⏱ ${hora}hs</div>`
+
+      let centro
+      if(terminado){
+        const pts = pred?.puntos_obtenidos ?? -1
+        const ptsTxt = pts>=3 ? `<span style="color:#15803d;font-weight:800;">🎯 +3 pts</span>`
+                      : pts>=1 ? `<span style="color:#d97706;font-weight:800;">👍 +1 pt</span>`
+                      : pts===0 ? `<span style="color:#dc2626;font-weight:800;">❌ 0 pts</span>` : ""
+        centro = `<div class="partido-vs">
           <div class="partido-score">${p.goles_local} — ${p.goles_visitante}</div>
           ${badge}
-          ${predHTML}
+          ${pred ? `<div style="font-size:11px;color:#64748b;">Tu pred: ${pred.goles_local}-${pred.goles_visitante} ${ptsTxt}</div>` : ""}
         </div>`
-    } else if(bloqueado || !user){
-      centroHTML = `
-        <div class="partido-vs">
+      } else if(bloqueado || !user){
+        centro = `<div class="partido-vs">
           <div class="partido-hora">${hora}hs</div>
           ${badge}
-          ${pred ? `<div style="font-size:12px;color:#15803d;font-weight:700;margin-top:4px;">✅ ${pred.goles_local}-${pred.goles_visitante}</div>` : ""}
+          ${pred ? `<div style="font-size:11px;color:#15803d;font-weight:700;">✅ ${pred.goles_local}-${pred.goles_visitante}</div>` : ""}
         </div>`
-    } else {
-      // Abierto + usuario logueado → inputs de predicción
-      const gl = pred?.goles_local   ?? ""
-      const gv = pred?.goles_visitante ?? ""
-      centroHTML = `
-        <div class="partido-vs">
+      } else {
+        const gl = pred?.goles_local   ?? ""
+        const gv = pred?.goles_visitante ?? ""
+        centro = `<div class="partido-vs">
           <div class="partido-hora">${hora}hs</div>
           ${badge}
           <div class="pred-inline">
-            <input type="number" min="0" max="20" value="${gl}" id="gl-${p.id}" placeholder="0" oninput="this.value=this.value.slice(0,2)">
+            <input type="number" min="0" max="20" value="${gl}" id="gl-${p.id}" placeholder="0">
             <span style="font-weight:900;color:#94a3b8;">-</span>
-            <input type="number" min="0" max="20" value="${gv}" id="gv-${p.id}" placeholder="0" oninput="this.value=this.value.slice(0,2)">
-            <button class="pred-btn" onclick="guardarPredHoy(${p.id})">
-              ${pred ? "✏️" : "Guardar"}
-            </button>
+            <input type="number" min="0" max="20" value="${gv}" id="gv-${p.id}" placeholder="0">
+            <button class="pred-btn" id="pbtn-${p.id}" onclick="guardarPredHoy(${p.id})">${pred?"✏️":"Guardar"}</button>
           </div>
         </div>`
-    }
+      }
 
-    return `<div class="partido-hoy-card ${claseCard}">
-      <div class="partido-equipo">
-        <span style="font-size:20px;">${flagL}</span>
-        <span>${nomL}</span>
-      </div>
-      ${centroHTML}
-      <div class="partido-equipo derecha">
-        <span style="font-size:20px;">${flagV}</span>
-        <span>${nomV}</span>
-      </div>
-    </div>`
-  }).join("")
+      const clase = terminado ? "terminado" : bloqueado ? "bloqueado" : ""
+      return `<div class="partido-hoy-card ${clase}">
+        <div class="partido-equipo"><span style="font-size:20px;">${flagL}</span><span>${nomL}</span></div>
+        ${centro}
+        <div class="partido-equipo derecha"><span style="font-size:20px;">${flagV}</span><span>${nomV}</span></div>
+      </div>`
+    }).join("")
+
+  } catch(e){
+    console.error("cargarPartidosHoy:", e)
+    vacioMsg(lista, "No se pudieron cargar los partidos.")
+  }
 }
 
 window.guardarPredHoy = async function(pid){
-  const gl = parseInt(document.getElementById("gl-"+pid)?.value)
-  const gv = parseInt(document.getElementById("gv-"+pid)?.value)
-  if(isNaN(gl)||isNaN(gv)){ alert("Ingresá los dos resultados"); return }
+  const gl  = parseInt(document.getElementById("gl-"+pid)?.value)
+  const gv  = parseInt(document.getElementById("gv-"+pid)?.value)
+  const btn = document.getElementById("pbtn-"+pid)
+  if(isNaN(gl)||isNaN(gv)){ if(btn){ btn.textContent="❗"; setTimeout(()=>btn.textContent="Guardar",1500) } return }
   const { data:{user} } = await supabase.auth.getUser()
-  if(!user){ alert("Tenés que iniciar sesión para predecir"); return }
-  const btn = document.querySelector(`[onclick="guardarPredHoy(${pid})"]`)
+  if(!user){ alert("Iniciá sesión para predecir"); return }
   if(btn){ btn.disabled=true; btn.textContent="..." }
   const { error } = await supabase.from("mundial_predicciones").upsert(
     { user_id:user.id, partido_id:pid, goles_local:gl, goles_visitante:gv },
     { onConflict:"user_id,partido_id" }
   )
-  if(btn){ btn.disabled=false; btn.textContent = error ? "Error" : "✅" }
-  if(!error && btn) setTimeout(()=>{ btn.textContent="✏️" }, 2000)
+  if(btn){ btn.disabled=false; btn.textContent = error ? "Error" : "✅"; setTimeout(()=>{ if(btn) btn.textContent="✏️" },2000) }
 }
 
 /* ══════════════════════════════════
    TABLAS DE POSICIONES
 ══════════════════════════════════ */
 const GRUPOS = ["A","B","C","D","E","F","G","H","I","J","K","L"]
-let _tablaGrupoActual = "A"
-let _tablaEquipos = {}
-let _tablaPartidos = []
+let _tgActual = "A", _tgEq = {}, _tgPart = []
 
 async function cargarTablas(){
-  const [eqRes, ptRes] = await Promise.all([
-    supabase.from("mundial_equipos").select("*"),
-    supabase.from("mundial_partidos").select("id,grupo,fase,equipo_local_id,equipo_visitante_id,goles_local,goles_visitante").eq("fase","grupo")
-  ])
-  if(eqRes.data) eqRes.data.forEach(e => _tablaEquipos[e.id] = e)
-  if(ptRes.data) _tablaPartidos = ptRes.data
+  try {
+    const [eqR, ptR] = await Promise.all([
+      supabase.from("mundial_equipos").select("id,nombre,bandera,grupo"),
+      supabase.from("mundial_partidos")
+        .select("id,grupo,equipo_local_id,equipo_visitante_id,goles_local,goles_visitante")
+        .eq("fase","grupo")
+    ])
+    if(eqR.data) eqR.data.forEach(e => _tgEq[e.id] = e)
+    if(ptR.data) _tgPart = ptR.data
 
-  // Generar botones de grupo
-  const btnsWrap = document.getElementById("tablaGrupoBtns")
-  if(btnsWrap){
-    btnsWrap.innerHTML = GRUPOS.map(g => `
+    const btns = document.getElementById("tablaGrupoBtns")
+    if(btns) btns.innerHTML = GRUPOS.map(g => `
       <button onclick="cambiarTablaGrupo('${g}')" id="tgb-${g}" style="
-        padding:7px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
-        border:1.5px solid ${g===_tablaGrupoActual?"#15803d":"#e2e8f0"};
-        background:${g===_tablaGrupoActual?"#15803d":"white"};
-        color:${g===_tablaGrupoActual?"white":"#64748b"};
-        transition:all .15s;">
-        Grupo ${g}
+        padding:6px 13px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+        border:1.5px solid ${g===_tgActual?"#15803d":"#e2e8f0"};
+        background:${g===_tgActual?"#15803d":"white"};
+        color:${g===_tgActual?"white":"#64748b"};transition:all .15s;">
+        ${g}
       </button>`).join("")
-  }
-  renderTablaGrupo(_tablaGrupoActual)
+
+    renderTablaGrupo(_tgActual)
+  } catch(e){ console.error("cargarTablas:", e) }
 }
 
 window.cambiarTablaGrupo = function(g){
-  _tablaGrupoActual = g
+  _tgActual = g
   GRUPOS.forEach(x => {
     const b = document.getElementById("tgb-"+x)
     if(!b) return
-    b.style.background = x===g ? "#15803d" : "white"
-    b.style.color      = x===g ? "white"   : "#64748b"
-    b.style.borderColor= x===g ? "#15803d" : "#e2e8f0"
+    b.style.background  = x===g ? "#15803d" : "white"
+    b.style.color       = x===g ? "white"   : "#64748b"
+    b.style.borderColor = x===g ? "#15803d" : "#e2e8f0"
   })
   renderTablaGrupo(g)
 }
 
 function renderTablaGrupo(g){
   const cont = document.getElementById("tablaContenido")
-  // Equipos del grupo
-  const eqs = Object.values(_tablaEquipos).filter(e => e.grupo === g)
+  const eqs  = Object.values(_tgEq).filter(e => e.grupo === g)
   if(!eqs.length){
-    cont.innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">Los equipos de este grupo se conocen a medida que avanza el torneo.</div>`
+    vacioMsg(cont, "Los equipos de este grupo se conocen a medida que avanza el torneo.")
     return
   }
-
-  // Calcular tabla
-  const stats = {}
-  eqs.forEach(e => stats[e.id] = { eq:e, pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts:0 })
-
-  _tablaPartidos.filter(p => p.grupo === g && p.goles_local !== null).forEach(p => {
-    const L = stats[p.equipo_local_id]
-    const V = stats[p.equipo_visitante_id]
-    if(!L || !V) return
-    const gl = p.goles_local, gv = p.goles_visitante
+  const st = {}
+  eqs.forEach(e => st[e.id] = { eq:e, pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts:0 })
+  _tgPart.filter(p => p.grupo===g && p.goles_local!==null && p.goles_local!==undefined).forEach(p => {
+    const L=st[p.equipo_local_id], V=st[p.equipo_visitante_id]
+    if(!L||!V) return
+    const gl=p.goles_local, gv=p.goles_visitante
     L.pj++; V.pj++; L.gf+=gl; L.gc+=gv; V.gf+=gv; V.gc+=gl
-    if(gl>gv){      L.pg++; L.pts+=3; V.pp++ }
-    else if(gl<gv){ V.pg++; V.pts+=3; L.pp++ }
-    else{           L.pe++; L.pts++; V.pe++; V.pts++ }
+    if(gl>gv){L.pg++;L.pts+=3;V.pp++} else if(gl<gv){V.pg++;V.pts+=3;L.pp++} else{L.pe++;L.pts++;V.pe++;V.pts++}
   })
-
-  const filas = Object.values(stats).sort((a,b) =>
-    b.pts-a.pts || (b.gf-b.gc)-(a.gf-a.gc) || b.gf-a.gf
-  )
-
+  const filas = Object.values(st).sort((a,b)=>b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf)
   cont.innerHTML = `<table class="tabla-grupo">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Equipo</th>
-        <th title="Partidos Jugados">PJ</th>
-        <th title="Ganados">G</th>
-        <th title="Empatados">E</th>
-        <th title="Perdidos">P</th>
-        <th title="Goles a favor">GF</th>
-        <th title="Goles en contra">GC</th>
-        <th title="Diferencia de goles">DG</th>
-        <th title="Puntos">Pts</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${filas.map((s,i) => `
-        <tr class="${i<2?"clasificado":""}">
-          <td style="color:#94a3b8;font-weight:700;">${i+1}</td>
-          <td><div class="equipo-nombre"><span>${s.eq.bandera||"🏳️"}</span>${s.eq.nombre}</div></td>
-          <td>${s.pj}</td>
-          <td>${s.pg}</td>
-          <td>${s.pe}</td>
-          <td>${s.pp}</td>
-          <td>${s.gf}</td>
-          <td>${s.gc}</td>
-          <td>${s.gf-s.gc>=0?"+":""}${s.gf-s.gc}</td>
-          <td><span class="pts">${s.pts}</span></td>
-        </tr>`).join("")}
-    </tbody>
-  </table>
+    <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead>
+    <tbody>${filas.map((s,i)=>`
+      <tr class="${i<2?"clasificado":""}">
+        <td style="color:#94a3b8;font-weight:700;">${i+1}</td>
+        <td><div class="equipo-nombre"><span>${s.eq.bandera||"🏳️"}</span>${s.eq.nombre}</div></td>
+        <td>${s.pj}</td><td>${s.pg}</td><td>${s.pe}</td><td>${s.pp}</td>
+        <td>${s.gf}</td><td>${s.gc}</td>
+        <td>${s.gf-s.gc>=0?"+":""}${s.gf-s.gc}</td>
+        <td><span class="pts">${s.pts}</span></td>
+      </tr>`).join("")}
+    </tbody></table>
   <div style="padding:8px 12px;font-size:10px;color:#94a3b8;display:flex;align-items:center;gap:6px;">
-    <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#22c55e;"></span>
-    Clasificados a octavos
+    <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#22c55e;flex-shrink:0;"></span>
+    Clasificados a octavos de final
   </div>`
 }
 
 /* ══════════════════════════════════
-   ENCUESTA — ¿Quién va a ganar?
+   ENCUESTA
 ══════════════════════════════════ */
 async function cargarEncuesta(){
-  // Poblar select con todos los equipos
-  const { data: eqs } = await supabase.from("mundial_equipos").select("id,nombre,bandera").order("nombre")
-  const sel = document.getElementById("encuestaSelect")
-  if(sel && eqs){
-    eqs.forEach(e => {
-      const o = document.createElement("option")
-      o.value = e.id; o.textContent = `${e.bandera||""} ${e.nombre}`
-      sel.appendChild(o)
-    })
-    // Si ya votó, pre-seleccionar
-    const miVoto = localStorage.getItem("tc_encuesta_campeon")
-    if(miVoto) sel.value = miVoto
-  }
-  await renderEncuestaResultados()
+  try {
+    const { data: eqs } = await supabase.from("mundial_equipos").select("id,nombre,bandera").order("nombre")
+    const sel = document.getElementById("encuestaSelect")
+    if(sel && eqs){
+      eqs.forEach(e => {
+        const o = document.createElement("option")
+        o.value = e.id; o.textContent = `${e.bandera||""} ${e.nombre}`
+        sel.appendChild(o)
+      })
+      const voto = localStorage.getItem("tc_voto_campeon")
+      if(voto) sel.value = voto
+    }
+    await renderEncuestaResultados()
+  } catch(e){ console.error("cargarEncuesta:", e) }
 }
 
 async function renderEncuestaResultados(){
   const res = document.getElementById("encuestaResultados")
   if(!res) return
-  // Contar votos desde Supabase (tabla mundial_encuesta)
-  const { data } = await supabase
-    .from("mundial_encuesta")
-    .select("equipo_id,count:equipo_id.count()")
-    .not("equipo_id","is",null)
+  try {
+    // Traer todos los votos y agrupar client-side (evita .count() que no siempre funciona)
+    const { data: votos, error } = await supabase
+      .from("mundial_encuesta")
+      .select("equipo_id")
+    if(error) throw error
 
-  if(!data || !data.length){
-    res.innerHTML = `<div style="font-size:12px;color:rgba(255,255,255,.4);text-align:center;padding:10px 0;">Sé el primero en votar.</div>`
-    return
-  }
+    if(!votos || !votos.length){
+      res.innerHTML = `<div style="font-size:12px;color:rgba(255,255,255,.4);text-align:center;padding:10px 0;">Sé el primero en votar.</div>`
+      return
+    }
 
-  const total = data.reduce((s,r) => s + Number(r.count), 0)
-  const top   = data.sort((a,b) => b.count-a.count).slice(0,8)
+    // Contar por equipo
+    const conteo = {}
+    votos.forEach(v => { conteo[v.equipo_id] = (conteo[v.equipo_id]||0)+1 })
+    const total = votos.length
+    const top   = Object.entries(conteo).sort((a,b)=>b[1]-a[1]).slice(0,8)
 
-  // Nombres de equipos
-  const ids = top.map(r => r.equipo_id)
-  const { data: eqsData } = await supabase.from("mundial_equipos").select("id,nombre,bandera").in("id", ids)
-  const eqMap = {}; (eqsData||[]).forEach(e => eqMap[e.id]=e)
+    const ids = top.map(([id])=>id)
+    const { data: eqsD } = await supabase.from("mundial_equipos").select("id,nombre,bandera").in("id",ids)
+    const EQ = {}; (eqsD||[]).forEach(e => EQ[e.id]=e)
 
-  res.innerHTML = top.map((r,i) => {
-    const eq  = eqMap[r.equipo_id] || {}
-    const pct = total ? Math.round(Number(r.count)/total*100) : 0
-    return `<div style="margin-bottom:8px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-        <span class="encuesta-barra-label">${i===0?"🥇":i===1?"🥈":i===2?"🥉":"  "} ${eq.bandera||""} ${eq.nombre||"?"}</span>
-        <span class="encuesta-barra-pct">${pct}% <span style="color:rgba(255,255,255,.35);font-size:10px;">(${r.count})</span></span>
-      </div>
-      <div class="encuesta-barra-wrap">
-        <div style="flex:1;background:rgba(255,255,255,.1);border-radius:99px;height:10px;overflow:hidden;">
+    res.innerHTML = top.map(([id,cnt],i) => {
+      const eq  = EQ[id] || {}
+      const pct = Math.round(cnt/total*100)
+      const med = i===0?"🥇":i===1?"🥈":i===2?"🥉":"  "
+      return `<div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+          <span class="encuesta-barra-label">${med} ${eq.bandera||""} ${eq.nombre||"?"}</span>
+          <span class="encuesta-barra-pct">${pct}% <span style="color:rgba(255,255,255,.35);font-size:10px;">(${cnt})</span></span>
+        </div>
+        <div style="background:rgba(255,255,255,.1);border-radius:99px;height:10px;overflow:hidden;">
           <div class="encuesta-barra-fill" style="width:${pct}%;"></div>
         </div>
-      </div>
-    </div>`
-  }).join("")
+      </div>`
+    }).join("")
+  } catch(e){ console.error("renderEncuestaResultados:", e) }
 }
 
 window.votarEncuesta = async function(){
   const sel = document.getElementById("encuestaSelect")
   const msg = document.getElementById("encuestaMensaje")
   if(!sel?.value){ if(msg) msg.innerHTML=`<span style="color:#fca5a5;">Elegí un equipo primero.</span>`; return }
-
   const { data:{user} } = await supabase.auth.getUser()
-  if(!user){
-    if(msg) msg.innerHTML=`<span style="color:#fca5a5;">Iniciá sesión para votar.</span>`
-    return
-  }
-
-  // Guardar/actualizar voto (upsert por user_id)
+  if(!user){ if(msg) msg.innerHTML=`<span style="color:#fca5a5;">Iniciá sesión para votar.</span>`; return }
   const { error } = await supabase.from("mundial_encuesta").upsert(
-    { user_id: user.id, equipo_id: sel.value },
-    { onConflict: "user_id" }
+    { user_id:user.id, equipo_id:parseInt(sel.value) },
+    { onConflict:"user_id" }
   )
-  if(error){
-    if(msg) msg.innerHTML=`<span style="color:#fca5a5;">Error al guardar el voto.</span>`
-    return
-  }
-  localStorage.setItem("tc_encuesta_campeon", sel.value)
-  if(msg) msg.innerHTML=`<span style="color:#6ee7b7;font-weight:700;">✅ ¡Voto registrado!</span>`
-  setTimeout(()=>{ if(msg) msg.innerHTML="" }, 3000)
+  if(error){ if(msg) msg.innerHTML=`<span style="color:#fca5a5;">Error: ${error.message}</span>`; return }
+  localStorage.setItem("tc_voto_campeon", sel.value)
+  if(msg){ msg.innerHTML=`<span style="color:#6ee7b7;font-weight:700;">✅ ¡Voto registrado!</span>`; setTimeout(()=>msg.innerHTML="",3000) }
   await renderEncuestaResultados()
 }
 
@@ -2269,39 +2231,35 @@ window.votarEncuesta = async function(){
 ══════════════════════════════════ */
 async function cargarGoleadores(){
   const cont = document.getElementById("tablaGoleadores")
-  const { data, error } = await supabase
-    .from("mundial_goleadores")
-    .select("*, equipo:mundial_equipos(nombre,bandera)")
-    .order("goles", { ascending:false })
-    .limit(20)
-
-  if(error || !data || !data.length){
-    cont.innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px;">
-      Los goleadores aparecen a medida que se juegan los partidos.
-    </div>`
-    return
+  try {
+    const { data, error } = await supabase
+      .from("mundial_goleadores")
+      .select("nombre_jugador,goles,equipo:mundial_equipos(nombre,bandera)")
+      .order("goles", { ascending:false })
+      .limit(20)
+    if(error) throw error
+    if(!data || !data.length){ vacioMsg(cont, "Los goleadores aparecen a medida que se juegan los partidos."); return }
+    cont.innerHTML = data.map((g,i) => `
+      <div class="goleador-row">
+        <div class="goleador-pos">${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
+        <div style="flex:1;">
+          <div class="goleador-nombre">${g.nombre_jugador}</div>
+          <div class="goleador-equipo">${g.equipo?.bandera||""} ${g.equipo?.nombre||""}</div>
+        </div>
+        <div class="goleador-goles">${g.goles} ⚽</div>
+      </div>`).join("")
+  } catch(e){
+    vacioMsg(cont, "Los goleadores aparecen a medida que se juegan los partidos.")
   }
-
-  cont.innerHTML = data.map((g,i) => `
-    <div class="goleador-row">
-      <div class="goleador-pos">${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
-      <div>
-        <div class="goleador-nombre">${g.nombre_jugador}</div>
-        <div class="goleador-equipo">${g.equipo?.bandera||""} ${g.equipo?.nombre||""}</div>
-      </div>
-      <div class="goleador-goles">${g.goles} ⚽</div>
-    </div>`).join("")
 }
 
 /* ══════════════════════════════════
-   INIT
+   INIT — cada función maneja su propio error
 ══════════════════════════════════ */
-await Promise.all([
-  cargarPartidosHoy(),
-  cargarTablas(),
-  cargarEncuesta(),
-  cargarGoleadores(),
-])
+cargarPartidosHoy()
+cargarTablas()
+cargarEncuesta()
+cargarGoleadores()
 </script>
 
 <script src="/notif_widget.js"></script>
