@@ -671,45 +671,8 @@
           </div>
         </div>
 
-        <!-- Compartir en redes -->
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#eff6ff;border-radius:12px;border-left:3px solid #3b82f6;">
-          <span style="font-size:20px;flex-shrink:0;">2️⃣</span>
-          <div style="flex:1;">
-            <div style="font-weight:800;font-size:13px;color:#1d4ed8;">Compartir la página en Instagram o Facebook</div>
-            <div style="font-size:12px;color:#64748b;margin-top:2px;margin-bottom:8px;">Publicá Trabajos Cerca en tus redes para que más personas se sumen al prode.</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <a href="https://www.instagram.com/" target="_blank"
-                onclick="localStorage.setItem('tc_compartido','1');marcarCompartidoReglas()"
-                style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);color:white;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;text-decoration:none;">
-                <i class="fa-brands fa-instagram"></i> Compartir en IG
-              </a>
-              <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ftrabajos cerca.com.ar%2Fmundial.html" target="_blank"
-                onclick="localStorage.setItem('tc_compartido','1');marcarCompartidoReglas()"
-                style="display:inline-flex;align-items:center;gap:6px;background:#1877f2;color:white;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;text-decoration:none;">
-                <i class="fa-brands fa-facebook"></i> Compartir en FB
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Instagram seguir -->
-        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#fdf2f8;border-radius:12px;border-left:3px solid #ec4899;">
-          <span style="font-size:20px;flex-shrink:0;">3️⃣</span>
-          <div style="flex:1;">
-            <div style="font-weight:800;font-size:13px;color:#9d174d;">Seguir a @datawebdigital en Instagram</div>
-            <div style="font-size:12px;color:#64748b;margin-top:2px;margin-bottom:8px;">Seguí nuestra cuenta para estar al tanto de los resultados, ganadores y novedades del prode.</div>
-            <a href="https://www.instagram.com/datawebdigital/" target="_blank" onclick="marcarInstagram()" style="
-              display:inline-flex;align-items:center;gap:7px;
-              background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);
-              color:white;font-weight:700;font-size:12px;
-              padding:7px 16px;border-radius:8px;text-decoration:none;">
-              <i class="fa-brands fa-instagram"></i> Seguir @datawebdigital
-            </a>
-          </div>
-        </div>
-
         <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#fefce8;border-radius:12px;border-left:3px solid #facc15;">
-          <span style="font-size:20px;flex-shrink:0;">4️⃣</span>
+          <span style="font-size:20px;flex-shrink:0;">2️⃣</span>
           <div>
             <div style="font-weight:800;font-size:13px;color:#a16207;">Predecir los partidos del Mundial</div>
             <div style="font-size:12px;color:#64748b;margin-top:2px;"><strong>3 pts</strong> por resultado exacto · <strong>1 pt</strong> por tendencia correcta. Las predicciones se bloquean <strong>1 hora antes</strong> de cada partido.</div>
@@ -734,30 +697,8 @@
 
       </div>
 
-      <!-- Checkboxes -->
+      <!-- Checkbox -->
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
-
-        <!-- Compartido confirm -->
-        <div style="background:#eff6ff;border-radius:12px;padding:12px 14px;border:1.5px solid #bfdbfe;">
-          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
-            <input type="checkbox" id="checkCompartido" onchange="validarAceptar()" style="
-              margin-top:2px;width:18px;height:18px;cursor:pointer;accent-color:#3b82f6;flex-shrink:0;">
-            <span style="font-size:12px;color:#374151;line-height:1.6;">
-              ✅ Ya compartí la página en Instagram o Facebook
-            </span>
-          </label>
-        </div>
-
-        <!-- Instagram confirm -->
-        <div style="background:#fdf2f8;border-radius:12px;padding:12px 14px;border:1.5px solid #fbcfe8;">
-          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
-            <input type="checkbox" id="checkInstagram" onchange="validarAceptar()" style="
-              margin-top:2px;width:18px;height:18px;cursor:pointer;accent-color:#ec4899;flex-shrink:0;">
-            <span style="font-size:12px;color:#374151;line-height:1.6;">
-              ✅ Ya sigo a <strong><a href="https://www.instagram.com/datawebdigital/" target="_blank" style="color:#ec4899;">@datawebdigital</a></strong> en Instagram
-            </span>
-          </label>
-        </div>
 
         <!-- Términos -->
         <div style="background:#f8fafc;border-radius:12px;padding:12px 14px;border:1.5px solid #e2e8f0;">
@@ -1612,11 +1553,6 @@ window.abrirPopupReglas = function() {
   const popup = document.getElementById("popupReglas")
   if (!popup) return
   popup.style.display = "flex"
-  // Pre-marcar checkboxes si ya completó los pasos
-  const cbComp = document.getElementById("checkCompartido")
-  const cbIG   = document.getElementById("checkInstagram")
-  if (cbComp && localStorage.getItem('tc_compartido')) { cbComp.checked = true }
-  if (cbIG   && localStorage.getItem('tc_ig_seguido'))  { cbIG.checked   = true }
   validarAceptar()
 }
 window.cerrarPopupReglas = function(e) {
@@ -1624,14 +1560,9 @@ window.cerrarPopupReglas = function(e) {
     document.getElementById("popupReglas").style.display = "none"
 }
 window.validarAceptar = function() {
-  const okComp = document.getElementById("checkCompartido")?.checked
-  const okIG   = document.getElementById("checkInstagram")?.checked
   const okTerm = document.getElementById("checkTerminos")?.checked
   const btn    = document.getElementById("btnIngresarFixture")
-  if (okComp && okIG && okTerm) {
-    // Guardar en localStorage
-    localStorage.setItem('tc_compartido', '1')
-    localStorage.setItem('tc_ig_seguido', '1')
+  if (okTerm) {
     btn.disabled = false
     btn.style.background = "linear-gradient(135deg,#15803d,#16a34a)"
     btn.style.color = "white"
@@ -1644,22 +1575,6 @@ window.validarAceptar = function() {
     btn.style.cursor = "not-allowed"
     btn.style.boxShadow = "none"
   }
-}
-
-// Marca checkboxes automáticamente cuando hacen click en los botones
-window.marcarInstagram = function() {
-  localStorage.setItem('tc_ig_seguido', '1')
-  setTimeout(() => {
-    const cb = document.getElementById("checkInstagram")
-    if (cb) { cb.checked = true; validarAceptar() }
-  }, 1500)
-}
-window.marcarCompartidoReglas = function() {
-  localStorage.setItem('tc_compartido', '1')
-  setTimeout(() => {
-    const cb = document.getElementById("checkCompartido")
-    if (cb) { cb.checked = true; validarAceptar() }
-  }, 800)
 }
 window.ingresarAlFixture = function() {
   document.getElementById("popupReglas").style.display = "none"
