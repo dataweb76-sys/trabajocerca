@@ -1754,7 +1754,7 @@ function renderPartidosHoy(){
       const kick      = new Date(p.fecha_inicio)
       const hora      = kick.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
       const fechaDia  = kick.toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"short",timeZone:"America/Argentina/Buenos_Aires"})
-      const terminado = p.goles_local !== null && p.goles_local !== undefined
+      const terminado = p.completado || (p.goles_local !== null && p.goles_local !== undefined)
       const bloqueado = !terminado && ahora >= new Date(kick.getTime() - 3600000)
       const pred      = MIS_PREDS[p.id]
       const eqL       = EQUIPOS[p.equipo_local_id]
@@ -1777,9 +1777,11 @@ function renderPartidosHoy(){
         const ptsTxt = pts>=3 ? `<span style="color:#15803d;font-weight:800;">🎯 +3</span>`
                      : pts>=1 ? `<span style="color:#d97706;font-weight:800;">👍 +1</span>`
                      : pts===0 ? `<span style="color:#dc2626;font-weight:800;">❌ 0</span>` : ""
+        const scoreStr = p.goles_local !== null && p.goles_local !== undefined
+          ? `${p.goles_local} — ${p.goles_visitante}` : "⌛ Final"
         centro = `<div class="partido-vs">
           ${grupoTag}
-          <div class="partido-score">${p.goles_local} — ${p.goles_visitante}</div>
+          <div class="partido-score">${scoreStr}</div>
           ${badge}
           <div style="font-size:10px;color:#94a3b8;margin-top:2px;">${fechaDia}</div>
           ${pred ? `<div style="font-size:11px;color:#64748b;margin-top:2px;">Tu pred: ${pred.goles_local}-${pred.goles_visitante} ${ptsTxt}</div>` : ""}
@@ -1921,7 +1923,10 @@ function cargarEncuestaEquipos(){
   const eqs = Object.values(EQUIPOS).sort((a,b) => a.nombre.localeCompare(b.nombre))
   eqs.forEach(e => {
     const o = document.createElement("option")
-    o.value = e.id; o.textContent = `${e.bandera||""} ${e.nombre}`
+    o.value = e.id
+    o.textContent = `${e.bandera||""} ${e.nombre}`
+    o.style.background = "#1e293b"
+    o.style.color = "#f1f5f9"
     sel.appendChild(o)
   })
   const voto = localStorage.getItem("tc_voto_campeon")
@@ -2158,10 +2163,10 @@ init()
       </p>
       <div style="display:flex;gap:8px;margin-bottom:16px;">
         <select id="encuestaSelect" style="
-          flex:1;background:rgba(255,255,255,.1);color:white;
+          flex:1;background:#1e293b;color:#f1f5f9;
           border:1.5px solid rgba(255,255,255,.25);border-radius:10px;
           padding:10px 12px;font-size:14px;font-weight:700;cursor:pointer;">
-          <option value="">— Elegí un equipo —</option>
+          <option value="" style="background:#1e293b;color:#f1f5f9;">— Elegí un equipo —</option>
         </select>
         <button onclick="votarEncuesta()" style="
           background:linear-gradient(135deg,#facc15,#f59e0b);color:#1c1917;
