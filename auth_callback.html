@@ -92,6 +92,7 @@ async function init() {
   else if(perfilRes.data?.tipo === 'oficio' || perfilRes.data?.tipo === 'profesional') destino = '/perfil_servicio.html'
   else if(perfilRes.data?.tipo === 'emprendimiento') destino = '/perfil_servicio.html?tipo=emprendimiento'
   else if(perfilRes.data?.tipo === 'cv')             destino = '/perfil_cv.html'
+  else if(tipoParam === 'cliente' || perfilRes.data?.tipo === 'cliente') destino = '/buscador.html'
 
   window.location.href = destino
 }
