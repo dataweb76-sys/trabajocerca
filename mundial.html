@@ -1823,177 +1823,157 @@ async function renderPartidosHoy(){
 }
 
 /* ── Tablas de posiciones ── */
-let _tablaData = null
+// Todos los partidos descargados de ESPN (para tablas)
+let _todosPartidos = []
 let _tgActual  = "A"
-const _GRUPOS  = ["A","B","C","D","E","F","G","H","I","J","K","L"]
 
 async function renderTablasGrupo(){
   const btns = document.getElementById("tablaGrupoBtns")
-  const cont = document.getElementById("tablaContenido")
   if(!btns) return
-
   btns.innerHTML = `<div style="color:#94a3b8;font-size:12px;padding:8px;">Cargando tablas...</div>`
 
   try {
-    const r    = await fetch(`${ESPN}/standings?season=2026`)
-    const data = await r.json()
-
-    // Estructura: data.groups[] o data.children[].groups[]
-    let grupos = data.groups || []
-    if(!grupos.length && data.children){
-      data.children.forEach(c => { if(c.groups) grupos.push(...c.groups) })
-    }
-    if(!grupos.length && data.standings?.groups){
-      grupos = data.standings.groups
+    // Descargar todos los partidos desde el 11 de junio hasta hoy
+    const hoy    = new Date()
+    const inicio = new Date("2026-06-11")
+    const dias   = []
+    for(let d = new Date(inicio); d <= hoy; d = new Date(d.getTime()+86400000)){
+      dias.push(d.toISOString().slice(0,10).replace(/-/g,""))
     }
 
-    if(!grupos.length){
-      // Fallback: calcular desde PARTIDOS de Supabase
-      _renderTablaSupabase(_tgActual)
-      _renderBotonesSupabase(btns)
+    // Fetch en paralelo (máx 30 días)
+    const resultados = await Promise.all(
+      dias.slice(0,30).map(dia =>
+        fetch(`${ESPN}/scoreboard?dates=${dia}&limit=50`)
+          .then(r=>r.json())
+          .then(d=>d.events||[])
+          .catch(()=>[])
+      )
+    )
+
+    // Deduplicar por ID
+    const evMap = {}
+    resultados.flat().forEach(ev => evMap[ev.id] = ev)
+    _todosPartidos = Object.values(evMap)
+
+    // Armar grupos a partir de los partidos
+    const grupos = {}
+    const equipos = {} // teamId → {nombre, logo, grupo}
+
+    _todosPartidos.forEach(ev => {
+      const comp  = ev.competitions[0]
+      const grpRaw= comp.groups?.abbreviation || comp.groups?.shortName || comp.groups?.name || ""
+      // "Group A" → "A"
+      const grp   = grpRaw.replace(/^group\s*/i,"").trim().toUpperCase()
+      if(!grp || grp.length > 2) return  // saltar rondas de eliminación
+
+      if(!grupos[grp]) grupos[grp] = {}
+
+      comp.competitors.forEach(c => {
+        const tid  = c.team.id
+        const logo = c.team.logos?.[0]?.href || c.team.logo || ""
+        const nom  = c.team.displayName || c.team.name || "?"
+        if(!equipos[tid]) equipos[tid] = {nom, logo, grp}
+        if(!grupos[grp][tid]) grupos[grp][tid] = {nom, logo, pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts:0}
+      })
+
+      // Solo partidos terminados
+      if(!ev.status.type.completed) return
+
+      const home = comp.competitors.find(c=>c.homeAway==="home")
+      const away = comp.competitors.find(c=>c.homeAway==="away")
+      if(!home||!away) return
+      const gl = parseInt(home.score||0), gv = parseInt(away.score||0)
+      if(isNaN(gl)||isNaN(gv)) return
+
+      const L = grupos[grp][home.team.id]
+      const V = grupos[grp][away.team.id]
+      if(!L||!V) return
+
+      L.pj++; V.pj++; L.gf+=gl; L.gc+=gv; V.gf+=gv; V.gc+=gl
+      if(gl>gv){L.pg++;L.pts+=3;V.pp++}
+      else if(gl<gv){V.pg++;V.pts+=3;L.pp++}
+      else{L.pe++;L.pts++;V.pe++;V.pts++}
+    })
+
+    const letras = Object.keys(grupos).sort()
+    if(!letras.length){
+      btns.innerHTML = `<div style="color:#dc2626;font-size:12px;padding:8px;">No se encontraron grupos en ESPN.</div>`
       return
     }
 
-    _tablaData = grupos
-
-    // Botones con los grupos reales que devuelve ESPN
-    btns.innerHTML = grupos.map((g,i) => {
-      const nombre = g.abbreviation || g.shortName || g.name || `Grupo ${String.fromCharCode(65+i)}`
-      const key    = g.abbreviation || g.shortName || nombre
-      return `<button onclick="cambiarTablaGrupo('${key}')" id="tgb-${key}" style="
+    // Botones de grupos
+    btns.innerHTML = letras.map((g,i) => `
+      <button onclick="cambiarTablaGrupo('${g}')" id="tgb-${g}" style="
         padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
         border:1.5px solid ${i===0?"#15803d":"#e2e8f0"};
         background:${i===0?"#15803d":"white"};
         color:${i===0?"white":"#374151"};transition:all .15s;">
-        ${nombre}
-      </button>`
-    }).join("")
+        Grupo ${g}
+      </button>`).join("")
 
-    _tgActual = (grupos[0]?.abbreviation || grupos[0]?.shortName || grupos[0]?.name)
-    _renderTablaESPN(_tgActual)
+    // Guardar grupos en variable global para cambiarTablaGrupo
+    window._gruposTabla = grupos
+    _tgActual = letras[0]
+    _dibujarTabla(_tgActual)
 
   } catch(err){
-    console.error("Tablas ESPN:", err)
-    _renderTablaSupabase(_tgActual)
-    _renderBotonesSupabase(btns)
+    console.error("renderTablasGrupo:", err)
+    document.getElementById("tablaContenido").innerHTML =
+      `<div style="text-align:center;padding:24px;color:#dc2626;font-size:13px;">Error al cargar las tablas.</div>`
   }
 }
 
-function _renderBotonesSupabase(btns){
-  const gruposConEq = _GRUPOS.filter(g => Object.values(EQUIPOS).some(e=>e.grupo===g))
-  const lista = gruposConEq.length ? gruposConEq : _GRUPOS.slice(0,8)
-  btns.innerHTML = lista.map((g,i) => `
-    <button onclick="cambiarTablaGrupo('${g}')" id="tgb-${g}" style="
-      padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
-      border:1.5px solid ${i===0?"#15803d":"#e2e8f0"};
-      background:${i===0?"#15803d":"white"};
-      color:${i===0?"white":"#374151"};transition:all .15s;">
-      Grupo ${g}
-    </button>`).join("")
-  _tgActual = lista[0]
-}
-
 window.cambiarTablaGrupo = function(key){
-  // Actualizar botones
   document.querySelectorAll("[id^='tgb-']").forEach(b => {
-    const activo = b.id === "tgb-" + key
+    const activo = b.id === "tgb-"+key
     b.style.background  = activo ? "#15803d" : "white"
     b.style.color       = activo ? "white"   : "#374151"
     b.style.borderColor = activo ? "#15803d" : "#e2e8f0"
   })
   _tgActual = key
-  if(_tablaData) _renderTablaESPN(key)
-  else           _renderTablaSupabase(key)
+  _dibujarTabla(key)
 }
 
-function _renderTablaESPN(key){
+function _dibujarTabla(key){
   const cont = document.getElementById("tablaContenido")
-  if(!cont || !_tablaData) return
-
-  const grupo = _tablaData.find(g =>
-    (g.abbreviation||g.shortName||g.name) === key
+  if(!cont) return
+  const g = window._gruposTabla?.[key]
+  if(!g || !Object.keys(g).length){
+    cont.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">Sin datos para Grupo ${key}.</div>`
+    return
+  }
+  const filas = Object.values(g).sort((a,b) =>
+    b.pts-a.pts || (b.gf-b.gc)-(a.gf-a.gc) || b.gf-a.gf
   )
-  if(!grupo){
-    cont.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">Sin datos para este grupo.</div>`
-    return
-  }
-
-  const entries = grupo.standings?.entries || grupo.entries || []
-  if(!entries.length){
-    cont.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">Los equipos de este grupo se definen a medida que avanza el torneo.</div>`
-    return
-  }
-
-  const filas = [...entries].sort((a,b) => statVal(b.stats,"points") - statVal(a.stats,"points")
-    || (statVal(b.stats,"pointsFor")-statVal(b.stats,"pointsAgainst")) - (statVal(a.stats,"pointsFor")-statVal(a.stats,"pointsAgainst"))
-    || statVal(b.stats,"pointsFor") - statVal(a.stats,"pointsFor"))
-
   cont.innerHTML = `<table class="tabla-grupo">
     <thead><tr>
-      <th style="width:28px;">#</th><th>Equipo</th>
-      <th title="Partidos Jugados">PJ</th><th title="Ganados">G</th>
-      <th title="Empatados">E</th><th title="Perdidos">P</th>
-      <th title="Goles a favor">GF</th><th title="Goles en contra">GC</th>
-      <th title="Diferencia">DG</th><th title="Puntos">Pts</th>
+      <th style="width:24px;">#</th><th>Equipo</th>
+      <th>PJ</th><th>G</th><th>E</th><th>P</th>
+      <th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
     </tr></thead>
     <tbody>${filas.map((e,i)=>{
-      const t   = e.team || {}
-      const pj  = statVal(e.stats,"gamesPlayed")
-      const g   = statVal(e.stats,"wins")
-      const emp = statVal(e.stats,"ties")
-      const p   = statVal(e.stats,"losses")
-      const gf  = statVal(e.stats,"pointsFor")
-      const gc  = statVal(e.stats,"pointsAgainst")
-      const dg  = gf-gc
-      const pts = statVal(e.stats,"points")
-      const logo= t.logos?.[0]?.href || t.logo || ""
-      const flag= logo ? `<img src="${logo}" style="width:20px;height:15px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.style.display='none'">` : ""
+      const dg  = e.gf-e.gc
+      const logo= e.logo ? `<img src="${e.logo}" style="width:20px;height:15px;object-fit:contain;margin-right:5px;vertical-align:middle;" onerror="this.style.display='none'">` : ""
       return `<tr class="${i<2?"clasificado":""}">
-        <td style="color:#94a3b8;font-weight:700;font-size:13px;">${i+1}</td>
-        <td><div class="equipo-nombre">${flag}${t.displayName||t.name||"?"}</div></td>
-        <td>${pj}</td><td>${g}</td><td>${emp}</td><td>${p}</td>
-        <td>${gf}</td><td>${gc}</td>
+        <td style="color:#94a3b8;font-weight:700;">${i+1}</td>
+        <td><div class="equipo-nombre">${logo}${e.nom}</div></td>
+        <td>${e.pj}</td><td>${e.pg}</td><td>${e.pe}</td><td>${e.pp}</td>
+        <td>${e.gf}</td><td>${e.gc}</td>
         <td style="color:${dg>0?"#15803d":dg<0?"#dc2626":"#64748b"};font-weight:700;">${dg>0?"+":""}${dg}</td>
-        <td><span class="pts">${pts}</span></td>
+        <td><span class="pts">${e.pts}</span></td>
       </tr>`
-    }).join("")}</tbody>
-  </table>
+    }).join("")}</tbody></table>
   <div style="padding:8px 12px;font-size:10px;color:#94a3b8;display:flex;align-items:center;gap:6px;">
     <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#22c55e;flex-shrink:0;"></span>
-    Clasificados a siguiente ronda · Fuente: ESPN
+    Clasificados · Datos: ESPN
   </div>`
 }
 
-function _renderTablaSupabase(g){
-  const cont = document.getElementById("tablaContenido")
-  if(!cont) return
-  const eqs = Object.values(EQUIPOS).filter(e => e.grupo === g)
-  if(!eqs.length){
-    cont.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">Sin equipos para este grupo.</div>`
-    return
-  }
-  const st = {}
-  eqs.forEach(e => st[e.id]={eq:e,pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0})
-  PARTIDOS.filter(p=>p.grupo===g&&p.fase==="grupo"&&p.goles_local!==null&&p.goles_local!==undefined).forEach(p=>{
-    const L=st[p.equipo_local_id],V=st[p.equipo_visitante_id]
-    if(!L||!V) return
-    const gl=p.goles_local,gv=p.goles_visitante
-    L.pj++;V.pj++;L.gf+=gl;L.gc+=gv;V.gf+=gv;V.gc+=gl
-    if(gl>gv){L.pg++;L.pts+=3;V.pp++}else if(gl<gv){V.pg++;V.pts+=3;L.pp++}else{L.pe++;L.pts++;V.pe++;V.pts++}
-  })
-  const filas=Object.values(st).sort((a,b)=>b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf)
-  cont.innerHTML=`<table class="tabla-grupo">
-    <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead>
-    <tbody>${filas.map((s,i)=>`<tr class="${i<2?"clasificado":""}">
-      <td style="color:#94a3b8;font-weight:700;">${i+1}</td>
-      <td><div class="equipo-nombre"><span style="font-size:16px;">${s.eq.bandera||"🏳️"}</span>${s.eq.nombre}</div></td>
-      <td>${s.pj}</td><td>${s.pg}</td><td>${s.pe}</td><td>${s.pp}</td>
-      <td>${s.gf}</td><td>${s.gc}</td>
-      <td style="color:${s.gf-s.gc>0?"#15803d":s.gf-s.gc<0?"#dc2626":"#64748b"};font-weight:700;">${s.gf-s.gc>0?"+":""}${s.gf-s.gc}</td>
-      <td><span class="pts">${s.pts}</span></td>
-    </tr>`).join("")}</tbody>
-  </table>`
-}
+// Dummy para compatibilidad con refrescarDatos
+function _renderTablaESPN(key){ _dibujarTabla(key) }
+function _renderTablaSupabase(key){ _dibujarTabla(key) }
+
 
 /* ── Encuesta: poblar select con EQUIPOS ya cargados ── */
 function cargarEncuestaEquipos(){
