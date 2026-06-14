@@ -1173,10 +1173,8 @@ async function init() {
   renderFixture()
 
   // Secciones de la página principal
-  renderPartidosHoy()
-  renderTablasGrupo()
+  _traerDatos().then(() => { renderPartidosHoy(); renderTablasGrupo(); renderGoleadores() }).catch(() => { renderPartidosHoy(); renderTablasGrupo(); renderGoleadores() })
   cargarEncuestaEquipos()
-  renderGoleadores()
 }
 
 /* ══════════════════════════════════
@@ -1702,282 +1700,102 @@ window.copiarGateLink = function() {}
 window.copiarGateIG   = function() {}
 
 /* ══════════════════════════════════
-   DATOS EN VIVO — ESPN API pública
+   DATOS EN VIVO — via /api/mundial-datos (serverless, sin CORS)
 ══════════════════════════════════ */
-const ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/FIFA.WORLD"
 
-/* helpers */
-function logoImg(url, nombre){
-  if(!url) return `<span style="font-size:22px;">🏳</span>`
-  return `<img src="${url}" alt="${nombre}" style="width:36px;height:36px;object-fit:contain;border-radius:4px;" onerror="this.replaceWith(document.createTextNode('🏳'))">`
+let _apiData = null
+
+async function _traerDatos(){
+  const r    = await fetch("/api/mundial-datos")
+  const data = await r.json()
+  if(!data.ok) throw new Error(data.error || "API error")
+  _apiData = data
+  return data
 }
-function statVal(stats, name){ return stats?.find(s=>s.name===name)?.value ?? 0 }
 
 /* ── Partidos de hoy ── */
 async function renderPartidosHoy(){
   const lista  = document.getElementById("listaPartidosHoy")
   const titulo = document.getElementById("tituloPartidosHoy")
   if(!lista) return
-
-  // Spinner mientras carga
-  lista.innerHTML = `<div style="text-align:center;padding:30px;color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin" style="font-size:22px;display:block;margin-bottom:8px;"></i>Cargando partidos en vivo...</div>`
-
+  lista.innerHTML = "<div style='text-align:center;padding:30px;color:#94a3b8;'><i class='fa-solid fa-spinner fa-spin' style='font-size:22px;display:block;margin-bottom:8px;'></i>Cargando...</div>"
   try {
+    const data    = _apiData || await _traerDatos()
     const ahora   = new Date()
-    const dStrAR  = new Date(ahora.getTime() - 3*3600000).toISOString().slice(0,10).replace(/-/g,"")
-    const dStrUTC = ahora.toISOString().slice(0,10).replace(/-/g,"")
-
-    // Traer los dos días por si el horario AR y UTC difieren
-    const [r1, r2] = await Promise.all([
-      fetch(`${ESPN}/scoreboard?dates=${dStrAR}&limit=50`).then(r=>r.json()),
-      dStrUTC!==dStrAR ? fetch(`${ESPN}/scoreboard?dates=${dStrUTC}&limit=50`).then(r=>r.json()) : Promise.resolve({events:[]})
-    ])
-
-    // Unificar y dedupllicar por id
-    const evMap = {}
-    ;[...(r1.events||[]), ...(r2.events||[])].forEach(e => evMap[e.id] = e)
-    const events = Object.values(evMap).sort((a,b)=>new Date(a.date)-new Date(b.date))
-
-    if(!events.length){
-      lista.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;">No hay partidos programados hoy.</div>`
+    const eventos = data.partidosHoy || []
+    if(!eventos.length){
+      lista.innerHTML = "<div style='text-align:center;padding:24px;color:#94a3b8;'>No hay partidos hoy.</div>"
       if(titulo) titulo.textContent = "Partidos del Mundial"
       return
     }
-
     if(titulo) titulo.textContent = "Partidos de hoy"
-
-    lista.innerHTML = events.map(ev => {
-      const comp    = ev.competitions[0]
-      const home    = comp.competitors.find(c=>c.homeAway==="home") || comp.competitors[0]
-      const away    = comp.competitors.find(c=>c.homeAway==="away") || comp.competitors[1]
-      const st      = ev.status
-      const tipo    = st.type
-      const kick    = new Date(ev.date)
-      const hora    = kick.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
-      const fechaDia= kick.toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"short",timeZone:"America/Argentina/Buenos_Aires"})
-
-      const terminado = tipo.completed
-      const enVivo    = !terminado && tipo.description !== "Scheduled"
+    lista.innerHTML = eventos.map(p => {
+      const kick      = new Date(p.fecha)
+      const hora      = kick.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
+      const fechaDia  = kick.toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"short",timeZone:"America/Argentina/Buenos_Aires"})
+      const terminado = p.completado
+      const enVivo    = !terminado && p.descripcion !== "Scheduled"
       const bloqueado = !terminado && !enVivo && ahora >= new Date(kick.getTime()-3600000)
-
-      const grupoTxt  = comp.groups?.abbreviation || comp.groups?.name || ""
-      const grupoTag  = grupoTxt ? `<span style="font-size:10px;color:#94a3b8;display:block;margin-bottom:2px;">${grupoTxt}</span>` : ""
-
+      const pred      = MIS_PREDS[p.id]
       let badge
-      if(terminado)      badge = `<div class="partido-badge badge-final">Final</div>`
-      else if(enVivo)    badge = `<div class="partido-badge badge-vivo">🔴 EN VIVO ${st.displayClock||""}</div>`
-      else if(bloqueado) badge = `<div class="partido-badge badge-bloq">🔒 Cerrado</div>`
-      else               badge = `<div class="partido-badge badge-abierto">⏱ ${hora}hs</div>`
-
-      const pred = MIS_PREDS[ev.id]
+      if(terminado)      badge = "<div class='partido-badge badge-final'>Final</div>"
+      else if(enVivo)    badge = `<div class='partido-badge badge-vivo'>🔴 EN VIVO ${p.reloj||""}</div>`
+      else if(bloqueado) badge = "<div class='partido-badge badge-bloq'>🔒 Cerrado</div>"
+      else               badge = `<div class='partido-badge badge-abierto'>⏱ ${hora}hs</div>`
+      const imgL = p.local.logo  ? `<img src="${p.local.logo}"  style="width:36px;height:36px;object-fit:contain;" onerror="this.style.display='none'">` : "🏳"
+      const imgV = p.visita.logo ? `<img src="${p.visita.logo}" style="width:36px;height:36px;object-fit:contain;" onerror="this.style.display='none'">` : "🏳"
+      const ptsTxt = pred?.puntos_obtenidos>=3 ? "<span style='color:#15803d;font-weight:800;'>🎯 +3</span>"
+                   : pred?.puntos_obtenidos>=1 ? "<span style='color:#d97706;font-weight:800;'>👍 +1</span>"
+                   : pred?.puntos_obtenidos===0 ? "<span style='color:#dc2626;font-weight:800;'>❌ 0</span>" : ""
       let centro
       if(terminado || enVivo){
-        const ptsTxt = pred?.puntos_obtenidos>=3 ? `<span style="color:#15803d;font-weight:800;">🎯 +3</span>`
-                     : pred?.puntos_obtenidos>=1 ? `<span style="color:#d97706;font-weight:800;">👍 +1</span>`
-                     : pred?.puntos_obtenidos===0 ? `<span style="color:#dc2626;font-weight:800;">❌ 0</span>` : ""
-        centro = `<div class="partido-vs">
-          ${grupoTag}
-          <div class="partido-score">${home.score??""} — ${away.score??""}</div>
-          ${badge}
-          <div style="font-size:10px;color:#94a3b8;">${fechaDia}</div>
-          ${pred ? `<div style="font-size:11px;color:#64748b;margin-top:2px;">Tu pred: ${pred.goles_local}-${pred.goles_visitante} ${ptsTxt}</div>` : ""}
-        </div>`
+        centro = `<div class='partido-vs'><div class='partido-score'>${p.local.score??""} — ${p.visita.score??""}</div>${badge}<div style='font-size:10px;color:#94a3b8;'>${fechaDia}</div>${pred?`<div style='font-size:11px;color:#64748b;margin-top:2px;'>Tu pred: ${pred.goles_local}-${pred.goles_visitante} ${ptsTxt}</div>`:""}</div>`
       } else if(bloqueado || !currentUser){
-        centro = `<div class="partido-vs">
-          ${grupoTag}
-          <div class="partido-hora">${hora}hs</div>
-          <div style="font-size:10px;color:#94a3b8;">${fechaDia}</div>
-          ${badge}
-          ${pred ? `<div style="font-size:11px;color:#15803d;font-weight:700;margin-top:2px;">✅ ${pred.goles_local}-${pred.goles_visitante}</div>` : ""}
-          ${!currentUser ? `<div style="font-size:11px;margin-top:4px;"><a href="/login?redirect=/mundial" style="color:#6366f1;font-weight:700;">Iniciá sesión →</a></div>` : ""}
-        </div>`
+        centro = `<div class='partido-vs'><div class='partido-hora'>${hora}hs</div><div style='font-size:10px;color:#94a3b8;'>${fechaDia}</div>${badge}${pred?`<div style='font-size:11px;color:#15803d;font-weight:700;margin-top:2px;'>✅ ${pred.goles_local}-${pred.goles_visitante}</div>`:""}${!currentUser?`<div style='font-size:11px;margin-top:4px;'><a href='/login?redirect=/mundial' style='color:#6366f1;font-weight:700;'>Iniciá sesión →</a></div>`:""}</div>`
       } else {
         const gl = pred?.goles_local   ?? ""
         const gv = pred?.goles_visitante ?? ""
-        centro = `<div class="partido-vs">
-          ${grupoTag}
-          <div class="partido-hora">${hora}hs</div>
-          <div style="font-size:10px;color:#94a3b8;">${fechaDia}</div>
-          ${badge}
-          <div class="pred-inline">
-            <input type="number" min="0" max="20" value="${gl}" id="phl-${ev.id}" placeholder="0">
-            <span style="font-weight:900;color:#94a3b8;">-</span>
-            <input type="number" min="0" max="20" value="${gv}" id="phv-${ev.id}" placeholder="0">
-            <button class="pred-btn" id="phb-${ev.id}" onclick="guardarPredHome('${ev.id}')">${pred?"✏️ Editar":"Guardar"}</button>
-          </div>
-        </div>`
+        centro = `<div class='partido-vs'><div class='partido-hora'>${hora}hs</div><div style='font-size:10px;color:#94a3b8;'>${fechaDia}</div>${badge}<div class='pred-inline'><input type='number' min='0' max='20' value='${gl}' id='phl-${p.id}' placeholder='0'><span style='font-weight:900;color:#94a3b8;'>-</span><input type='number' min='0' max='20' value='${gv}' id='phv-${p.id}' placeholder='0'><button class='pred-btn' id='phb-${p.id}' onclick="guardarPredHome('${p.id}')">${pred?"✏️ Editar":"Guardar"}</button></div></div>`
       }
-
       const clase = terminado?"terminado":enVivo?"vivo":bloqueado?"bloqueado":""
-      return `<div class="partido-hoy-card ${clase}">
-        <div class="partido-equipo">${logoImg(home.team?.logo,home.team?.displayName)}<span>${home.team?.displayName||"?"}</span></div>
-        ${centro}
-        <div class="partido-equipo derecha">${logoImg(away.team?.logo,away.team?.displayName)}<span>${away.team?.displayName||"?"}</span></div>
-      </div>`
+      return `<div class='partido-hoy-card ${clase}'><div class='partido-equipo'>${imgL}<span>${p.local.nombre}</span></div>${centro}<div class='partido-equipo derecha'>${imgV}<span>${p.visita.nombre}</span></div></div>`
     }).join("")
-
   } catch(err){
-    console.error("renderPartidosHoy ESPN:", err)
-    lista.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;">No se pudo conectar con el servicio de datos en vivo.</div>`
+    console.error("renderPartidosHoy:", err)
+    lista.innerHTML = "<div style='text-align:center;padding:24px;color:#dc2626;font-size:13px;'>Error al cargar datos. Reintentando...</div>"
+    setTimeout(renderPartidosHoy, 5000)
   }
 }
 
 /* ── Tablas de posiciones ── */
-// Todos los partidos descargados de ESPN (para tablas)
-let _todosPartidos = []
-let _tgActual  = "A"
-
 async function renderTablasGrupo(){
   const btns = document.getElementById("tablaGrupoBtns")
   if(!btns) return
-  btns.innerHTML = `<div style="color:#94a3b8;font-size:12px;padding:8px;">Cargando tablas...</div>`
-
+  btns.innerHTML = "<div style='color:#94a3b8;font-size:12px;padding:8px;'><i class='fa-solid fa-spinner fa-spin'></i> Cargando tablas...</div>"
   try {
-    // Descargar todos los partidos desde el 11 de junio hasta hoy
-    const hoy    = new Date()
-    const inicio = new Date("2026-06-11")
-    const dias   = []
-    for(let d = new Date(inicio); d <= hoy; d = new Date(d.getTime()+86400000)){
-      dias.push(d.toISOString().slice(0,10).replace(/-/g,""))
-    }
-
-    // Fetch en paralelo (máx 30 días)
-    const resultados = await Promise.all(
-      dias.slice(0,30).map(dia =>
-        fetch(`${ESPN}/scoreboard?dates=${dia}&limit=50`)
-          .then(r=>r.json())
-          .then(d=>d.events||[])
-          .catch(()=>[])
-      )
-    )
-
-    // Deduplicar por ID
-    const evMap = {}
-    resultados.flat().forEach(ev => evMap[ev.id] = ev)
-    _todosPartidos = Object.values(evMap)
-
-    // Armar grupos a partir de los partidos
-    const grupos = {}
-    const equipos = {} // teamId → {nombre, logo, grupo}
-
-    _todosPartidos.forEach(ev => {
-      const comp  = ev.competitions[0]
-      // ESPN usa varios formatos: "Group A", "FIFA World Cup - Group A", notas, etc.
-      const grpRaw= comp.groups?.abbreviation
-                 || comp.groups?.shortName
-                 || comp.groups?.name
-                 || comp.notes?.find(n=>/group/i.test(n.headline||n.text||""))?.headline
-                 || ev.season?.slug || ""
-      // Extraer solo la letra del grupo: "Group A" | "Grupo A" | "FIFA WC - Group C" → "A","C"
-      const mGrp  = grpRaw.match(/\bGroup\s+([A-L])\b/i) || grpRaw.match(/\b([A-L])\b/)
-      const grp   = mGrp ? mGrp[1].toUpperCase() : ""
-      if(!grp) return  // saltar rondas de eliminación o sin grupo
-
-      if(!grupos[grp]) grupos[grp] = {}
-
-      comp.competitors.forEach(c => {
-        const tid  = c.team.id
-        const logo = c.team.logos?.[0]?.href || c.team.logo || ""
-        const nom  = c.team.displayName || c.team.name || "?"
-        if(!equipos[tid]) equipos[tid] = {nom, logo, grp}
-        if(!grupos[grp][tid]) grupos[grp][tid] = {nom, logo, pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts:0}
-      })
-
-      // Solo partidos terminados
-      if(!ev.status.type.completed) return
-
-      const home = comp.competitors.find(c=>c.homeAway==="home")
-      const away = comp.competitors.find(c=>c.homeAway==="away")
-      if(!home||!away) return
-      const gl = parseInt(home.score||0), gv = parseInt(away.score||0)
-      if(isNaN(gl)||isNaN(gv)) return
-
-      const L = grupos[grp][home.team.id]
-      const V = grupos[grp][away.team.id]
-      if(!L||!V) return
-
-      L.pj++; V.pj++; L.gf+=gl; L.gc+=gv; V.gf+=gv; V.gc+=gl
-      if(gl>gv){L.pg++;L.pts+=3;V.pp++}
-      else if(gl<gv){V.pg++;V.pts+=3;L.pp++}
-      else{L.pe++;L.pts++;V.pe++;V.pts++}
-    })
-
-    let letras = Object.keys(grupos).sort()
-
-    // Si ESPN no devolvió grupos, usar EQUIPOS de Supabase con partidos de ESPN
+    const data      = _apiData || await _traerDatos()
+    const standings = data.standings || {}
+    const letras    = Object.keys(standings).sort()
     if(!letras.length){
-      _todosPartidos.forEach(ev => {
-        const comp = ev.competitions[0]
-        comp.competitors.forEach(c => {
-          const tid  = c.team.id
-          const nom  = c.team.displayName || c.team.name || ""
-          const logo = c.team.logos?.[0]?.href || c.team.logo || ""
-          // Buscar en EQUIPOS de Supabase por nombre similar
-          const eqSup = Object.values(EQUIPOS).find(e =>
-            e.nombre && nom && (
-              e.nombre.toLowerCase().includes(nom.toLowerCase().slice(0,5)) ||
-              nom.toLowerCase().includes(e.nombre.toLowerCase().slice(0,5))
-            )
-          )
-          const grp = eqSup?.grupo || ""
-          if(!grp) return
-          if(!grupos[grp]) grupos[grp] = {}
-          if(!grupos[grp][tid]) grupos[grp][tid] = {nom, logo, pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0}
-        })
-        if(!ev.status.type.completed) return
-        const comp2 = ev.competitions[0]
-        const home  = comp2.competitors.find(c=>c.homeAway==="home")
-        const away  = comp2.competitors.find(c=>c.homeAway==="away")
-        if(!home||!away) return
-        const gl=parseInt(home.score||0), gv=parseInt(away.score||0)
-        if(isNaN(gl)||isNaN(gv)) return
-        // encontrar grupo de alguno de los dos
-        let grp=""
-        for(const g of Object.keys(grupos)){
-          if(grupos[g][home.team.id] || grupos[g][away.team.id]){ grp=g; break }
-        }
-        if(!grp) return
-        const L=grupos[grp][home.team.id], V=grupos[grp][away.team.id]
-        if(!L||!V) return
-        L.pj++;V.pj++;L.gf+=gl;L.gc+=gv;V.gf+=gv;V.gc+=gl
-        if(gl>gv){L.pg++;L.pts+=3;V.pp++}else if(gl<gv){V.pg++;V.pts+=3;L.pp++}else{L.pe++;L.pts++;V.pe++;V.pts++}
-      })
-      letras = Object.keys(grupos).sort()
-    }
-
-    if(!letras.length){
-      btns.innerHTML = `<div style="color:#94a3b8;font-size:12px;padding:8px;">Los grupos se actualizan con los partidos.</div>`
+      btns.innerHTML = "<div style='color:#94a3b8;font-size:12px;padding:8px;'>Sin datos de grupos aún.</div>"
       return
     }
-
-    // Botones de grupos
-    btns.innerHTML = letras.map((g,i) => `
-      <button onclick="cambiarTablaGrupo('${g}')" id="tgb-${g}" style="
-        padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
-        border:1.5px solid ${i===0?"#15803d":"#e2e8f0"};
-        background:${i===0?"#15803d":"white"};
-        color:${i===0?"white":"#374151"};transition:all .15s;">
-        Grupo ${g}
-      </button>`).join("")
-
-    // Guardar grupos en variable global para cambiarTablaGrupo
-    window._gruposTabla = grupos
+    window._standingsData = standings
+    btns.innerHTML = letras.map((g,i) => `<button onclick="cambiarTablaGrupo('${g}')" id="tgb-${g}" style="padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid ${i===0?"#15803d":"#e2e8f0"};background:${i===0?"#15803d":"white"};color:${i===0?"white":"#374151"};transition:all .15s;">Grupo ${g}</button>`).join("")
     _tgActual = letras[0]
     _dibujarTabla(_tgActual)
-
   } catch(err){
     console.error("renderTablasGrupo:", err)
-    document.getElementById("tablaContenido").innerHTML =
-      `<div style="text-align:center;padding:24px;color:#dc2626;font-size:13px;">Error al cargar las tablas.</div>`
+    btns.innerHTML = "<div style='color:#dc2626;font-size:12px;padding:8px;'>Error al cargar tablas.</div>"
   }
 }
 
 window.cambiarTablaGrupo = function(key){
-  document.querySelectorAll("[id^='tgb-']").forEach(b => {
-    const activo = b.id === "tgb-"+key
-    b.style.background  = activo ? "#15803d" : "white"
-    b.style.color       = activo ? "white"   : "#374151"
-    b.style.borderColor = activo ? "#15803d" : "#e2e8f0"
+  document.querySelectorAll("[id^='tgb-']").forEach(b=>{
+    const activo = b.id==="tgb-"+key
+    b.style.background  = activo?"#15803d":"white"
+    b.style.color       = activo?"white":"#374151"
+    b.style.borderColor = activo?"#15803d":"#e2e8f0"
   })
   _tgActual = key
   _dibujarTabla(key)
@@ -1986,42 +1804,40 @@ window.cambiarTablaGrupo = function(key){
 function _dibujarTabla(key){
   const cont = document.getElementById("tablaContenido")
   if(!cont) return
-  const g = window._gruposTabla?.[key]
-  if(!g || !Object.keys(g).length){
-    cont.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">Sin datos para Grupo ${key}.</div>`
+  const filas = window._standingsData?.[key]
+  if(!filas?.length){
+    cont.innerHTML = `<div style='text-align:center;padding:24px;color:#94a3b8;font-size:13px;'>Sin datos para Grupo ${key}.</div>`
     return
   }
-  const filas = Object.values(g).sort((a,b) =>
-    b.pts-a.pts || (b.gf-b.gc)-(a.gf-a.gc) || b.gf-a.gf
-  )
-  cont.innerHTML = `<table class="tabla-grupo">
-    <thead><tr>
-      <th style="width:24px;">#</th><th>Equipo</th>
-      <th>PJ</th><th>G</th><th>E</th><th>P</th>
-      <th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
-    </tr></thead>
-    <tbody>${filas.map((e,i)=>{
-      const dg  = e.gf-e.gc
-      const logo= e.logo ? `<img src="${e.logo}" style="width:20px;height:15px;object-fit:contain;margin-right:5px;vertical-align:middle;" onerror="this.style.display='none'">` : ""
-      return `<tr class="${i<2?"clasificado":""}">
-        <td style="color:#94a3b8;font-weight:700;">${i+1}</td>
-        <td><div class="equipo-nombre">${logo}${e.nom}</div></td>
-        <td>${e.pj}</td><td>${e.pg}</td><td>${e.pe}</td><td>${e.pp}</td>
-        <td>${e.gf}</td><td>${e.gc}</td>
-        <td style="color:${dg>0?"#15803d":dg<0?"#dc2626":"#64748b"};font-weight:700;">${dg>0?"+":""}${dg}</td>
-        <td><span class="pts">${e.pts}</span></td>
-      </tr>`
-    }).join("")}</tbody></table>
-  <div style="padding:8px 12px;font-size:10px;color:#94a3b8;display:flex;align-items:center;gap:6px;">
-    <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#22c55e;flex-shrink:0;"></span>
-    Clasificados · Datos: ESPN
-  </div>`
+  const tbody = filas.map((e,i)=>{
+    const dg   = e.gf - e.gc
+    const logo = e.logo ? `<img src="${e.logo}" style="width:20px;height:15px;object-fit:contain;margin-right:5px;vertical-align:middle;" onerror="this.style.display='none'">` : "🏳"
+    return `<tr class="${i<2?"clasificado":""}"><td style="color:#94a3b8;font-weight:700;">${i+1}</td><td><div class="equipo-nombre">${logo}${e.nombre}</div></td><td>${e.pj}</td><td>${e.pg}</td><td>${e.pe}</td><td>${e.pp}</td><td>${e.gf}</td><td>${e.gc}</td><td style="color:${dg>0?"#15803d":dg<0?"#dc2626":"#64748b"};font-weight:700;">${dg>0?"+":""}${dg}</td><td><span class="pts">${e.pts}</span></td></tr>`
+  }).join("")
+  cont.innerHTML = `<table class='tabla-grupo'><thead><tr><th style="width:24px;">#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead><tbody>${tbody}</tbody></table><div style='padding:8px 12px;font-size:10px;color:#94a3b8;display:flex;align-items:center;gap:6px;'><span style='display:inline-block;width:8px;height:8px;border-radius:2px;background:#22c55e;flex-shrink:0;'></span>Clasificados · Datos: ESPN</div>`
 }
 
-// Dummy para compatibilidad con refrescarDatos
-function _renderTablaESPN(key){ _dibujarTabla(key) }
-function _renderTablaSupabase(key){ _dibujarTabla(key) }
-
+/* ── Goleadores ── */
+async function renderGoleadores(){
+  const cont = document.getElementById("tablaGoleadores")
+  if(!cont) return
+  cont.innerHTML = "<div style='text-align:center;padding:20px;color:#94a3b8;'><i class='fa-solid fa-spinner fa-spin'></i> Cargando goleadores...</div>"
+  try {
+    const data  = _apiData || await _traerDatos()
+    const lista = data.goleadores || []
+    if(!lista.length){
+      cont.innerHTML = "<div style='text-align:center;padding:24px;color:#94a3b8;font-size:13px;'>Los goleadores aparecen a medida que se juegan los partidos.</div>"
+      return
+    }
+    cont.innerHTML = lista.map((g,i)=>{
+      const logo    = g.logo ? `<img src="${g.logo}" style="width:20px;height:15px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.style.display='none'">` : "🏳"
+      const medalla = i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1
+      return `<div class='goleador-row'><div class='goleador-pos'>${medalla}</div><div style='flex:1;'><div class='goleador-nombre'>${g.nombre}</div><div class='goleador-equipo'>${logo}${g.equipo}</div></div><div class='goleador-goles'>${g.goles} ⚽</div></div>`
+    }).join("")
+  } catch(err){
+    cont.innerHTML = "<div style='text-align:center;padding:24px;color:#94a3b8;font-size:13px;'>Error al cargar goleadores.</div>"
+  }
+}
 
 /* ── Encuesta: poblar select con EQUIPOS ya cargados ── */
 function cargarEncuestaEquipos(){
@@ -2087,89 +1903,6 @@ window.votarEncuesta = async function(){
   _renderEncuestaVotos()
 }
 
-/* ── Goleadores — ESPN API ── */
-async function renderGoleadores(){
-  const cont = document.getElementById("tablaGoleadores")
-  if(!cont) return
-  cont.innerHTML = `<div style="text-align:center;padding:20px;color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando goleadores...</div>`
-
-  try {
-    // Traer summaries de todos los partidos terminados y extraer scoring plays
-    const terminados = _todosPartidos.filter(ev => ev.status.type.completed).slice(0,40)
-
-    const summaries = await Promise.all(
-      terminados.map(ev =>
-        fetch(`${ESPN}/summary?event=${ev.id}`)
-          .then(r=>r.json()).catch(()=>null)
-      )
-    )
-
-    // Acumular goleadores
-    const goles = {} // "Nombre|equipoId" → {nombre, equipo, logo, goles}
-    summaries.forEach(s => {
-      if(!s) return
-      const scoring = s.scoringPlays || []
-      scoring.forEach(play => {
-        // ESPN scoring play: {team:{id,displayName,logos}, participants:[{athlete:{displayName}}]}
-        const jugador = play.participants?.[0]?.athlete?.displayName
-                     || play.text?.split("(")[0]?.trim()
-        if(!jugador || jugador.length < 2) return
-        const team  = play.team || {}
-        const key   = jugador + "|" + (team.id||"")
-        if(!goles[key]) goles[key] = {
-          nombre: jugador,
-          equipo: team.displayName || team.name || "",
-          logo:   team.logos?.[0]?.href || team.logo || "",
-          goles:  0
-        }
-        goles[key].goles++
-      })
-    })
-
-    const lista = Object.values(goles).sort((a,b)=>b.goles-a.goles)
-
-    if(!lista.length){
-      // Fallback: tabla Supabase manual
-      const { data, error } = await supabase
-        .from("mundial_goleadores")
-        .select("nombre_jugador,goles,equipo_id")
-        .order("goles",{ascending:false}).limit(20)
-      if(!error && data?.length){
-        cont.innerHTML = data.map((g,i)=>{
-          const eq = EQUIPOS[g.equipo_id]||{}
-          return `<div class="goleador-row">
-            <div class="goleador-pos">${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
-            <div style="flex:1;">
-              <div class="goleador-nombre">${g.nombre_jugador}</div>
-              <div class="goleador-equipo">${eq.bandera||""} ${eq.nombre||""}</div>
-            </div>
-            <div class="goleador-goles">${g.goles} ⚽</div>
-          </div>`
-        }).join("")
-        return
-      }
-      cont.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">Los goleadores aparecen a medida que se juegan los partidos.</div>`
-      return
-    }
-
-    cont.innerHTML = lista.slice(0,20).map((g,i)=>{
-      const logo = g.logo ? `<img src="${g.logo}" style="width:20px;height:15px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.style.display='none'">` : ""
-      return `<div class="goleador-row">
-        <div class="goleador-pos">${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
-        <div style="flex:1;">
-          <div class="goleador-nombre">${g.nombre}</div>
-          <div class="goleador-equipo">${logo}${g.equipo}</div>
-        </div>
-        <div class="goleador-goles">${g.goles} ⚽</div>
-      </div>`
-    }).join("")
-  } catch(err){
-    cont.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">Los goleadores aparecen a medida que se juegan los partidos.</div>`
-  }
-}
-
-/* ══════════════════════════════════
-   Auto-refresh cada 30 seg (partidos en vivo)
 ══════════════════════════════════ */
 async function refrescarDatos(){
   try {
@@ -2179,10 +1912,11 @@ async function refrescarDatos(){
         .from("mundial_predicciones").select("*").eq("user_id", currentUser.id)
       if(preds){ MIS_PREDS = {}; preds.forEach(p => MIS_PREDS[p.partido_id] = p) }
     }
-    // Refrescar secciones con datos externos + fixture
+    // Refrescar datos desde API serverless + repintar secciones
+    _apiData = null
+    await _traerDatos()
     await renderPartidosHoy()
-    if(_tablaData) _renderTablaESPN(_tgActual)
-    else           _renderTablaSupabase(_tgActual)
+    await renderTablasGrupo()
     await renderGoleadores()
 
     const el = document.getElementById("ultimaActualizacion")
