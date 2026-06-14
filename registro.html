@@ -286,10 +286,11 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
 
 <!-- ══ BENEFICIOS ══ -->
 <div class="beneficios-wrap">
-  <h2 class="beneficios-titulo">¿Por qué registrarte?</h2>
-  <p class="beneficios-sub">Trabajos Cerca es 100% gratis. Elegís cómo querés usar la plataforma.</p>
+  <h2 class="beneficios-titulo" id="benTitulo">¿Por qué registrarte?</h2>
+  <p class="beneficios-sub" id="benSub">Trabajos Cerca es 100% gratis. Elegís cómo querés usar la plataforma.</p>
 
-  <div class="beneficios-grid">
+  <!-- Beneficios generales (todos los tipos excepto cliente) -->
+  <div class="beneficios-grid" id="benGeneral">
 
     <div class="ben-card">
       <div class="ben-card-ico oficio"><i class="fa-solid fa-wrench"></i></div>
@@ -319,6 +320,41 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
       <div class="ben-card-ico empresa"><i class="fa-solid fa-building"></i></div>
       <h3>Sos empresa o comercio</h3>
       <p>Publicá tus puestos disponibles y encontrá el candidato ideal entre los vecinos de la zona. Rápido, gratuito y sin burocracia.</p>
+    </div>
+
+  </div>
+
+  <!-- Beneficios para cliente (solo cuando ?tipo=cliente) -->
+  <div class="beneficios-grid" id="benCliente" style="display:none;">
+
+    <div class="ben-card">
+      <div class="ben-card-ico" style="background:#dbeafe;color:#1d4ed8;"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <h3>Buscás un oficio o profesional</h3>
+      <p>Encontrá plomeros, electricistas, contadores, médicos y más — todos cerca de tu domicilio. Filtrá por zona, rubro y disponibilidad.</p>
+    </div>
+
+    <div class="ben-card">
+      <div class="ben-card-ico" style="background:#d1fae5;color:#059669;"><i class="fa-brands fa-whatsapp"></i></div>
+      <h3>Contacto directo por WhatsApp</h3>
+      <p>Sin intermediarios ni comisiones. Escribís directamente al profesional y coordinás como quieras. Rápido, simple y gratis.</p>
+    </div>
+
+    <div class="ben-card">
+      <div class="ben-card-ico" style="background:#fef3c7;color:#d97706;"><i class="fa-solid fa-star"></i></div>
+      <h3>Calificá y leé reseñas</h3>
+      <p>Sabé quién trabajó bien antes de contratar. Podés ver las calificaciones de otros clientes y dejar tu opinión después del trabajo.</p>
+    </div>
+
+    <div class="ben-card">
+      <div class="ben-card-ico" style="background:#ede9fe;color:#7c3aed;"><i class="fa-solid fa-location-dot"></i></div>
+      <h3>Profesionales de tu zona</h3>
+      <p>Filtrá por ciudad y barrio. Encontrá a alguien que esté cerca, que conozca la zona y pueda llegar rápido a tu domicilio.</p>
+    </div>
+
+    <div class="ben-card">
+      <div class="ben-card-ico" style="background:#fee2e2;color:#dc2626;"><i class="fa-solid fa-bolt"></i></div>
+      <h3>Disponible ahora</h3>
+      <p>Ves quién está disponible en este momento para atenderte. Ideal para urgencias — fontanería, cerrajería, electricidad y más.</p>
     </div>
 
   </div>
@@ -402,6 +438,21 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+// Adaptar sección de beneficios según ?tipo=
+;(function(){
+  var tipo = new URLSearchParams(window.location.search).get('tipo')
+  if(tipo === 'cliente'){
+    var gen = document.getElementById('benGeneral')
+    var cli = document.getElementById('benCliente')
+    var tit = document.getElementById('benTitulo')
+    var sub = document.getElementById('benSub')
+    if(gen) gen.style.display = 'none'
+    if(cli) cli.style.display = ''
+    if(tit) tit.textContent = '¿Por qué registrarte como cliente?'
+    if(sub) sub.textContent = 'Gratis, sin comisiones y directo al profesional que necesitás.'
+  }
+})()
+
 const SUPA_URL = 'https://iqeiszkoifxgygoqvbem.supabase.co'
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
 const supa = window.supabase.createClient(SUPA_URL, SUPA_KEY)
