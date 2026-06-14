@@ -862,6 +862,18 @@ window.votarEncuestaPopup = async function(){
     if(msg){ msg.style.color="#6ee7b7"; msg.textContent="✅ ¡Voto registrado!" }
   }
 }
+
+// Interceptar clicks en buscadores si no hay sesión
+;(async function(){
+  const { data } = await supabase.auth.getUser()
+  if(data.user) return
+  document.querySelectorAll('.buscador-link').forEach(a => {
+    a.addEventListener('click', function(e){
+      e.preventDefault()
+      window.abrirPopupBuscadores()
+    })
+  })
+})()
 </script>
 
 
@@ -1764,18 +1776,6 @@ window.googleSignInCV     = () => googleSignIn("trabajador")
 </div>
 
 <script>
-// Interceptar clicks en buscadores si no hay sesión
-;(async function(){
-  const { data } = await supabase.auth.getUser()
-  if(data.user) return
-  document.querySelectorAll('.buscador-link').forEach(a => {
-    a.addEventListener('click', function(e){
-      e.preventDefault()
-      abrirPopupBuscadores()
-    })
-  })
-})()
-
 function abrirPopupBuscadores(){
   const popup = document.getElementById('popupVideoBuscadores')
   const video = document.getElementById('videoBuscadores')
