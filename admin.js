@@ -740,9 +740,9 @@ function renderSlots(seccion, contenedorId, total) {
     const tieneImg = !!src
     html += `
       <div style="background:#f8fafc;border:1.5px solid ${tieneImg?'#bfdbfe':'#e2e8f0'};border-radius:10px;overflow:hidden;text-align:center;">
-        <div style="height:80px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+        <div style="height:90px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
           ${tieneImg
-            ? `<img src="${src}" style="width:100%;height:80px;object-fit:cover;" onerror="this.parentNode.innerHTML='<i class=\\'fa-solid fa-image\\' style=\\'font-size:24px;color:#94a3b8;\\'></i>'">`
+            ? `<img src="${src}" style="width:100%;height:90px;object-fit:contain;background:#f1f5f9;" onerror="this.parentNode.innerHTML='<i class=\\'fa-solid fa-image\\' style=\\'font-size:24px;color:#94a3b8;\\'></i>'">`
             : '<i class="fa-solid fa-image" style="font-size:24px;color:#94a3b8;"></i>'}
         </div>
         <div style="padding:8px 6px 10px;display:flex;flex-direction:column;gap:5px;align-items:center;">
