@@ -283,19 +283,19 @@
 
     <!-- Botones de búsqueda -->
     <div class="hero-buscar-btns">
-      <a href="/buscador_oficios.html" class="hero-buscar-btn">
+      <a href="/buscador_oficios.html" class="hero-buscar-btn buscador-link">
         <span class="hb-ico">🔧</span> Oficios
       </a>
-      <a href="/buscador_profesionales.html" class="hero-buscar-btn">
+      <a href="/buscador_profesionales.html" class="hero-buscar-btn buscador-link">
         <span class="hb-ico">🎓</span> Profesionales
       </a>
-      <a href="/buscador_trabajos.html" class="hero-buscar-btn">
+      <a href="/buscador_trabajos.html" class="hero-buscar-btn buscador-link">
         <span class="hb-ico">📄</span> CV Publicados
       </a>
-      <a href="/buscador_emprendimientos.html" class="hero-buscar-btn">
+      <a href="/buscador_emprendimientos.html" class="hero-buscar-btn buscador-link">
         <span class="hb-ico">🚀</span> Emprendimientos
       </a>
-      <a href="/buscador_ofertas.html" class="hero-buscar-btn">
+      <a href="/buscador_ofertas.html" class="hero-buscar-btn buscador-link">
         <span class="hb-ico">💼</span> Mercado Laboral
       </a>
     </div>
@@ -1738,36 +1738,50 @@ window.googleSignInCV     = () => googleSignIn("trabajador")
     <!-- Video -->
     <div style="position:relative;background:#000;aspect-ratio:16/9;">
       <video id="videoGuiaRegistro" controls playsinline style="width:100%;height:100%;display:block;"
-        src="/GuiaRegistro.mp4">
+        src="/verbuscadores.mp4">
         Tu navegador no soporta video HTML5.
       </video>
     </div>
     <!-- Acciones -->
     <div style="padding:16px 20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;background:#1e293b;">
-      <a href="https://www.trabajoscerca.com.ar/registro.html" style="
+      <button onclick="cerrarVideoRegistro();abrirPopupRegistroTipo()" style="
         display:inline-flex;align-items:center;gap:8px;
         background:linear-gradient(135deg,#22c55e,#16a34a);
-        color:white;font-weight:800;font-size:14px;
-        padding:11px 24px;border-radius:10px;text-decoration:none;
+        color:white;font-weight:800;font-size:15px;
+        padding:12px 28px;border-radius:10px;cursor:pointer;border:none;
         box-shadow:0 4px 14px rgba(22,163,74,.35);">
         <i class="fa-solid fa-user-plus"></i> Registrarse
-      </a>
-      <button onclick="compartirRegistro()" style="
+      </button>
+      <a href="/login.html" style="
         display:inline-flex;align-items:center;gap:8px;
         background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);
-        color:white;font-weight:700;font-size:14px;
-        padding:11px 24px;border-radius:10px;cursor:pointer;">
-        <i class="fa-solid fa-share-nodes"></i> Compartir en redes
-      </button>
+        color:white;font-weight:700;font-size:15px;
+        padding:12px 28px;border-radius:10px;text-decoration:none;">
+        <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
+      </a>
     </div>
   </div>
 </div>
 
 <script>
+// Interceptar clicks en buscadores si no hay sesión
+;(async function(){
+  const { data } = await supabase.auth.getUser()
+  if(data.user) return  // logueado: navegación normal
+  document.querySelectorAll('.buscador-link').forEach(a => {
+    a.addEventListener('click', function(e){
+      e.preventDefault()
+      abrirVideoRegistro()
+    })
+  })
+})()
+
 function abrirVideoRegistro(){
   const popup = document.getElementById('popupVideoRegistro')
+  const video = document.getElementById('videoGuiaRegistro')
   popup.style.display = 'flex'
   document.body.style.overflow = 'hidden'
+  video.play().catch(()=>{})
 }
 function cerrarVideoRegistro(){
   const popup = document.getElementById('popupVideoRegistro')
