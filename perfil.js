@@ -1200,110 +1200,132 @@ function cargarProdeCard(userId){
   if(status) status.innerHTML = `<span style="color:#4ade80;font-weight:700;">✅ ¡Participación gratuita y abierta para todos!</span>`
 }
 
-/* ── PRODE: cargar partidos de hoy desde Supabase ── */
+/* ── PRODE: partidos de hoy desde ESPN (datos reales) + encuesta ── */
 async function cargarPartidoProde(userId){
   const lista = document.getElementById("prodeListaPartidos")
   if(!lista) return
   try {
-    const ahora  = new Date()
-    const hoyIni = new Date(ahora); hoyIni.setHours(0,0,0,0)
-    const hoyFin = new Date(ahora); hoyFin.setHours(23,59,59,999)
+    const ahora   = new Date()
+    const dStrAR  = new Date(ahora.getTime()-3*3600000).toISOString().slice(0,10).replace(/-/g,"")
+    const dStrUTC = ahora.toISOString().slice(0,10).replace(/-/g,"")
 
-    // Partidos de hoy
-    const { data: hoy } = await supabase
-      .from("mundial_partidos")
-      .select("*, equipo_local:mundial_equipos!equipo_local_id(nombre,bandera), equipo_visit:mundial_equipos!equipo_visitante_id(nombre,bandera)")
-      .gte("fecha_inicio", hoyIni.toISOString())
-      .lte("fecha_inicio", hoyFin.toISOString())
-      .order("fecha_inicio")
+    const [r1, r2] = await Promise.all([
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/FIFA.WORLD/scoreboard?dates=${dStrAR}&limit=50`).then(r=>r.json()),
+      dStrUTC!==dStrAR ? fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/FIFA.WORLD/scoreboard?dates=${dStrUTC}&limit=50`).then(r=>r.json()) : Promise.resolve({events:[]})
+    ])
 
-    // Si no hay partidos hoy, mostrar el próximo
-    let partidos = hoy && hoy.length > 0 ? hoy : null
-    let labelSeccion = "📅 Partidos de hoy"
+    const evMap = {}
+    ;[...(r1.events||[]),...(r2.events||[])].forEach(e=>evMap[e.id]=e)
+    let eventos = Object.values(evMap).sort((a,b)=>new Date(a.date)-new Date(b.date))
 
-    if(!partidos){
-      const { data: prox } = await supabase
-        .from("mundial_partidos")
-        .select("*, equipo_local:mundial_equipos!equipo_local_id(nombre,bandera), equipo_visit:mundial_equipos!equipo_visitante_id(nombre,bandera)")
-        .is("goles_local", null)
-        .gte("fecha_inicio", ahora.toISOString())
-        .order("fecha_inicio")
-        .limit(3)
-      partidos = prox
-      labelSeccion = "📅 Próximos partidos"
+    // Si no hay partidos hoy, mostrar próximos sin fecha
+    let label = "📅 Partidos de hoy"
+    if(!eventos.length){
+      const rp = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/FIFA.WORLD/scoreboard`).then(r=>r.json())
+      eventos = (rp.events||[]).slice(0,3)
+      label = "📅 Próximos partidos"
     }
 
-    // Actualizar título de sección
     const tit = lista.previousElementSibling
-    if(tit) tit.textContent = labelSeccion
+    if(tit) tit.textContent = label
 
-    if(!partidos || partidos.length === 0){
-      lista.innerHTML = `<div style="color:rgba(255,255,255,.35);font-size:12px;text-align:center;padding:10px 0;">No hay partidos programados por ahora</div>`
-      return
-    }
+    if(!eventos.length){
+      lista.innerHTML = `<div style="color:rgba(255,255,255,.35);font-size:12px;text-align:center;padding:10px 0;">No hay partidos por ahora</div>`
+    } else {
+      lista.innerHTML = eventos.map(ev => {
+        const comp = ev.competitions[0]
+        const home = comp.competitors.find(c=>c.homeAway==="home")||comp.competitors[0]
+        const away = comp.competitors.find(c=>c.homeAway==="away")||comp.competitors[1]
+        const kick = new Date(ev.date)
+        const hora = kick.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
+        const tipo = ev.status.type
+        const terminado = tipo.completed
+        const enVivo    = !terminado && tipo.description!=="Scheduled"
+        const bloq      = !terminado && !enVivo && ahora>=new Date(kick.getTime()-3600000)
+        const logoH = home.team?.logos?.[0]?.href||""
+        const logoA = away.team?.logos?.[0]?.href||""
+        const imgH  = logoH?`<img src="${logoH}" style="width:18px;height:14px;object-fit:contain;vertical-align:middle;">`:"🏳"
+        const imgA  = logoA?`<img src="${logoA}" style="width:18px;height:14px;object-fit:contain;vertical-align:middle;">`:"🏳"
+        const nomH  = home.team?.displayName||"?"
+        const nomA  = away.team?.displayName||"?"
 
-    // Buscar mis predicciones para estos partidos
-    let misPreds = {}
-    if(userId){
-      const ids = partidos.map(p => p.id)
-      const { data: preds } = await supabase
-        .from("mundial_predicciones")
-        .select("partido_id,goles_local,goles_visitante,puntos_obtenidos")
-        .eq("user_id", userId)
-        .in("partido_id", ids)
-      if(preds) preds.forEach(p => misPreds[p.partido_id] = p)
-    }
+        let badge = ""
+        if(terminado)   badge = `<span style="font-size:10px;background:#22c55e;color:white;font-weight:800;padding:1px 7px;border-radius:99px;">Final ${home.score}-${away.score}</span>`
+        else if(enVivo) badge = `<span style="font-size:10px;background:#dc2626;color:white;font-weight:800;padding:1px 7px;border-radius:99px;">🔴 EN VIVO ${home.score??0}-${away.score??0}</span>`
+        else if(bloq)   badge = `<span style="font-size:10px;color:#fca5a5;font-weight:700;">🔒 Cerrado</span>`
+        else            badge = `<span style="font-size:10px;color:#fbbf24;font-weight:700;">⏱ ${hora}hs</span>`
 
-    lista.innerHTML = partidos.map(p => {
-      const kick     = new Date(p.fecha_inicio)
-      const hora     = kick.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
-      const flagL    = p.equipo_local?.bandera  || "🏳️"
-      const flagV    = p.equipo_visit?.bandera  || "🏳️"
-      const nomL     = p.equipo_local?.nombre   || p.desc_local    || "Por definir"
-      const nomV     = p.equipo_visit?.nombre   || p.desc_visitante || "Por definir"
-      const bloq     = ahora >= new Date(kick.getTime() - 60*60*1000)
-      const terminado= p.goles_local !== null && p.goles_local !== undefined
-      const pred     = misPreds[p.id]
-
-      let estadoBadge = ""
-      if(terminado){
-        const score = `${p.goles_local}-${p.goles_visitante}`
-        if(pred){
-          const pts   = pred.puntos_obtenidos || 0
-          const color = pts >= 3 ? "#4ade80" : pts >= 1 ? "#fbbf24" : "#f87171"
-          const label = pts >= 3 ? "🎯 +3 pts" : pts >= 1 ? "👍 +1 pt" : "❌ 0 pts"
-          estadoBadge = `<span style="font-size:11px;color:#94a3b8;">Tu pred: ${pred.goles_local}-${pred.goles_visitante}</span>
-            <span style="margin-left:6px;font-size:11px;color:${color};font-weight:800;">${label}</span>`
-        } else {
-          estadoBadge = `<span style="font-size:11px;color:#94a3b8;">Sin predicción</span>`
-        }
-      } else if(bloq){
-        estadoBadge = `<span style="font-size:11px;color:#fca5a5;font-weight:700;">🔒 Cerrado</span>`
-      } else if(pred){
-        estadoBadge = `<span style="font-size:11px;color:#6ee7b7;font-weight:700;">✅ Pred: ${pred.goles_local}-${pred.goles_visitante}</span>`
-      } else {
-        estadoBadge = `<span style="font-size:11px;color:#fbbf24;font-weight:700;">⏱ ${hora}hs · ¡Predecí!</span>`
-      }
-
-      return `<div style="
-        background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
-        border-radius:11px;padding:11px 13px;
-        ${terminado ? "border-color:rgba(255,255,255,.08);" : bloq ? "border-color:rgba(239,68,68,.3);" : "border-color:rgba(250,204,21,.25);"}
-      ">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
-          <div style="font-size:14px;font-weight:800;color:white;">
-            ${flagL} ${nomL}
-            <span style="color:rgba(255,255,255,.4);font-size:11px;margin:0 4px;">vs</span>
-            ${nomV} ${flagV}
-            ${terminado ? `<span style="margin-left:8px;font-size:15px;font-weight:900;color:#fbbf24;">${p.goles_local}-${p.goles_visitante}</span>` : ""}
+        return `<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:11px;padding:10px 13px;${enVivo?"border-color:rgba(220,38,38,.5);":""}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;">
+            <div style="font-size:13px;font-weight:800;color:white;">${imgH} ${nomH} <span style="color:rgba(255,255,255,.4);font-size:10px;">vs</span> ${nomA} ${imgA}</div>
+            <div>${badge}</div>
           </div>
-          <div style="text-align:right;">${estadoBadge}</div>
-        </div>
-      </div>`
-    }).join("")
+        </div>`
+      }).join("")
+    }
+
+    // Encuesta ¿Quién va a ganar? — mini card
+    await _montarEncuestaPerfilCard(userId)
 
   } catch(e){
-    if(lista) lista.innerHTML = `<div style="color:rgba(255,255,255,.35);font-size:12px;text-align:center;padding:10px 0;">Error al cargar partidos</div>`
+    if(lista) lista.innerHTML = `<div style="color:rgba(255,255,255,.35);font-size:12px;text-align:center;padding:10px 0;">Sin conexión a datos en vivo</div>`
+  }
+}
+
+async function _montarEncuestaPerfilCard(userId){
+  // Buscar o crear el contenedor de encuesta dentro de #prodeCard
+  const card = document.getElementById("prodeCard")
+  if(!card) return
+  if(document.getElementById("perfilEncuestaWrap")) return // ya montado
+
+  const wrap = document.createElement("div")
+  wrap.id = "perfilEncuestaWrap"
+  wrap.style.cssText = "margin-top:14px;border-top:1px solid rgba(255,255,255,.1);padding-top:12px;"
+  wrap.innerHTML = `
+    <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#fbbf24;text-transform:uppercase;margin-bottom:8px;">🏆 ¿Quién va a ganar el Mundial?</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select id="perfilEncuestaSelect" style="
+        flex:1;background:#1e293b;color:#f1f5f9;border:1.5px solid rgba(255,255,255,.2);
+        border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer;">
+        <option value="" style="background:#1e293b;">— Elegí un equipo —</option>
+      </select>
+      <button onclick="window._votarEncuestaPerfil()" style="
+        background:linear-gradient(135deg,#facc15,#f59e0b);color:#1c1917;
+        font-weight:900;font-size:12px;padding:7px 13px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;">
+        Votar ⚡
+      </button>
+    </div>
+    <div id="perfilEncuestaMensaje" style="font-size:11px;margin-top:6px;min-height:14px;color:rgba(255,255,255,.5);"></div>
+    <div style="margin-top:6px;"><a href="/mundial.html" style="color:#fbbf24;font-size:11px;font-weight:700;text-decoration:none;">⚽ Ver tabla completa de votos →</a></div>
+  `
+  card.appendChild(wrap)
+
+  // Poblar select
+  try {
+    const { data: eqs } = await supabase.from("mundial_equipos").select("id,nombre,bandera").order("nombre")
+    const sel = document.getElementById("perfilEncuestaSelect")
+    if(sel && eqs) eqs.forEach(e => {
+      const o = document.createElement("option")
+      o.value=e.id; o.textContent=`${e.bandera||""} ${e.nombre}`
+      o.style.background="#1e293b"; o.style.color="#f1f5f9"
+      sel.appendChild(o)
+    })
+    const voto = localStorage.getItem("tc_voto_campeon")
+    if(voto && sel) sel.value = voto
+  } catch(e){}
+
+  window._votarEncuestaPerfil = async function(){
+    const sel = document.getElementById("perfilEncuestaSelect")
+    const msg = document.getElementById("perfilEncuestaMensaje")
+    if(!sel?.value){ if(msg) msg.textContent="Elegí un equipo."; return }
+    if(!userId){ if(msg) msg.textContent="Iniciá sesión para votar."; return }
+    const { error } = await supabase.from("mundial_encuesta").upsert(
+      {user_id:userId, equipo_id:parseInt(sel.value)},{onConflict:"user_id"}
+    )
+    if(!error){
+      localStorage.setItem("tc_voto_campeon", sel.value)
+      if(msg){ msg.style.color="#6ee7b7"; msg.textContent="✅ ¡Voto registrado!" }
+    }
   }
 }
 

@@ -705,18 +705,34 @@
         </div>
       </div>
 
+      <!-- Encuesta ¿Quién va a ganar? -->
+      <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#fbbf24;text-transform:uppercase;margin-bottom:8px;">🏆 ¿Quién va a ganar el Mundial?</div>
+        <div style="display:flex;gap:8px;">
+          <select id="popupEncuestaSelect" style="
+            flex:1;background:#1e293b;color:#f1f5f9;border:1.5px solid rgba(255,255,255,.2);
+            border-radius:8px;padding:7px 10px;font-size:13px;font-weight:700;cursor:pointer;">
+            <option value="" style="background:#1e293b;">— Elegí un equipo —</option>
+          </select>
+          <button onclick="votarEncuestaPopup()" style="
+            background:linear-gradient(135deg,#facc15,#f59e0b);color:#1c1917;
+            font-weight:900;font-size:13px;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap;">
+            Votar ⚡
+          </button>
+        </div>
+        <div id="popupEncuestaMensaje" style="font-size:11px;margin-top:6px;min-height:14px;color:rgba(255,255,255,.5);"></div>
+      </div>
+
       <!-- Pasos rápidos -->
-      <div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">
         ¿Cómo participar?
       </div>
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:18px;font-size:12px;">
-        <span style="background:#f0fdf4;color:#15803d;border-radius:8px;padding:5px 11px;font-weight:700;">1️⃣ Registrate</span>
-        <span style="color:#cbd5e1;">→</span>
-        <span style="background:#fff7ed;color:#c2410c;border-radius:8px;padding:5px 11px;font-weight:700;">📱 Compartí en IG/FB</span>
-        <span style="color:#cbd5e1;">→</span>
-        <span style="background:#fdf4ff;color:#7c3aed;border-radius:8px;padding:5px 11px;font-weight:700;">📸 Seguinos en @datawebdigital</span>
-        <span style="color:#cbd5e1;">→</span>
-        <span style="background:#fefce8;color:#a16207;border-radius:8px;padding:5px 11px;font-weight:700;">⚽ Predecí</span>
+        <span style="background:rgba(255,255,255,.1);color:#f1f5f9;border-radius:8px;padding:5px 11px;font-weight:700;">1️⃣ Registrate gratis</span>
+        <span style="color:rgba(255,255,255,.3);">→</span>
+        <span style="background:rgba(255,255,255,.1);color:#f1f5f9;border-radius:8px;padding:5px 11px;font-weight:700;">⚽ Predecí</span>
+        <span style="color:rgba(255,255,255,.3);">→</span>
+        <span style="background:rgba(250,204,21,.2);color:#facc15;border-radius:8px;padding:5px 11px;font-weight:700;">🏆 Ganás premios</span>
       </div>
 
       <!-- Botón principal -->
@@ -778,65 +794,85 @@ window.cerrarPopupMundial = function(e){
     if(btnSecun) btnSecun.style.display = "none"
   }
 
-  // Cargar partidos de hoy
-  await cargarPartidoHoyPopup()
+  // Cargar partidos de hoy y encuesta
+  await Promise.all([cargarPartidoHoyPopup(), cargarEncuestaPopup()])
 
   popup.style.display = "flex"
 })()
 
 async function cargarPartidoHoyPopup(){
   try {
-    const ahora   = new Date()
-    const hoyIni  = new Date(ahora); hoyIni.setHours(0,0,0,0)
-    const hoyFin  = new Date(ahora); hoyFin.setHours(23,59,59,999)
+    const ahora  = new Date()
+    const dStrAR = new Date(ahora.getTime()-3*3600000).toISOString().slice(0,10).replace(/-/g,"")
+    const dStrUTC= ahora.toISOString().slice(0,10).replace(/-/g,"")
 
-    const { data: partidos } = await supabase
-      .from("mundial_partidos")
-      .select("*, equipo_local:mundial_equipos!equipo_local_id(nombre,bandera), equipo_visit:mundial_equipos!equipo_visitante_id(nombre,bandera)")
-      .gte("fecha_inicio", hoyIni.toISOString())
-      .lte("fecha_inicio", hoyFin.toISOString())
-      .order("fecha_inicio")
+    const [r1,r2] = await Promise.all([
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/FIFA.WORLD/scoreboard?dates=${dStrAR}&limit=50`).then(r=>r.json()),
+      dStrUTC!==dStrAR ? fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/FIFA.WORLD/scoreboard?dates=${dStrUTC}&limit=50`).then(r=>r.json()) : Promise.resolve({events:[]})
+    ])
+    const evMap = {}
+    ;[...(r1.events||[]),...(r2.events||[])].forEach(e=>evMap[e.id]=e)
+    const eventos = Object.values(evMap).sort((a,b)=>new Date(a.date)-new Date(b.date))
 
-    if(!partidos || partidos.length === 0) return
-
-    // Mostrar el próximo partido del día (o el que está en curso)
-    const proximo = partidos.find(p => new Date(p.fecha_inicio) > ahora) || partidos[partidos.length - 1]
-    const kick    = new Date(proximo.fecha_inicio)
-    const local   = proximo.equipo_local?.nombre  || proximo.desc_local    || "Por definir"
-    const visit   = proximo.equipo_visit?.nombre  || proximo.desc_visitante || "Por definir"
-    const flagL   = proximo.equipo_local?.bandera  || "🏳️"
-    const flagV   = proximo.equipo_visit?.bandera  || "🏳️"
-    const bloqueado = ahora >= new Date(kick.getTime() - 60*60*1000)
-
-    const hora = kick.toLocaleTimeString("es-AR", { hour:"2-digit", minute:"2-digit", timeZone:"America/Argentina/Buenos_Aires" })
-
+    const card   = document.getElementById("popupPartidoHoy")
     const infoEl = document.getElementById("popupPartidoInfo")
     const horaEl = document.getElementById("popupPartidoHora")
     const bloqEl = document.getElementById("popupPartidoBloq")
-    const card   = document.getElementById("popupPartidoHoy")
+    if(!card||!infoEl) return
+    if(!eventos.length) return
 
-    if(!infoEl || !card) return
+    infoEl.innerHTML = eventos.map(ev => {
+      const comp = ev.competitions[0]
+      const home = comp.competitors.find(c=>c.homeAway==="home")||comp.competitors[0]
+      const away = comp.competitors.find(c=>c.homeAway==="away")||comp.competitors[1]
+      const hora = new Date(ev.date).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
+      const tipo = ev.status.type
+      const logoH = home.team?.logos?.[0]?.href||""
+      const logoA = away.team?.logos?.[0]?.href||""
+      const imgH  = logoH?`<img src="${logoH}" style="width:18px;height:13px;object-fit:contain;vertical-align:middle;">`:"🏳"
+      const imgA  = logoA?`<img src="${logoA}" style="width:18px;height:13px;object-fit:contain;vertical-align:middle;">`:"🏳"
+      if(tipo.completed){
+        return `<div style="margin-bottom:6px;">${imgH} ${home.team?.displayName||"?"} <span style="color:#facc15;font-weight:900;">${home.score} — ${away.score}</span> ${away.team?.displayName||"?"} ${imgA} <span style="background:#22c55e;color:white;font-size:9px;font-weight:800;padding:1px 6px;border-radius:99px;margin-left:4px;">Final</span></div>`
+      }
+      const enVivo = tipo.description!=="Scheduled"
+      return `<div style="margin-bottom:6px;">${imgH} ${home.team?.displayName||"?"} <span style="color:#fbbf24;">vs</span> ${away.team?.displayName||"?"} ${imgA} ${enVivo?`<span style="background:#dc2626;color:white;font-size:9px;font-weight:800;padding:1px 6px;border-radius:99px;margin-left:4px;">🔴 EN VIVO</span>`:`<span style="color:rgba(255,255,255,.5);font-size:11px;">${hora}hs</span>`}</div>`
+    }).join("")
 
-    // Si hay varios partidos hoy, mostrarlos todos
-    if(partidos.length > 1){
-      const lista = partidos.map(p => {
-        const nl = p.equipo_local?.nombre  || p.desc_local    || "Por definir"
-        const nv = p.equipo_visit?.nombre  || p.desc_visitante || "Por definir"
-        const fl = p.equipo_local?.bandera  || "🏳️"
-        const fv = p.equipo_visit?.bandera  || "🏳️"
-        const h  = new Date(p.fecha_inicio).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
-        return `<div style="margin-bottom:4px;">${fl} ${nl} <span style="color:#fbbf24;">vs</span> ${fv} ${nv} <span style="color:rgba(255,255,255,.5);font-size:11px;">${h}hs</span></div>`
-      }).join("")
-      infoEl.innerHTML = lista
-      horaEl.textContent = `${partidos.length} partidos hoy · ¡No te pierdas las predicciones!`
-    } else {
-      infoEl.innerHTML = `${flagL} ${local} <span style="color:#fbbf24;">vs</span> ${flagV} ${visit}`
-      horaEl.textContent = `Hoy a las ${hora}hs (Argentina) · ¡Anotá tu predicción!`
-    }
-
-    if(bloqueado && bloqEl) bloqEl.style.display = "block"
+    horaEl.textContent = `${eventos.length} partido${eventos.length>1?"s":""} hoy · ¡No te pierdas las predicciones!`
     card.style.display = "block"
   } catch(e){ /* silencioso */ }
+}
+
+async function cargarEncuestaPopup(){
+  try {
+    const sel = document.getElementById("popupEncuestaSelect")
+    if(!sel) return
+    // Traer equipos de Supabase
+    const { data: eqs } = await supabase.from("mundial_equipos").select("id,nombre,bandera").order("nombre")
+    if(eqs) eqs.forEach(e => {
+      const o = document.createElement("option")
+      o.value = e.id; o.textContent = `${e.bandera||""} ${e.nombre}`
+      o.style.background="#1e293b"; o.style.color="#f1f5f9"
+      sel.appendChild(o)
+    })
+    const voto = localStorage.getItem("tc_voto_campeon")
+    if(voto) sel.value = voto
+  } catch(e){}
+}
+
+window.votarEncuestaPopup = async function(){
+  const sel = document.getElementById("popupEncuestaSelect")
+  const msg = document.getElementById("popupEncuestaMensaje")
+  if(!sel?.value){ if(msg) msg.textContent="Elegí un equipo primero."; return }
+  const { data:{user} } = await supabase.auth.getUser()
+  if(!user){ if(msg) msg.innerHTML=`<a href="/registro.html" style="color:#facc15;font-weight:700;">Registrate para votar →</a>`; return }
+  const { error } = await supabase.from("mundial_encuesta").upsert(
+    {user_id:user.id, equipo_id:parseInt(sel.value)},{onConflict:"user_id"}
+  )
+  if(!error){
+    localStorage.setItem("tc_voto_campeon", sel.value)
+    if(msg){ msg.style.color="#6ee7b7"; msg.textContent="✅ ¡Voto registrado!" }
+  }
 }
 </script>
 
