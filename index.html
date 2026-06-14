@@ -1738,27 +1738,27 @@ window.googleSignInCV     = () => googleSignIn("trabajador")
     <!-- Video -->
     <div style="position:relative;background:#000;aspect-ratio:16/9;">
       <video id="videoGuiaRegistro" controls playsinline style="width:100%;height:100%;display:block;"
-        src="/verbuscadores.mp4">
+        src="/GuiaRegistro.mp4">
         Tu navegador no soporta video HTML5.
       </video>
     </div>
     <!-- Acciones -->
     <div style="padding:16px 20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;background:#1e293b;">
-      <button onclick="cerrarVideoRegistro();abrirPopupRegistroTipo()" style="
+      <a href="https://www.trabajoscerca.com.ar/registro.html" style="
         display:inline-flex;align-items:center;gap:8px;
         background:linear-gradient(135deg,#22c55e,#16a34a);
-        color:white;font-weight:800;font-size:15px;
-        padding:12px 28px;border-radius:10px;cursor:pointer;border:none;
+        color:white;font-weight:800;font-size:14px;
+        padding:11px 24px;border-radius:10px;text-decoration:none;
         box-shadow:0 4px 14px rgba(22,163,74,.35);">
         <i class="fa-solid fa-user-plus"></i> Registrarse
-      </button>
-      <a href="/login.html" style="
+      </a>
+      <button onclick="compartirRegistro()" style="
         display:inline-flex;align-items:center;gap:8px;
         background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);
-        color:white;font-weight:700;font-size:15px;
-        padding:12px 28px;border-radius:10px;text-decoration:none;">
-        <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
-      </a>
+        color:white;font-weight:700;font-size:14px;
+        padding:11px 24px;border-radius:10px;cursor:pointer;">
+        <i class="fa-solid fa-share-nodes"></i> Compartir en redes
+      </button>
     </div>
   </div>
 </div>
@@ -1767,21 +1767,34 @@ window.googleSignInCV     = () => googleSignIn("trabajador")
 // Interceptar clicks en buscadores si no hay sesión
 ;(async function(){
   const { data } = await supabase.auth.getUser()
-  if(data.user) return  // logueado: navegación normal
+  if(data.user) return
   document.querySelectorAll('.buscador-link').forEach(a => {
     a.addEventListener('click', function(e){
       e.preventDefault()
-      abrirVideoRegistro()
+      abrirPopupBuscadores()
     })
   })
 })()
 
-function abrirVideoRegistro(){
-  const popup = document.getElementById('popupVideoRegistro')
-  const video = document.getElementById('videoGuiaRegistro')
+function abrirPopupBuscadores(){
+  const popup = document.getElementById('popupVideoBuscadores')
+  const video = document.getElementById('videoBuscadores')
   popup.style.display = 'flex'
   document.body.style.overflow = 'hidden'
   video.play().catch(()=>{})
+}
+function cerrarPopupBuscadores(){
+  const popup = document.getElementById('popupVideoBuscadores')
+  const video = document.getElementById('videoBuscadores')
+  popup.style.display = 'none'
+  video.pause()
+  document.body.style.overflow = ''
+}
+
+function abrirVideoRegistro(){
+  const popup = document.getElementById('popupVideoRegistro')
+  popup.style.display = 'flex'
+  document.body.style.overflow = 'hidden'
 }
 function cerrarVideoRegistro(){
   const popup = document.getElementById('popupVideoRegistro')
@@ -1804,5 +1817,48 @@ function compartirRegistro(){
   }
 }
 </script>
+
+<!-- ══ POPUP VIDEO BUSCADORES (no logueados) ══ -->
+<div id="popupVideoBuscadores" style="
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);
+  z-index:10000;align-items:center;justify-content:center;padding:16px;
+" onclick="if(event.target===this)cerrarPopupBuscadores()">
+  <div style="
+    background:#0f172a;border-radius:20px;max-width:520px;width:100%;
+    overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.7);animation:slideUp .3s ease;
+  ">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.1);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-magnifying-glass" style="color:#60a5fa;font-size:18px;"></i>
+        <span style="color:white;font-weight:700;font-size:15px;">Registrate para usar los buscadores</span>
+      </div>
+      <button onclick="cerrarPopupBuscadores()" style="background:rgba(255,255,255,.12);border:none;color:white;border-radius:50%;width:32px;height:32px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">×</button>
+    </div>
+    <div style="position:relative;background:#000;aspect-ratio:16/9;">
+      <video id="videoBuscadores" controls playsinline style="width:100%;height:100%;display:block;"
+        src="/verbuscadores.mp4">
+        Tu navegador no soporta video HTML5.
+      </video>
+    </div>
+    <div style="padding:18px 20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;background:#1e293b;">
+      <button onclick="cerrarPopupBuscadores();abrirPopupRegistroTipo()" style="
+        display:inline-flex;align-items:center;gap:8px;
+        background:linear-gradient(135deg,#22c55e,#16a34a);
+        color:white;font-weight:800;font-size:15px;
+        padding:12px 28px;border-radius:10px;cursor:pointer;border:none;
+        box-shadow:0 4px 14px rgba(22,163,74,.35);">
+        <i class="fa-solid fa-user-plus"></i> Registrarse
+      </button>
+      <a href="/login.html" style="
+        display:inline-flex;align-items:center;gap:8px;
+        background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);
+        color:white;font-weight:700;font-size:15px;
+        padding:12px 28px;border-radius:10px;text-decoration:none;">
+        <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
+      </a>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
