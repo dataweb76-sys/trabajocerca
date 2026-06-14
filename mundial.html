@@ -1862,10 +1862,16 @@ async function renderTablasGrupo(){
 
     _todosPartidos.forEach(ev => {
       const comp  = ev.competitions[0]
-      const grpRaw= comp.groups?.abbreviation || comp.groups?.shortName || comp.groups?.name || ""
-      // "Group A" → "A"
-      const grp   = grpRaw.replace(/^group\s*/i,"").trim().toUpperCase()
-      if(!grp || grp.length > 2) return  // saltar rondas de eliminación
+      // ESPN usa varios formatos: "Group A", "FIFA World Cup - Group A", notas, etc.
+      const grpRaw= comp.groups?.abbreviation
+                 || comp.groups?.shortName
+                 || comp.groups?.name
+                 || comp.notes?.find(n=>/group/i.test(n.headline||n.text||""))?.headline
+                 || ev.season?.slug || ""
+      // Extraer solo la letra del grupo: "Group A" | "Grupo A" | "FIFA WC - Group C" → "A","C"
+      const mGrp  = grpRaw.match(/\bGroup\s+([A-L])\b/i) || grpRaw.match(/\b([A-L])\b/)
+      const grp   = mGrp ? mGrp[1].toUpperCase() : ""
+      if(!grp) return  // saltar rondas de eliminación o sin grupo
 
       if(!grupos[grp]) grupos[grp] = {}
 
@@ -1896,9 +1902,51 @@ async function renderTablasGrupo(){
       else{L.pe++;L.pts++;V.pe++;V.pts++}
     })
 
-    const letras = Object.keys(grupos).sort()
+    let letras = Object.keys(grupos).sort()
+
+    // Si ESPN no devolvió grupos, usar EQUIPOS de Supabase con partidos de ESPN
     if(!letras.length){
-      btns.innerHTML = `<div style="color:#dc2626;font-size:12px;padding:8px;">No se encontraron grupos en ESPN.</div>`
+      _todosPartidos.forEach(ev => {
+        const comp = ev.competitions[0]
+        comp.competitors.forEach(c => {
+          const tid  = c.team.id
+          const nom  = c.team.displayName || c.team.name || ""
+          const logo = c.team.logos?.[0]?.href || c.team.logo || ""
+          // Buscar en EQUIPOS de Supabase por nombre similar
+          const eqSup = Object.values(EQUIPOS).find(e =>
+            e.nombre && nom && (
+              e.nombre.toLowerCase().includes(nom.toLowerCase().slice(0,5)) ||
+              nom.toLowerCase().includes(e.nombre.toLowerCase().slice(0,5))
+            )
+          )
+          const grp = eqSup?.grupo || ""
+          if(!grp) return
+          if(!grupos[grp]) grupos[grp] = {}
+          if(!grupos[grp][tid]) grupos[grp][tid] = {nom, logo, pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0}
+        })
+        if(!ev.status.type.completed) return
+        const comp2 = ev.competitions[0]
+        const home  = comp2.competitors.find(c=>c.homeAway==="home")
+        const away  = comp2.competitors.find(c=>c.homeAway==="away")
+        if(!home||!away) return
+        const gl=parseInt(home.score||0), gv=parseInt(away.score||0)
+        if(isNaN(gl)||isNaN(gv)) return
+        // encontrar grupo de alguno de los dos
+        let grp=""
+        for(const g of Object.keys(grupos)){
+          if(grupos[g][home.team.id] || grupos[g][away.team.id]){ grp=g; break }
+        }
+        if(!grp) return
+        const L=grupos[grp][home.team.id], V=grupos[grp][away.team.id]
+        if(!L||!V) return
+        L.pj++;V.pj++;L.gf+=gl;L.gc+=gv;V.gf+=gv;V.gc+=gl
+        if(gl>gv){L.pg++;L.pts+=3;V.pp++}else if(gl<gv){V.pg++;V.pts+=3;L.pp++}else{L.pe++;L.pts++;V.pe++;V.pts++}
+      })
+      letras = Object.keys(grupos).sort()
+    }
+
+    if(!letras.length){
+      btns.innerHTML = `<div style="color:#94a3b8;font-size:12px;padding:8px;">Los grupos se actualizan con los partidos.</div>`
       return
     }
 
@@ -2043,60 +2091,80 @@ window.votarEncuesta = async function(){
 async function renderGoleadores(){
   const cont = document.getElementById("tablaGoleadores")
   if(!cont) return
-  cont.innerHTML = `<div style="text-align:center;padding:20px;color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin"></i></div>`
-  try {
-    // ESPN leaders endpoint para WC
-    const r = await fetch(`${ESPN}/leaders?season=2026&limit=20`)
-    const data = await r.json()
+  cont.innerHTML = `<div style="text-align:center;padding:20px;color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando goleadores...</div>`
 
-    // Buscar categoría de goles
-    const cats = data.categories || data.leaders || []
-    const golescat = cats.find(c =>
-      c.name?.toLowerCase().includes("goal") ||
-      c.abbreviation?.toLowerCase() === "g" ||
-      c.displayName?.toLowerCase().includes("gol")
+  try {
+    // Traer summaries de todos los partidos terminados y extraer scoring plays
+    const terminados = _todosPartidos.filter(ev => ev.status.type.completed).slice(0,40)
+
+    const summaries = await Promise.all(
+      terminados.map(ev =>
+        fetch(`${ESPN}/summary?event=${ev.id}`)
+          .then(r=>r.json()).catch(()=>null)
+      )
     )
 
-    const liders = golescat?.leaders || golescat?.athletes || []
-    if(!liders.length) throw new Error("no leaders")
+    // Acumular goleadores
+    const goles = {} // "Nombre|equipoId" → {nombre, equipo, logo, goles}
+    summaries.forEach(s => {
+      if(!s) return
+      const scoring = s.scoringPlays || []
+      scoring.forEach(play => {
+        // ESPN scoring play: {team:{id,displayName,logos}, participants:[{athlete:{displayName}}]}
+        const jugador = play.participants?.[0]?.athlete?.displayName
+                     || play.text?.split("(")[0]?.trim()
+        if(!jugador || jugador.length < 2) return
+        const team  = play.team || {}
+        const key   = jugador + "|" + (team.id||"")
+        if(!goles[key]) goles[key] = {
+          nombre: jugador,
+          equipo: team.displayName || team.name || "",
+          logo:   team.logos?.[0]?.href || team.logo || "",
+          goles:  0
+        }
+        goles[key].goles++
+      })
+    })
 
-    cont.innerHTML = liders.slice(0,15).map((l,i) => {
-      const at   = l.athlete || l
-      const team = at.team || {}
-      const logo = team.logos?.[0]?.href || team.logo || ""
-      const flag = logo ? `<img src="${logo}" style="width:20px;height:15px;object-fit:contain;" onerror="this.style.display='none'">` : ""
-      const goles= l.value ?? l.displayValue ?? "?"
-      return `<div class="goleador-row">
-        <div class="goleador-pos">${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
-        <div style="flex:1;">
-          <div class="goleador-nombre">${at.displayName||at.fullName||"?"}</div>
-          <div class="goleador-equipo">${flag} ${team.displayName||team.name||""}</div>
-        </div>
-        <div class="goleador-goles">${goles} ⚽</div>
-      </div>`
-    }).join("")
-  } catch(err){
-    // Fallback a Supabase manual
-    try {
+    const lista = Object.values(goles).sort((a,b)=>b.goles-a.goles)
+
+    if(!lista.length){
+      // Fallback: tabla Supabase manual
       const { data, error } = await supabase
         .from("mundial_goleadores")
         .select("nombre_jugador,goles,equipo_id")
         .order("goles",{ascending:false}).limit(20)
-      if(error||!data?.length) throw new Error("no data")
-      cont.innerHTML = data.map((g,i) => {
-        const eq = EQUIPOS[g.equipo_id] || {}
-        return `<div class="goleador-row">
-          <div class="goleador-pos">${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
-          <div style="flex:1;">
-            <div class="goleador-nombre">${g.nombre_jugador}</div>
-            <div class="goleador-equipo">${eq.bandera||""} ${eq.nombre||""}</div>
-          </div>
-          <div class="goleador-goles">${g.goles} ⚽</div>
-        </div>`
-      }).join("")
-    } catch(e2){
-      cont.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">Los datos de goleadores estarán disponibles en breve.</div>`
+      if(!error && data?.length){
+        cont.innerHTML = data.map((g,i)=>{
+          const eq = EQUIPOS[g.equipo_id]||{}
+          return `<div class="goleador-row">
+            <div class="goleador-pos">${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
+            <div style="flex:1;">
+              <div class="goleador-nombre">${g.nombre_jugador}</div>
+              <div class="goleador-equipo">${eq.bandera||""} ${eq.nombre||""}</div>
+            </div>
+            <div class="goleador-goles">${g.goles} ⚽</div>
+          </div>`
+        }).join("")
+        return
+      }
+      cont.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">Los goleadores aparecen a medida que se juegan los partidos.</div>`
+      return
     }
+
+    cont.innerHTML = lista.slice(0,20).map((g,i)=>{
+      const logo = g.logo ? `<img src="${g.logo}" style="width:20px;height:15px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.style.display='none'">` : ""
+      return `<div class="goleador-row">
+        <div class="goleador-pos">${i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}</div>
+        <div style="flex:1;">
+          <div class="goleador-nombre">${g.nombre}</div>
+          <div class="goleador-equipo">${logo}${g.equipo}</div>
+        </div>
+        <div class="goleador-goles">${g.goles} ⚽</div>
+      </div>`
+    }).join("")
+  } catch(err){
+    cont.innerHTML = `<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">Los goleadores aparecen a medida que se juegan los partidos.</div>`
   }
 }
 
