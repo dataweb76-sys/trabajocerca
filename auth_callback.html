@@ -65,6 +65,8 @@ async function init() {
   // Guardar datos básicos de Google si no tiene perfil
   var perfilRes = await supa.from('perfiles').select('id, tipo').eq('id', user.id).maybeSingle()
 
+  var tipoParam = new URLSearchParams(window.location.search).get('tipo') || null
+
   if(!perfilRes.data) {
     // Usuario nuevo de Google — crear perfil básico
     var meta     = user.user_metadata || {}
@@ -76,11 +78,22 @@ async function init() {
       id:       user.id,
       nombre:   nombre,
       apellido: apellido,
-      email:    user.email
+      email:    user.email,
+      tipo:     tipoParam
     })
   }
 
-  window.location.href = '/perfil.html'
+  // Redirigir según tipo elegido antes del registro
+  var destino = '/perfil.html'
+  if(tipoParam === 'oficio' || tipoParam === 'profesional') destino = '/perfil_servicio.html'
+  else if(tipoParam === 'emprendimiento')                    destino = '/perfil_servicio.html?tipo=emprendimiento'
+  else if(tipoParam === 'cv')                               destino = '/perfil_cv.html'
+  // Si ya tenía perfil con tipo guardado, respetarlo
+  else if(perfilRes.data?.tipo === 'oficio' || perfilRes.data?.tipo === 'profesional') destino = '/perfil_servicio.html'
+  else if(perfilRes.data?.tipo === 'emprendimiento') destino = '/perfil_servicio.html?tipo=emprendimiento'
+  else if(perfilRes.data?.tipo === 'cv')             destino = '/perfil_cv.html'
+
+  window.location.href = destino
 }
 
 init()

@@ -475,16 +475,19 @@ document.getElementById('formReg').addEventListener('submit', async function(e) 
     return
   }
 
+  var tipoParam = new URLSearchParams(window.location.search).get('tipo') || null
+  var redirectDestino = _destinoPorTipo(tipoParam)
+
   var userId = res.data?.user?.id
   if(userId) {
     await supa.from('perfiles').upsert({
       id: userId, nombre: nombre, apellido: apellido, email: email,
-      movil: movil, tipo: null
+      movil: movil, tipo: tipoParam
     })
   }
 
   if(res.data?.session) {
-    window.location.href = '/perfil.html'
+    window.location.href = redirectDestino
   } else {
     mostrarOk(
       '<strong><i class="fa-solid fa-envelope" style="margin-right:6px"></i>¡Listo!</strong><br>' +
@@ -495,11 +498,20 @@ document.getElementById('formReg').addEventListener('submit', async function(e) 
   }
 })
 
+function _destinoPorTipo(tipo) {
+  if(tipo === 'oficio')         return '/perfil_servicio.html'
+  if(tipo === 'profesional')    return '/perfil_servicio.html'
+  if(tipo === 'emprendimiento') return '/perfil_servicio.html?tipo=emprendimiento'
+  if(tipo === 'cv')             return '/perfil_cv.html'
+  return '/perfil.html'
+}
+
 async function registrarGoogle() {
+  var tipoParam = new URLSearchParams(window.location.search).get('tipo') || ''
   var res = await supa.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin + '/auth_callback.html',
+      redirectTo: window.location.origin + '/auth_callback.html' + (tipoParam ? '?tipo=' + tipoParam : ''),
       queryParams: { prompt: 'select_account' }
     }
   })
