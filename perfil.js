@@ -189,7 +189,8 @@ async function init(){
     empresa:        '<span class="badge" style="background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;">🏢 Empresa</span>',
     emprendimiento: '<span class="badge" style="background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;">🚀 Emprendimiento</span>',
     cv:             '<span class="badge badge-work">📄 Busca trabajo</span>',
-    empleador:      '<span class="badge" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">🏢 Empleador</span>'
+    empleador:      '<span class="badge" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">🏢 Empleador</span>',
+    cliente:        '<span class="badge" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;">🔍 Cliente</span>'
   }
   const badgeHtml = BADGE[_tipo] || BADGE.profesional
 
@@ -199,20 +200,54 @@ async function init(){
     empresa:        `<a href="/perfil_servicio.html" class="btn btn-orange"><i class="fa-solid fa-building"></i> Gestionar mi empresa</a>`,
     emprendimiento: `<a href="/perfil_servicio.html" class="btn btn-orange"><i class="fa-solid fa-rocket"></i> Gestionar mi emprendimiento</a>`,
     cv:             `<a href="/perfil_cv.html"       class="btn btn-success"><i class="fa-solid fa-file-lines"></i> Gestionar mi CV</a>`,
-    empleador:      `<a href="/buscador_trabajos.html" class="btn btn-success"><i class="fa-solid fa-users"></i> Buscar empleados</a>`
+    empleador:      `<a href="/buscador_trabajos.html" class="btn btn-success"><i class="fa-solid fa-users"></i> Buscar empleados</a>`,
+    cliente:        `<a href="/buscador.html" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Buscar oficios y profesionales</a>`
   }
   const accionPrincipal = ACCION[_tipo] || ACCION.profesional
 
-  /* ── Buscadores donde aparecer (multi-tipo) ── */
+  /* ── Buscadores donde aparecer (multi-tipo) / o buscadores para cliente ── */
   const tiposActivos = (data.tipo || _tipo).split(",").map(t => t.trim()).filter(Boolean)
-  const BUSCADORES_OPTS = [
-    { id:"oficio",         emoji:"🔧", label:"Buscador de Oficios",         desc:"Plomeros, electricistas, carpinteros..." },
-    { id:"profesional",    emoji:"👔", label:"Buscador de Profesionales",    desc:"Médicos, abogados, contadores..." },
-    { id:"emprendimiento", emoji:"🚀", label:"Buscador de Emprendimientos",  desc:"Locales, marcas y proyectos propios" },
-    { id:"cv",             emoji:"📄", label:"Buscador de CVs / Empleados",  desc:"Aparecés buscando trabajo" },
-    { id:"empresa",        emoji:"🏢", label:"Ofertas de Trabajo",           desc:"Publicás puestos y buscás empleados" },
+
+  const BUSCADORES_LINKS = [
+    { href:"/buscador_oficios.html",        emoji:"🔧", label:"Buscar oficios",          desc:"Plomeros, electricistas, albañiles, pintores..." },
+    { href:"/buscador_profesionales.html",  emoji:"👔", label:"Buscar profesionales",     desc:"Médicos, abogados, contadores, psicólogos..." },
+    { href:"/buscador_emprendimientos.html",emoji:"🚀", label:"Buscar emprendimientos",   desc:"Locales, marcas, proyectos y negocios" },
+    { href:"/buscador_cv.html",             emoji:"📄", label:"Ver CVs / buscar empleados",desc:"Encontrá personas en búsqueda de trabajo" },
+    { href:"/buscador_trabajos.html",       emoji:"💼", label:"Ofertas de trabajo",        desc:"Puestos publicados por empresas y empleadores" },
   ]
-  const buscadoresHtml = `
+
+  let buscadoresHtml
+  if(_tipo === "cliente"){
+    buscadoresHtml = `
+    <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:16px 18px;margin-bottom:16px;">
+      <h3 style="margin:0 0 6px;font-size:16px;font-weight:800;">
+        <i class="fa-solid fa-magnifying-glass" style="color:#2563eb;"></i> Buscadores disponibles
+      </h3>
+      <p style="margin:0 0 14px;font-size:12px;color:#1d4ed8;">Encontrá el profesional, oficio o servicio que necesitás.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${BUSCADORES_LINKS.map(b => `
+          <a href="${b.href}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;
+            background:white;border:1.5px solid #dbeafe;border-radius:10px;
+            text-decoration:none;color:inherit;transition:background .15s;"
+            onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='white'">
+            <span style="font-size:22px;flex-shrink:0;">${b.emoji}</span>
+            <div style="flex:1;">
+              <strong style="display:block;font-size:13px;color:#1e293b;">${b.label}</strong>
+              <span style="font-size:11px;color:#64748b;">${b.desc}</span>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#93c5fd;font-size:12px;flex-shrink:0;"></i>
+          </a>`).join("")}
+      </div>
+    </div>`
+  } else {
+    const BUSCADORES_OPTS = [
+      { id:"oficio",         emoji:"🔧", label:"Buscador de Oficios",         desc:"Plomeros, electricistas, carpinteros..." },
+      { id:"profesional",    emoji:"👔", label:"Buscador de Profesionales",    desc:"Médicos, abogados, contadores..." },
+      { id:"emprendimiento", emoji:"🚀", label:"Buscador de Emprendimientos",  desc:"Locales, marcas y proyectos propios" },
+      { id:"cv",             emoji:"📄", label:"Buscador de CVs / Empleados",  desc:"Aparecés buscando trabajo" },
+      { id:"empresa",        emoji:"🏢", label:"Ofertas de Trabajo",           desc:"Publicás puestos y buscás empleados" },
+    ]
+    buscadoresHtml = `
     <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 18px;margin-bottom:16px;">
       <h3 style="margin:0 0 6px;font-size:16px;font-weight:800;">
         <i class="fa-solid fa-magnifying-glass" style="color:#2563eb;"></i> ¿En qué buscadores querés aparecer?
@@ -239,6 +274,7 @@ async function init(){
           </label>`).join("")}
       </div>
     </div>`
+  }
 
   /* ── Disponibilidad + Estadísticas + Trabajos realizados (solo profesionales) ── */
   let disponibleHtml = ""
