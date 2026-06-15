@@ -36,12 +36,26 @@ function getPreloadedState(html) {
   const idx   = html.indexOf('window.__PRELOADED_STATE__')
   if (idx < 0) return null
   const start = html.indexOf('{', idx)
-  const end   = html.indexOf('</script>', start)
-  try {
-    return JSON.parse(html.slice(start, end).trim())
-  } catch {
-    return null
+  if (start < 0) return null
+
+  // Balancear llaves para encontrar el cierre exacto del objeto JSON
+  let depth = 0, inStr = false, escape = false
+  for (let i = start; i < html.length; i++) {
+    const c = html[i]
+    if (escape)            { escape = false; continue }
+    if (c === '\\' && inStr) { escape = true;  continue }
+    if (c === '"')           { inStr = !inStr;  continue }
+    if (inStr)               continue
+    if (c === '{') depth++
+    else if (c === '}') {
+      depth--
+      if (depth === 0) {
+        try { return JSON.parse(html.slice(start, i + 1)) }
+        catch { return null }
+      }
+    }
   }
+  return null
 }
 
 /* ── Partidos ─────────────────────────────────────────────────────────── */
