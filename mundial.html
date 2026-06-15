@@ -1702,43 +1702,19 @@ window.copiarGateLink = function() {}
 window.copiarGateIG   = function() {}
 
 /* ══════════════════════════════════
-   DATOS EN VIVO — ESPN directo, actualiza cada 5 min
+   DATOS EN VIVO — canchallena proxy, actualiza cada 5 min
 ══════════════════════════════════ */
 
-const ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/FIFA.WORLD"
 let _tgActual = "A"
+let _cachedDatos = null   // cache en memoria para evitar re-fetch innecesario
 
-async function _fetchJSON(url){
-  const r = await fetch(url)
+async function _fetchDatos(){
+  const r = await fetch("/api/mundial-datos")
   if(!r.ok) throw new Error("HTTP " + r.status)
-  return r.json()
-}
-
-function _diasRecientes(n){
-  const dias = []
-  const hoy = new Date()
-  for(let i = n; i >= -1; i--){
-    const d = new Date(hoy.getTime() - i * 86400000)
-    dias.push(d.toISOString().slice(0,10).replace(/-/g,""))
-  }
-  return dias
-}
-
-async function _traerPartidos(){
-  const inicio = "20260611"
-  const hoy    = new Date()
-  // Solo desde el inicio del mundial hasta hoy (máx 32 días, en paralelo)
-  const dias = []
-  for(let d = new Date("2026-06-11"); d <= hoy; d = new Date(d.getTime()+86400000)){
-    dias.push(d.toISOString().slice(0,10).replace(/-/g,""))
-  }
-  const slices = dias.slice(0, 32)
-  const results = await Promise.all(
-    slices.map(d => _fetchJSON(`${ESPN}/scoreboard?dates=${d}&limit=50`).then(j=>j.events||[]).catch(()=>[]))
-  )
-  const evMap = {}
-  results.flat().forEach(ev => { evMap[ev.id] = ev })
-  return Object.values(evMap)
+  const j = await r.json()
+  if(!j.ok) throw new Error(j.error || "Error en servidor")
+  _cachedDatos = j
+  return j
 }
 
 /* ── Partidos de hoy ── */
@@ -1748,68 +1724,80 @@ async function renderPartidosHoy(){
   if(!lista) return
   lista.innerHTML = "<div style='text-align:center;padding:30px;color:#94a3b8;'><i class='fa-solid fa-spinner fa-spin' style='font-size:22px;display:block;margin-bottom:8px;'></i>Cargando partidos...</div>"
   try {
-    const ahora  = new Date()
-    const dStrAR = new Date(ahora.getTime()-3*3600000).toISOString().slice(0,10).replace(/-/g,"")
-    const dStrUTC= ahora.toISOString().slice(0,10).replace(/-/g,"")
-    // Traer hoy + ayer para cubrir partidos nocturnos
-    const [hoyRes, ayerRes] = await Promise.all([
-      _fetchJSON(`${ESPN}/scoreboard?dates=${dStrUTC}&limit=50`).then(j=>j.events||[]).catch(()=>[]),
-      _fetchJSON(`${ESPN}/scoreboard?dates=${dStrAR}&limit=50`).then(j=>j.events||[]).catch(()=>[])
-    ])
-    const evMap = {}
-    ;[...ayerRes, ...hoyRes].forEach(ev => { evMap[ev.id] = ev })
-    const eventos = Object.values(evMap).sort((a,b)=>new Date(a.date)-new Date(b.date))
+    const datos = _cachedDatos || await _fetchDatos()
+    const partidos = datos.partidos || []
 
-    if(!eventos.length){
-      lista.innerHTML = "<div style='text-align:center;padding:24px;color:#94a3b8;'>No hay partidos hoy.</div>"
+    // Detectar partidos de HOY comparando contra fecha actual en AR (UTC-3)
+    const ahora = new Date()
+    const hoyAR = new Date(ahora.getTime() - 3*3600000)
+    const diaHoy = hoyAR.getDate()
+    const mesHoy = hoyAR.getMonth() + 1
+    const MESES = {enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,octubre:10,noviembre:11,diciembre:12}
+
+    function fechaEsHoy(fechaStr){
+      const m = fechaStr.match(/(\d{1,2})\s+de\s+(\w+)/i)
+      if(!m) return false
+      const dia = parseInt(m[1])
+      const mes = MESES[(m[2]||"").toLowerCase()]
+      return dia === diaHoy && mes === mesHoy
+    }
+
+    // Filtrar hoy; si no hay, mostrar todos
+    let mostrar = partidos.filter(p => fechaEsHoy(p.fecha))
+    if(!mostrar.length) mostrar = partidos
+
+    if(!mostrar.length){
+      lista.innerHTML = "<div style='text-align:center;padding:24px;color:#94a3b8;'>No hay partidos disponibles.</div>"
       if(titulo) titulo.textContent = "Partidos del Mundial"
       return
     }
-    if(titulo) titulo.textContent = "Partidos de hoy"
-    lista.innerHTML = eventos.map(p => {
-      const comp      = p.competitions[0]
-      const home      = comp.competitors.find(c=>c.homeAway==="home")||comp.competitors[0]
-      const away      = comp.competitors.find(c=>c.homeAway==="away")||comp.competitors[1]
-      const kick      = new Date(p.date)
-      const hora      = kick.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Argentina/Buenos_Aires"})
-      const fechaDia  = kick.toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"short",timeZone:"America/Argentina/Buenos_Aires"})
-      const terminado = p.status.type.completed
-      const enVivo    = !terminado && p.status.type.description !== "Scheduled"
-      const bloqueado = !terminado && !enVivo && ahora >= new Date(kick.getTime()-3600000)
-      const pred      = MIS_PREDS[p.id]
-      const glScore   = home.score ?? ""
-      const gvScore   = away.score ?? ""
-      const reloj     = p.status.displayClock || ""
 
-      let badge
-      if(terminado)      badge = "<div class='partido-badge badge-final'>Final</div>"
-      else if(enVivo)    badge = `<div class='partido-badge badge-vivo'>🔴 EN VIVO ${reloj}</div>`
-      else if(bloqueado) badge = "<div class='partido-badge badge-bloq'>🔒 Cerrado</div>"
-      else               badge = `<div class='partido-badge badge-abierto'>⏱ ${hora}hs</div>`
+    // Agrupar por fecha para mostrar
+    const porFecha = {}
+    mostrar.forEach(p => {
+      if(!porFecha[p.fecha]) porFecha[p.fecha] = []
+      porFecha[p.fecha].push(p)
+    })
 
-      const imgL = home.team?.logos?.[0]?.href ? `<img src="${home.team.logos[0].href}" style="width:36px;height:36px;object-fit:contain;" onerror="this.style.display='none'">` : "🏳"
-      const imgV = away.team?.logos?.[0]?.href ? `<img src="${away.team.logos[0].href}" style="width:36px;height:36px;object-fit:contain;" onerror="this.style.display='none'">` : "🏳"
+    if(titulo){
+      const claves = Object.keys(porFecha)
+      titulo.textContent = claves.length === 1 && fechaEsHoy(claves[0]) ? "Partidos de hoy" : "Fixture del Mundial"
+    }
 
-      const ptsTxt = pred?.puntos_obtenidos>=3 ? "<span style='color:#15803d;font-weight:800;'>🎯 +3</span>"
-                   : pred?.puntos_obtenidos>=1 ? "<span style='color:#d97706;font-weight:800;'>👍 +1</span>"
-                   : pred?.puntos_obtenidos===0 ? "<span style='color:#dc2626;font-weight:800;'>❌ 0</span>" : ""
+    lista.innerHTML = Object.entries(porFecha).map(([fecha, ps]) => {
+      const cards = ps.map(p => {
+        const terminado = p.estado === "FT"
+        const enVivo    = p.estado === "LIVE"
+        const signo     = terminado||enVivo ? `${p.golesL} — ${p.golesV}` : (p.hora ? `${p.hora}hs` : "vs")
 
-      let centro
-      if(terminado || enVivo){
-        centro = `<div class='partido-vs'><div class='partido-score'>${glScore} — ${gvScore}</div>${badge}<div style='font-size:10px;color:#94a3b8;'>${fechaDia}</div>${pred?`<div style='font-size:11px;color:#64748b;margin-top:2px;'>Tu pred: ${pred.goles_local}-${pred.goles_visitante} ${ptsTxt}</div>`:""}</div>`
-      } else if(bloqueado || !currentUser){
-        centro = `<div class='partido-vs'><div class='partido-hora'>${hora}hs</div><div style='font-size:10px;color:#94a3b8;'>${fechaDia}</div>${badge}${pred?`<div style='font-size:11px;color:#15803d;font-weight:700;margin-top:2px;'>✅ ${pred.goles_local}-${pred.goles_visitante}</div>`:""}${!currentUser?`<div style='font-size:11px;margin-top:4px;'><a href='/login?redirect=/mundial' style='color:#6366f1;font-weight:700;'>Iniciá sesión →</a></div>`:""}</div>`
-      } else {
-        const gl = pred?.goles_local ?? ""
-        const gv = pred?.goles_visitante ?? ""
-        centro = `<div class='partido-vs'><div class='partido-hora'>${hora}hs</div><div style='font-size:10px;color:#94a3b8;'>${fechaDia}</div>${badge}<div class='pred-inline'><input type='number' min='0' max='20' value='${gl}' id='phl-${p.id}' placeholder='0'><span style='font-weight:900;color:#94a3b8;'>-</span><input type='number' min='0' max='20' value='${gv}' id='phv-${p.id}' placeholder='0'><button class='pred-btn' onclick="guardarPredHome('${p.id}')">${pred?"✏️ Editar":"Guardar"}</button></div></div>`
-      }
-      const clase = terminado?"terminado":enVivo?"vivo":bloqueado?"bloqueado":""
-      return `<div class='partido-hoy-card ${clase}'><div class='partido-equipo'>${imgL}<span>${home.team?.displayName||"?"}</span></div>${centro}<div class='partido-equipo derecha'>${imgV}<span>${away.team?.displayName||"?"}</span></div></div>`
+        let badge
+        if(terminado)   badge = "<div class='partido-badge badge-final'>Final</div>"
+        else if(enVivo) badge = "<div class='partido-badge badge-vivo'>🔴 EN VIVO</div>"
+        else            badge = `<div class='partido-badge badge-abierto'>⏱ ${p.hora||""}hs</div>`
+
+        const clase = terminado?"terminado":enVivo?"vivo":""
+
+        const centro = `<div class='partido-vs'>
+          <div class='partido-score'>${signo}</div>
+          ${badge}
+        </div>`
+
+        return `<div class='partido-hoy-card ${clase}'>
+          <div class='partido-equipo'><span style='font-size:22px;'>🏳️</span><span>${p.local}</span></div>
+          ${centro}
+          <div class='partido-equipo derecha'><span style='font-size:22px;'>🏳️</span><span>${p.visitante}</span></div>
+        </div>`
+      }).join("")
+
+      return `<div style='margin-bottom:8px;'>
+        <div style='font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;padding:6px 4px 2px;'>${fecha}</div>
+        ${cards}
+      </div>`
     }).join("")
+
   } catch(err){
     console.error("renderPartidosHoy:", err)
-    lista.innerHTML = "<div style='text-align:center;padding:24px;color:#dc2626;font-size:13px;'>Error al cargar. Reintentando...</div>"
+    lista.innerHTML = "<div style='text-align:center;padding:24px;color:#dc2626;font-size:13px;'>Error al cargar partidos. Reintentando...</div>"
     setTimeout(renderPartidosHoy, 8000)
   }
 }
@@ -1820,43 +1808,22 @@ async function renderTablasGrupo(){
   if(!btns) return
   btns.innerHTML = "<div style='color:#94a3b8;font-size:12px;padding:8px;'><i class='fa-solid fa-spinner fa-spin'></i> Cargando tablas...</div>"
   try {
-    const todos = await _traerPartidos()
-    const grupos = {}
-    todos.forEach(ev => {
-      const comp   = ev.competitions[0]
-      const grpRaw = comp.groups?.abbreviation||comp.groups?.shortName||comp.groups?.name||comp.notes?.find(n=>/group/i.test(n.headline||""))?.headline||""
-      const m = grpRaw.match(/\bGroup\s+([A-L])\b/i) || grpRaw.match(/\b([A-L])\b/)
-      const grp = m ? m[1].toUpperCase() : ""
-      if(!grp) return
-      comp.competitors.forEach(c=>{
-        if(!grupos[grp]) grupos[grp]={}
-        if(!grupos[grp][c.team.id]){
-          grupos[grp][c.team.id]={ id:c.team.id, nombre:c.team.displayName||c.team.name||"?", logo:c.team.logos?.[0]?.href||"", pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0 }
-        }
-      })
-      if(!ev.status.type.completed) return
-      const home = comp.competitors.find(c=>c.homeAway==="home")
-      const away = comp.competitors.find(c=>c.homeAway==="away")
-      if(!home||!away) return
-      const gl=parseInt(home.score??0), gv=parseInt(away.score??0)
-      if(isNaN(gl)||isNaN(gv)) return
-      const L=grupos[grp]?.[home.team.id], V=grupos[grp]?.[away.team.id]
-      if(!L||!V) return
-      L.pj++;V.pj++;L.gf+=gl;L.gc+=gv;V.gf+=gv;V.gc+=gl
-      if(gl>gv){L.pg++;L.pts+=3;V.pp++}
-      else if(gl<gv){V.pg++;V.pts+=3;L.pp++}
-      else{L.pe++;L.pts++;V.pe++;V.pts++}
-    })
+    const datos = _cachedDatos || await _fetchDatos()
+    const grupos = datos.grupos || {}
     const letras = Object.keys(grupos).sort()
+
     if(!letras.length){
       btns.innerHTML = "<div style='color:#94a3b8;font-size:12px;padding:8px;'>Sin datos de grupos aún.</div>"
       return
     }
+
     window._standingsData = {}
-    letras.forEach(g=>{
-      window._standingsData[g] = Object.values(grupos[g]).sort((a,b)=>b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf)
-    })
-    btns.innerHTML = letras.map((g,i)=>`<button onclick="cambiarTablaGrupo('${g}')" id="tgb-${g}" style="padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid ${i===0?"#15803d":"#e2e8f0"};background:${i===0?"#15803d":"white"};color:${i===0?"white":"#374151"};transition:all .15s;">Grupo ${g}</button>`).join("")
+    letras.forEach(g => { window._standingsData[g] = grupos[g] })
+
+    btns.innerHTML = letras.map((g,i) =>
+      `<button onclick="cambiarTablaGrupo('${g}')" id="tgb-${g}" style="padding:6px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid ${i===0?"#15803d":"#e2e8f0"};background:${i===0?"#15803d":"white"};color:${i===0?"white":"#374151"};transition:all .15s;">Grupo ${g}</button>`
+    ).join("")
+
     _tgActual = letras[0]
     _dibujarTabla(_tgActual)
   } catch(err){
@@ -1882,11 +1849,11 @@ function _dibujarTabla(key){
   const filas = window._standingsData?.[key]
   if(!filas?.length){ cont.innerHTML = `<div style='text-align:center;padding:24px;color:#94a3b8;font-size:13px;'>Sin datos para Grupo ${key}.</div>`; return }
   const tbody = filas.map((e,i)=>{
-    const dg=e.gf-e.gc
-    const logo=e.logo?`<img src="${e.logo}" style="width:20px;height:15px;object-fit:contain;margin-right:5px;vertical-align:middle;" onerror="this.style.display='none'">`:"🏳"
-    return `<tr class="${i<2?"clasificado":""}"><td style="color:#94a3b8;font-weight:700;">${i+1}</td><td><div class="equipo-nombre">${logo}${e.nombre}</div></td><td>${e.pj}</td><td>${e.pg}</td><td>${e.pe}</td><td>${e.pp}</td><td>${e.gf}</td><td>${e.gc}</td><td style="color:${dg>0?"#15803d":dg<0?"#dc2626":"#64748b"};font-weight:700;">${dg>0?"+":""}${dg}</td><td><span class="pts">${e.pts}</span></td></tr>`
+    const dg = e.dg ?? (e.gf - e.gc)
+    const nombre = e.equipo || e.nombre || "?"
+    return `<tr class="${i<2?"clasificado":""}"><td style="color:#94a3b8;font-weight:700;">${i+1}</td><td><div class="equipo-nombre">${nombre}</div></td><td>${e.pj}</td><td>${e.pg}</td><td>${e.pe}</td><td>${e.pp}</td><td>${e.gf}</td><td>${e.gc}</td><td style="color:${dg>0?"#15803d":dg<0?"#dc2626":"#64748b"};font-weight:700;">${dg>0?"+":""}${dg}</td><td><span class="pts">${e.pts}</span></td></tr>`
   }).join("")
-  cont.innerHTML = `<table class='tabla-grupo'><thead><tr><th style="width:24px;">#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead><tbody>${tbody}</tbody></table><div style='padding:8px 12px;font-size:10px;color:#94a3b8;display:flex;align-items:center;gap:6px;'><span style='display:inline-block;width:8px;height:8px;border-radius:2px;background:#22c55e;'></span>Clasificados · Datos: ESPN</div>`
+  cont.innerHTML = `<table class='tabla-grupo'><thead><tr><th style="width:24px;">#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead><tbody>${tbody}</tbody></table><div style='padding:8px 12px;font-size:10px;color:#94a3b8;display:flex;align-items:center;gap:6px;'><span style='display:inline-block;width:8px;height:8px;border-radius:2px;background:#22c55e;'></span>Clasificados · Datos: canchallena.com.ar</div>`
 }
 
 /* ── Goleadores ── */
@@ -1895,53 +1862,24 @@ async function renderGoleadores(){
   if(!cont) return
   cont.innerHTML = "<div style='text-align:center;padding:20px;color:#94a3b8;'><i class='fa-solid fa-spinner fa-spin'></i> Cargando goleadores...</div>"
   try {
-    // ESPN scorers endpoint para el Mundial 2026
-    const data = await _fetchJSON(`${ESPN}/leaders?season=2026&seasontype=1`).catch(()=>null)
-    const cats  = data?.categories || []
-    const golescat = cats.find(c=>(c.name||"").toLowerCase().includes("goal")||c.shortName==="G")
-    const lista = golescat?.leaders?.slice(0,15) || []
-    if(!lista.length){
-      // Fallback: calcular desde scoreboard (solo últimos 10 días para no tardar)
-      const ahora = new Date()
-      const dias  = []
-      for(let i=0;i<10;i++){
-        const d=new Date(ahora.getTime()-i*86400000)
-        dias.push(d.toISOString().slice(0,10).replace(/-/g,""))
-      }
-      const res = await Promise.all(dias.map(d=>_fetchJSON(`${ESPN}/scoreboard?dates=${d}&limit=50`).then(j=>j.events||[]).catch(()=>[])))
-      const terminados = res.flat().filter(ev=>ev.status.type.completed)
-      if(!terminados.length){
-        cont.innerHTML = "<div style='text-align:center;padding:24px;color:#94a3b8;font-size:13px;'>Los goleadores aparecen cuando se jueguen partidos.</div>"
-        return
-      }
-      const summs = await Promise.all(terminados.slice(0,20).map(ev=>_fetchJSON(`${ESPN}/summary?event=${ev.id}`).catch(()=>null)))
-      const golesMap = {}
-      summs.forEach(s=>{
-        if(!s) return
-        ;(s.scoringPlays||[]).forEach(p=>{
-          const jugador=p.participants?.[0]?.athlete?.displayName||p.text?.split(/[\(\n]/)[0]?.trim()
-          if(!jugador||jugador.length<2) return
-          const team=p.team||{}
-          const key=jugador+"|"+(team.id||"")
-          if(!golesMap[key]) golesMap[key]={nombre:jugador,equipo:team.displayName||team.name||"",logo:team.logos?.[0]?.href||"",goles:0}
-          golesMap[key].goles++
-        })
-      })
-      const gArr = Object.values(golesMap).sort((a,b)=>b.goles-a.goles).slice(0,15)
-      if(!gArr.length){ cont.innerHTML="<div style='text-align:center;padding:24px;color:#94a3b8;font-size:13px;'>Sin goleadores aún.</div>"; return }
-      cont.innerHTML = gArr.map((g,i)=>{
-        const logo=g.logo?`<img src="${g.logo}" style="width:20px;height:15px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.style.display='none'">`:"🏳"
-        const medalla=i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1
-        return `<div class='goleador-row'><div class='goleador-pos'>${medalla}</div><div style='flex:1;'><div class='goleador-nombre'>${g.nombre}</div><div class='goleador-equipo'>${logo}${g.equipo}</div></div><div class='goleador-goles'>${g.goles} ⚽</div></div>`
-      }).join("")
+    const datos = _cachedDatos || await _fetchDatos()
+    const gArr  = datos.goleadores || []
+
+    if(!gArr.length){
+      cont.innerHTML = "<div style='text-align:center;padding:24px;color:#94a3b8;font-size:13px;'>Los goleadores aparecen cuando se jueguen partidos.</div>"
       return
     }
-    cont.innerHTML = lista.map((l,i)=>{
-      const ath  = l.athlete
-      const team = l.team
-      const logo = team?.logos?.[0]?.href?`<img src="${team.logos[0].href}" style="width:20px;height:15px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.style.display='none'">`:"🏳"
-      const medalla=i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1
-      return `<div class='goleador-row'><div class='goleador-pos'>${medalla}</div><div style='flex:1;'><div class='goleador-nombre'>${ath?.displayName||"?"}</div><div class='goleador-equipo'>${logo}${team?.displayName||""}</div></div><div class='goleador-goles'>${l.value||l.displayValue||"?"} ⚽</div></div>`
+
+    cont.innerHTML = gArr.map((g,i) => {
+      const medalla = i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1
+      return `<div class='goleador-row'>
+        <div class='goleador-pos'>${medalla}</div>
+        <div style='flex:1;'>
+          <div class='goleador-nombre'>${g.nombre}</div>
+          <div class='goleador-equipo'>${g.equipo||""}</div>
+        </div>
+        <div class='goleador-goles'>${g.goles} ⚽</div>
+      </div>`
     }).join("")
   } catch(err){
     cont.innerHTML = "<div style='text-align:center;padding:24px;color:#94a3b8;font-size:13px;'>Error al cargar goleadores.</div>"
@@ -2012,6 +1950,8 @@ window.votarEncuesta = async function(){
   _renderEncuestaVotos()
 }
 
+/* ══════════════════════════════════
+   Auto-refresco cada 5 minutos
 ══════════════════════════════════ */
 async function refrescarDatos(){
   try {
@@ -2021,7 +1961,9 @@ async function refrescarDatos(){
         .from("mundial_predicciones").select("*").eq("user_id", currentUser.id)
       if(preds){ MIS_PREDS = {}; preds.forEach(p => MIS_PREDS[p.partido_id] = p) }
     }
-    // Refrescar secciones con datos frescos de ESPN
+    // Forzar re-fetch limpiando cache
+    _cachedDatos = null
+    await _fetchDatos()
     await renderPartidosHoy()
     await renderTablasGrupo()
     await renderGoleadores()

@@ -1,165 +1,200 @@
 /**
  * Vercel Serverless Function — /api/mundial-datos
- * Trae standings, partidos de hoy y goleadores del Mundial 2026 desde ESPN.
- * Corre server-side → sin CORS, sin límites de fetch del browser.
+ * Proxy para canchallena.lanacion.com.ar — parsea HTML y devuelve JSON.
+ * 3 requests en paralelo, sin riesgo de timeout.
  */
 
-const ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/FIFA.WORLD"
-
-async function fetchJSON(url) {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`)
-  return res.json()
-}
-
-// Rango de días desde el inicio del mundial hasta hoy
-function diasDesdeInicio() {
-  const inicio = new Date("2026-06-11")
-  const hoy    = new Date()
-  const dias   = []
-  for (let d = new Date(inicio); d <= hoy; d = new Date(d.getTime() + 86400000)) {
-    dias.push(d.toISOString().slice(0, 10).replace(/-/g, ""))
-  }
-  return dias
-}
-
 export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*")
-  res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=30")
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300')
+
+  const BASE = 'https://canchallena.lanacion.com.ar/futbol/mundial'
+  const HDR  = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    'Accept': 'text/html,application/xhtml+xml',
+    'Accept-Language': 'es-AR,es;q=0.9'
+  }
 
   try {
-    const dias = diasDesdeInicio().slice(0, 35)
+    const [htmlFix, htmlGrupos, htmlGol] = await Promise.all([
+      fetch(`${BASE}/fixture/`, { headers: HDR }).then(r => r.text()),
+      fetch(`${BASE}/grupos/`,  { headers: HDR }).then(r => r.text()),
+      fetch(`${BASE}/goleadores/`, { headers: HDR }).then(r => r.text()),
+    ])
 
-    // 1. Descargar todos los partidos en paralelo
-    const resultados = await Promise.all(
-      dias.map(d =>
-        fetchJSON(`${ESPN}/scoreboard?dates=${d}&limit=50`)
-          .then(j => j.events || [])
-          .catch(() => [])
-      )
-    )
+    const partidos   = parsearPartidos(htmlFix)
+    const grupos     = parsearGrupos(htmlGrupos)
+    const goleadores = parsearGoleadores(htmlGol)
 
-    const evMap = {}
-    resultados.flat().forEach(ev => { evMap[ev.id] = ev })
-    const todosPartidos = Object.values(evMap)
-
-    // 2. Separar partidos de hoy (AR = UTC-3)
-    const ahora   = new Date()
-    const dStrAR  = new Date(ahora.getTime() - 3 * 3600000).toISOString().slice(0, 10).replace(/-/g, "")
-    const dStrUTC = ahora.toISOString().slice(0, 10).replace(/-/g, "")
-    const partidosHoy = todosPartidos
-      .filter(ev => {
-        const d = new Date(ev.date).toISOString().slice(0, 10).replace(/-/g, "")
-        return d === dStrAR || d === dStrUTC
-      })
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
-      .map(ev => {
-        const comp = ev.competitions[0]
-        const home = comp.competitors.find(c => c.homeAway === "home") || comp.competitors[0]
-        const away = comp.competitors.find(c => c.homeAway === "away") || comp.competitors[1]
-        return {
-          id:         ev.id,
-          fecha:      ev.date,
-          completado: ev.status.type.completed,
-          descripcion:ev.status.type.description,
-          reloj:      ev.status.displayClock || "",
-          periodo:    ev.status.period || 0,
-          local:  { nombre: home.team?.displayName || "?", logo: home.team?.logos?.[0]?.href || "", score: home.score ?? null },
-          visita: { nombre: away.team?.displayName || "?", logo: away.team?.logos?.[0]?.href || "", score: away.score ?? null },
-        }
-      })
-
-    // 3. Calcular standings desde todos los partidos
-    const grupos = {} // "A" → { "teamId": { stats... } }
-
-    todosPartidos.forEach(ev => {
-      const comp   = ev.competitions[0]
-      const notes  = comp.notes || []
-      const grpRaw = comp.groups?.abbreviation
-                  || comp.groups?.shortName
-                  || comp.groups?.name
-                  || notes.find(n => /group/i.test(n.headline || ""))?.headline
-                  || ""
-      const m = grpRaw.match(/\bGroup\s+([A-L])\b/i) || grpRaw.match(/\b([A-L])\b/)
-      const grp = m ? m[1].toUpperCase() : ""
-      if (!grp) return
-
-      const comp2 = ev.competitions[0]
-      comp2.competitors.forEach(c => {
-        if (!grupos[grp]) grupos[grp] = {}
-        if (!grupos[grp][c.team.id]) {
-          grupos[grp][c.team.id] = {
-            id:    c.team.id,
-            nombre:c.team.displayName || c.team.name || "?",
-            logo:  c.team.logos?.[0]?.href || c.team.logo || "",
-            pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, pts: 0
-          }
-        }
-      })
-
-      if (!ev.status.type.completed) return
-      const home = comp2.competitors.find(c => c.homeAway === "home")
-      const away = comp2.competitors.find(c => c.homeAway === "away")
-      if (!home || !away) return
-      const gl = parseInt(home.score ?? 0), gv = parseInt(away.score ?? 0)
-      if (isNaN(gl) || isNaN(gv)) return
-
-      const L = grupos[grp]?.[home.team.id]
-      const V = grupos[grp]?.[away.team.id]
-      if (!L || !V) return
-
-      L.pj++; V.pj++; L.gf += gl; L.gc += gv; V.gf += gv; V.gc += gl
-      if (gl > gv)      { L.pg++; L.pts += 3; V.pp++ }
-      else if (gl < gv) { V.pg++; V.pts += 3; L.pp++ }
-      else              { L.pe++; L.pts++;     V.pe++; V.pts++ }
-    })
-
-    // Convertir grupos a array ordenado por pts
-    const standings = {}
-    Object.keys(grupos).sort().forEach(g => {
-      standings[g] = Object.values(grupos[g]).sort(
-        (a, b) => b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc) || b.gf - a.gf
-      )
-    })
-
-    // 4. Goleadores: fetch summaries de partidos terminados
-    const terminados = todosPartidos.filter(ev => ev.status.type.completed).slice(0, 48)
-    const summaries  = await Promise.all(
-      terminados.map(ev =>
-        fetchJSON(`${ESPN}/summary?event=${ev.id}`).catch(() => null)
-      )
-    )
-
-    const golesMap = {}
-    summaries.forEach(s => {
-      if (!s) return
-      const plays = s.scoringPlays || []
-      plays.forEach(p => {
-        const jugador = p.participants?.[0]?.athlete?.displayName
-                     || p.text?.split(/[(\n]/)[0]?.trim()
-        if (!jugador || jugador.length < 2) return
-        const team = p.team || {}
-        const key  = jugador + "|" + (team.id || "")
-        if (!golesMap[key]) {
-          golesMap[key] = {
-            nombre: jugador,
-            equipo: team.displayName || team.name || "",
-            logo:   team.logos?.[0]?.href || team.logo || "",
-            goles:  0
-          }
-        }
-        golesMap[key].goles++
-      })
-    })
-
-    const goleadores = Object.values(golesMap)
-      .sort((a, b) => b.goles - a.goles)
-      .slice(0, 25)
-
-    res.status(200).json({ ok: true, partidosHoy, standings, goleadores })
-
+    res.status(200).json({ ok: true, partidos, grupos, goleadores, ts: Date.now() })
   } catch (err) {
-    console.error("mundial-datos:", err)
     res.status(500).json({ ok: false, error: err.message })
   }
+}
+
+/* ── Partidos / Fixture ───────────────────────────────────────────────── */
+function parsearPartidos(html) {
+  const partidos = []
+
+  // Dividir por bloques de fecha (h2 o h3)
+  const partes = html.split(/<h[23][^>]*>/i)
+
+  for (let i = 1; i < partes.length; i++) {
+    const bloque = partes[i]
+
+    // Extraer texto del encabezado (antes del primer <)
+    const fechaRaw = bloque.match(/^([^<]{2,80})/)
+    if (!fechaRaw) continue
+    const fechaStr = limpiarHTML(fechaRaw[1]).trim()
+
+    // Solo bloques con fecha real (meses en español)
+    if (!/enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|\d{4}/i.test(fechaStr)) continue
+
+    // Buscar partidos con resultado: ABC 2 - 1 DEF
+    const reResult = /\b([A-Z]{2,4})\s+(\d+)\s*[-–]\s*(\d+)\s+([A-Z]{2,4})\b/g
+    let m
+    while ((m = reResult.exec(bloque)) !== null) {
+      partidos.push({
+        fecha:     fechaStr,
+        local:     m[1],
+        golesL:    parseInt(m[2]),
+        golesV:    parseInt(m[3]),
+        visitante: m[4],
+        estado:    'FT'
+      })
+    }
+
+    // Buscar horarios con equipos: ABC 18:00 DEF o ABC - DEF (sin score)
+    // Patrón: código hora código
+    const reHora = /\b([A-Z]{2,4})\s+(\d{1,2}:\d{2})\s+([A-Z]{2,4})\b/g
+    while ((m = reHora.exec(bloque)) !== null) {
+      const existe = partidos.some(p =>
+        p.fecha === fechaStr && (p.local === m[1] || p.visitante === m[1])
+      )
+      if (!existe) {
+        partidos.push({ fecha: fechaStr, local: m[1], golesL: null, golesV: null, visitante: m[3], hora: m[2], estado: 'PRG' })
+      }
+    }
+
+    // En vivo: buscar "en vivo" o similar cerca del partido
+    const reEnVivo = /\b([A-Z]{2,4})\s+(\d+)\s*[-–]\s*(\d+)\s+([A-Z]{2,4})\b[^<]*(?:vivo|live|\d{2,3}')/gi
+    while ((m = reEnVivo.exec(bloque)) !== null) {
+      const idx = partidos.findIndex(p =>
+        p.local === m[1] && p.visitante === m[4] && p.fecha === fechaStr
+      )
+      if (idx >= 0) partidos[idx].estado = 'LIVE'
+    }
+  }
+
+  return partidos
+}
+
+/* ── Grupos / Standings ───────────────────────────────────────────────── */
+function parsearGrupos(html) {
+  const grupos = {}
+
+  // Encontrar todas las ocurrencias de "Grupo X"
+  const reGrupo = /Grupo\s+([A-L])/gi
+  const matches = [...html.matchAll(reGrupo)]
+  const posiciones = matches.map(m => ({ letra: m[1].toUpperCase(), pos: m.index }))
+
+  // Eliminar duplicados de letra
+  const vistas = new Set()
+  const unicas = posiciones.filter(p => {
+    if (vistas.has(p.letra)) return false
+    vistas.add(p.letra)
+    return true
+  })
+
+  for (let i = 0; i < unicas.length; i++) {
+    const { letra, pos } = unicas[i]
+    const fin = unicas[i + 1]?.pos ?? pos + 10000
+    const segmento = html.slice(pos, fin)
+    const equipos = parsearTablaGrupo(segmento)
+    if (equipos.length > 0) grupos[letra] = equipos
+  }
+
+  return grupos
+}
+
+function parsearTablaGrupo(segmento) {
+  const equipos = []
+
+  // Filas de tabla
+  const reFila = /<tr[^>]*>([\s\S]*?)<\/tr>/gi
+  let m
+  while ((m = reFila.exec(segmento)) !== null) {
+    const filaHTML = m[1]
+    const celdas = [...filaHTML.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)]
+      .map(c => limpiarHTML(c[1]).trim())
+
+    if (celdas.length < 7) continue
+
+    // Identificar celda de equipo (texto con letras, no solo números)
+    const nombreIdx = celdas.findIndex(c => /[A-Za-záéíóúñÁÉÍÓÚÑ]{3,}/.test(c) && !/^(?:PTS|PJ|PG|PE|PP|DG|GF|GC|EQUIPO|ÚLTIMOS)$/i.test(c))
+    if (nombreIdx < 0) continue
+
+    // Extraer solo números de las demás celdas
+    const nums = celdas
+      .filter((_, idx) => idx !== nombreIdx)
+      .map(c => c.match(/^-?\d+$/) ? parseInt(c) : null)
+      .filter(n => n !== null)
+
+    if (nums.length < 6) continue
+
+    equipos.push({
+      equipo: celdas[nombreIdx],
+      pts:    nums[0],
+      pj:     nums[1],
+      pg:     nums[2],
+      pe:     nums[3],
+      pp:     nums[4],
+      dg:     nums[5],
+      gf:     nums[6] ?? 0,
+      gc:     nums[7] ?? 0,
+    })
+
+    if (equipos.length >= 4) break
+  }
+
+  return equipos
+}
+
+/* ── Goleadores ───────────────────────────────────────────────────────── */
+function parsearGoleadores(html) {
+  const goleadores = []
+
+  const reFila = /<tr[^>]*>([\s\S]*?)<\/tr>/gi
+  let m
+  while ((m = reFila.exec(html)) !== null) {
+    const celdas = [...m[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)]
+      .map(c => limpiarHTML(c[1]).trim())
+
+    if (celdas.length < 2) continue
+
+    // Nombre: celda con letras y más de 3 chars
+    const nombre = celdas.find(c => /[A-Za-záéíóúñÁÉÍÓÚÑ]{4,}/.test(c) && !/^(?:Jugador|Equipo|Goles|Rank|Nombre|GOLES|JUGADOR)/i.test(c))
+    // Goles: celda solo con dígito(s)
+    const golesStr = celdas.find(c => /^\d{1,2}$/.test(c))
+
+    if (!nombre || !golesStr) continue
+
+    goleadores.push({ nombre, goles: parseInt(golesStr) })
+    if (goleadores.length >= 20) break
+  }
+
+  return goleadores
+}
+
+/* ── Helpers ──────────────────────────────────────────────────────────── */
+function limpiarHTML(str) {
+  return str
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&aacute;/g, 'á').replace(/&eacute;/g, 'é')
+    .replace(/&iacute;/g, 'í').replace(/&oacute;/g, 'ó')
+    .replace(/&uacute;/g, 'ú').replace(/&ntilde;/g, 'ñ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
