@@ -1742,8 +1742,12 @@ async function renderPartidosHoy(){
       return dia === diaHoy && mes === mesHoy
     }
 
-    // Filtrar hoy; si no hay, mostrar todos
-    let mostrar = partidos.filter(p => fechaEsHoy(p.fecha))
+    // Filtrar por fecha ISO (más confiable que texto en español)
+    const hoyStr = new Date(ahora.getTime() - 3*3600000).toISOString().slice(0,10)
+    let mostrar = partidos.filter(p => p.fechaISO && p.fechaISO.slice(0,10) === hoyStr)
+    // Fallback: filtrar por texto de fecha en español
+    if(!mostrar.length) mostrar = partidos.filter(p => fechaEsHoy(p.fecha))
+    // Fallback final: todos los partidos
     if(!mostrar.length) mostrar = partidos
 
     if(!mostrar.length){
@@ -1752,7 +1756,7 @@ async function renderPartidosHoy(){
       return
     }
 
-    // Agrupar por fecha para mostrar
+    // Agrupar por fecha
     const porFecha = {}
     mostrar.forEach(p => {
       if(!porFecha[p.fecha]) porFecha[p.fecha] = []
@@ -1761,7 +1765,8 @@ async function renderPartidosHoy(){
 
     if(titulo){
       const claves = Object.keys(porFecha)
-      titulo.textContent = claves.length === 1 && fechaEsHoy(claves[0]) ? "Partidos de hoy" : "Fixture del Mundial"
+      titulo.textContent = claves.length === 1 && (fechaEsHoy(claves[0]) || mostrar[0]?.fechaISO?.slice(0,10) === hoyStr)
+        ? "Partidos de hoy" : "Fixture del Mundial"
     }
 
     lista.innerHTML = Object.entries(porFecha).map(([fecha, ps]) => {
@@ -1773,9 +1778,14 @@ async function renderPartidosHoy(){
         let badge
         if(terminado)   badge = "<div class='partido-badge badge-final'>Final</div>"
         else if(enVivo) badge = "<div class='partido-badge badge-vivo'>🔴 EN VIVO</div>"
-        else            badge = `<div class='partido-badge badge-abierto'>⏱ ${p.hora||""}hs</div>`
+        else            badge = `<div class='partido-badge badge-abierto'>⏱ ${p.hora||"–"}hs</div>`
 
         const clase = terminado?"terminado":enVivo?"vivo":""
+
+        const imgL = p.localLogo     ? `<img src="${p.localLogo}"     style="width:32px;height:32px;object-fit:contain;" onerror="this.style.display='none'">` : "🏳️"
+        const imgV = p.visitanteLogo ? `<img src="${p.visitanteLogo}" style="width:32px;height:32px;object-fit:contain;" onerror="this.style.display='none'">` : "🏳️"
+        const nomL = p.localNombre     || p.local
+        const nomV = p.visitanteNombre || p.visitante
 
         const centro = `<div class='partido-vs'>
           <div class='partido-score'>${signo}</div>
@@ -1783,9 +1793,9 @@ async function renderPartidosHoy(){
         </div>`
 
         return `<div class='partido-hoy-card ${clase}'>
-          <div class='partido-equipo'><span style='font-size:22px;'>🏳️</span><span>${p.local}</span></div>
+          <div class='partido-equipo'>${imgL}<span>${nomL}</span></div>
           ${centro}
-          <div class='partido-equipo derecha'><span style='font-size:22px;'>🏳️</span><span>${p.visitante}</span></div>
+          <div class='partido-equipo derecha'>${imgV}<span>${nomV}</span></div>
         </div>`
       }).join("")
 
