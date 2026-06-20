@@ -1,6 +1,16 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/perfil_publico",
+      "has": [
+        { "type": "query", "key": "id" },
+        { "type": "header", "key": "user-agent", "value": ".*(facebookexternalhit|Twitterbot|WhatsApp|LinkedInBot|Slackbot|TelegramBot).*" }
+      ],
+      "destination": "/api/og-perfil?id=:id"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
