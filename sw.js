@@ -4,7 +4,7 @@
    - Manejo de Push Notifications
 ══════════════════════════════════════════════ */
 
-const CACHE_NAME = 'tc-v51'
+const CACHE_NAME = 'tc-v52'
 const CACHE_STATIC = ['/index.html', '/style.css', '/logo.png']
 
 /* ── Instalación ── */
@@ -45,8 +45,11 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        const clone = res.clone()
-        caches.open(CACHE_NAME).then(c => c.put(e.request, clone))
+        // No cachear respuestas parciales (206), opacas o errores
+        if(res.ok && res.status === 200 && res.type !== 'opaque') {
+          const clone = res.clone()
+          caches.open(CACHE_NAME).then(c => c.put(e.request, clone))
+        }
         return res
       })
       .catch(() => caches.match(e.request))
