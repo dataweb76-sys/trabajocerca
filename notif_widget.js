@@ -67,46 +67,71 @@
     min-width: 15px; height: 15px; border-radius: 20px; padding: 0 3px;
     display: flex; align-items: center; justify-content: center;
     border: 2px solid white; pointer-events: none; line-height: 1;
+    animation: nw-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes nw-pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
   }
   #notif-panel {
     position: absolute; top: calc(100% + 10px); right: -10px;
-    width: 310px; background: white; border-radius: 14px;
-    box-shadow: 0 8px 36px rgba(0,0,0,.17);
+    width: 330px; background: white; border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.18);
     border: 1px solid #e2e8f0; overflow: hidden;
     display: none; z-index: 6000;
+    animation: nw-aparecer .18s ease;
+  }
+  @keyframes nw-aparecer {
+    from { opacity:0; transform: translateY(-6px); }
+    to   { opacity:1; transform: translateY(0); }
   }
   #notif-panel.abierto { display: block; }
   .nw-header {
-    padding: 13px 16px 11px; border-bottom: 1px solid #e2e8f0;
+    padding: 14px 16px 12px; border-bottom: 1px solid #e2e8f0;
     display: flex; align-items: center; justify-content: space-between;
+    background: #f8fafc;
   }
   .nw-header strong { font-size: 14px; color: #1e293b; font-weight: 800; }
-  .nw-marcar { font-size: 12px; color: #2563eb; cursor: pointer; font-weight: 600; }
-  .nw-marcar:hover { text-decoration: underline; }
-  .nw-lista { max-height: 360px; overflow-y: auto; }
+  .nw-marcar { font-size: 12px; color: #2563eb; cursor: pointer; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+  .nw-marcar:hover { background: #eff6ff; }
+  .nw-lista { max-height: 380px; overflow-y: auto; }
   .nw-lista::-webkit-scrollbar { width: 4px; }
   .nw-lista::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+  .nw-separador {
+    padding: 6px 14px 4px; font-size: 11px; font-weight: 700;
+    color: #94a3b8; text-transform: uppercase; letter-spacing: .05em;
+    background: #f8fafc; border-bottom: 1px solid #f1f5f9;
+  }
   .nw-item {
-    padding: 11px 14px; border-bottom: 1px solid #f1f5f9;
-    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 14px; border-bottom: 1px solid #f1f5f9;
+    display: flex; gap: 11px; align-items: flex-start;
     cursor: default; transition: background .15s;
   }
   .nw-item.nw-url { cursor: pointer; }
   .nw-item.nw-url:hover { background: #f8fafc; }
-  .nw-item.nw-nueva { background: #eff6ff; }
+  .nw-item.nw-nueva { background: #eff6ff; border-left: 3px solid #2563eb; }
   .nw-item.nw-nueva.nw-url:hover { background: #dbeafe; }
   .nw-ico {
-    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 15px;
+    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
   }
-  .nw-body strong { font-size: 13px; color: #1e293b; display: block; margin-bottom: 1px; line-height: 1.3; }
-  .nw-body p { font-size: 12px; color: #64748b; margin: 0 0 2px; }
+  .nw-body { flex: 1; min-width: 0; }
+  .nw-body strong { font-size: 13px; color: #1e293b; display: block; margin-bottom: 2px; line-height: 1.35; }
+  .nw-body p { font-size: 12px; color: #64748b; margin: 0 0 3px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nw-meta { display: flex; align-items: center; gap: 6px; }
   .nw-body time { font-size: 11px; color: #94a3b8; }
+  .nw-nueva-dot { width: 7px; height: 7px; border-radius: 50%; background: #2563eb; flex-shrink: 0; }
   .nw-vacia {
-    padding: 32px 16px; text-align: center; color: #94a3b8;
+    padding: 36px 16px; text-align: center; color: #94a3b8;
   }
-  .nw-vacia i { font-size: 28px; display: block; margin-bottom: 8px; opacity: .5; }
+  .nw-vacia i { font-size: 32px; display: block; margin-bottom: 10px; opacity: .4; }
   .nw-vacia p { margin: 0; font-size: 13px; }
+  .nw-footer {
+    padding: 10px 16px; border-top: 1px solid #e2e8f0; text-align: center;
+    background: #f8fafc;
+  }
+  .nw-footer a { font-size: 12px; color: #2563eb; font-weight: 600; text-decoration: none; }
+  .nw-footer a:hover { text-decoration: underline; }
   @media(max-width: 400px){
     #notif-panel { width: calc(100vw - 24px); right: -50px; }
   }
@@ -138,6 +163,9 @@
           <i class="fa-solid fa-bell-slash"></i>
           <p>Sin notificaciones por ahora</p>
         </div>
+      </div>
+      <div class="nw-footer">
+        <a href="/notificaciones.html">Ver todas las notificaciones</a>
       </div>
     </div>`
 
@@ -236,25 +264,45 @@
     }
 
     const ICONOS = {
-      review:  { ico: "⭐", bg: "#fef9c3" },
-      pedido:  { ico: "📋", bg: "#eff6ff" },
-      mensaje: { ico: "💬", bg: "#eff6ff" },
-      sistema: { ico: "📣", bg: "#f0fdf4" }
+      review:   { ico: "⭐", bg: "#fef9c3" },
+      pedido:   { ico: "📋", bg: "#eff6ff" },
+      mensaje:  { ico: "💬", bg: "#dbeafe" },
+      sistema:  { ico: "📣", bg: "#f0fdf4" },
+      pago:     { ico: "💰", bg: "#dcfce7" },
+      contacto: { ico: "👤", bg: "#fce7f3" },
+      alerta:   { ico: "⚠️", bg: "#fef3c7" },
     }
 
-    lista.innerHTML = _notifs.map(n => {
+    const nuevas    = _notifs.filter(n => !n.leida)
+    const anteriores = _notifs.filter(n => n.leida)
+
+    function renderItem(n) {
       const ic  = ICONOS[n.tipo] || { ico: "🔔", bg: "#f1f5f9" }
       const cls = `nw-item ${n.leida ? "" : "nw-nueva"} ${n.url ? "nw-url" : ""}`
-      const onclick = n.url ? `onclick="window._nwClick('${n.id}','${n.url}')"` : `onclick="window._nwClick('${n.id}','')"`
+      const onclick = `onclick="window._nwClick('${n.id}','${n.url || ''}')" `
       return `<div class="${cls}" ${onclick}>
         <div class="nw-ico" style="background:${ic.bg};">${ic.ico}</div>
         <div class="nw-body">
           <strong>${n.titulo}</strong>
           ${n.cuerpo ? `<p>${n.cuerpo}</p>` : ""}
-          <time>${hace(n.created_at)}</time>
+          <div class="nw-meta">
+            ${!n.leida ? '<span class="nw-nueva-dot"></span>' : ''}
+            <time>${hace(n.created_at)}</time>
+          </div>
         </div>
       </div>`
-    }).join("")
+    }
+
+    let html = ""
+    if (nuevas.length) {
+      html += `<div class="nw-separador">🔵 Nuevas (${nuevas.length})</div>`
+      html += nuevas.map(renderItem).join("")
+    }
+    if (anteriores.length) {
+      html += `<div class="nw-separador">Anteriores</div>`
+      html += anteriores.map(renderItem).join("")
+    }
+    lista.innerHTML = html
   }
 
   function hace(iso){
