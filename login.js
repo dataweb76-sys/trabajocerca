@@ -30,8 +30,22 @@ async function loginConGoogle(){
   }
 }
 
+async function loginConFacebook(){
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "facebook",
+    options: {
+      redirectTo: "https://www.trabajoscerca.com.ar/auth_callback.html"
+    }
+  })
+  if(error){
+    const msg = document.getElementById("msg")
+    if(msg) msg.innerHTML = `<div class="alerta alerta-err">${error.message}</div>`
+  }
+}
+
 window.login = login
 window.loginConGoogle = loginConGoogle
+window.loginConFacebook = loginConFacebook
 
 window.mostrarRecuperarPass = function(e) {
   if(e) e.preventDefault()
