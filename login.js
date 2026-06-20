@@ -34,7 +34,8 @@ async function loginConFacebook(){
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "facebook",
     options: {
-      redirectTo: "https://www.trabajoscerca.com.ar/auth_callback.html"
+      redirectTo: "https://www.trabajoscerca.com.ar/auth_callback.html",
+      scopes: "public_profile"
     }
   })
   if(error){

@@ -580,7 +580,8 @@ async function registrarFacebook() {
   var res = await supa.auth.signInWithOAuth({
     provider: 'facebook',
     options: {
-      redirectTo: window.location.origin + '/auth_callback.html' + (tipoParam ? '?tipo=' + tipoParam : '')
+      redirectTo: window.location.origin + '/auth_callback.html' + (tipoParam ? '?tipo=' + tipoParam : ''),
+      scopes: 'public_profile'
     }
   })
   if(res.error) mostrarError('Error al conectar con Facebook. Intentá de nuevo.')
