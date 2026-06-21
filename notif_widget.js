@@ -441,21 +441,26 @@
       const data = await res.json()
       if(!data?.[0]?.admin) return
 
-      // Ya es admin → agregar ícono al nav
-      const adminLink = document.createElement("a")
-      adminLink.href  = "/admin.html"
-      adminLink.title = "Panel admin"
-      adminLink.innerHTML = `<i class="fa-solid fa-shield-halved" style="color:#7c3aed;"></i> <span style="color:#7c3aed;font-weight:700;">Admin</span>`
-      adminLink.style.cssText = "display:inline-flex;align-items:center;gap:5px;"
+      // Ya es admin → esperar a que wrap esté en el DOM (splash.js puede demorar)
+      function insertarAdminLink(){
+        if(document.getElementById("admin-nav-link")) return // ya existe
+        const parent = wrap.parentNode || document.querySelector(".tnav-right")
+        if(!parent){ setTimeout(insertarAdminLink, 200); return }
 
-      // Resaltar si ya estamos en admin.html
-      if(location.pathname === "/admin.html"){
-        adminLink.style.color = "#7c3aed"
-        adminLink.style.fontWeight = "700"
+        const adminLink = document.createElement("a")
+        adminLink.id    = "admin-nav-link"
+        adminLink.href  = "/admin.html"
+        adminLink.title = "Panel admin"
+        adminLink.innerHTML = `<i class="fa-solid fa-shield-halved"></i> <span>Admin</span>`
+        adminLink.style.cssText = "display:inline-flex;align-items:center;gap:5px;color:#7c3aed;font-weight:700;text-decoration:none;"
+
+        if(wrap.parentNode){
+          wrap.parentNode.insertBefore(adminLink, wrap)
+        } else {
+          parent.appendChild(adminLink)
+        }
       }
-
-      // Insertar antes de la campana
-      if(wrap.parentNode) wrap.parentNode.insertBefore(adminLink, wrap)
+      insertarAdminLink()
     } catch(e){}
   }
 

@@ -634,23 +634,6 @@ async function init(){
     <label><i class="fa-brands fa-tiktok" style="color:#010101;"></i> TikTok</label>
     <input id="editTiktok" value="${esc(data.tiktok)}" placeholder="Ej: @tunombre">
 
-    ${data.tipo !== "cv" && data.tipo !== "cliente" ? `
-    <div style="background:linear-gradient(135deg,#ede9fe,#eff6ff);border:1.5px solid #c4b5fd;border-radius:14px;padding:16px;margin-top:8px;">
-      <label style="display:flex;align-items:center;gap:12px;cursor:pointer;margin:0;">
-        <div style="position:relative;flex-shrink:0;">
-          <input type="checkbox" id="editAceptaTicket" ${data.acepta_ticket_descuento ? "checked" : ""}
-            style="width:0;height:0;opacity:0;position:absolute;"
-            onchange="document.getElementById('ticketToggleSlider').style.background=this.checked?'#7c3aed':'#cbd5e1';document.getElementById('ticketToggleKnob').style.transform=this.checked?'translateX(20px)':'translateX(0)'">
-          <div id="ticketToggleSlider" style="width:44px;height:24px;border-radius:99px;background:${data.acepta_ticket_descuento?'#7c3aed':'#cbd5e1'};transition:background .2s;cursor:pointer;" onclick="document.getElementById('editAceptaTicket').click()">
-            <div id="ticketToggleKnob" style="width:20px;height:20px;background:white;border-radius:50%;margin:2px;transition:transform .2s;transform:${data.acepta_ticket_descuento?'translateX(20px)':'translateX(0)'}"></div>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:14px;font-weight:800;color:#5b21b6;">⭐ Aceptar Ticket de Descuento 10%</div>
-          <div style="font-size:12px;color:#6d28d9;margin-top:2px;">Los clientes con ticket obtienen 10% OFF. Aparecés destacado con estrella en el buscador.</div>
-        </div>
-      </label>
-    </div>` : ""}
     <label>Teléfono fijo</label>
     <input id="editTelefono" value="${esc(data.telefono_fijo)}" type="tel" placeholder="Ej: 02214567890">
     <label>Dirección</label>
@@ -949,8 +932,7 @@ window.guardarDatos = async function(){
     provincia:        document.getElementById("editProvincia").value,
     nombre_empresa:   empresa || null,
     mostrar_como:     mostrarComo,
-    mostrar_telefono: mostrarTel,
-    acepta_ticket_descuento: document.getElementById("editAceptaTicket")?.checked ?? false
+    mostrar_telefono: mostrarTel
   }
 
   // Campos exclusivos de empleador
