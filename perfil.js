@@ -528,7 +528,11 @@ async function init(){
       </div>
     </div>` : ""
 
-  document.getElementById("dash").innerHTML = `
+  /* ── Función para renderizar el perfil completo (no clientes) ── */
+  function renderPerfilCompleto() {
+    // Actualizar tipo a oficio para que aparezcan las opciones
+    // (el usuario eligió empezar a ofrecer algo)
+    document.getElementById("dash").innerHTML = `
     ${bannerEmpresa}
     <div class="dash-header">
       <div style="text-align:center;">
@@ -562,71 +566,18 @@ async function init(){
         <i class="fa-solid fa-share-nodes"></i> Compartir en redes
       </button>
     </div>
-
-    <!-- Panel compartir -->
     <div id="panelCompartir" style="display:none;margin-top:12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 18px;">
       <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.04em;">¿Qué querés compartir?</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button onclick="compartirPerfil('${userId}')"
-          style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;font-weight:700;font-size:14px;">
+        <button onclick="compartirPerfil('${userId}')" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;font-weight:700;font-size:14px;">
           <i class="fa-solid fa-user"></i> Mi perfil
         </button>
-        <button onclick="compartirInicio()"
-          style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:white;font-weight:700;font-size:14px;">
+        <button onclick="compartirInicio()" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:white;font-weight:700;font-size:14px;">
           <i class="fa-solid fa-globe"></i> La página Trabajos Cerca
         </button>
       </div>
       <div id="msgCompartir" style="margin-top:10px;"></div>
     </div>
-
-    <!-- ── PRODE MUNDIAL 2026 ── -->
-    <div id="prodeCard" style="margin:20px 0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);border:1.5px solid rgba(250,204,21,.35);border-radius:18px;padding:20px;overflow:hidden;position:relative;">
-      <div style="position:absolute;top:-20px;right:-20px;font-size:90px;opacity:.06;pointer-events:none;">⚽</div>
-
-      <!-- Encabezado -->
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
-        <div style="font-size:36px;flex-shrink:0;">⚽🏆</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:15px;font-weight:900;color:white;line-height:1.2;">Prode Mundial 2026</div>
-          <div id="prodeStatus" style="font-size:12px;color:rgba(255,255,255,.55);margin-top:3px;">Verificando...</div>
-        </div>
-        <button onclick="window._abrirReglasMundial()" style="
-          background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
-          color:rgba(255,255,255,.9);font-size:12px;font-weight:700;
-          padding:7px 13px;border-radius:9px;cursor:pointer;flex-shrink:0;
-          transition:background .15s;"
-          onmouseover="this.style.background='rgba(255,255,255,.22)'"
-          onmouseout="this.style.background='rgba(255,255,255,.12)'">
-          📋 Reglas
-        </button>
-      </div>
-
-      <!-- ── PARTIDOS DE HOY ── -->
-      <div id="prodePartidosHoy" style="margin-bottom:14px;">
-        <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:#fbbf24;text-transform:uppercase;margin-bottom:10px;">
-          📅 Partidos de hoy
-        </div>
-        <div id="prodeListaPartidos" style="display:flex;flex-direction:column;gap:8px;">
-          <div style="color:rgba(255,255,255,.35);font-size:12px;text-align:center;padding:10px 0;">Cargando...</div>
-        </div>
-      </div>
-
-      <!-- Botón entrar al fixture -->
-      <a href="/mundial.html"
-        style="display:flex;align-items:center;justify-content:center;gap:10px;
-          background:linear-gradient(135deg,#facc15,#f59e0b,#d97706);
-          color:#1c1917;font-weight:900;font-size:15px;
-          padding:14px;border-radius:13px;text-decoration:none;
-          box-shadow:0 4px 20px rgba(250,204,21,.4);transition:transform .15s;"
-        onmouseover="this.style.transform='scale(1.02)'"
-        onmouseout="this.style.transform='scale(1)'">
-        ⚽ Entrar y participar →
-      </a>
-
-    </div>
-    </div>
-
-    <hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0;">
 
     ${misPerfilesHtml}
     ${statsHtml}
@@ -634,284 +585,121 @@ async function init(){
     ${disponibleHtml}
     ${trabajosHtml}
 
-    ${data.tipo === "empleador" ? `
-    <!-- ── ACCIONES EMPLEADOR ── -->
-    <div style="margin-bottom:28px;">
-      <h3 style="margin:0 0 14px;font-size:17px;"><i class="fa-solid fa-rocket" style="color:#2563eb;"></i> Acciones rápidas</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <button onclick="abrirModalPuesto()"
-          style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:22px 14px;border-radius:16px;border:2px solid #bfdbfe;background:#eff6ff;cursor:pointer;transition:all .2s;"
-          onmouseover="this.style.background='#dbeafe';this.style.borderColor='#3b82f6'"
-          onmouseout="this.style.background='#eff6ff';this.style.borderColor='#bfdbfe'">
-          <i class="fa-solid fa-bullhorn" style="font-size:32px;color:#2563eb;"></i>
-          <div>
-            <p style="margin:0;font-weight:800;font-size:14px;color:#1e293b;">Publicar puesto</p>
-            <p style="margin:2px 0 0;font-size:12px;color:#64748b;">Promocioná un puesto en tu empresa</p>
-          </div>
-        </button>
-        <a href="/buscador_trabajos.html"
-          style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:22px 14px;border-radius:16px;border:2px solid #bbf7d0;background:#f0fdf4;cursor:pointer;transition:all .2s;text-decoration:none;"
-          onmouseover="this.style.background='#dcfce7';this.style.borderColor='#22c55e'"
-          onmouseout="this.style.background='#f0fdf4';this.style.borderColor='#bbf7d0'">
-          <i class="fa-solid fa-users" style="font-size:32px;color:#059669;"></i>
-          <div>
-            <p style="margin:0;font-weight:800;font-size:14px;color:#1e293b;">Buscar empleados</p>
-            <p style="margin:2px 0 0;font-size:12px;color:#64748b;">Explorá CVs de tu zona</p>
-          </div>
-        </a>
-      </div>
-    </div>
-    <hr style="margin:0 0 24px;border:none;border-top:1px solid #e2e8f0;">
-    ` : ""}
-
     <h3 style="margin:0 0 16px;font-size:17px;">Mis datos</h3>
-
     <div class="grid-2col">
       <div><label>Nombre *</label><input id="editNombre" value="${esc(data.nombre)}"></div>
       <div><label>Apellido *</label><input id="editApellido" value="${esc(data.apellido)}"></div>
     </div>
-
     <label>Móvil / WhatsApp *</label>
     <input id="editMovil" value="${esc(data.movil)}" type="tel" placeholder="Ej: 1123456789">
-
     <label><i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram</label>
     <input id="editInstagram" value="${esc(data.instagram)}" placeholder="Ej: @tunombre">
-
     <label>Teléfono fijo</label>
     <input id="editTelefono" value="${esc(data.telefono_fijo)}" type="tel" placeholder="Ej: 02214567890">
-
     <label>Dirección</label>
     <input id="editDireccion" value="${esc(data.direccion)}" placeholder="Ej: Av. Rivadavia 1234, piso 2">
-
     <label>Código Postal</label>
     <input id="editCP" value="${esc(data.codigo_postal)}" placeholder="Ej: 1900" oninput="autocompletarCPPerfil(this.value)">
-
     <label>Localidad</label>
     <select id="editLocalidad">
       <option value="${esc(data.localidad)}">${esc(data.localidad) || "Ingresá el CP primero"}</option>
     </select>
-
     <label>Provincia</label>
     <input id="editProvincia" value="${esc(data.provincia)}" readonly placeholder="Se completa automático">
-
     <label>Email</label>
     <input value="${esc(data.email)}" readonly style="color:#94a3b8;">
 
-    ${data.tipo === "empleador" ? `
-    <!-- ── DATOS DE EMPRESA ── -->
-    <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:18px 20px;margin:4px 0 20px;">
-      <h4 style="margin:0 0 14px;font-size:15px;font-weight:800;color:#1d4ed8;">
-        <i class="fa-solid fa-building" style="margin-right:6px;"></i>Datos de la empresa o comercio
-      </h4>
-
-      <div id="logoEmpresaActual" style="margin-bottom:10px;">
-        ${data.empresa_logo ? `<img src="${esc(data.empresa_logo)}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;border:2px solid #bfdbfe;">` : ""}
-      </div>
-      <label><i class="fa-solid fa-image" style="color:#2563eb;"></i> Logo o imagen de la empresa</label>
-      <label for="inputLogoEmpresa" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;background:white;border:2px dashed #93c5fd;border-radius:10px;padding:10px 16px;font-size:13px;color:#2563eb;font-weight:600;margin-bottom:12px;">
-        <i class="fa-solid fa-cloud-arrow-up"></i> Subir logo
-        <input type="file" id="inputLogoEmpresa" accept="image/*" style="display:none" onchange="subirLogoEmpresa(this)">
-      </label>
-      <div id="msgLogoEmpresa" style="margin-bottom:8px;"></div>
-
-      <label>Nombre de la empresa *</label>
-      <input id="editEmpresaNombre" value="${esc(data.nombre_empresa)}" placeholder="Ej: Supermercado El Sol, Ferretería García">
-
-      <label>Rubro / Sector</label>
-      <select id="editEmpresaSector">
-        <option value="">— Seleccioná un sector —</option>
-        ${["Comercio y retail","Gastronomía y hotelería","Construcción","Industria y producción",
-           "Transporte y logística","Tecnología e informática","Salud y medicina","Educación",
-           "Seguridad","Agropecuario","Servicios profesionales","Limpieza y mantenimiento",
-           "Textil y confección","Medios y comunicación","Otro"].map(s =>
-          `<option value="${s}" ${data.empresa_sector===s?"selected":""}>${s}</option>`
-        ).join("")}
-      </select>
-
-      <label>Descripción de la empresa <span style="font-size:11px;color:#94a3b8;font-weight:400;">(opcional — aparece en tu perfil público)</span></label>
-      <textarea id="editEmpresaDesc" rows="3" placeholder="Contá a qué se dedica tu empresa, cuántos empleados tenés, qué ambiente de trabajo ofrecés...">${esc(data.empresa_descripcion)}</textarea>
-    </div>
-    ` : ""}
-
-    <!-- ── Visibilidad pública ── -->
-    <div style="background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:14px;padding:18px 18px 14px;margin:20px 0 0;">
-      <h4 style="margin:0 0 14px;font-size:15px;font-weight:800;color:#6d28d9;">
-        <i class="fa-solid fa-eye" style="margin-right:6px;"></i>Visibilidad en el buscador
-      </h4>
-
-      <label>
-        <i class="fa-solid fa-building" style="color:#7c3aed;margin-right:4px;"></i>
-        Nombre de Empresa o Negocio
-        <span style="font-size:11px;color:#94a3b8;font-weight:400;"> (opcional)</span>
-      </label>
-      <input id="editEmpresa" value="${esc(data.nombre_empresa)}" placeholder="Ej: Plomería García, Estudio López & Asoc.">
-
-      <label style="margin-top:12px;">Aparecer en el perfil público como</label>
-      <div class="radio-group" style="margin-bottom:14px;">
-        <label class="radio-opt">
-          <input type="radio" name="editMostrarComo" value="personal" ${(data.mostrar_como||'personal')==='personal'?'checked':''}>
-          <span class="radio-custom"></span>
-          Mi nombre personal (${esc(data.nombre)} ${esc(data.apellido)})
-        </label>
-        <label class="radio-opt">
-          <input type="radio" name="editMostrarComo" value="empresa" ${data.mostrar_como==='empresa'?'checked':''}>
-          <span class="radio-custom"></span>
-          Nombre de empresa / negocio
-        </label>
-      </div>
-
-      <div class="check-fila" style="margin-bottom:0;">
-        <label class="check-opt">
-          <input type="checkbox" id="editMostrarTel" ${data.mostrar_telefono!==false?'checked':''}>
-          <span class="check-custom"></span>
-          Mostrar mi teléfono/WhatsApp en el perfil público
-        </label>
-      </div>
-
-      <div class="check-fila" style="margin-top:12px;border-top:1px solid #e9d5ff;padding-top:12px;margin-bottom:0;">
-        <label class="check-opt">
-          <input type="checkbox" id="toggleMostrarMapa" ${localStorage.getItem('tc_mapa_on')==='1'?'checked':''}
-            onchange="this.checked?localStorage.setItem('tc_mapa_on','1'):localStorage.removeItem('tc_mapa_on');document.getElementById('mapaOnMsg').style.display=this.checked?'flex':'none'">
-          <span class="check-custom"></span>
-          Mostrar enlace a Google Maps en el buscador
-        </label>
-        <div id="mapaOnMsg" style="display:${localStorage.getItem('tc_mapa_on')==='1'?'flex':'none'};align-items:center;gap:6px;font-size:12px;color:#6d28d9;margin-top:6px;padding:8px 10px;background:rgba(109,40,217,.08);border-radius:8px;">
-          <i class="fa-solid fa-map-location-dot"></i>
-          <span>Activado — cada resultado mostrará "Ver en mapa" con la ubicación en Google Maps</span>
-        </div>
-      </div>
-
-      <div class="check-fila" style="margin-top:12px;border-top:1px solid #e9d5ff;padding-top:12px;margin-bottom:0;">
-        <label class="check-opt">
-          <input type="checkbox" id="toggleRecibirMsgs" ${localStorage.getItem('tc_recibir_msgs')==='0'?'':'checked'}
-            onchange="this.checked?localStorage.removeItem('tc_recibir_msgs'):localStorage.setItem('tc_recibir_msgs','0');document.getElementById('msgsOffMsg').style.display=this.checked?'none':'flex'">
-          <span class="check-custom"></span>
-          Recibir mensajes de otros usuarios
-        </label>
-        <div id="msgsOffMsg" style="display:${localStorage.getItem('tc_recibir_msgs')==='0'?'flex':'none'};align-items:center;gap:6px;font-size:12px;color:#dc2626;margin-top:6px;padding:8px 10px;background:rgba(220,38,38,.07);border-radius:8px;">
-          <i class="fa-solid fa-comment-slash"></i>
-          <span>Mensajes desactivados en este dispositivo — otros usuarios no verán el botón de mensaje en tu perfil</span>
-        </div>
-      </div>
-
-      <div class="check-fila" style="margin-top:12px;border-top:1px solid #e9d5ff;padding-top:12px;margin-bottom:0;">
-        <label class="check-opt">
-          <input type="checkbox" id="toggleAparecerMapa" ${localStorage.getItem('tc_en_mapa')==='0'?'':'checked'}
-            onchange="this.checked?localStorage.removeItem('tc_en_mapa'):localStorage.setItem('tc_en_mapa','0');document.getElementById('mapaOffMsg').style.display=this.checked?'none':'flex'">
-          <span class="check-custom"></span>
-          Aparecer en el mapa de profesionales
-        </label>
-        <div id="mapaOffMsg" style="display:${localStorage.getItem('tc_en_mapa')==='0'?'flex':'none'};align-items:center;gap:6px;font-size:12px;color:#dc2626;margin-top:6px;padding:8px 10px;background:rgba(220,38,38,.07);border-radius:8px;">
-          <i class="fa-solid fa-map-pin"></i>
-          <span>Tu perfil no aparecerá en el mapa de profesionales en este dispositivo</span>
-        </div>
-        <p style="font-size:11px;color:#94a3b8;margin:6px 0 0;padding-left:2px;">
-          <i class="fa-solid fa-circle-info" style="margin-right:3px;"></i>
-          Para configurar tu ubicación en el mapa, completá tu dirección en
-          <a href="/perfil_servicio.html" style="color:#2563eb;">tu perfil de servicio</a>.
-        </p>
-      </div>
-    </div>
-
     <div id="msgPerfil" style="margin-top:14px;"></div>
-
     <button class="btn btn-primary" onclick="guardarDatos()">
       <i class="fa-solid fa-save"></i> Guardar cambios
     </button>
 
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
-
-    ${data.tipo === "profesional" ? `
-      <h3 style="margin:0 0 6px;font-size:17px;">
-        <i class="fa-solid fa-star" style="color:#f59e0b;"></i> Puntuar a un cliente
-      </h3>
-      <p style="font-size:14px;color:#64748b;margin:0 0 16px;">
-        Cuando cerrés un trato, buscá al cliente por su email y dejale una puntuación para ayudar a la comunidad.
-      </p>
-      <label>Email del cliente</label>
-      <input id="emailCliente" type="email" placeholder="email registrado del cliente">
-      <div id="clienteEncontrado" style="margin-bottom:10px;"></div>
-      <button class="btn btn-outline" onclick="buscarCliente()" style="margin-bottom:18px;">
-        <i class="fa-solid fa-magnifying-glass"></i> Buscar cliente
-      </button>
-      <div id="formClienteRating" style="display:none;">
-        <label>Puntuación *</label>
-        <div class="stars-input" id="starsCliente">
-          <i class="fa-solid fa-star" onclick="setEstrellaCliente(1)" onmouseover="hoverEstrellaCliente(1)" onmouseout="resetHoverCliente()"></i>
-          <i class="fa-solid fa-star" onclick="setEstrellaCliente(2)" onmouseover="hoverEstrellaCliente(2)" onmouseout="resetHoverCliente()"></i>
-          <i class="fa-solid fa-star" onclick="setEstrellaCliente(3)" onmouseover="hoverEstrellaCliente(3)" onmouseout="resetHoverCliente()"></i>
-          <i class="fa-solid fa-star" onclick="setEstrellaCliente(4)" onmouseover="hoverEstrellaCliente(4)" onmouseout="resetHoverCliente()"></i>
-          <i class="fa-solid fa-star" onclick="setEstrellaCliente(5)" onmouseover="hoverEstrellaCliente(5)" onmouseout="resetHoverCliente()"></i>
-        </div>
-        <label>Comentario</label>
-        <textarea id="comentarioCliente" rows="3"
-          placeholder="¿Cómo fue trabajar con este cliente? Puntualidad, trato, pago..."></textarea>
-        <div id="msgClienteRating"></div>
-        <button class="btn btn-success" onclick="enviarRatingCliente()">
-          <i class="fa-solid fa-paper-plane"></i> Enviar puntuación
-        </button>
-      </div>
-    ` : ""}
-
     ${referidosHtml}
     ${guardadosHtml}
-
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
+    <button class="btn btn-outline" onclick="cerrarSesion()" style="color:#ef4444;border-color:#ef4444;">
+      <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+    </button>`
 
-    <!-- Cambiar contraseña -->
-    <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;" id="cambPassHeader">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <i class="fa-solid fa-key" style="color:#64748b;"></i>
-          <span style="font-size:14px;font-weight:700;color:#1e293b;">Cambiar contraseña</span>
+    cargarProdeCard(userId)
+    cargarPartidoProde(userId)
+    montarFAQChat()
+    enviarRecordatorioCompartir(userId)
+    if(registrados.length === 0) mostrarBienvenida(userId)
+  }
+
+  /* ── Vista simplificada para clientes ── */
+  if(_tipo === "cliente") {
+    document.getElementById("dash").innerHTML = `
+    <div class="dash-header">
+      <div style="text-align:center;">
+        ${fotoHtml}
+        <div style="margin-top:8px;">
+          <label for="inputFoto" style="cursor:pointer;color:#2563eb;font-size:12px;font-weight:600;">
+            <i class="fa-solid fa-camera"></i> Cambiar foto
+          </label>
+          <input type="file" id="inputFoto" accept="image/*" style="display:none" onchange="subirFoto(this)">
         </div>
-        <button onclick="toggleCambiarPass()" id="btnTogglePass"
-          style="background:none;border:none;color:#2563eb;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">
-          Cambiar
-        </button>
       </div>
-      <div id="cambPassForm" style="display:none;margin-top:12px;">
-        <input type="password" id="nuevaPass" placeholder="Nueva contraseña (mín. 6 caracteres)"
-          style="width:100%;padding:10px 13px;border:1.5px solid #e2e8f0;border-radius:9px;
-          font-size:14px;margin-bottom:8px;font-family:inherit;box-sizing:border-box;">
-        <input type="password" id="nuevaPass2" placeholder="Repetir nueva contraseña"
-          style="width:100%;padding:10px 13px;border:1.5px solid #e2e8f0;border-radius:9px;
-          font-size:14px;margin-bottom:10px;font-family:inherit;box-sizing:border-box;">
-        <div id="msgCambPass" style="font-size:12px;margin-bottom:8px;"></div>
-        <button onclick="guardarNuevaPass()" id="btnGuardarPass"
-          style="width:100%;padding:10px;background:#2563eb;color:white;border:none;border-radius:9px;
-          font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
-          <i class="fa-solid fa-check"></i> Guardar nueva contraseña
-        </button>
+      <div class="dash-info" style="flex:1;">
+        <h3>${data.nombre || ""} ${data.apellido || ""}</h3>
+        <p><i class="fa-solid fa-location-dot"></i> ${data.localidad || "Sin localidad"}${data.provincia ? ", " + data.provincia : ""}</p>
+        <p><i class="fa-brands fa-whatsapp" style="color:#25D366"></i> ${data.movil || "Sin móvil"}</p>
+        ${badgeHtml}
       </div>
     </div>
 
-    ${data.admin ? `
-    <a href="/admin.html" class="btn" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
-      <i class="fa-solid fa-shield-halved"></i> Panel de Administración
-    </a>
-    ` : ""}
-    <button class="btn btn-outline" onclick="cerrarSesion()" style="color:#ef4444;border-color:#ef4444;">
-      <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+    <!-- Prode Mundial -->
+    <div id="prodeCard" style="margin:20px 0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);border:1.5px solid rgba(250,204,21,.35);border-radius:18px;padding:20px;overflow:hidden;position:relative;">
+      <div style="position:absolute;top:-20px;right:-20px;font-size:90px;opacity:.06;pointer-events:none;">⚽</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+        <div style="font-size:36px;flex-shrink:0;">⚽🏆</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:900;color:white;line-height:1.2;">Prode Mundial 2026</div>
+          <div id="prodeStatus" style="font-size:12px;color:rgba(255,255,255,.55);margin-top:3px;">Verificando...</div>
+        </div>
+        <button onclick="window._abrirReglasMundial()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.9);font-size:12px;font-weight:700;padding:7px 13px;border-radius:9px;cursor:pointer;flex-shrink:0;">📋 Reglas</button>
+      </div>
+      <div id="prodePartidosHoy" style="margin-bottom:14px;">
+        <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:#fbbf24;text-transform:uppercase;margin-bottom:10px;">📅 Partidos de hoy</div>
+        <div id="prodeListaPartidos" style="display:flex;flex-direction:column;gap:8px;"><div style="color:rgba(255,255,255,.35);font-size:12px;text-align:center;padding:10px 0;">Cargando...</div></div>
+      </div>
+      <a href="/mundial.html" style="display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#facc15,#f59e0b,#d97706);color:#1c1917;font-weight:900;font-size:15px;padding:14px;border-radius:13px;text-decoration:none;box-shadow:0 4px 20px rgba(250,204,21,.4);">
+        ⚽ Entrar y participar →
+      </a>
+    </div>
+
+    <!-- Botón para ofrecer servicios -->
+    <button onclick="window._expandirPerfilCompleto()" style="
+      display:flex;align-items:center;gap:16px;width:100%;padding:20px 22px;
+      background:linear-gradient(135deg,#f0fdf4,#eff6ff);
+      border:2px dashed #86efac;border-radius:16px;cursor:pointer;text-align:left;
+      font-family:inherit;transition:border-color .2s,box-shadow .2s;margin-bottom:20px;"
+      onmouseover="this.style.borderColor='#22c55e';this.style.boxShadow='0 4px 16px rgba(34,197,94,.15)'"
+      onmouseout="this.style.borderColor='#86efac';this.style.boxShadow=''">
+      <div style="width:52px;height:52px;border-radius:14px;background:white;border:1.5px solid #86efac;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px;">🚀</div>
+      <div style="flex:1;">
+        <div style="font-size:16px;font-weight:800;color:#15803d;margin-bottom:3px;">¿Querés ofrecer tus servicios?</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">Registrá tu oficio, profesión, emprendimiento o subí tu CV. Es gratis y llegás a clientes de tu zona.</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="color:#86efac;font-size:16px;flex-shrink:0;"></i>
     </button>
-  `
 
-  // Cargar datos del prode en la card (async, no bloquea render)
-  cargarProdeCard(userId)
-  cargarPartidoProde(userId)
-
-  // Chatbox de preguntas frecuentes
-  montarFAQChat()
-
-  // Recordatorio diario: compartir perfil
-  enviarRecordatorioCompartir(userId)
-
-  // Modal de bienvenida si no completó el tipo de perfil
-  if(registrados.length === 0 && data.tipo !== "cliente") {
-    mostrarBienvenida(userId)
+    ${guardadosHtml}
+    `
+    window._expandirPerfilCompleto = function() {
+      renderPerfilCompleto()
+    }
+    cargarProdeCard(userId)
+    cargarPartidoProde(userId)
+    return
   }
 
+  /* ── Vista completa (no clientes) ── */
+  renderPerfilCompleto()
 }
+
 
 /* ── LOGO EMPRESA ── */
 window.subirLogoEmpresa = async function(input){
