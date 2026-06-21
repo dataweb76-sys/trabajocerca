@@ -382,8 +382,105 @@ src="https://www.facebook.com/tr?id=1644323720203476&ev=PageView&noscript=1"/></
   </div>
 </div>
 
+<!-- ══ SELECTOR DE TIPO (paso 0) ══ -->
+<div id="stepTipo" class="form-wrap" style="display:none;">
+  <h2 class="form-titulo">¿Cómo querés usar Trabajos Cerca?</h2>
+  <p class="form-sub">Elegí una opción para empezar. Siempre podés agregar más después.</p>
+  <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
+
+    <button onclick="elegirTipo('cliente')" style="
+      display:flex;align-items:center;gap:16px;padding:20px 22px;
+      background:white;border:2px solid #e2e8f0;border-radius:16px;
+      cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s;font-family:inherit;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);"
+      onmouseover="this.style.borderColor='#2563eb';this.style.boxShadow='0 4px 16px rgba(37,99,235,.15)'"
+      onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='0 2px 8px rgba(0,0,0,.06)'">
+      <div style="width:52px;height:52px;border-radius:14px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-magnifying-glass" style="font-size:22px;color:#2563eb;"></i>
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:800;color:#0f172a;margin-bottom:3px;">Solo quiero buscar</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">Busco plomeros, electricistas, profesionales u oficios cerca mío. Solo quiero contactarlos.</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#94a3b8;font-size:14px;flex-shrink:0;"></i>
+    </button>
+
+    <button onclick="elegirTipo('oficio')" style="
+      display:flex;align-items:center;gap:16px;padding:20px 22px;
+      background:white;border:2px solid #e2e8f0;border-radius:16px;
+      cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s;font-family:inherit;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);"
+      onmouseover="this.style.borderColor='#d97706';this.style.boxShadow='0 4px 16px rgba(217,119,6,.15)'"
+      onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='0 2px 8px rgba(0,0,0,.06)'">
+      <div style="width:52px;height:52px;border-radius:14px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-wrench" style="font-size:22px;color:#d97706;"></i>
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:800;color:#0f172a;margin-bottom:3px;">Tengo un oficio</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">Plomero, electricista, albañil, pintor, gasista, carpintero y más. Quiero aparecer en el buscador y conseguir clientes.</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#94a3b8;font-size:14px;flex-shrink:0;"></i>
+    </button>
+
+    <button onclick="elegirTipo('profesional')" style="
+      display:flex;align-items:center;gap:16px;padding:20px 22px;
+      background:white;border:2px solid #e2e8f0;border-radius:16px;
+      cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s;font-family:inherit;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);"
+      onmouseover="this.style.borderColor='#7c3aed';this.style.boxShadow='0 4px 16px rgba(124,58,237,.15)'"
+      onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='0 2px 8px rgba(0,0,0,.06)'">
+      <div style="width:52px;height:52px;border-radius:14px;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-briefcase" style="font-size:22px;color:#7c3aed;"></i>
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:800;color:#0f172a;margin-bottom:3px;">Soy profesional</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">Contador, abogado, arquitecto, médico, psicólogo y más. Quiero mostrar mis servicios y recibir consultas.</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#94a3b8;font-size:14px;flex-shrink:0;"></i>
+    </button>
+
+    <button onclick="elegirTipo('emprendimiento')" style="
+      display:flex;align-items:center;gap:16px;padding:20px 22px;
+      background:white;border:2px solid #e2e8f0;border-radius:16px;
+      cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s;font-family:inherit;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);"
+      onmouseover="this.style.borderColor='#16a34a';this.style.boxShadow='0 4px 16px rgba(22,163,74,.15)'"
+      onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='0 2px 8px rgba(0,0,0,.06)'">
+      <div style="width:52px;height:52px;border-radius:14px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-store" style="font-size:22px;color:#16a34a;"></i>
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:800;color:#0f172a;margin-bottom:3px;">Tengo un emprendimiento</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">Negocio local, comercio, marca o servicio propio. Quiero visibilidad en mi zona y más clientes.</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#94a3b8;font-size:14px;flex-shrink:0;"></i>
+    </button>
+
+    <button onclick="elegirTipo('cv')" style="
+      display:flex;align-items:center;gap:16px;padding:20px 22px;
+      background:white;border:2px solid #e2e8f0;border-radius:16px;
+      cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s;font-family:inherit;
+      box-shadow:0 2px 8px rgba(0,0,0,.06);"
+      onmouseover="this.style.borderColor='#0891b2';this.style.boxShadow='0 4px 16px rgba(8,145,178,.15)'"
+      onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='0 2px 8px rgba(0,0,0,.06)'">
+      <div style="width:52px;height:52px;border-radius:14px;background:#ecfeff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-file-lines" style="font-size:22px;color:#0891b2;"></i>
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:800;color:#0f172a;margin-bottom:3px;">Busco trabajo / subo mi CV</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">Quiero que empresas y particulares me encuentren. Cargo mi CV y aparezco en el buscador de candidatos.</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="margin-left:auto;color:#94a3b8;font-size:14px;flex-shrink:0;"></i>
+    </button>
+
+  </div>
+  <p style="text-align:center;font-size:13px;color:#94a3b8;margin-top:18px;">
+    ¿Ya tenés cuenta? <a href="/login.html" style="color:#2563eb;font-weight:600;">Iniciá sesión</a>
+  </p>
+</div>
+
 <!-- ══ FORMULARIO ══ -->
-<div class="form-wrap">
+<div class="form-wrap" id="stepForm" style="display:none;">
   <h2 class="form-titulo">Creá tu cuenta gratis</h2>
   <p class="form-sub">Solo te pedimos los datos básicos. Después elegís cómo usarla.</p>
 
@@ -456,18 +553,39 @@ src="https://www.facebook.com/tr?id=1644323720203476&ev=PageView&noscript=1"/></
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// Adaptar sección de beneficios según ?tipo=
+// ── PASO 0: selector de tipo ──
 ;(function(){
   var tipo = new URLSearchParams(window.location.search).get('tipo')
-  if(tipo === 'cliente'){
+  var stepTipo = document.getElementById('stepTipo')
+  var stepForm = document.getElementById('stepForm')
+
+  function adaptarBeneficios(t){
     var gen = document.getElementById('benGeneral')
     var cli = document.getElementById('benCliente')
     var tit = document.getElementById('benTitulo')
     var sub = document.getElementById('benSub')
-    if(gen) gen.style.display = 'none'
-    if(cli) cli.style.display = ''
-    if(tit) tit.textContent = '¿Por qué registrarte como cliente?'
-    if(sub) sub.textContent = 'Gratis, sin comisiones y directo al profesional que necesitás.'
+    if(t === 'cliente'){
+      if(gen) gen.style.display = 'none'
+      if(cli) cli.style.display = ''
+      if(tit) tit.textContent = '¿Por qué registrarte como cliente?'
+      if(sub) sub.textContent = 'Gratis, sin comisiones y directo al profesional que necesitás.'
+    }
+  }
+
+  if(tipo){
+    stepForm.style.display = ''
+    adaptarBeneficios(tipo)
+  } else {
+    stepTipo.style.display = ''
+  }
+
+  window.elegirTipo = function(t){
+    var url = new URL(location.href)
+    url.searchParams.set('tipo', t)
+    history.replaceState(null, '', url.toString())
+    stepTipo.style.display = 'none'
+    stepForm.style.display = ''
+    adaptarBeneficios(t)
   }
 })()
 
