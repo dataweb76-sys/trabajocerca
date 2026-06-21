@@ -575,6 +575,11 @@ window.addEventListener('beforeinstallprompt', function(e) {
            </a>`
         : '') +
       (loggedIn
+        ? `<a href="/libreta.html" title="Mis Clientes" style="color:#f59e0b;font-weight:700;">
+            <i class="fa-solid fa-book"></i><span> Clientes</span>
+           </a>`
+        : '') +
+      (loggedIn
         ? `<button class="btn-salir" title="Cerrar sesión" onclick="(function(){Object.keys(localStorage).filter(function(k){return k.startsWith('sb-')}).forEach(function(k){localStorage.removeItem(k)});location.href='/index.html';})()" >
             <i class="fa-solid fa-right-from-bracket"></i><span> Salir</span>
            </button>`

@@ -670,6 +670,24 @@ async function init(){
       </div>
     </div>
 
+    <!-- Botón para ofrecer servicios -->
+    <button onclick="window._expandirPerfilCompleto()" style="
+      display:flex;align-items:center;gap:16px;width:100%;padding:20px 22px;
+      background:linear-gradient(135deg,#f0fdf4,#eff6ff);
+      border:2px dashed #86efac;border-radius:16px;cursor:pointer;text-align:left;
+      font-family:inherit;transition:border-color .2s,box-shadow .2s;margin-bottom:20px;"
+      onmouseover="this.style.borderColor='#22c55e';this.style.boxShadow='0 4px 16px rgba(34,197,94,.15)'"
+      onmouseout="this.style.borderColor='#86efac';this.style.boxShadow=''">
+      <div style="width:52px;height:52px;border-radius:14px;background:white;border:1.5px solid #86efac;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px;">🚀</div>
+      <div style="flex:1;">
+        <div style="font-size:16px;font-weight:800;color:#15803d;margin-bottom:3px;">¿Querés ofrecer tus servicios?</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.5;">Registrá tu oficio, profesión, emprendimiento o subí tu CV. Es gratis y llegás a clientes de tu zona.</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="color:#86efac;font-size:16px;flex-shrink:0;"></i>
+    </button>
+
+    ${guardadosHtml}
+
     <!-- Prode Mundial -->
     <div id="prodeCard" style="margin:20px 0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);border:1.5px solid rgba(250,204,21,.35);border-radius:18px;padding:20px;overflow:hidden;position:relative;">
       <div style="position:absolute;top:-20px;right:-20px;font-size:90px;opacity:.06;pointer-events:none;">⚽</div>
@@ -689,24 +707,6 @@ async function init(){
         ⚽ Entrar y participar →
       </a>
     </div>
-
-    <!-- Botón para ofrecer servicios -->
-    <button onclick="window._expandirPerfilCompleto()" style="
-      display:flex;align-items:center;gap:16px;width:100%;padding:20px 22px;
-      background:linear-gradient(135deg,#f0fdf4,#eff6ff);
-      border:2px dashed #86efac;border-radius:16px;cursor:pointer;text-align:left;
-      font-family:inherit;transition:border-color .2s,box-shadow .2s;margin-bottom:20px;"
-      onmouseover="this.style.borderColor='#22c55e';this.style.boxShadow='0 4px 16px rgba(34,197,94,.15)'"
-      onmouseout="this.style.borderColor='#86efac';this.style.boxShadow=''">
-      <div style="width:52px;height:52px;border-radius:14px;background:white;border:1.5px solid #86efac;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px;">🚀</div>
-      <div style="flex:1;">
-        <div style="font-size:16px;font-weight:800;color:#15803d;margin-bottom:3px;">¿Querés ofrecer tus servicios?</div>
-        <div style="font-size:13px;color:#64748b;line-height:1.5;">Registrá tu oficio, profesión, emprendimiento o subí tu CV. Es gratis y llegás a clientes de tu zona.</div>
-      </div>
-      <i class="fa-solid fa-chevron-right" style="color:#86efac;font-size:16px;flex-shrink:0;"></i>
-    </button>
-
-    ${guardadosHtml}
     `
     window._expandirPerfilCompleto = function() {
       renderPerfilCompleto()
