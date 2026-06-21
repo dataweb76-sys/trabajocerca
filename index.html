@@ -878,6 +878,83 @@ window.votarEncuestaPopup = async function(){
   }
 }
 
+/* ══ OFICIO DE LA SEMANA ══ */
+async function cargarOficioSemana(){
+  try {
+    const hace7 = new Date(Date.now() - 7*24*60*60*1000).toISOString()
+
+    // Top profesional oficio por eventos (vistas + wa_clicks) últimos 7 días
+    const { data: eventos } = await supabase
+      .from("perfil_eventos")
+      .select("profesional_id")
+      .gte("created_at", hace7)
+
+    if(!eventos?.length) return
+
+    // Contar eventos por profesional
+    const conteo = {}
+    eventos.forEach(e => { conteo[e.profesional_id] = (conteo[e.profesional_id] || 0) + 1 })
+    const topIds = Object.entries(conteo).sort((a,b) => b[1]-a[1]).slice(0,10).map(e => e[0])
+
+    // Buscar el que sea oficio y tenga servicio activo
+    const { data: candidatos } = await supabase
+      .from("perfiles")
+      .select("id, nombre, apellido, nombre_empresa, mostrar_como, foto, localidad, provincia, tipo, instagram")
+      .in("id", topIds)
+      .ilike("tipo", "%oficio%")
+      .limit(10)
+
+    if(!candidatos?.length) return
+
+    // Ordenar por el conteo original
+    candidatos.sort((a,b) => (conteo[b.id]||0) - (conteo[a.id]||0))
+    const p = candidatos[0]
+
+    // Buscar su servicio para obtener categoría y descripción
+    const { data: srv } = await supabase
+      .from("servicios")
+      .select("categoria, descripcion")
+      .eq("usuario_id", p.id)
+      .maybeSingle()
+
+    const nombre = (p.mostrar_como === "empresa" && p.nombre_empresa) ? p.nombre_empresa : `${p.nombre||""} ${p.apellido||""}`.trim()
+    const categoria = srv?.categoria?.split(",")[0]?.trim() || "Oficio"
+    const desc = srv?.descripcion ? srv.descripcion.slice(0,100)+"…" : `${nombre} es uno de los oficios más consultados esta semana en Trabajos Cerca.`
+    const foto = p.foto
+      ? `<img src="${p.foto}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #fbbf24;flex-shrink:0;">`
+      : `<div style="width:72px;height:72px;border-radius:50%;background:#1e293b;border:3px solid #fbbf24;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:28px;">🔧</div>`
+    const lugar = [p.localidad, p.provincia].filter(Boolean).join(", ")
+    const eventos7 = conteo[p.id] || 0
+    const perfilUrl = `${location.origin}/perfil_publico.html?id=${p.id}`
+
+    document.getElementById("oficioSemanaContent").innerHTML = `
+      ${foto}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:19px;font-weight:900;color:white;margin-bottom:2px;">${nombre}</div>
+        <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.35);border-radius:20px;padding:3px 12px;margin-bottom:6px;">
+          <span style="font-size:13px;font-weight:700;color:#fbbf24;">🔧 ${categoria}</span>
+        </div>
+        ${lugar ? `<div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:4px;"><i class="fa-solid fa-location-dot" style="color:#fbbf24;font-size:11px;"></i> ${lugar}</div>` : ""}
+        <div style="font-size:13px;color:rgba(255,255,255,.75);line-height:1.5;">${desc}</div>
+        <div style="margin-top:8px;font-size:12px;color:#fbbf24;font-weight:700;">🔥 ${eventos7} consultas esta semana</div>
+      </div>`
+
+    // Botones
+    const txt = encodeURIComponent(`🔧 Oficio de la semana en Trabajos Cerca:\n${nombre} — ${categoria}\n👉 ${perfilUrl}`)
+    document.getElementById("btnOScompartirWA").onclick = () => window.open(`https://wa.me/?text=${txt}`, "_blank")
+    document.getElementById("btnOScompartirFB").onclick = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(perfilUrl)}`, "_blank", "width=600,height=400")
+    document.getElementById("btnOScompartirIG").onclick = () => {
+      navigator.clipboard?.writeText(`🔧 Oficio de la semana: ${nombre} — ${categoria}\n👉 ${perfilUrl}\n\n#TrabajoCerca #Oficios #${categoria.replace(/\s/g,"")}`)
+      alert("📋 Texto copiado. Abrí Instagram, creá una Story y pegalo junto a una foto del perfil.")
+    }
+    document.getElementById("btnOSverPerfil").onclick = () => location.href = perfilUrl
+
+    document.getElementById("oficioSemanaWrap").style.display = "block"
+  } catch(e) { console.warn("oficio semana:", e) }
+}
+
+cargarOficioSemana()
+
 </script>
 
 
@@ -925,6 +1002,43 @@ window.votarEncuestaPopup = async function(){
   </a>
 </div>
 
+
+<!-- ══ OFICIO DE LA SEMANA ══ -->
+<div id="oficioSemanaWrap" style="max-width:900px;margin:24px auto 0;padding:0 24px;display:none;">
+  <div style="
+    background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);
+    border-radius:20px;padding:20px;position:relative;overflow:hidden;
+    border:1.5px solid rgba(251,191,36,.25);box-shadow:0 8px 32px rgba(0,0,0,.2);">
+
+    <!-- Fondo decorativo -->
+    <div style="position:absolute;top:-30px;right:-20px;font-size:120px;opacity:.04;pointer-events:none;">🔧</div>
+
+    <!-- Badge semana -->
+    <div style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1c1917;font-size:11px;font-weight:900;padding:4px 12px;border-radius:20px;letter-spacing:.05em;margin-bottom:14px;text-transform:uppercase;">
+      ⭐ Oficio de la semana
+    </div>
+
+    <div id="oficioSemanaContent" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <!-- se llena por JS -->
+    </div>
+
+    <!-- Botones compartir -->
+    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+      <button id="btnOScompartirWA" style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#25d366;color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+      </button>
+      <button id="btnOScompartirFB" style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#1877f2;color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+        <i class="fa-brands fa-facebook"></i> Facebook
+      </button>
+      <button id="btnOScompartirIG" style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+        <i class="fa-brands fa-instagram"></i> Stories
+      </button>
+      <button id="btnOSverPerfil" style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:rgba(255,255,255,.1);color:white;border:1.5px solid rgba(255,255,255,.25);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+        <i class="fa-solid fa-eye"></i> Ver perfil
+      </button>
+    </div>
+  </div>
+</div>
 
 <section class="como-funciona">
   <h2>¿Cómo funciona?</h2>
