@@ -384,6 +384,10 @@ async function cargarPerfil(){
           style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;font-weight:600;color:#0f172a;cursor:pointer;">
           <i class="fa-brands fa-x-twitter"></i> X
         </button>
+        <button onclick="compartirLinkedIn('${id}')"
+          style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:9px;font-size:13px;font-weight:600;color:#0a66c2;cursor:pointer;">
+          <i class="fa-brands fa-linkedin"></i> LinkedIn
+        </button>
       </div>
     </div>
     ${servicioHtml}
@@ -401,6 +405,29 @@ async function cargarPerfil(){
       ${!cvPublico ? `<p style="margin:8px 0 0;font-size:12px;color:#64748b;"><i class="fa-solid fa-lock" style="color:#f97316;"></i> Requiere autorización del candidato</p>` : ""}
     </div>` : ""}
     ${fotosHtml}
+    ${perfil.instagram ? `
+    <div class="card" style="padding:0;overflow:hidden;border:1.5px solid #e1306c33;">
+      <div style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);padding:14px 18px;display:flex;align-items:center;gap:12px;">
+        <i class="fa-brands fa-instagram" style="font-size:22px;color:white;"></i>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:800;color:white;">Instagram</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.85);">@${perfil.instagram.replace('@','')}</div>
+        </div>
+        <a href="https://instagram.com/${perfil.instagram.replace('@','')}" target="_blank" rel="noopener"
+          style="background:white;color:#fd1d1d;font-weight:700;font-size:13px;padding:7px 14px;border-radius:20px;text-decoration:none;white-space:nowrap;">
+          Ver perfil
+        </a>
+      </div>
+      <div style="padding:0;">
+        <iframe
+          src="https://www.instagram.com/${perfil.instagram.replace('@','')}/embed/"
+          style="width:100%;height:480px;border:none;display:block;"
+          scrolling="no"
+          allowtransparency="true"
+          loading="lazy">
+        </iframe>
+      </div>
+    </div>` : ""}
     ${impulsarCVHtml}
     ${reviewsHtml}
     ${bannerPubHtml}
@@ -1315,4 +1342,8 @@ window.compartirX = function(nombre, id){
   const url = `${location.origin}/perfil_publico.html?id=${id}`
   const txt = encodeURIComponent(`Mirá el perfil de ${nombre} en Trabajos Cerca 💼`)
   window.open(`https://twitter.com/intent/tweet?text=${txt}&url=${encodeURIComponent(url)}`, "_blank", "width=600,height=400")
+}
+window.compartirLinkedIn = function(id){
+  const url = encodeURIComponent(`${location.origin}/perfil_publico.html?id=${id}`)
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, "_blank", "width=600,height=600")
 }
