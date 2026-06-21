@@ -455,7 +455,7 @@
       }
 
       // Insertar antes de la campana
-      nav.insertBefore(adminLink, wrap)
+      if(wrap.parentNode) wrap.parentNode.insertBefore(adminLink, wrap)
     } catch(e){}
   }
 
