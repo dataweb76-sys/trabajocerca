@@ -24,40 +24,51 @@ styleDisp.textContent = `@keyframes pulse-green { 0%,100%{box-shadow:0 0 0 0 rgb
 document.head.appendChild(styleDisp)
 
 /* ── POPUP REGISTRO (para acciones que requieren cuenta) ── */
-function mostrarPopupRegistro(motivo) {
+window.mostrarPopupRegistro = function(motivo) {
   let el = document.getElementById('_tcPopupReg')
   if(!el){
     el = document.createElement('div')
     el.id = '_tcPopupReg'
-    el.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;align-items:center;justify-content:center;padding:16px;'
-    el.onclick = e => { if(e.target===el) el.style.display='none' }
+    el.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10000;align-items:center;justify-content:center;padding:16px;'
+    el.onclick = e => { if(e.target===el) cerrarPopupReg() }
     el.innerHTML = `
-      <div style="background:white;border-radius:20px;max-width:400px;width:100%;padding:28px 24px;text-align:center;box-shadow:0 28px 90px rgba(0,0,0,.25);animation:slideUp .25s ease;position:relative;">
-        <button onclick="document.getElementById('_tcPopupReg').style.display='none'"
-          style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;color:#94a3b8;cursor:pointer;">×</button>
-        <div style="font-size:42px;margin-bottom:10px;" id="_tcPopupRegIcon">🔐</div>
-        <h3 style="margin:0 0 8px;font-size:20px;color:#0f172a;" id="_tcPopupRegTitulo">Creá tu cuenta gratis</h3>
-        <p style="margin:0 0 20px;font-size:14px;color:#64748b;line-height:1.5;" id="_tcPopupRegDesc">Registrate para contactar profesionales, guardar favoritos y más.</p>
-        <a id="_tcPopupRegBtn" href="/registro.html"
-          style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-weight:800;font-size:16px;border-radius:12px;text-decoration:none;margin-bottom:10px;">
-          <i class="fa-solid fa-user-plus"></i> Registrarme gratis
-        </a>
-        <a href="/login.html"
-          style="display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;background:#f1f5f9;color:#475569;font-weight:700;font-size:14px;border-radius:12px;text-decoration:none;">
-          <i class="fa-solid fa-right-to-bracket"></i> Ya tengo cuenta
-        </a>
+      <div style="background:#0f172a;border-radius:20px;max-width:480px;width:100%;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.7);">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.1);">
+          <div style="display:flex;align-items:center;gap:9px;">
+            <span id="_tcPopupRegIcon" style="font-size:20px;">🔐</span>
+            <span id="_tcPopupRegTitulo" style="color:white;font-weight:700;font-size:15px;">Creá tu cuenta gratis</span>
+          </div>
+          <button onclick="cerrarPopupReg()" style="background:rgba(255,255,255,.12);border:none;color:white;border-radius:50%;width:30px;height:30px;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">×</button>
+        </div>
+        <div style="position:relative;background:#000;aspect-ratio:16/9;">
+          <video id="_tcPopupRegVideo" controls playsinline style="width:100%;height:100%;display:block;" src="/verbuscadores.mp4">
+            Tu navegador no soporta video HTML5.
+          </video>
+        </div>
+        <div style="padding:16px 18px;background:#1e293b;">
+          <p id="_tcPopupRegDesc" style="margin:0 0 14px;font-size:13px;color:#94a3b8;text-align:center;line-height:1.5;">Registrate para contactar profesionales, guardar favoritos y más.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a id="_tcPopupRegBtn" href="/registro.html"
+              style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-weight:800;font-size:15px;border-radius:10px;text-decoration:none;min-width:140px;">
+              <i class="fa-solid fa-user-plus"></i> Registrarme gratis
+            </a>
+            <a id="_tcPopupLoginBtn" href="/login.html"
+              style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);color:white;font-weight:700;font-size:14px;border-radius:10px;text-decoration:none;min-width:140px;">
+              <i class="fa-solid fa-right-to-bracket"></i> Ya tengo cuenta
+            </a>
+          </div>
+        </div>
       </div>`
     document.body.appendChild(el)
   }
   const next = encodeURIComponent(location.pathname + location.search)
   el.querySelector('#_tcPopupRegBtn').href = `/registro.html?next=${next}`
-  el.querySelector('a[href*="login"]').href = `/login.html?next=${next}`
+  el.querySelector('#_tcPopupLoginBtn').href = `/login.html?next=${next}`
   if(motivo){
     const textos = {
-      whatsapp: ['💬','Contactar por WhatsApp','Para ver el número y escribirle directamente, necesitás una cuenta gratuita.'],
-      mensaje:  ['✉️','Enviar mensaje','Para chatear con este profesional necesitás registrarte. Es gratis y tarda 1 minuto.'],
-      favorito: ['❤️','Guardar favoritos','Para guardar profesionales y volver a verlos después, creá tu cuenta gratis.'],
-      compartir:['🔗','Compartir perfil','Compartí el perfil de este profesional con quien lo necesite.'],
+      whatsapp: ['💬', 'Contactar por WhatsApp', 'Para ver el número y escribirle, necesitás una cuenta gratuita.'],
+      mensaje:  ['✉️', 'Enviar mensaje privado', 'Para chatear con este profesional registrate. Es gratis y tarda 1 minuto.'],
+      favorito: ['❤️', 'Guardar en favoritos', 'Para guardar profesionales y volver a verlos después, creá tu cuenta gratis.'],
     }
     const [ico, tit, desc] = textos[motivo] || textos.whatsapp
     el.querySelector('#_tcPopupRegIcon').textContent = ico
@@ -65,6 +76,18 @@ function mostrarPopupRegistro(motivo) {
     el.querySelector('#_tcPopupRegDesc').textContent = desc
   }
   el.style.display = 'flex'
+  document.body.style.overflow = 'hidden'
+  const vid = el.querySelector('#_tcPopupRegVideo')
+  vid.currentTime = 0
+  vid.play().catch(()=>{})
+}
+window.cerrarPopupReg = function() {
+  const el = document.getElementById('_tcPopupReg')
+  if(!el) return
+  const vid = el.querySelector('#_tcPopupRegVideo')
+  if(vid) vid.pause()
+  el.style.display = 'none'
+  document.body.style.overflow = ''
 }
 
 /* ── AUTH ── */
