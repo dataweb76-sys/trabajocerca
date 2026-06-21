@@ -669,6 +669,7 @@ async function init(){
     cargarPartidoProde(userId)
     montarFAQChat()
     enviarRecordatorioCompartir(userId)
+    mostrarPopupNuevosReferidos(userId)
     if(registrados.length === 0) mostrarBienvenida(userId)
   }
 
@@ -1581,6 +1582,77 @@ init()
 
   history.replaceState({}, '', '/perfil.html')
 })()
+
+/* ══════════════════════════════════════════════════════════
+   POPUP NUEVOS REFERIDOS — avisa al profesional
+══════════════════════════════════════════════════════════ */
+async function mostrarPopupNuevosReferidos(userId) {
+  try {
+    const { data: perfil } = await supabase
+      .from('perfiles')
+      .select('puntos, ref_ultima_visita')
+      .eq('id', userId).single()
+
+    if(!perfil) return
+    const puntosActuales = perfil.puntos || 0
+    const ultimaVisita   = perfil.ref_ultima_visita || new Date(0).toISOString()
+
+    // Contar referidos que se registraron después de la última visita
+    const { count } = await supabase
+      .from('perfiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('referido_por', userId)
+      .gt('created_at', ultimaVisita)
+
+    if(!count || count === 0) {
+      // Actualizar fecha de visita de todas formas
+      await supabase.from('perfiles').update({ ref_ultima_visita: new Date().toISOString() }).eq('id', userId)
+      return
+    }
+
+    // Calcular si desbloqueó algo nuevo
+    const umbrales = [10, 20, 50]
+    const bonus = umbrales.filter(u => puntosActuales >= u && (puntosActuales - count) < u)
+    const desbloqueo = bonus.length > 0
+      ? bonus[0] === 50
+        ? '🎁 ¡Desbloqueaste publicar un trabajo realizado gratis!'
+        : `🎉 ¡Desbloqueaste ${bonus[0] <= 10 ? '+10' : '+5'} clientes extra en tu libreta!`
+      : ''
+
+    // Mostrar popup
+    const overlay = document.createElement('div')
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;'
+    overlay.innerHTML = `
+      <div style="background:white;border-radius:20px;max-width:380px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .3s ease;">
+        <div style="background:linear-gradient(135deg,#1d4ed8,#7c3aed);padding:24px;text-align:center;color:white;">
+          <div style="font-size:48px;margin-bottom:8px;">🎊</div>
+          <h2 style="margin:0 0 4px;font-size:20px;">¡Nuevos referidos!</h2>
+          <p style="margin:0;opacity:.85;font-size:14px;">Usuarios que se unieron con tu invitación</p>
+        </div>
+        <div style="padding:24px;text-align:center;">
+          <div style="font-size:56px;font-weight:900;color:#1e293b;line-height:1;">${count}</div>
+          <div style="font-size:15px;color:#64748b;margin-bottom:16px;">persona${count!==1?'s':''} nueva${count!==1?'s':''} se registró${count!==1?'ron':''} con tu código</div>
+          <div style="background:#eff6ff;border-radius:12px;padding:12px 16px;margin-bottom:16px;">
+            <div style="font-size:13px;color:#1d4ed8;font-weight:700;">Total acumulado: ${puntosActuales} referidos</div>
+            <div style="background:#dbeafe;border-radius:99px;height:8px;margin-top:8px;overflow:hidden;">
+              <div style="width:${Math.min(100,Math.round(puntosActuales/50*100))}%;height:100%;background:#2563eb;border-radius:99px;"></div>
+            </div>
+            <div style="font-size:11px;color:#64748b;margin-top:5px;">${puntosActuales < 50 ? `${50-puntosActuales} más para publicar un trabajo realizado gratis` : '¡Máximo alcanzado! 🏆'}</div>
+          </div>
+          ${desbloqueo ? `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:12px;margin-bottom:16px;font-size:14px;font-weight:700;color:#16a34a;">${desbloqueo}</div>` : ''}
+          <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;background:#1d4ed8;color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;">
+            ¡Genial, gracias! 🙌
+          </button>
+        </div>
+      </div>`
+    document.body.appendChild(overlay)
+    overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove() })
+
+    // Actualizar fecha de visita
+    await supabase.from('perfiles').update({ ref_ultima_visita: new Date().toISOString() }).eq('id', userId)
+
+  } catch(e) { console.warn('popup referidos:', e) }
+}
 
 /* ══════════════════════════════════════════════════════════
    MODAL BIENVENIDA — Completar tipo de perfil

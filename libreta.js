@@ -8,6 +8,9 @@ let userId = null
 let clientes = []
 let clienteActual = null
 let trabajosActuales = []
+let slotsTotal = 5   // base gratuita
+let puntosRef  = 0   // referidos registrados con su código
+const SLOTS_BASE = 5
 
 const ESTADOS = {
   consulta:      { label: '🔵 Consulta',      cls: 'e-consulta',      dot: 'dot-consulta' },
@@ -23,12 +26,34 @@ const ESTADOS = {
   if(!session) { location.href = '/login.html'; return }
   userId = session.user.id
 
-  // Cargar nombre del profesional para los mensajes de invitación
-  const { data: prof } = await _supabase.from('perfiles').select('nombre,apellido').eq('id', userId).single()
-  window._profNombre = prof ? `${prof.nombre || ''} ${prof.apellido || ''}`.trim() : 'Un profesional'
+  const { data: prof } = await _supabase
+    .from('perfiles')
+    .select('nombre, apellido, puntos, libreta_slots_extra')
+    .eq('id', userId).single()
+
+  window._profNombre = prof ? `${prof.nombre||''} ${prof.apellido||''}`.trim() : ''
+  puntosRef  = prof?.puntos || 0
+
+  // Calcular slots totales según puntos y extra pagados
+  const slotsExtra = prof?.libreta_slots_extra || 0
+  const bonoPuntos = puntosRef >= 50 ? 20 : puntosRef >= 20 ? 10 : puntosRef >= 10 ? 10 : 0
+  slotsTotal = SLOTS_BASE + bonoPuntos + slotsExtra
+
+  // Verificar si hay bono nuevo por puntos que no se haya acreditado aún
+  await verificarBonoPuntos(puntosRef, slotsExtra)
 
   await cargarClientes()
+  renderBarraSlots()
 })()
+
+async function verificarBonoPuntos(puntos, slotsExtra) {
+  // Acredita slots automáticamente cuando alcanza umbrales
+  const bonoCorrecto = puntos >= 50 ? 20 : puntos >= 20 ? 10 : puntos >= 10 ? 10 : 0
+  if(bonoCorrecto > slotsExtra) {
+    await _supabase.from('perfiles').update({ libreta_slots_extra: bonoCorrecto }).eq('id', userId)
+    slotsTotal = SLOTS_BASE + bonoCorrecto
+  }
+}
 
 /* ══ CLIENTES ══ */
 
@@ -248,6 +273,7 @@ window.cambiarEstado = async function(trabajoId, nuevoEstado) {
 /* ══ MODAL CLIENTE ══ */
 
 window.abrirModalCliente = function() {
+  if(clientes.length >= slotsTotal) { mostrarModalUpgrade(); return }
   document.getElementById('tituloModalCliente').textContent = 'Agregar cliente'
   document.getElementById('clienteEditId').value = ''
   document.getElementById('cNombre').value = ''
@@ -437,6 +463,165 @@ function formatFecha(f) {
   if(!f) return ''
   const [y, m, d] = f.split('-')
   return `${d}/${m}/${y}`
+}
+
+/* ══ BARRA DE SLOTS ══ */
+function renderBarraSlots() {
+  const usado = clientes.length
+  const pct   = Math.min(100, Math.round(usado / slotsTotal * 100))
+  const color = usado >= slotsTotal ? '#dc2626' : usado >= slotsTotal * 0.8 ? '#f59e0b' : '#22c55e'
+
+  // Próximo umbral de puntos
+  const proxUmbral = puntosRef < 10 ? 10 : puntosRef < 20 ? 20 : puntosRef < 50 ? 50 : null
+  const proxLabel  = proxUmbral === 50
+    ? `${proxUmbral - puntosRef} referidos más → publicar un trabajo realizado gratis 🎁`
+    : proxUmbral
+      ? `${proxUmbral - puntosRef} referidos más → +${proxUmbral <= 10 ? 10 : 5} clientes extra 🎉`
+      : '¡Máximo desbloqueado por referidos! 🏆'
+
+  let barraHTML = `
+    <div style="background:white;border-radius:12px;padding:12px 16px;box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:700;color:#1e293b;">📋 Clientes: ${usado} / ${slotsTotal}</span>
+        ${usado >= slotsTotal
+          ? `<button onclick="mostrarModalUpgrade()" style="background:#dc2626;color:white;border:none;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer;">+ Ampliar</button>`
+          : `<span style="font-size:11px;color:#94a3b8;">${slotsTotal - usado} disponibles</span>`}
+      </div>
+      <div style="background:#f1f5f9;border-radius:99px;height:7px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:${color};border-radius:99px;transition:width .4s;"></div>
+      </div>
+      ${proxUmbral !== null ? `<p style="margin:7px 0 0;font-size:11px;color:#64748b;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> ${proxLabel}</p>` : ''}
+    </div>`
+
+  const wrap = document.getElementById('resumen-top')
+  if(wrap) wrap.innerHTML = barraHTML
+}
+
+/* ══ MODAL UPGRADE ══ */
+window.mostrarModalUpgrade = function() {
+  const proxSlots  = slotsTotal + 10
+  const faltanRef  = puntosRef < 10 ? 10 - puntosRef : puntosRef < 20 ? 20 - puntosRef : 10
+  const refLink    = `https://trabajoscerca.com.ar/registro.html?ref=${userId}`
+  const msgWA      = encodeURIComponent(
+    `¡Hola! 👋 Te invito a Trabajos Cerca, la plataforma gratuita para encontrar oficios, profesionales y trabajo cerca tuyo.\n\nRegistrate con mi link y empezá a usarla hoy 👇\n${refLink}`
+  )
+
+  let modal = document.getElementById('modalUpgrade')
+  if(!modal) {
+    modal = document.createElement('div')
+    modal.id = 'modalUpgrade'
+    modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;align-items:center;justify-content:center;padding:16px;'
+    modal.onclick = e => { if(e.target === modal) modal.style.display = 'none' }
+    document.body.appendChild(modal)
+  }
+
+  modal.innerHTML = `
+    <div style="background:white;border-radius:20px;width:100%;max-width:460px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25);">
+      <div style="background:linear-gradient(135deg,#1e293b,#334155);padding:22px 24px;color:white;">
+        <div style="font-size:32px;margin-bottom:8px;">🔒</div>
+        <h2 style="margin:0 0 4px;font-size:20px;">Límite alcanzado</h2>
+        <p style="margin:0;font-size:14px;opacity:.75;">Tenés ${clientes.length} de ${slotsTotal} clientes disponibles</p>
+      </div>
+
+      <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px;">
+
+        <!-- Opción 1: Referidos -->
+        <div style="border:2px solid #e0e7ff;border-radius:14px;padding:16px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="font-size:28px;">🎯</div>
+            <div>
+              <div style="font-weight:800;color:#1e293b;font-size:15px;">Invitá amigos → Gratis</div>
+              <div style="font-size:12px;color:#64748b;">Conseguí ${faltanRef} registro${faltanRef!==1?'s':''} más y sumás <strong>+10 clientes</strong></div>
+            </div>
+          </div>
+          <div style="background:#f8fafc;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:12px;font-weight:700;color:#475569;">Tu progreso: ${puntosRef} / ${puntosRef < 10 ? 10 : 20} referidos</span>
+            </div>
+            <div style="background:#e2e8f0;border-radius:99px;height:8px;overflow:hidden;">
+              <div style="width:${Math.min(100, Math.round(puntosRef / (puntosRef < 10 ? 10 : 20) * 100))}%;height:100%;background:#6366f1;border-radius:99px;"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="https://wa.me/?text=${msgWA}" target="_blank"
+              style="flex:1;min-width:120px;display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#25d366;color:white;font-weight:700;font-size:13px;padding:10px 14px;border-radius:10px;text-decoration:none;">
+              <i class="fa-brands fa-whatsapp"></i> Invitar por WA
+            </a>
+            <button onclick="copiarLinkRef()" style="flex:1;min-width:120px;display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#eff6ff;color:#2563eb;font-weight:700;font-size:13px;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;">
+              <i class="fa-solid fa-copy"></i> Copiar link
+            </button>
+          </div>
+        </div>
+
+        <!-- Opción 2: Pago -->
+        <div style="border:2px solid #fef3c7;border-radius:14px;padding:16px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="font-size:28px;">💳</div>
+            <div>
+              <div style="font-weight:800;color:#1e293b;font-size:15px;">Pago único → +10 clientes</div>
+              <div style="font-size:12px;color:#64748b;">$10.000 ARS · Acreditación en menos de 24hs</div>
+            </div>
+          </div>
+          <div style="background:#fffbeb;border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;color:#475569;line-height:1.6;">
+            <strong>Transferí a:</strong><br>
+            👤 Daniel Faggi<br>
+            🏦 CVU/Alias: <strong>dataweb.mp</strong><br>
+            💰 Monto: <strong>$10.000</strong><br>
+            📝 Concepto: <strong>Libreta TC - ${userId.slice(0,8)}</strong>
+          </div>
+          <button onclick="abrirModalComprobante()" style="width:100%;background:#f59e0b;color:#1c1917;font-weight:800;font-size:14px;padding:12px;border-radius:10px;border:none;cursor:pointer;">
+            <i class="fa-solid fa-paper-plane"></i> Enviar comprobante
+          </button>
+        </div>
+
+        <!-- Logros -->
+        <div style="background:#f8fafc;border-radius:12px;padding:12px 14px;">
+          <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.05em;">🏆 Recompensas por referidos</p>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${[
+              {n:10,  premio:'+10 clientes extra',            done: puntosRef>=10},
+              {n:20,  premio:'+5 clientes más (15 total)',    done: puntosRef>=20},
+              {n:50,  premio:'Publicar 1 trabajo realizado 🎁', done: puntosRef>=50},
+            ].map(r => `
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:28px;height:28px;border-radius:50%;background:${r.done?'#22c55e':'#e2e8f0'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;">
+                  ${r.done ? '✓' : r.n}
+                </div>
+                <span style="font-size:13px;color:${r.done?'#16a34a':'#64748b'};font-weight:${r.done?'700':'400'};">${r.premio}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+
+      </div>
+      <div style="padding:0 24px 20px;">
+        <button onclick="document.getElementById('modalUpgrade').style.display='none'" style="width:100%;background:#f1f5f9;color:#475569;font-weight:700;font-size:14px;padding:12px;border-radius:10px;border:none;cursor:pointer;">
+          Cerrar
+        </button>
+      </div>
+    </div>`
+
+  modal.style.display = 'flex'
+}
+
+window.copiarLinkRef = function() {
+  const link = `https://trabajoscerca.com.ar/registro.html?ref=${userId}`
+  navigator.clipboard?.writeText(link).catch(()=>{})
+  mostrarToast('📋 Link de invitación copiado!')
+}
+
+window.abrirModalComprobante = function() {
+  const texto = prompt('Pegá el número de operación o una descripción del pago:')
+  if(!texto) return
+  _supabase.from('libreta_pagos').insert({
+    profesional_id: userId,
+    monto: 10000,
+    slots_sumados: 10,
+    comprobante: texto,
+    aprobado: false
+  }).then(() => {
+    document.getElementById('modalUpgrade').style.display = 'none'
+    mostrarToast('✅ Comprobante enviado. Te acreditamos en menos de 24hs.')
+  })
 }
 
 function mostrarToast(msg) {
