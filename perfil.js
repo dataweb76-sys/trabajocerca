@@ -575,8 +575,26 @@ async function init(){
         <button onclick="compartirInicio()" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:white;font-weight:700;font-size:14px;">
           <i class="fa-solid fa-globe"></i> La página Trabajos Cerca
         </button>
+        <button onclick="window.generarTarjetaProfesional('${userId}')" style="flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,#f59e0b,#ef4444);color:white;font-weight:700;font-size:14px;">
+          <i class="fa-solid fa-id-card"></i> Descargar mi tarjeta
+        </button>
       </div>
       <div id="msgCompartir" style="margin-top:10px;"></div>
+      <div id="previewTarjeta" style="display:none;margin-top:14px;text-align:center;">
+        <p style="font-size:13px;color:#475569;margin:0 0 8px;font-weight:600;">📲 Guardá esta imagen y compartila en Instagram o Facebook</p>
+        <canvas id="canvasTarjeta" style="max-width:100%;border-radius:14px;box-shadow:0 4px 24px rgba(0,0,0,.15);"></canvas>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+          <button onclick="window.descargarTarjeta()" style="display:inline-flex;align-items:center;gap:7px;background:#0f172a;color:white;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;">
+            <i class="fa-solid fa-download"></i> Descargar PNG
+          </button>
+          <a href="https://www.instagram.com" target="_blank" style="display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;text-decoration:none;">
+            <i class="fa-brands fa-instagram"></i> Abrir Instagram
+          </a>
+          <button onclick="window.compartirTarjetaFB('${userId}')" style="display:inline-flex;align-items:center;gap:7px;background:#1877f2;color:white;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;">
+            <i class="fa-brands fa-facebook"></i> Compartir en Facebook
+          </button>
+        </div>
+      </div>
     </div>
 
     ${misPerfilesHtml}
@@ -1759,4 +1777,237 @@ function mostrarBienvenida(userId) {
     const primero = tipos[0]
     window.location.href = `/perfil_servicio.html?tipo=${primero}&bv=1`
   }
+}
+
+/* ══════════════════════════════════════════════════════════
+   GENERADOR DE TARJETA PROFESIONAL (Canvas 1080x1080)
+══════════════════════════════════════════════════════════ */
+window.generarTarjetaProfesional = async function(userId) {
+  const btn = event?.currentTarget
+  if(btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generando...' }
+
+  try {
+    const { data: p } = await supabase
+      .from("perfiles")
+      .select("nombre, apellido, nombre_empresa, mostrar_como, foto, localidad, provincia, tipo")
+      .eq("id", userId).single()
+
+    const { data: srv } = await supabase
+      .from("servicios").select("categoria, descripcion").eq("usuario_id", userId).maybeSingle()
+
+    const nombre = (p.mostrar_como === "empresa" && p.nombre_empresa)
+      ? p.nombre_empresa
+      : `${p.nombre || ""} ${p.apellido || ""}`.trim()
+    const categoria = srv?.categoria?.split(",")[0]?.trim() || "Profesional"
+    const lugar = [p.localidad, p.provincia].filter(Boolean).join(", ")
+    const perfilUrl = `https://trabajoscerca.com.ar/perfil_publico.html?id=${userId}`
+
+    const W = 1080, H = 1080
+    const canvas = document.getElementById("canvasTarjeta")
+    canvas.width = W
+    canvas.height = H
+    const ctx = canvas.getContext("2d")
+
+    // ── Fondo degradado oscuro ──
+    const bg = ctx.createLinearGradient(0, 0, W, H)
+    bg.addColorStop(0, "#0f172a")
+    bg.addColorStop(0.5, "#1e2d4a")
+    bg.addColorStop(1, "#0f172a")
+    ctx.fillStyle = bg
+    ctx.fillRect(0, 0, W, H)
+
+    // ── Círculos decorativos de fondo ──
+    ;[
+      { x: 900, y: 150, r: 320, color: "rgba(37,99,235,0.12)" },
+      { x: 120, y: 900, r: 260, color: "rgba(245,158,11,0.10)" },
+      { x: 540, y: 540, r: 420, color: "rgba(255,255,255,0.03)" },
+    ].forEach(c => {
+      ctx.beginPath()
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2)
+      ctx.fillStyle = c.color
+      ctx.fill()
+    })
+
+    // ── Header: logo/marca ──
+    ctx.fillStyle = "rgba(255,255,255,0.06)"
+    ctx.fillRect(0, 0, W, 100)
+    ctx.font = "bold 36px Arial"
+    ctx.fillStyle = "#fbbf24"
+    ctx.textAlign = "center"
+    ctx.fillText("TRABAJOS CERCA", W / 2, 62)
+    ctx.font = "20px Arial"
+    ctx.fillStyle = "rgba(255,255,255,0.5)"
+    ctx.fillText("trabajoscerca.com.ar", W / 2, 88)
+
+    // ── Línea amarilla bajo header ──
+    const linGrad = ctx.createLinearGradient(0, 0, W, 0)
+    linGrad.addColorStop(0, "transparent")
+    linGrad.addColorStop(0.3, "#fbbf24")
+    linGrad.addColorStop(0.7, "#f59e0b")
+    linGrad.addColorStop(1, "transparent")
+    ctx.fillStyle = linGrad
+    ctx.fillRect(0, 100, W, 3)
+
+    // ── Foto de perfil ──
+    const fotoY = 220, fotoR = 160
+    ctx.save()
+    ctx.beginPath()
+    ctx.arc(W / 2, fotoY, fotoR + 6, 0, Math.PI * 2)
+    ctx.fillStyle = "#fbbf24"
+    ctx.fill()
+    ctx.restore()
+
+    if(p.foto) {
+      await new Promise(resolve => {
+        const img = new Image()
+        img.crossOrigin = "anonymous"
+        img.onload = () => {
+          ctx.save()
+          ctx.beginPath()
+          ctx.arc(W / 2, fotoY, fotoR, 0, Math.PI * 2)
+          ctx.clip()
+          ctx.drawImage(img, W/2 - fotoR, fotoY - fotoR, fotoR*2, fotoR*2)
+          ctx.restore()
+          resolve()
+        }
+        img.onerror = () => {
+          dibujarAvatarFallback(ctx, W/2, fotoY, fotoR)
+          resolve()
+        }
+        img.src = p.foto
+      })
+    } else {
+      dibujarAvatarFallback(ctx, W/2, fotoY, fotoR)
+    }
+
+    // ── Badge de categoría ──
+    const badgeY = fotoY + fotoR + 30
+    const badgeText = `🔧 ${categoria}`
+    ctx.font = "bold 28px Arial"
+    const badgeW = ctx.measureText(badgeText).width + 50
+    const badgeH = 50
+    ctx.fillStyle = "rgba(245,158,11,0.2)"
+    ctx.strokeStyle = "#fbbf24"
+    ctx.lineWidth = 2
+    roundRect(ctx, W/2 - badgeW/2, badgeY, badgeW, badgeH, 25)
+    ctx.fill(); ctx.stroke()
+    ctx.fillStyle = "#fbbf24"
+    ctx.textAlign = "center"
+    ctx.fillText(badgeText, W/2, badgeY + 33)
+
+    // ── Nombre ──
+    ctx.font = "bold 64px Arial"
+    ctx.fillStyle = "#ffffff"
+    ctx.textAlign = "center"
+    const nombreY = badgeY + 100
+    // Texto largo: reducir
+    const nombreFit = fitText(ctx, nombre, W - 120, 64)
+    ctx.font = `bold ${nombreFit}px Arial`
+    ctx.fillText(nombre, W/2, nombreY)
+
+    // ── Localidad ──
+    if(lugar) {
+      ctx.font = "28px Arial"
+      ctx.fillStyle = "rgba(255,255,255,0.55)"
+      ctx.fillText(`📍 ${lugar}`, W/2, nombreY + 50)
+    }
+
+    // ── Descripción breve ──
+    if(srv?.descripcion) {
+      const desc = srv.descripcion.length > 80 ? srv.descripcion.slice(0,80)+"…" : srv.descripcion
+      ctx.font = "italic 26px Arial"
+      ctx.fillStyle = "rgba(255,255,255,0.65)"
+      ctx.fillText(`"${desc}"`, W/2, nombreY + (lugar ? 110 : 70))
+    }
+
+    // ── QR ──
+    const qrY = 780
+    const qrSize = 160
+    const qrCanvas = document.createElement("canvas")
+    await QRCode.toCanvas(qrCanvas, perfilUrl, { width: qrSize, margin: 1, color: { dark: "#0f172a", light: "#ffffff" } })
+    // Fondo blanco redondeado bajo QR
+    ctx.fillStyle = "#ffffff"
+    roundRect(ctx, W/2 - qrSize/2 - 12, qrY - 12, qrSize + 24, qrSize + 24, 16)
+    ctx.fill()
+    ctx.drawImage(qrCanvas, W/2 - qrSize/2, qrY, qrSize, qrSize)
+
+    ctx.font = "bold 22px Arial"
+    ctx.fillStyle = "#fbbf24"
+    ctx.textAlign = "center"
+    ctx.fillText("📲 Escaneame para contactarme", W/2, qrY + qrSize + 44)
+
+    // ── Footer ──
+    ctx.fillStyle = "rgba(255,255,255,0.05)"
+    ctx.fillRect(0, H - 70, W, 70)
+    ctx.font = "22px Arial"
+    ctx.fillStyle = "rgba(255,255,255,0.4)"
+    ctx.fillText("Encontrá profesionales y oficios cerca tuyo — ¡Es gratis!", W/2, H - 26)
+
+    // ── Mostrar preview ──
+    document.getElementById("previewTarjeta").style.display = "block"
+    document.getElementById("previewTarjeta").scrollIntoView({ behavior: "smooth", block: "nearest" })
+
+    // Guardar referencia para descarga
+    window._tarjetaCanvas = canvas
+    window._tarjetaNombre = nombre.replace(/\s+/g, "-").toLowerCase()
+    window._tarjetaPerfilUrl = perfilUrl
+
+  } catch(e) {
+    console.error("Error generando tarjeta:", e)
+    alert("No se pudo generar la tarjeta. Intentá de nuevo.")
+  } finally {
+    if(btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-id-card"></i> Descargar mi tarjeta' }
+  }
+}
+
+function dibujarAvatarFallback(ctx, x, y, r) {
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(x, y, r, 0, Math.PI * 2)
+  ctx.fillStyle = "#1e3a5f"
+  ctx.fill()
+  ctx.font = `${r}px Arial`
+  ctx.fillStyle = "rgba(255,255,255,0.3)"
+  ctx.textAlign = "center"
+  ctx.textBaseline = "middle"
+  ctx.fillText("👷", x, y)
+  ctx.textBaseline = "alphabetic"
+  ctx.restore()
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + w - r, y)
+  ctx.arcTo(x + w, y, x + w, y + r, r)
+  ctx.lineTo(x + w, y + h - r)
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r)
+  ctx.lineTo(x + r, y + h)
+  ctx.arcTo(x, y + h, x, y + h - r, r)
+  ctx.lineTo(x, y + r)
+  ctx.arcTo(x, y, x + r, y, r)
+  ctx.closePath()
+}
+
+function fitText(ctx, text, maxWidth, startSize) {
+  let size = startSize
+  ctx.font = `bold ${size}px Arial`
+  while(ctx.measureText(text).width > maxWidth && size > 24) {
+    size -= 4
+    ctx.font = `bold ${size}px Arial`
+  }
+  return size
+}
+
+window.descargarTarjeta = function() {
+  if(!window._tarjetaCanvas) return
+  const link = document.createElement("a")
+  link.download = `tarjeta-${window._tarjetaNombre || "profesional"}-trabajoscerca.png`
+  link.href = window._tarjetaCanvas.toDataURL("image/png")
+  link.click()
+}
+
+window.compartirTarjetaFB = function(userId) {
+  const url = `https://trabajoscerca.com.ar/perfil_publico.html?id=${userId}`
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank", "width=600,height=400")
 }
