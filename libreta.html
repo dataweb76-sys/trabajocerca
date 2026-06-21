@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Clientes — Trabajos Cerca</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  body { background:#f1f5f9; }
+
+  /* ── Topbar ── */
+  .topbar nav a.activo { color:#f59e0b; }
+
+  /* ── Layout ── */
+  .lib-wrap {
+    max-width:900px; margin:0 auto; padding:16px;
+    display:grid; grid-template-columns:320px 1fr; gap:16px; align-items:start;
+  }
+  @media(max-width:680px){
+    .lib-wrap { grid-template-columns:1fr; }
+    .panel-detalle { display:none; }
+    .panel-detalle.activo { display:block; }
+    .panel-lista.oculto { display:none; }
+  }
+
+  /* ── Panel lista ── */
+  .panel-lista { background:white; border-radius:16px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.07); }
+  .panel-lista-header {
+    background:linear-gradient(135deg,#1e293b,#334155);
+    padding:16px; color:white;
+    display:flex; align-items:center; gap:10px;
+  }
+  .panel-lista-header h2 { margin:0; font-size:17px; flex:1; }
+  .btn-add-cliente {
+    background:#f59e0b; color:#1e293b; border:none; border-radius:10px;
+    padding:8px 14px; font-size:13px; font-weight:800; cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+  }
+  .search-clientes {
+    padding:10px 12px; border-bottom:1px solid #f1f5f9;
+  }
+  .search-clientes input {
+    width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+    padding:9px 12px; font-size:13px; box-sizing:border-box; outline:none;
+  }
+  .search-clientes input:focus { border-color:#2563eb; }
+
+  /* ── Tarjetas de cliente ── */
+  .cliente-item {
+    display:flex; align-items:center; gap:12px;
+    padding:13px 14px; border-bottom:1px solid #f8fafc;
+    cursor:pointer; transition:background .15s;
+  }
+  .cliente-item:hover { background:#f8fafc; }
+  .cliente-item.activo { background:#eff6ff; }
+  .cliente-avatar {
+    width:42px; height:42px; border-radius:50%;
+    background:linear-gradient(135deg,#2563eb,#0ea5e9);
+    display:flex; align-items:center; justify-content:center;
+    color:white; font-weight:800; font-size:16px; flex-shrink:0;
+  }
+  .cliente-info { flex:1; min-width:0; }
+  .cliente-nombre { font-size:14px; font-weight:700; color:#1e293b; }
+  .cliente-sub { font-size:12px; color:#94a3b8; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cliente-badge {
+    font-size:11px; font-weight:700; padding:3px 8px;
+    border-radius:20px; white-space:nowrap;
+  }
+  .badge-activo   { background:#fef3c7; color:#92400e; }
+  .badge-cobrado  { background:#d1fae5; color:#065f46; }
+  .badge-consulta { background:#e0e7ff; color:#3730a3; }
+
+  /* ── Panel detalle ── */
+  .panel-detalle {
+    background:white; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,.07);
+    overflow:hidden;
+  }
+  .detalle-header {
+    background:linear-gradient(135deg,#1e293b,#334155);
+    padding:18px 20px; color:white;
+  }
+  .detalle-nombre { font-size:20px; font-weight:900; margin:0 0 4px; }
+  .detalle-contacto { font-size:13px; color:rgba(255,255,255,.7); display:flex; gap:14px; flex-wrap:wrap; }
+  .detalle-acciones { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+  .btn-accion {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 14px; border-radius:10px; font-size:13px; font-weight:700;
+    border:none; cursor:pointer; text-decoration:none;
+  }
+
+  /* ── Stats del cliente ── */
+  .stats-cliente {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    border-bottom:1px solid #f1f5f9;
+  }
+  .stat-item { padding:14px; text-align:center; border-right:1px solid #f1f5f9; }
+  .stat-item:last-child { border-right:none; }
+  .stat-num { font-size:22px; font-weight:900; color:#1e293b; }
+  .stat-lbl { font-size:11px; color:#94a3b8; margin-top:2px; }
+
+  /* ── Trabajos ── */
+  .trabajos-header {
+    padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid #f1f5f9;
+  }
+  .trabajos-header h3 { margin:0; font-size:15px; color:#1e293b; }
+  .btn-add-trabajo {
+    background:#2563eb; color:white; border:none; border-radius:9px;
+    padding:7px 13px; font-size:12px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; gap:5px;
+  }
+  .trabajo-card {
+    padding:14px 16px; border-bottom:1px solid #f8fafc;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .trabajo-estado-dot {
+    width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:5px;
+  }
+  .trabajo-body { flex:1; min-width:0; }
+  .trabajo-desc { font-size:14px; font-weight:700; color:#1e293b; margin-bottom:4px; }
+  .trabajo-meta { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .estado-pill {
+    font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px;
+  }
+  .trabajo-monto { font-size:13px; font-weight:800; color:#16a34a; }
+  .trabajo-fecha { font-size:11px; color:#94a3b8; }
+  .trabajo-acciones { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .btn-estado {
+    font-size:11px; padding:4px 10px; border-radius:8px; border:1.5px solid #e2e8f0;
+    background:white; cursor:pointer; font-weight:600; color:#475569;
+  }
+  .btn-estado:hover { border-color:#2563eb; color:#2563eb; }
+  .btn-eliminar-t { color:#ef4444; border-color:#fee2e2; }
+  .btn-eliminar-t:hover { background:#fef2f2; border-color:#ef4444; }
+
+  /* ── Estados colores ── */
+  .e-consulta      { background:#e0e7ff; color:#3730a3; }
+  .e-presupuestado { background:#fef3c7; color:#92400e; }
+  .e-en_curso      { background:#fed7aa; color:#9a3412; }
+  .e-terminado     { background:#d1fae5; color:#065f46; }
+  .e-cobrado       { background:#dcfce7; color:#14532d; }
+  .dot-consulta      { background:#6366f1; }
+  .dot-presupuestado { background:#f59e0b; }
+  .dot-en_curso      { background:#f97316; }
+  .dot-terminado     { background:#22c55e; }
+  .dot-cobrado       { background:#16a34a; }
+
+  /* ── Empty states ── */
+  .empty-state { text-align:center; padding:40px 20px; color:#94a3b8; }
+  .empty-state .icon { font-size:40px; margin-bottom:12px; }
+  .empty-state p { margin:0; font-size:14px; }
+
+  /* ── Modales ── */
+  .lib-modal-bg {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,.5); z-index:1000;
+    align-items:center; justify-content:center; padding:16px;
+  }
+  .lib-modal-bg.open { display:flex; }
+  .lib-modal {
+    background:white; border-radius:18px; width:100%; max-width:440px;
+    max-height:90vh; overflow-y:auto;
+  }
+  .lib-modal-header {
+    padding:18px 20px; border-bottom:1px solid #f1f5f9;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; background:white; z-index:1;
+  }
+  .lib-modal-header h3 { margin:0; font-size:17px; color:#1e293b; }
+  .lib-modal-close {
+    background:none; border:none; font-size:24px; color:#94a3b8;
+    cursor:pointer; padding:0; line-height:1;
+  }
+  .lib-modal-body { padding:18px 20px; }
+  .lib-modal-body label { display:block; font-size:13px; font-weight:700; color:#475569; margin-bottom:5px; margin-top:14px; }
+  .lib-modal-body label:first-child { margin-top:0; }
+  .lib-modal-body input,
+  .lib-modal-body select,
+  .lib-modal-body textarea {
+    width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+    padding:10px 12px; font-size:14px; box-sizing:border-box;
+    font-family:inherit; outline:none;
+  }
+  .lib-modal-body input:focus,
+  .lib-modal-body select:focus,
+  .lib-modal-body textarea:focus { border-color:#2563eb; }
+  .lib-modal-body textarea { resize:vertical; min-height:70px; }
+  .lib-modal-footer { padding:14px 20px; border-top:1px solid #f1f5f9; display:flex; gap:8px; }
+  .btn-guardar {
+    flex:1; background:#2563eb; color:white; border:none;
+    border-radius:11px; padding:13px; font-size:15px; font-weight:700; cursor:pointer;
+  }
+  .btn-cancelar {
+    background:#f1f5f9; color:#475569; border:none;
+    border-radius:11px; padding:13px 18px; font-size:14px; font-weight:700; cursor:pointer;
+  }
+  .input-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  /* ── Notas del cliente ── */
+  .notas-cliente {
+    padding:14px 16px; border-bottom:1px solid #f1f5f9;
+  }
+  .notas-cliente p { margin:0; font-size:13px; color:#475569; font-style:italic; }
+
+  /* ── Btn volver mobile ── */
+  .btn-volver {
+    display:none; align-items:center; gap:6px;
+    padding:8px 12px; background:#f1f5f9; border:none; border-radius:9px;
+    font-size:13px; font-weight:700; color:#1e293b; cursor:pointer; margin-bottom:12px;
+  }
+  @media(max-width:680px){ .btn-volver { display:inline-flex; } }
+
+  .lib-placeholder {
+    display:flex; align-items:center; justify-content:center;
+    min-height:300px; color:#cbd5e1; flex-direction:column; gap:10px;
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <a href="/index.html"><img src="logo.png" alt="Trabajos Cerca"></a>
+  </div>
+  <nav>
+    <a href="/buscador.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></a>
+    <a href="/mensajes.html"><i class="fa-solid fa-comment-dots"></i> <span>Mensajes</span></a>
+    <a href="/libreta.html" class="activo" style="color:#f59e0b;font-weight:700;"><i class="fa-solid fa-book"></i> <span>Mis Clientes</span></a>
+    <a href="/perfil.html"><i class="fa-solid fa-user"></i> <span>Perfil</span></a>
+  </nav>
+</header>
+
+<div style="max-width:900px;margin:16px auto;padding:0 16px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <div>
+      <h1 style="margin:0;font-size:22px;color:#1e293b;"><i class="fa-solid fa-book" style="color:#f59e0b;"></i> Mis Clientes</h1>
+      <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Tu libreta de trabajos y clientes</p>
+    </div>
+    <div id="resumen-top" style="display:flex;gap:10px;"></div>
+  </div>
+</div>
+
+<div class="lib-wrap">
+  <!-- ── Panel izquierdo: lista de clientes ── -->
+  <div class="panel-lista" id="panelLista">
+    <div class="panel-lista-header">
+      <i class="fa-solid fa-users" style="font-size:18px;color:#f59e0b;"></i>
+      <h2>Clientes <span id="contadorClientes" style="font-size:13px;font-weight:400;opacity:.7;"></span></h2>
+      <button class="btn-add-cliente" onclick="abrirModalCliente()">
+        <i class="fa-solid fa-plus"></i> Agregar
+      </button>
+    </div>
+    <div class="search-clientes">
+      <input type="text" id="inputBuscarCliente" placeholder="🔍 Buscar cliente..." oninput="filtrarClientes(this.value)">
+    </div>
+    <div id="listaClientes">
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <p>Cargando clientes...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Panel derecho: detalle del cliente ── -->
+  <div class="panel-detalle" id="panelDetalle">
+    <div class="lib-placeholder">
+      <i class="fa-solid fa-hand-pointer" style="font-size:36px;"></i>
+      <p style="font-size:14px;color:#94a3b8;">Seleccioná un cliente para ver sus trabajos</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL AGREGAR/EDITAR CLIENTE ══ -->
+<div class="lib-modal-bg" id="modalCliente" onclick="cerrarModalSiFondo(event,'modalCliente')">
+  <div class="lib-modal">
+    <div class="lib-modal-header">
+      <h3 id="tituloModalCliente">Agregar cliente</h3>
+      <button class="lib-modal-close" onclick="cerrarModal('modalCliente')">×</button>
+    </div>
+    <div class="lib-modal-body">
+      <input type="hidden" id="clienteEditId">
+      <div class="input-row">
+        <div>
+          <label>Nombre *</label>
+          <input id="cNombre" placeholder="Juan">
+        </div>
+        <div>
+          <label>Apellido</label>
+          <input id="cApellido" placeholder="García">
+        </div>
+      </div>
+      <label>Teléfono / WhatsApp</label>
+      <input id="cTelefono" type="tel" placeholder="Ej: 1123456789">
+      <label>Email</label>
+      <input id="cEmail" type="email" placeholder="juan@email.com">
+      <label>Notas (dirección, referencias, etc.)</label>
+      <textarea id="cNotas" placeholder="Ej: Casa en Corrientes 1234, timbre 3B"></textarea>
+    </div>
+    <div class="lib-modal-footer">
+      <button class="btn-cancelar" onclick="cerrarModal('modalCliente')">Cancelar</button>
+      <button class="btn-guardar" onclick="guardarCliente()"><i class="fa-solid fa-check"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL AGREGAR/EDITAR TRABAJO ══ -->
+<div class="lib-modal-bg" id="modalTrabajo" onclick="cerrarModalSiFondo(event,'modalTrabajo')">
+  <div class="lib-modal">
+    <div class="lib-modal-header">
+      <h3 id="tituloModalTrabajo">Agregar trabajo</h3>
+      <button class="lib-modal-close" onclick="cerrarModal('modalTrabajo')">×</button>
+    </div>
+    <div class="lib-modal-body">
+      <input type="hidden" id="trabajoEditId">
+      <label>Descripción *</label>
+      <input id="tDesc" placeholder="Ej: Instalación eléctrica cocina">
+      <div class="input-row">
+        <div>
+          <label>Categoría</label>
+          <input id="tCat" placeholder="Ej: Electricidad">
+        </div>
+        <div>
+          <label>Estado</label>
+          <select id="tEstado">
+            <option value="consulta">🔵 Consulta</option>
+            <option value="presupuestado">🟡 Presupuestado</option>
+            <option value="en_curso">🟠 En curso</option>
+            <option value="terminado">✅ Terminado</option>
+            <option value="cobrado">💰 Cobrado</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-row">
+        <div>
+          <label>Monto ($)</label>
+          <input id="tMonto" type="number" placeholder="0">
+        </div>
+        <div>
+          <label>Fecha inicio</label>
+          <input id="tFechaInicio" type="date">
+        </div>
+      </div>
+      <label>Fecha fin</label>
+      <input id="tFechaFin" type="date">
+      <label>Notas internas</label>
+      <textarea id="tNotas" placeholder="Detalles del trabajo, materiales, etc."></textarea>
+    </div>
+    <div class="lib-modal-footer">
+      <button class="btn-cancelar" onclick="cerrarModal('modalTrabajo')">Cancelar</button>
+      <button class="btn-guardar" onclick="guardarTrabajo()"><i class="fa-solid fa-check"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="libreta.js"></script>
+</body>
+</html>
