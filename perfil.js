@@ -561,6 +561,19 @@ async function init(){
       </div>
     </div>
 
+    <button onclick="window.abrirGuiaUso('profesional')" style="
+      display:flex;align-items:center;gap:14px;width:100%;padding:16px 20px;margin-bottom:12px;
+      background:linear-gradient(135deg,#0f172a,#1e3a5f);border:1.5px solid #3b82f6;
+      border-radius:14px;cursor:pointer;text-align:left;font-family:inherit;transition:box-shadow .2s;"
+      onmouseover="this.style.boxShadow='0 4px 20px rgba(59,130,246,.3)'"
+      onmouseout="this.style.boxShadow=''">
+      <div style="width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📖</div>
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:900;color:white;">Guía de uso completa</div>
+        <div style="font-size:12px;color:#93c5fd;margin-top:2px;">Cómo conseguir más clientes, puntos, tickets y más →</div>
+      </div>
+    </button>
+
     <div class="dash-actions">
       <a href="/perfil_publico.html?id=${userId}" class="btn btn-outline" target="_blank" rel="noopener">
         <i class="fa-solid fa-eye"></i> Ver mi perfil público
@@ -716,6 +729,20 @@ async function init(){
         ${badgeHtml}
       </div>
     </div>
+
+    <!-- Guía de uso -->
+    <button onclick="window.abrirGuiaUso('cliente')" style="
+      display:flex;align-items:center;gap:14px;width:100%;padding:16px 20px;margin-bottom:12px;
+      background:linear-gradient(135deg,#0f172a,#1e3a5f);border:1.5px solid #3b82f6;
+      border-radius:14px;cursor:pointer;text-align:left;font-family:inherit;transition:box-shadow .2s;"
+      onmouseover="this.style.boxShadow='0 4px 20px rgba(59,130,246,.3)'"
+      onmouseout="this.style.boxShadow=''">
+      <div style="width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📖</div>
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:900;color:white;">Guía de uso completa</div>
+        <div style="font-size:12px;color:#93c5fd;margin-top:2px;">Cómo ganar puntos, tickets de descuento y mucho más →</div>
+      </div>
+    </button>
 
     <!-- Botón para ofrecer servicios -->
     <button onclick="window._expandirPerfilCompleto()" style="
@@ -1131,6 +1158,103 @@ window.compartirInvitacionIG = async function(userId) {
   } catch(e) {
     if (msg) msg.innerHTML = `<div style="background:#fef2f2;border-radius:10px;padding:10px 14px;font-size:12px;color:#991b1b;">No se pudo copiar. Tu link: <strong>${refLink}</strong></div>`
   }
+}
+
+/* ══════════════════════════════════════════════════════════
+   GUÍA DE USO — popup diferenciado por tipo de perfil
+══════════════════════════════════════════════════════════ */
+window.abrirGuiaUso = function(tipo) {
+  const esPro = tipo === 'profesional'
+
+  const pasosPro = [
+    { icono:'📸', titulo:'Completá tu perfil al 100%',
+      texto:'Agregá una foto clara, describí bien tu servicio, sumá tu WhatsApp y tu localidad. Los perfiles completos aparecen primero en el buscador.' },
+    { icono:'🔧', titulo:'Publicá tu oficio o servicio',
+      texto:'Desde "Mis perfiles" podés registrarte como Oficio, Profesional, Emprendimiento, CV o Empresa. Cada uno tiene su propio buscador con clientes que buscan exactamente lo que ofrecés.' },
+    { icono:'📷', titulo:'Subí fotos de trabajos realizados',
+      texto:'Con el Plan Básico podés subir hasta 1 foto de trabajos realizados. Los clientes confían más en perfiles con evidencia visual de tu trabajo.' },
+    { icono:'✅', titulo:'Activá "Disponible ahora"',
+      texto:'El botón verde hace que aparezcas con un punto verde en los resultados. Los clientes lo ven y saben que podés atenderlos de inmediato — eso genera más contactos.' },
+    { icono:'⭐', titulo:'Activá el Ticket de Descuento 10%',
+      texto:'Al activarlo aparecés con el badge "⭐ TICKET 10% OFF" en el buscador. Los clientes con ticket preferirán contactarte a vos antes que a la competencia.' },
+    { icono:'🎁', titulo:'Invitá amigos y ganá puntos',
+      texto:'Compartí tu link de referido. Cada persona que se registre con tu link suma 1 punto. Con 10 puntos ganás slots extra en tu Libreta de Clientes. Con 50 puntos publicás un trabajo realizado gratis.' },
+    { icono:'📋', titulo:'Usá tu Libreta de Clientes',
+      texto:'Guardá los datos de tus clientes, registrá trabajos con estado (presupuestado, en curso, terminado), llevá el control de lo que te deben y enviá recordatorios por WhatsApp.' },
+    { icono:'📱', titulo:'Compartí tu perfil en redes',
+      texto:'Usá el botón "Compartir en redes" para difundir tu perfil en WhatsApp, Facebook e Instagram. También podés descargar tu tarjeta profesional 1080x1080 lista para postear.' },
+    { icono:'🌟', titulo:'Calificaciones y reputación',
+      texto:'Pedile a tus clientes que te califiquen en tu perfil público. Las estrellas mejoran tu posición en el buscador y generan más confianza en nuevos clientes.' },
+    { icono:'💬', titulo:'Respondé consultas urgentes',
+      texto:'En la sección "Urgentes" aparecen personas que necesitan un servicio ahora mismo. Respondé rápido y conseguí clientes directos sin esperar a que te busquen.' },
+  ]
+
+  const pasosCli = [
+    { icono:'🔍', titulo:'Buscá profesionales cerca tuyo',
+      texto:'Usá el buscador para encontrar plomeros, electricistas, médicos, contadores y más de 30 oficios. Filtrá por ciudad o provincia para ver solo los de tu zona.' },
+    { icono:'💬', titulo:'Contactá directo por WhatsApp',
+      texto:'En cada perfil hay un botón de WhatsApp. Hacés clic y arranca una conversación directa con el profesional — sin intermediarios, sin comisiones.' },
+    { icono:'⭐', titulo:'Calificá a los profesionales',
+      texto:'Después de contratar, podés calificar el servicio. Tus calificaciones ayudan a otros usuarios a elegir bien y le dan visibilidad al profesional.' },
+    { icono:'❤️', titulo:'Guardá tus favoritos',
+      texto:'El botón de corazón en cada perfil guarda al profesional en tu lista de favoritos. Así los tenés a mano para la próxima vez que los necesités.' },
+    { icono:'🎁', titulo:'Invitá amigos y ganá puntos',
+      texto:'Compartí tu link de invitación. Cada persona que se registre con tu código suma 1 punto para vos. Los puntos aparecen en tu perfil y se acumulan automáticamente.' },
+    { icono:'🎟️', titulo:'¡Con 10 referidos ganás un Ticket de Descuento!',
+      texto:'Al llegar a 10 puntos de referidos te damos automáticamente 1 Ticket de Descuento 10% OFF. Te avisamos con un popup y te llega una notificación.' },
+    { icono:'🛍️', titulo:'Usá tu ticket en perfiles con estrella',
+      texto:'Buscá perfiles con el badge "⭐ TICKET 10% OFF". Hacé clic en su perfil, tocá "Mostrar mi ticket" y mostráselo al profesional para obtener el 10% de descuento.' },
+    { icono:'📲', titulo:'Instalá la app en tu celular',
+      texto:'Trabajos Cerca funciona como app. En Chrome (Android) o Safari (iPhone) tocá el ícono de compartir y elegí "Agregar a pantalla de inicio". Así recibís notificaciones de nuevos referidos.' },
+    { icono:'🔔', titulo:'Notificaciones de referidos',
+      texto:'Cada vez que alguien se registre con tu código de invitación, te avisamos. Si tenés la app instalada, también recibís una notificación push en tu celular.' },
+    { icono:'💼', titulo:'¿Querés ofrecer algo vos también?',
+      texto:'Si tenés un oficio, sos profesional o tenés un emprendimiento, podés registrarte desde tu perfil. Es gratis y empezás a recibir clientes de tu zona.' },
+  ]
+
+  const pasos = esPro ? pasosPro : pasosCli
+  const titulo = esPro ? '📖 Guía para Profesionales y Emprendedores' : '📖 Guía para Clientes'
+  const subtitulo = esPro ? 'Todo lo que podés hacer para conseguir más clientes' : 'Cómo sacarle el máximo provecho a Trabajos Cerca'
+  const gradiente = esPro ? 'linear-gradient(135deg,#1e40af,#7c3aed)' : 'linear-gradient(135deg,#065f46,#1e40af)'
+
+  const pasosHtml = pasos.map((p, i) => `
+    <div style="display:flex;gap:14px;align-items:flex-start;padding:14px 0;${i < pasos.length-1 ? 'border-bottom:1px solid #f1f5f9;' : ''}">
+      <div style="width:46px;height:46px;border-radius:13px;background:#f8fafc;border:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${p.icono}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:800;color:#1e293b;margin-bottom:3px;">${i+1}. ${p.titulo}</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.55;">${p.texto}</div>
+      </div>
+    </div>`).join('')
+
+  const overlay = document.createElement('div')
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9300;display:flex;align-items:flex-end;justify-content:center;padding:0;'
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:22px 22px 0 0;max-width:520px;width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 -12px 60px rgba(0,0,0,.25);animation:slideUp .3s ease;">
+      <!-- Header fijo -->
+      <div style="background:${gradiente};padding:22px 22px 18px;flex-shrink:0;border-radius:22px 22px 0 0;position:relative;">
+        <button onclick="this.closest('[style*=fixed]').remove()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.2);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
+        <h2 style="margin:0 0 4px;font-size:18px;color:white;font-weight:900;padding-right:36px;">${titulo}</h2>
+        <p style="margin:0;font-size:13px;color:rgba(255,255,255,.8);">${subtitulo}</p>
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+          <span style="background:rgba(255,255,255,.18);color:white;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;">${pasos.length} pasos</span>
+          <span style="background:rgba(255,255,255,.18);color:white;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;">🎟️ Sistema de tickets</span>
+          <span style="background:rgba(255,255,255,.18);color:white;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;">🎁 Puntos por referidos</span>
+        </div>
+      </div>
+      <!-- Contenido scrolleable -->
+      <div style="overflow-y:auto;padding:4px 20px 20px;flex:1;">
+        ${pasosHtml}
+      </div>
+      <!-- Footer fijo -->
+      <div style="padding:16px 20px;border-top:1px solid #f1f5f9;flex-shrink:0;background:white;border-radius:0 0 0 0;">
+        <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;background:${gradiente};color:white;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;">
+          ¡Entendido, a potenciar mi perfil! 🚀
+        </button>
+      </div>
+    </div>`
+
+  document.body.appendChild(overlay)
+  overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove() })
 }
 
 /* ── CERRAR SESIÓN ── */
