@@ -573,6 +573,26 @@ async function init(){
         <i class="fa-solid fa-share-nodes"></i> Compartir en redes
       </button>
     </div>
+
+    ${data.tipo !== "cv" && data.tipo !== "cliente" ? `
+    <div style="margin-top:10px;">
+      <label style="display:flex;align-items:center;gap:12px;cursor:pointer;background:${data.acepta_ticket_descuento?'linear-gradient(135deg,#ede9fe,#eff6ff)':'#f8fafc'};border:1.5px solid ${data.acepta_ticket_descuento?'#c4b5fd':'#e2e8f0'};border-radius:14px;padding:14px 16px;transition:all .2s;"
+        id="ticketToggleLabel">
+        <div style="position:relative;flex-shrink:0;">
+          <input type="checkbox" id="ticketToggleDash" ${data.acepta_ticket_descuento ? "checked" : ""}
+            style="width:0;height:0;opacity:0;position:absolute;"
+            onchange="window._guardarTicketToggle(this.checked)">
+          <div id="ticketToggleSliderDash" style="width:44px;height:24px;border-radius:99px;background:${data.acepta_ticket_descuento?'#7c3aed':'#cbd5e1'};transition:background .2s;cursor:pointer;" onclick="document.getElementById('ticketToggleDash').click()">
+            <div id="ticketToggleKnobDash" style="width:20px;height:20px;background:white;border-radius:50%;margin:2px;transition:transform .2s;transform:${data.acepta_ticket_descuento?'translateX(20px)':'translateX(0)'}"></div>
+          </div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:800;color:${data.acepta_ticket_descuento?'#5b21b6':'#475569'};">⭐ Aceptar Ticket 10% OFF</div>
+          <div style="font-size:12px;color:${data.acepta_ticket_descuento?'#6d28d9':'#94a3b8'};margin-top:2px;">${data.acepta_ticket_descuento?'Aparecés con estrella en el buscador':'Activalo para aparecer con estrella en el buscador'}</div>
+        </div>
+      </label>
+    </div>` : ""}
+
     <div id="panelCompartir" style="display:none;margin-top:12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 18px;">
       <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.04em;">¿Qué querés compartir?</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -1044,6 +1064,25 @@ window.compartirInicio = function(){
   const url   = "https://trabajoscerca.com.ar/"
   const texto = "¡Encontrá profesionales, oficios y trabajo en tu ciudad! 👷‍♂️💼 Trabajos Cerca — 100% gratis."
   compartir(url, "Trabajos Cerca", texto)
+}
+
+/* ── TOGGLE TICKET DESCUENTO ── */
+window._guardarTicketToggle = async function(activo) {
+  const slider = document.getElementById('ticketToggleSliderDash')
+  const knob   = document.getElementById('ticketToggleKnobDash')
+  const label  = document.getElementById('ticketToggleLabel')
+  if(slider) slider.style.background = activo ? '#7c3aed' : '#cbd5e1'
+  if(knob)   knob.style.transform    = activo ? 'translateX(20px)' : 'translateX(0)'
+  if(label) {
+    label.style.background   = activo ? 'linear-gradient(135deg,#ede9fe,#eff6ff)' : '#f8fafc'
+    label.style.borderColor  = activo ? '#c4b5fd' : '#e2e8f0'
+    label.querySelector('div > div:first-child').style.color = activo ? '#5b21b6' : '#475569'
+    label.querySelector('div > div:last-child').style.color  = activo ? '#6d28d9' : '#94a3b8'
+    label.querySelector('div > div:last-child').textContent  = activo ? 'Aparecés con estrella en el buscador' : 'Activalo para aparecer con estrella en el buscador'
+  }
+  const { data: ud } = await supabase.auth.getUser()
+  if(!ud?.user) return
+  await supabase.from('perfiles').update({ acepta_ticket_descuento: activo }).eq('id', ud.user.id)
 }
 
 /* ── COMPARTIR LINK DE REFERIDOS ── */
