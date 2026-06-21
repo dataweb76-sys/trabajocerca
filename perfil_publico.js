@@ -456,6 +456,38 @@ async function cargarPerfil(){
         </p>
       </div>
     </div>` : ""}
+    ${perfil.acepta_ticket_descuento ? await (async () => {
+      let ticketsViewer = 0
+      if(usuarioActual && usuarioActual !== id) {
+        const { data: vp } = await supabase.from('perfiles').select('tickets_descuento').eq('id', usuarioActual).single()
+        ticketsViewer = vp?.tickets_descuento || 0
+      }
+      return `
+    <div class="card" style="padding:0;overflow:hidden;border:2px solid #a78bfa;">
+      <div style="background:linear-gradient(135deg,#4c1d95,#1e40af);padding:16px 20px;display:flex;align-items:center;gap:14px;">
+        <div style="font-size:32px;flex-shrink:0;">🎟️</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:900;color:white;">⭐ Acepta Ticket de Descuento 10%</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;">Este perfil ofrece 10% de descuento a clientes con ticket</div>
+        </div>
+      </div>
+      <div style="padding:16px 20px;background:#faf5ff;">
+        ${usuarioActual && usuarioActual !== id
+          ? ticketsViewer > 0
+            ? `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <div style="background:#f3e8ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:10px 16px;">
+                  <div style="font-size:13px;font-weight:700;color:#6d28d9;">Tenés <strong>${ticketsViewer}</strong> ticket${ticketsViewer!==1?'s':''} disponible${ticketsViewer!==1?'s':''}</div>
+                  <div style="font-size:11px;color:#7c3aed;margin-top:2px;">Mostráselo al contratar para obtener el 10% OFF</div>
+                </div>
+                <button onclick="window._mostrarTicketParaUsar(${ticketsViewer})" style="background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;border:none;border-radius:12px;padding:12px 18px;font-size:14px;font-weight:800;cursor:pointer;">
+                  🎟️ Mostrar mi ticket
+                </button>
+              </div>`
+            : `<div style="font-size:13px;color:#6d28d9;">No tenés tickets aún. <a href="/perfil.html" style="color:#7c3aed;font-weight:700;">Invitá amigos</a> y ganá tickets al llegar a 10 referidos.</div>`
+          : `<div style="font-size:13px;color:#6d28d9;"><a href="/login.html" style="color:#7c3aed;font-weight:700;">Iniciá sesión</a> para ver si tenés tickets disponibles y obtener el 10% OFF.</div>`}
+      </div>
+    </div>`
+    })() : ""}
     ${impulsarCVHtml}
     ${reviewsHtml}
     ${bannerPubHtml}
@@ -537,6 +569,43 @@ window.enviarRatingPub = async function(trabajadorId, nombre){
 }
 
 cargarPerfil()
+
+/* ══════════════════════════════════════════════════════
+   TICKET DE DESCUENTO — Mostrar ticket al profesional
+══════════════════════════════════════════════════════ */
+window._mostrarTicketParaUsar = async function(cantTickets) {
+  const { data: ud } = await supabase.auth.getUser()
+  if(!ud?.user) return
+  const { data: p } = await supabase.from('perfiles').select('nombre, apellido').eq('id', ud.user.id).single()
+  const nombre = `${p?.nombre || ''} ${p?.apellido || ''}`.trim()
+
+  const overlay = document.createElement('div')
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9200;display:flex;align-items:center;justify-content:center;padding:20px;'
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:22px;max-width:360px;width:100%;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.4);">
+      <div style="background:linear-gradient(135deg,#4c1d95,#1e40af);padding:22px;color:white;text-align:center;">
+        <div style="font-size:52px;margin-bottom:6px;">🎟️</div>
+        <h2 style="margin:0 0 4px;font-size:20px;">Ticket de Descuento 10%</h2>
+        <p style="margin:0;opacity:.8;font-size:13px;">Mostrá esta pantalla al profesional</p>
+      </div>
+      <div style="padding:24px;text-align:center;">
+        <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:3px dashed #f59e0b;border-radius:20px;padding:24px;margin-bottom:18px;">
+          <div style="font-size:13px;font-weight:600;color:#78350f;margin-bottom:4px;">Cliente verificado</div>
+          <div style="font-size:22px;font-weight:900;color:#92400e;margin-bottom:2px;">${nombre}</div>
+          <div style="font-size:42px;font-weight:900;color:#d97706;margin:10px 0;">10% OFF</div>
+          <div style="font-size:12px;color:#78350f;">Tickets disponibles: <strong>${cantTickets}</strong></div>
+          <div style="font-size:10px;color:#92400e;margin-top:6px;opacity:.7;">${new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'})}</div>
+        </div>
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:12px;margin-bottom:18px;font-size:12px;color:#15803d;text-align:left;">
+          <strong>Para el profesional:</strong><br>
+          Aplicá un 10% de descuento a este cliente. El ticket se valida por confianza — fue premiado por recomendar Trabajos Cerca a sus contactos.
+        </div>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;background:#4c1d95;color:white;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;">Cerrar</button>
+      </div>
+    </div>`
+  document.body.appendChild(overlay)
+  overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove() })
+}
 
 /* ══════════════════════════════════════════════════════
    LIGHTBOX — Popup de imágenes de trabajos realizados

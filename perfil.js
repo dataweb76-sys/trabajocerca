@@ -474,6 +474,10 @@ async function init(){
             style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.2);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;">
             <i class="fa-solid fa-share-nodes"></i> Más
           </button>
+          <button onclick="window.abrirModalTickets()"
+            style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.18);color:white;border:1.5px solid rgba(255,255,255,.3);border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;">
+            🎟️ Mis Tickets <span style="background:#fbbf24;color:#1e293b;border-radius:99px;padding:0 7px;font-size:11px;font-weight:900;margin-left:2px;">${data.tickets_descuento||0}</span>
+          </button>
         </div>
       </div>
     </div>`
@@ -617,6 +621,24 @@ async function init(){
     <input id="editInstagram" value="${esc(data.instagram)}" placeholder="Ej: @tunombre">
     <label><i class="fa-brands fa-tiktok" style="color:#010101;"></i> TikTok</label>
     <input id="editTiktok" value="${esc(data.tiktok)}" placeholder="Ej: @tunombre">
+
+    ${data.tipo !== "cv" && data.tipo !== "cliente" ? `
+    <div style="background:linear-gradient(135deg,#ede9fe,#eff6ff);border:1.5px solid #c4b5fd;border-radius:14px;padding:16px;margin-top:8px;">
+      <label style="display:flex;align-items:center;gap:12px;cursor:pointer;margin:0;">
+        <div style="position:relative;flex-shrink:0;">
+          <input type="checkbox" id="editAceptaTicket" ${data.acepta_ticket_descuento ? "checked" : ""}
+            style="width:0;height:0;opacity:0;position:absolute;"
+            onchange="document.getElementById('ticketToggleSlider').style.background=this.checked?'#7c3aed':'#cbd5e1';document.getElementById('ticketToggleKnob').style.transform=this.checked?'translateX(20px)':'translateX(0)'">
+          <div id="ticketToggleSlider" style="width:44px;height:24px;border-radius:99px;background:${data.acepta_ticket_descuento?'#7c3aed':'#cbd5e1'};transition:background .2s;cursor:pointer;" onclick="document.getElementById('editAceptaTicket').click()">
+            <div id="ticketToggleKnob" style="width:20px;height:20px;background:white;border-radius:50%;margin:2px;transition:transform .2s;transform:${data.acepta_ticket_descuento?'translateX(20px)':'translateX(0)'}"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:#5b21b6;">⭐ Aceptar Ticket de Descuento 10%</div>
+          <div style="font-size:12px;color:#6d28d9;margin-top:2px;">Los clientes con ticket obtienen 10% OFF. Aparecés destacado con estrella en el buscador.</div>
+        </div>
+      </label>
+    </div>` : ""}
     <label>Teléfono fijo</label>
     <input id="editTelefono" value="${esc(data.telefono_fijo)}" type="tel" placeholder="Ej: 02214567890">
     <label>Dirección</label>
@@ -711,6 +733,27 @@ async function init(){
     </button>
 
     ${guardadosHtml}
+
+    <!-- Tickets de Descuento -->
+    <div id="ticketClienteCard" style="margin:0 0 20px;background:linear-gradient(135deg,#4c1d95,#1e40af);border-radius:18px;padding:20px;overflow:hidden;position:relative;cursor:pointer;"
+      onclick="window.abrirModalTickets()">
+      <div style="position:absolute;top:-20px;right:-20px;font-size:100px;opacity:.07;pointer-events:none;">🎟️</div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:54px;height:54px;border-radius:16px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">🎟️</div>
+        <div style="flex:1;">
+          <div style="font-size:16px;font-weight:900;color:white;margin-bottom:3px;">Mis Tickets de Descuento</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8);">
+            Tenés <strong id="ticketCountLabel" style="color:#fbbf24;">...</strong> ticket${(data.tickets_descuento||0)!==1?'s':''} disponible${(data.tickets_descuento||0)!==1?'s':''} •
+            <span id="puntosTicketLabel" style="color:rgba(255,255,255,.7);">${puntosRef} pto${puntosRef!==1?'s':''}</span>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color:rgba(255,255,255,.5);"></i>
+      </div>
+      <div id="barraProgTicket" style="margin-top:14px;background:rgba(255,255,255,.15);border-radius:99px;height:6px;overflow:hidden;">
+        <div style="width:${Math.min(100,Math.round((puntosRef%10)/10*100))}%;height:100%;background:#fbbf24;border-radius:99px;transition:width .6s;"></div>
+      </div>
+      <div style="margin-top:6px;font-size:11px;color:rgba(255,255,255,.6);">${10-(puntosRef%10)>0?`${10-(puntosRef%10)} referido${10-(puntosRef%10)!==1?'s':''} más para ganar un ticket`:'¡Ticket disponible!'}</div>
+    </div>
 
     <!-- Prode Mundial -->
     <div id="prodeCard" style="margin:20px 0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);border:1.5px solid rgba(250,204,21,.35);border-radius:18px;padding:20px;overflow:hidden;position:relative;">
@@ -894,7 +937,8 @@ window.guardarDatos = async function(){
     provincia:        document.getElementById("editProvincia").value,
     nombre_empresa:   empresa || null,
     mostrar_como:     mostrarComo,
-    mostrar_telefono: mostrarTel
+    mostrar_telefono: mostrarTel,
+    acepta_ticket_descuento: document.getElementById("editAceptaTicket")?.checked ?? false
   }
 
   // Campos exclusivos de empleador
@@ -1590,68 +1634,172 @@ async function mostrarPopupNuevosReferidos(userId) {
   try {
     const { data: perfil } = await supabase
       .from('perfiles')
-      .select('puntos, ref_ultima_visita')
+      .select('puntos_referidos, ref_ultima_visita, tickets_descuento')
       .eq('id', userId).single()
 
     if(!perfil) return
-    const puntosActuales = perfil.puntos || 0
-    const ultimaVisita   = perfil.ref_ultima_visita || new Date(0).toISOString()
+    const puntosActuales  = perfil.puntos_referidos || 0
+    const ticketsActuales = perfil.tickets_descuento || 0
+    const ultimaVisita    = perfil.ref_ultima_visita || new Date(0).toISOString()
 
-    // Contar referidos que se registraron después de la última visita
+    // Contar referidos nuevos desde la última visita
     const { count } = await supabase
-      .from('perfiles')
+      .from('referidos')
       .select('id', { count: 'exact', head: true })
-      .eq('referido_por', userId)
+      .eq('referidor_id', userId)
       .gt('created_at', ultimaVisita)
 
-    if(!count || count === 0) {
-      // Actualizar fecha de visita de todas formas
-      await supabase.from('perfiles').update({ ref_ultima_visita: new Date().toISOString() }).eq('id', userId)
-      return
+    await supabase.from('perfiles').update({ ref_ultima_visita: new Date().toISOString() }).eq('id', userId)
+
+    if(!count || count === 0) return
+
+    // ── Tickets ganados: 1 ticket cada 10 puntos
+    const ticketsGanados = Math.floor(puntosActuales / 10) - Math.floor((puntosActuales - count) / 10)
+    if(ticketsGanados > 0) {
+      await supabase.from('perfiles')
+        .update({ tickets_descuento: ticketsActuales + ticketsGanados })
+        .eq('id', userId)
+      // Notificación interna
+      await supabase.from('notificaciones').insert({
+        usuario_id: userId, tipo: 'sistema',
+        titulo: `🎟️ ¡Ganaste ${ticketsGanados} Ticket${ticketsGanados>1?'s':''} de Descuento!`,
+        cuerpo: `Llegaste a ${Math.floor(puntosActuales/10)*10} referidos. Usá tu ticket para obtener 10% OFF en perfiles que lo acepten.`,
+        url: '/perfil.html'
+      }).catch(()=>{})
     }
 
-    // Calcular si desbloqueó algo nuevo
-    const umbrales = [10, 20, 50]
-    const bonus = umbrales.filter(u => puntosActuales >= u && (puntosActuales - count) < u)
-    const desbloqueo = bonus.length > 0
-      ? bonus[0] === 50
+    // ── Desbloqueos de libreta
+    const umbralesLib = [10, 20, 50]
+    const bonusLib = umbralesLib.filter(u => puntosActuales >= u && (puntosActuales - count) < u)
+    const desbloqueo = bonusLib.length > 0
+      ? bonusLib[0] === 50
         ? '🎁 ¡Desbloqueaste publicar un trabajo realizado gratis!'
-        : `🎉 ¡Desbloqueaste ${bonus[0] <= 10 ? '+10' : '+5'} clientes extra en tu libreta!`
+        : `🎉 ¡Desbloqueaste ${bonusLib[0] <= 10 ? '+10' : '+5'} clientes extra en tu libreta!`
       : ''
 
-    // Mostrar popup
+    const ticketsNuevosHtml = ticketsGanados > 0 ? `
+      <div style="background:linear-gradient(135deg,#4c1d95,#1e40af);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+        <div style="font-size:28px;flex-shrink:0;">🎟️</div>
+        <div>
+          <div style="font-size:15px;font-weight:900;color:white;">¡Ganaste ${ticketsGanados} Ticket${ticketsGanados>1?'s':''} de Descuento!</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;">Usalo para obtener 10% OFF en profesionales y emprendimientos</div>
+        </div>
+      </div>` : ''
+
     const overlay = document.createElement('div')
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;'
     overlay.innerHTML = `
       <div style="background:white;border-radius:20px;max-width:380px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .3s ease;">
         <div style="background:linear-gradient(135deg,#1d4ed8,#7c3aed);padding:24px;text-align:center;color:white;">
           <div style="font-size:48px;margin-bottom:8px;">🎊</div>
-          <h2 style="margin:0 0 4px;font-size:20px;">¡Nuevos referidos!</h2>
-          <p style="margin:0;opacity:.85;font-size:14px;">Usuarios que se unieron con tu invitación</p>
+          <h2 style="margin:0 0 4px;font-size:20px;">¡${count} nuevo${count!==1?'s':''} referido${count!==1?'s':''}!</h2>
+          <p style="margin:0;opacity:.85;font-size:14px;">Se unieron con tu código de invitación</p>
         </div>
         <div style="padding:24px;text-align:center;">
-          <div style="font-size:56px;font-weight:900;color:#1e293b;line-height:1;">${count}</div>
-          <div style="font-size:15px;color:#64748b;margin-bottom:16px;">persona${count!==1?'s':''} nueva${count!==1?'s':''} se registró${count!==1?'ron':''} con tu código</div>
-          <div style="background:#eff6ff;border-radius:12px;padding:12px 16px;margin-bottom:16px;">
-            <div style="font-size:13px;color:#1d4ed8;font-weight:700;">Total acumulado: ${puntosActuales} referidos</div>
+          ${ticketsNuevosHtml}
+          <div style="background:#eff6ff;border-radius:12px;padding:12px 16px;margin-bottom:14px;">
+            <div style="font-size:13px;color:#1d4ed8;font-weight:700;">Total: ${puntosActuales} referido${puntosActuales!==1?'s':''}</div>
             <div style="background:#dbeafe;border-radius:99px;height:8px;margin-top:8px;overflow:hidden;">
-              <div style="width:${Math.min(100,Math.round(puntosActuales/50*100))}%;height:100%;background:#2563eb;border-radius:99px;"></div>
+              <div style="width:${Math.min(100,Math.round((puntosActuales%10)/10*100))}%;height:100%;background:#2563eb;border-radius:99px;"></div>
             </div>
-            <div style="font-size:11px;color:#64748b;margin-top:5px;">${puntosActuales < 50 ? `${50-puntosActuales} más para publicar un trabajo realizado gratis` : '¡Máximo alcanzado! 🏆'}</div>
+            <div style="font-size:11px;color:#64748b;margin-top:5px;">${10-(puntosActuales%10)>0?`${10-(puntosActuales%10)} más para ganar otro ticket 🎟️`:'¡Listo para ganar ticket!'}</div>
           </div>
-          ${desbloqueo ? `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:12px;margin-bottom:16px;font-size:14px;font-weight:700;color:#16a34a;">${desbloqueo}</div>` : ''}
-          <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;background:#1d4ed8;color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;">
-            ¡Genial, gracias! 🙌
-          </button>
+          ${desbloqueo ? `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:12px;margin-bottom:14px;font-size:13px;font-weight:700;color:#16a34a;">${desbloqueo}</div>` : ''}
+          <div style="display:flex;gap:10px;">
+            ${ticketsGanados > 0 ? `<button onclick="this.closest('[style*=fixed]').remove();window.abrirModalTickets()" style="flex:1;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;">Ver mis tickets 🎟️</button>` : ''}
+            <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;background:#1d4ed8;color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;">¡Genial! 🙌</button>
+          </div>
         </div>
       </div>`
     document.body.appendChild(overlay)
     overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove() })
 
-    // Actualizar fecha de visita
-    await supabase.from('perfiles').update({ ref_ultima_visita: new Date().toISOString() }).eq('id', userId)
-
   } catch(e) { console.warn('popup referidos:', e) }
+}
+
+/* ══════════════════════════════════════════════════════════
+   MODAL TICKETS DE DESCUENTO
+══════════════════════════════════════════════════════════ */
+window.abrirModalTickets = async function() {
+  const { data: ud } = await supabase.auth.getUser()
+  if(!ud?.user) return
+  const { data: p } = await supabase.from('perfiles')
+    .select('tickets_descuento, puntos_referidos, nombre')
+    .eq('id', ud.user.id).single()
+
+  const tickets = p?.tickets_descuento || 0
+  const puntos  = p?.puntos_referidos  || 0
+  const falta   = 10 - (puntos % 10)
+
+  const overlay = document.createElement('div')
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9100;display:flex;align-items:center;justify-content:center;padding:20px;'
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:22px;max-width:420px;width:100%;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);max-height:90vh;overflow-y:auto;">
+      <div style="background:linear-gradient(135deg,#4c1d95,#1e40af);padding:26px 24px;color:white;text-align:center;position:relative;">
+        <button onclick="this.closest('[style*=fixed]').remove()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.15);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+        <div style="font-size:52px;margin-bottom:8px;">🎟️</div>
+        <h2 style="margin:0 0 4px;font-size:22px;">Mis Tickets de Descuento</h2>
+        <p style="margin:0;opacity:.8;font-size:14px;">Ganá descuentos en negocios y profesionales locales</p>
+      </div>
+      <div style="padding:24px;">
+
+        <!-- Tickets disponibles -->
+        <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #fbbf24;border-radius:18px;padding:20px;text-align:center;margin-bottom:20px;">
+          <div style="font-size:56px;font-weight:900;color:#92400e;line-height:1;">${tickets}</div>
+          <div style="font-size:15px;font-weight:700;color:#78350f;margin-top:4px;">ticket${tickets!==1?'s':''} disponible${tickets!==1?'s':''}</div>
+          ${tickets > 0
+            ? `<div style="font-size:12px;color:#92400e;margin-top:8px;background:rgba(255,255,255,.6);border-radius:8px;padding:6px 12px;">Buscá el badge <strong>⭐ TICKET 10% OFF</strong> en el buscador y usá tu descuento</div>`
+            : `<div style="font-size:12px;color:#92400e;margin-top:8px;">Invitá amigos para ganar tu primer ticket</div>`}
+        </div>
+
+        <!-- Progreso hacia próximo ticket -->
+        <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;margin-bottom:20px;">
+          <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:10px;">🎯 Progreso al próximo ticket</div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:6px;">
+            <span>${puntos % 10} / 10 referidos</span>
+            <span>${falta > 0 ? `Faltan ${falta}` : '¡Ticket listo!'}</span>
+          </div>
+          <div style="background:#e2e8f0;border-radius:99px;height:10px;overflow:hidden;">
+            <div style="width:${Math.min(100,Math.round((puntos%10)/10*100))}%;height:100%;background:linear-gradient(90deg,#7c3aed,#2563eb);border-radius:99px;transition:width .6s;"></div>
+          </div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:6px;">Total de referidos: <strong>${puntos}</strong> · Tickets ganados: <strong>${Math.floor(puntos/10)}</strong></div>
+        </div>
+
+        <!-- Cómo funciona -->
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:16px;margin-bottom:20px;">
+          <div style="font-size:13px;font-weight:800;color:#15803d;margin-bottom:12px;">ℹ️ ¿Cómo funciona?</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#374151;">
+              <span style="font-size:18px;flex-shrink:0;">1️⃣</span>
+              <span>Invitá amigos con tu link de referido. Cada uno que se registra suma <strong>1 punto</strong>.</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#374151;">
+              <span style="font-size:18px;flex-shrink:0;">2️⃣</span>
+              <span>Al llegar a <strong>10 puntos</strong> ganás <strong>1 Ticket de Descuento 10%</strong> automáticamente.</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#374151;">
+              <span style="font-size:18px;flex-shrink:0;">3️⃣</span>
+              <span>Buscá perfiles con el badge <strong>⭐ TICKET 10% OFF</strong> y mostrales tu ticket al contratar.</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#374151;">
+              <span style="font-size:18px;flex-shrink:0;">4️⃣</span>
+              <span>El profesional o emprendimiento te aplica el <strong>10% de descuento</strong> en el servicio.</span>
+            </div>
+          </div>
+        </div>
+
+        <a href="/buscador.html?ticket=1" style="display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;font-weight:800;font-size:15px;padding:14px;border-radius:13px;text-decoration:none;margin-bottom:10px;">
+          ⭐ Buscar perfiles con Ticket 10% OFF
+        </a>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;background:#f1f5f9;color:#475569;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">Cerrar</button>
+      </div>
+    </div>`
+  document.body.appendChild(overlay)
+  overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove() })
+
+  // Actualizar label en la card del cliente si existe
+  const lbl = document.getElementById('ticketCountLabel')
+  if(lbl) lbl.textContent = tickets + ' ticket' + (tickets!==1?'s':'')
 }
 
 /* ══════════════════════════════════════════════════════════

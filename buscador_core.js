@@ -373,7 +373,7 @@ window.buscar = async function(){
   cont.innerHTML = `<div style="text-align:center;padding:40px;color:#64748b;">
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
-  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,disponible_ahora,perfiles(id,tipo,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,verificado,profesion_universitaria,plan_nivel)"
+  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,disponible_ahora,perfiles(id,tipo,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,verificado,profesion_universitaria,plan_nivel,acepta_ticket_descuento)"
   let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=800`
 
   if(palabra && palabra === "Disponible ahora"){
@@ -507,7 +507,10 @@ window.buscar = async function(){
     const badgePortfolio = (p.plan_nivel > 0 && p.tipo === "oficio")
       ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#f97316;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:3px;"><i class="fa-solid fa-images" style="font-size:9px;"></i> TRABAJOS REALIZADOS</span>`
       : ""
-    const badgesLine = (badgeDest || badgeVerif || badgePortfolio) ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;">${badgeDest}${badgeVerif}${badgePortfolio}</div>` : ""
+    const badgeTicket = p.acepta_ticket_descuento
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:3px;" title="Acepta Ticket de Descuento 10%"><i class="fa-solid fa-ticket" style="font-size:9px;"></i> ⭐ TICKET 10% OFF</span>`
+      : ""
+    const badgesLine = (badgeDest || badgeVerif || badgePortfolio || badgeTicket) ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;">${badgeDest}${badgeVerif}${badgePortfolio}${badgeTicket}</div>` : ""
 
     const card = document.createElement("div")
     card.className = "card"

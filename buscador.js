@@ -229,7 +229,7 @@ window.buscar = async function(){
   cont.innerHTML = `<div style="text-align:center;padding:40px;color:#64748b;">
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
-  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,perfiles(id,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,profesion_universitaria)"
+  const select = "id,categoria,titulo,descripcion,servicios_lista,horarios,localidad,provincia,lat,lng,perfiles(id,nombre,apellido,nombre_empresa,mostrar_como,mostrar_telefono,movil,foto,localidad,provincia,instagram,destacado,profesion_universitaria,acepta_ticket_descuento,plan_nivel,verificado)"
   let url = `${SB_URL}/rest/v1/servicios?activo=eq.true&select=${encodeURIComponent(select)}&order=created_at.desc&limit=800`
 
   if(palabra){ const p=encodeURIComponent(`*${palabra}*`); url+=`&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p},servicios_lista.ilike.${p})` }
@@ -249,6 +249,12 @@ window.buscar = async function(){
   // Filtrar por tipo si viene desde los botones de inicio
   if(_tipoBuscador === "profesional" || _tipoBuscador === "oficio"){
     data = data.filter(d => esProfesionalUni(d) === (_tipoBuscador === "profesional"))
+  }
+
+  // Filtrar solo perfiles con ticket si viene ?ticket=1
+  const _urlParams = new URLSearchParams(location.search)
+  if(_urlParams.get('ticket') === '1') {
+    data = data.filter(d => d.perfiles?.acepta_ticket_descuento === true)
   }
 
   if(!data?.length){
