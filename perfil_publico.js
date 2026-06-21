@@ -320,10 +320,15 @@ async function cargarPerfil(){
           <p style="margin:0;font-weight:800;color:#15803d;font-size:15px;">💼 ¿Tenés trabajo para ofrecerle?</p>
           <p style="margin:4px 0 0;font-size:13px;color:#16a34a;line-height:1.5;">Contactalo directamente por WhatsApp, sin intermediarios.</p>
         </div>
-        <a href="${waLinkContacto}" target="_blank" rel="noopener"
+        ${usuarioActual
+          ? `<a href="${waLinkContacto}" target="_blank" rel="noopener"
           style="display:inline-flex;align-items:center;gap:7px;padding:12px 18px;background:#25D366;color:white;border-radius:10px;font-size:14px;font-weight:800;text-decoration:none;white-space:nowrap;">
           <i class="fa-brands fa-whatsapp"></i> Contactar ahora
-        </a>
+        </a>`
+          : `<a href="/registro.html?next=${encodeURIComponent(location.pathname+location.search)}"
+          style="display:inline-flex;align-items:center;gap:7px;padding:12px 18px;background:#16a34a;color:white;border-radius:10px;font-size:14px;font-weight:800;text-decoration:none;white-space:nowrap;">
+          <i class="fa-solid fa-user-plus"></i> Registrate gratis
+        </a>`}
       </div>` : ""}
 
     </div>`
@@ -349,8 +354,19 @@ async function cargarPerfil(){
         style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:white;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;margin:10px auto 4px;font-family:inherit;box-shadow:0 4px 14px rgba(37,99,235,.3);">
         <i class="fa-solid fa-file-lines"></i> Ver CV completo
       </button>` : ""}
-      ${wa?`<a class="btn-whatsapp" href="${wa}" target="_blank" rel="noopener">
-        <i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</a>`:""}
+      ${wa
+        ? usuarioActual
+          ? `<a class="btn-whatsapp" href="${wa}?text=${encodeURIComponent(`Hola${perfil.nombre?" "+perfil.nombre:""}! Vi tu perfil en Trabajos Cerca.`)}" target="_blank" rel="noopener">
+        <i class="fa-brands fa-whatsapp"></i> Contactar por WhatsApp</a>`
+          : `<div style="background:linear-gradient(135deg,#f0fdf4,#eff6ff);border:2px solid #86efac;border-radius:14px;padding:16px 18px;text-align:center;margin:10px 0;">
+          <p style="margin:0 0 6px;font-size:15px;font-weight:700;color:#15803d;">¿Querés contactar a ${displayNombre}?</p>
+          <p style="margin:0 0 12px;font-size:13px;color:#475569;">Registrate gratis para ver el contacto y conectar con profesionales.</p>
+          <a href="/registro.html?next=${encodeURIComponent(location.pathname+location.search)}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:linear-gradient(135deg,#16a34a,#15803d);color:white;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;margin-right:8px;">
+            <i class="fa-solid fa-user-plus"></i> Registrarme gratis</a>
+          <a href="/login.html?next=${encodeURIComponent(location.pathname+location.search)}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 16px;background:white;color:#475569;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13px;font-weight:600;text-decoration:none;">
+            Ya tengo cuenta</a>
+        </div>`
+        : ""}
       <div style="display:flex;gap:7px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
         <button id="btnCompartir" onclick="compartirPerfil('${id}')"
           style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;font-weight:600;color:#475569;cursor:pointer;">
@@ -862,15 +878,19 @@ window.abrirVerCV = async function(userId, nombre, waNum, esPublico, cvArchivo){
 
   footer.innerHTML = `
     <div style="display:flex;gap:10px;margin-bottom:${puedeEnviar?"14px":"0"};flex-wrap:wrap;">
-      ${waLink ? `
+      ${waLink && miId ? `
       <a href="${waLink}" target="_blank" rel="noopener"
         style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;background:#25D366;color:white;border-radius:11px;font-size:14px;font-weight:800;text-decoration:none;min-width:140px;">
         <i class="fa-brands fa-whatsapp"></i> Contactar
+      </a>` : waLink ? `
+      <a href="/registro.html?next=${encodeURIComponent(location.pathname+location.search)}"
+        style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;background:#16a34a;color:white;border-radius:11px;font-size:14px;font-weight:800;text-decoration:none;min-width:140px;">
+        <i class="fa-solid fa-user-plus"></i> Registrate para contactar
       </a>` : ""}
-      <button onclick="window._tcCerrarCV();window.location.href='/mensajes.html?dest=${userId}'"
+      ${miId ? `<button onclick="window._tcCerrarCV();window.location.href='/mensajes.html?dest=${userId}'"
         style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 16px;background:#eff6ff;color:#1d4ed8;border:1.5px solid #bfdbfe;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;min-width:140px;">
         <i class="fa-solid fa-comment-dots"></i> Mensaje privado
-      </button>
+      </button>` : ""}
     </div>
 
     ${puedeEnviar ? `
