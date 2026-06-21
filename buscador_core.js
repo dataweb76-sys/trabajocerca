@@ -41,7 +41,7 @@ window.mostrarPopupRegistro = function(motivo) {
           <button onclick="cerrarPopupReg()" style="background:rgba(255,255,255,.12);border:none;color:white;border-radius:50%;width:30px;height:30px;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">×</button>
         </div>
         <div style="position:relative;background:#000;aspect-ratio:16/9;">
-          <video id="_tcPopupRegVideo" controls playsinline style="width:100%;height:100%;display:block;" src="/verbuscadores.mp4">
+          <video id="_tcPopupRegVideo" controls playsinline style="width:100%;height:100%;display:block;" src="/registrate.mp4">
             Tu navegador no soporta video HTML5.
           </video>
         </div>
