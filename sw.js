@@ -4,7 +4,7 @@
    - Manejo de Push Notifications
 ══════════════════════════════════════════════ */
 
-const CACHE_NAME = 'tc-v52'
+const CACHE_NAME = 'tc-v53'
 const CACHE_STATIC = ['/index.html', '/style.css', '/logo.png']
 
 /* ── Instalación ── */
@@ -39,20 +39,19 @@ self.addEventListener('message', e => {
 /* ── Fetch: network-first, cache como fallback ── */
 self.addEventListener('fetch', e => {
   if(e.request.method !== 'GET') return
-  // No cachear llamadas a Supabase
-  if(e.request.url.includes('supabase.co')) return
+  // Solo interceptar recursos del mismo origen; dejar pasar terceros (Facebook, Google, etc.)
+  if(!e.request.url.startsWith(self.location.origin)) return
 
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        // No cachear respuestas parciales (206), opacas o errores
-        if(res.ok && res.status === 200 && res.type !== 'opaque') {
+        if(res.ok && res.status === 200) {
           const clone = res.clone()
           caches.open(CACHE_NAME).then(c => c.put(e.request, clone))
         }
         return res
       })
-      .catch(() => caches.match(e.request))
+      .catch(() => caches.match(e.request).then(r => r || Response.error()))
   )
 })
 

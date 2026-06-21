@@ -882,33 +882,43 @@ window.votarEncuestaPopup = async function(){
 async function cargarOficioSemana(){
   try {
     const hace7 = new Date(Date.now() - 7*24*60*60*1000).toISOString()
+    let p = null
+    let conteo = {}
 
-    // Top profesional oficio por eventos (vistas + wa_clicks) últimos 7 días
+    // Intentar con eventos de los últimos 7 días
     const { data: eventos } = await supabase
       .from("perfil_eventos")
       .select("profesional_id")
       .gte("created_at", hace7)
 
-    if(!eventos?.length) return
+    if(eventos?.length) {
+      eventos.forEach(e => { conteo[e.profesional_id] = (conteo[e.profesional_id] || 0) + 1 })
+      const topIds = Object.entries(conteo).sort((a,b) => b[1]-a[1]).slice(0,10).map(e => e[0])
+      const { data: candidatos } = await supabase
+        .from("perfiles")
+        .select("id, nombre, apellido, nombre_empresa, mostrar_como, foto, localidad, provincia, tipo")
+        .in("id", topIds)
+        .ilike("tipo", "%oficio%")
+        .limit(10)
+      if(candidatos?.length){
+        candidatos.sort((a,b) => (conteo[b.id]||0) - (conteo[a.id]||0))
+        p = candidatos[0]
+      }
+    }
 
-    // Contar eventos por profesional
-    const conteo = {}
-    eventos.forEach(e => { conteo[e.profesional_id] = (conteo[e.profesional_id] || 0) + 1 })
-    const topIds = Object.entries(conteo).sort((a,b) => b[1]-a[1]).slice(0,10).map(e => e[0])
-
-    // Buscar el que sea oficio y tenga servicio activo
-    const { data: candidatos } = await supabase
-      .from("perfiles")
-      .select("id, nombre, apellido, nombre_empresa, mostrar_como, foto, localidad, provincia, tipo, instagram")
-      .in("id", topIds)
-      .ilike("tipo", "%oficio%")
-      .limit(10)
-
-    if(!candidatos?.length) return
-
-    // Ordenar por el conteo original
-    candidatos.sort((a,b) => (conteo[b.id]||0) - (conteo[a.id]||0))
-    const p = candidatos[0]
+    // Fallback: cualquier oficio con foto registrado en la plataforma
+    if(!p){
+      const { data: fallback } = await supabase
+        .from("perfiles")
+        .select("id, nombre, apellido, nombre_empresa, mostrar_como, foto, localidad, provincia, tipo")
+        .ilike("tipo", "%oficio%")
+        .not("foto", "is", null)
+        .limit(20)
+      if(!fallback?.length) return
+      // Elegir uno según el día de la semana para que rote cada día
+      const idx = new Date().getDay() % fallback.length
+      p = fallback[idx]
+    }
 
     // Buscar su servicio para obtener categoría y descripción
     const { data: srv } = await supabase

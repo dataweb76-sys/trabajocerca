@@ -2,10 +2,16 @@
   "name": "trabajos-cerca",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "sitemap": "node generate-sitemap.js"
   },
   "devDependencies": {
     "pg": "^8.21.0",
+    "puppeteer": "^24.43.1",
     "sharp": "^0.34.5"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.1",
+    "ws": "^8.21.0"
   }
 }

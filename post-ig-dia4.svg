@@ -1,0 +1,25 @@
+﻿<svg width="1080" height="1080" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+  <rect width="1080" height="1080" fill="#26215C"/>
+  <rect x="0" y="0" width="1080" height="8" fill="#7F77DD"/>
+  <rect x="72" y="72" width="188" height="44" rx="22" fill="#EEEDFE"/>
+  <text x="166" y="100" text-anchor="middle" font-size="22" font-weight="700" fill="#26215C">Tip del día</text>
+  <text x="72" y="250" font-size="140">💡</text>
+  <text x="72" y="388" font-size="68" font-weight="900" fill="#FFFFFF">Antes de contratar,</text>
+  <text x="72" y="468" font-size="68" font-weight="900" fill="#AFA9EC">pedí 3</text>
+  <text x="72" y="548" font-size="68" font-weight="900" fill="#AFA9EC">presupuestos.</text>
+  <rect x="72" y="600" width="936" height="2" fill="#534AB7"/>
+  <text x="72" y="668" font-size="36" fill="#CECBF6">Por qué importa:</text>
+  <circle cx="100" cy="738" r="22" fill="#7F77DD"/>
+  <text x="100" y="747" text-anchor="middle" font-size="20" font-weight="900" fill="#EEEDFE">1</text>
+  <text x="140" y="747" font-size="34" fill="#E0DFFC">Comparás precios reales</text>
+  <circle cx="100" cy="810" r="22" fill="#7F77DD"/>
+  <text x="100" y="819" text-anchor="middle" font-size="20" font-weight="900" fill="#EEEDFE">2</text>
+  <text x="140" y="819" font-size="34" fill="#E0DFFC">Evaluás quién responde mejor</text>
+  <circle cx="100" cy="882" r="22" fill="#7F77DD"/>
+  <text x="100" y="891" text-anchor="middle" font-size="20" font-weight="900" fill="#EEEDFE">3</text>
+  <text x="140" y="891" font-size="34" fill="#E0DFFC">Tomás una decisión informada</text>
+  <text x="72" y="974" font-size="30" fill="#AFA9EC">En Trabajos Cerca contactás a varios a la vez, gratis.</text>
+  <rect x="0" y="1032" width="1080" height="48" fill="#1a1740"/>
+  <text x="72" y="1064" font-size="26" font-weight="700" fill="#7F77DD">trabajoscerca.com.ar</text>
+  <text x="1008" y="1064" text-anchor="end" font-size="22" fill="#AFA9EC">#TipDelDia  #Argentina</text>
+</svg>

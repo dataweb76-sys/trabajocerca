@@ -2,6 +2,8 @@ const http = require("http")
 const fs = require("fs")
 const path = require("path")
 
+require("./generate-sitemap.js")
+
 const port = 7000
 
 http.createServer((req, res) => {

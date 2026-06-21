@@ -1,0 +1,24 @@
+﻿<svg width="1080" height="1080" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+  <rect width="1080" height="1080" fill="#0F6E56"/>
+  <rect x="0" y="0" width="1080" height="8" fill="#1D9E75"/>
+  <rect x="72" y="72" width="210" height="44" rx="22" fill="#E1F5EE"/>
+  <text x="177" y="100" text-anchor="middle" font-size="22" font-weight="700" fill="#04342C">LocalWeb.ar</text>
+  <text x="72" y="270" font-size="160">🏪</text>
+  <text x="72" y="420" font-size="76" font-weight="900" fill="#FFFFFF">Tu negocio</text>
+  <text x="72" y="512" font-size="76" font-weight="900" fill="#9FE1CB">en internet.</text>
+  <text x="72" y="606" font-size="42" font-weight="700" fill="#E1F5EE">Sin técnicos. Sin páginas caras.</text>
+  <text x="72" y="670" font-size="42" font-weight="700" fill="#E1F5EE">Solo tu negocio donde</text>
+  <text x="72" y="730" font-size="42" font-weight="700" fill="#E1F5EE">tus vecinos te buscan.</text>
+  <circle cx="100" cy="830" r="18" fill="#9FE1CB"/>
+  <text x="100" y="838" text-anchor="middle" font-size="22" font-weight="900" fill="#04342C">✓</text>
+  <text x="134" y="838" font-size="32" fill="#E1F5EE">Aparecés en Google</text>
+  <circle cx="100" cy="894" r="18" fill="#9FE1CB"/>
+  <text x="100" y="902" text-anchor="middle" font-size="22" font-weight="900" fill="#04342C">✓</text>
+  <text x="134" y="902" font-size="32" fill="#E1F5EE">Fotos, horarios y WhatsApp</text>
+  <circle cx="100" cy="958" r="18" fill="#9FE1CB"/>
+  <text x="100" y="966" text-anchor="middle" font-size="22" font-weight="900" fill="#04342C">✓</text>
+  <text x="134" y="966" font-size="32" fill="#E1F5EE">100% gratuito para empezar</text>
+  <rect x="0" y="1032" width="1080" height="48" fill="#085041"/>
+  <text x="72" y="1064" font-size="26" font-weight="700" fill="#5DCAA5">localweb.ar</text>
+  <text x="1008" y="1064" text-anchor="end" font-size="22" fill="#9FE1CB">#NegocioLocal  #ComercioArgentino</text>
+</svg>
