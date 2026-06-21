@@ -575,22 +575,14 @@ async function init(){
     </div>
 
     ${data.tipo !== "cv" && data.tipo !== "cliente" ? `
-    <div style="margin-top:10px;">
-      <label style="display:flex;align-items:center;gap:12px;cursor:pointer;background:${data.acepta_ticket_descuento?'linear-gradient(135deg,#ede9fe,#eff6ff)':'#f8fafc'};border:1.5px solid ${data.acepta_ticket_descuento?'#c4b5fd':'#e2e8f0'};border-radius:14px;padding:14px 16px;transition:all .2s;"
-        id="ticketToggleLabel">
-        <div style="position:relative;flex-shrink:0;">
-          <input type="checkbox" id="ticketToggleDash" ${data.acepta_ticket_descuento ? "checked" : ""}
-            style="width:0;height:0;opacity:0;position:absolute;"
-            onchange="window._guardarTicketToggle(this.checked)">
-          <div id="ticketToggleSliderDash" style="width:44px;height:24px;border-radius:99px;background:${data.acepta_ticket_descuento?'#7c3aed':'#cbd5e1'};transition:background .2s;cursor:pointer;" onclick="document.getElementById('ticketToggleDash').click()">
-            <div id="ticketToggleKnobDash" style="width:20px;height:20px;background:white;border-radius:50%;margin:2px;transition:transform .2s;transform:${data.acepta_ticket_descuento?'translateX(20px)':'translateX(0)'}"></div>
-          </div>
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:14px;font-weight:800;color:${data.acepta_ticket_descuento?'#5b21b6':'#475569'};">⭐ Aceptar Ticket 10% OFF</div>
-          <div style="font-size:12px;color:${data.acepta_ticket_descuento?'#6d28d9':'#94a3b8'};margin-top:2px;">${data.acepta_ticket_descuento?'Aparecés con estrella en el buscador':'Activalo para aparecer con estrella en el buscador'}</div>
-        </div>
-      </label>
+    <div id="ticketToggleLabel" onclick="window._guardarTicketToggle()" style="margin-top:10px;display:flex;align-items:center;gap:14px;cursor:pointer;background:${data.acepta_ticket_descuento?'linear-gradient(135deg,#ede9fe,#eff6ff)':'#f8fafc'};border:1.5px solid ${data.acepta_ticket_descuento?'#c4b5fd':'#e2e8f0'};border-radius:14px;padding:14px 16px;transition:all .2s;user-select:none;">
+      <div id="ticketToggleSliderDash" data-activo="${data.acepta_ticket_descuento?'1':'0'}" style="flex-shrink:0;width:44px;height:24px;border-radius:99px;background:${data.acepta_ticket_descuento?'#7c3aed':'#cbd5e1'};transition:background .2s;position:relative;">
+        <div id="ticketToggleKnobDash" style="position:absolute;top:2px;left:2px;width:20px;height:20px;background:white;border-radius:50%;transition:transform .2s;transform:${data.acepta_ticket_descuento?'translateX(20px)':'translateX(0)'};box-shadow:0 1px 4px rgba(0,0,0,.2);"></div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div id="ticketToggleTitulo" style="font-size:14px;font-weight:800;color:${data.acepta_ticket_descuento?'#5b21b6':'#475569'};">⭐ Aceptar Ticket 10% OFF</div>
+        <div id="ticketToggleDesc" style="font-size:12px;color:${data.acepta_ticket_descuento?'#6d28d9':'#94a3b8'};margin-top:2px;">${data.acepta_ticket_descuento?'Aparecés con estrella en el buscador':'Activalo para aparecer con estrella en el buscador'}</div>
+      </div>
     </div>` : ""}
 
     <div id="panelCompartir" style="display:none;margin-top:12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px 18px;">
@@ -1067,22 +1059,37 @@ window.compartirInicio = function(){
 }
 
 /* ── TOGGLE TICKET DESCUENTO ── */
-window._guardarTicketToggle = async function(activo) {
+window._guardarTicketToggle = async function() {
   const slider = document.getElementById('ticketToggleSliderDash')
   const knob   = document.getElementById('ticketToggleKnobDash')
   const label  = document.getElementById('ticketToggleLabel')
-  if(slider) slider.style.background = activo ? '#7c3aed' : '#cbd5e1'
-  if(knob)   knob.style.transform    = activo ? 'translateX(20px)' : 'translateX(0)'
+  const titulo = document.getElementById('ticketToggleTitulo')
+  const desc   = document.getElementById('ticketToggleDesc')
+  if(!slider) return
+
+  const activo = slider.style.background !== 'rgb(124, 58, 237)' && !slider.style.background.includes('#7c3aed')
+    ? true
+    : slider.dataset.activo !== '1'
+
+  // toggle interno
+  const nuevoEstado = slider.dataset.activo !== '1'
+  slider.dataset.activo = nuevoEstado ? '1' : '0'
+
+  slider.style.background = nuevoEstado ? '#7c3aed' : '#cbd5e1'
+  if(knob) knob.style.transform = nuevoEstado ? 'translateX(20px)' : 'translateX(0)'
   if(label) {
-    label.style.background   = activo ? 'linear-gradient(135deg,#ede9fe,#eff6ff)' : '#f8fafc'
-    label.style.borderColor  = activo ? '#c4b5fd' : '#e2e8f0'
-    label.querySelector('div > div:first-child').style.color = activo ? '#5b21b6' : '#475569'
-    label.querySelector('div > div:last-child').style.color  = activo ? '#6d28d9' : '#94a3b8'
-    label.querySelector('div > div:last-child').textContent  = activo ? 'Aparecés con estrella en el buscador' : 'Activalo para aparecer con estrella en el buscador'
+    label.style.background  = nuevoEstado ? 'linear-gradient(135deg,#ede9fe,#eff6ff)' : '#f8fafc'
+    label.style.borderColor = nuevoEstado ? '#c4b5fd' : '#e2e8f0'
   }
+  if(titulo) titulo.style.color = nuevoEstado ? '#5b21b6' : '#475569'
+  if(desc) {
+    desc.style.color   = nuevoEstado ? '#6d28d9' : '#94a3b8'
+    desc.textContent   = nuevoEstado ? 'Aparecés con estrella en el buscador' : 'Activalo para aparecer con estrella en el buscador'
+  }
+
   const { data: ud } = await supabase.auth.getUser()
   if(!ud?.user) return
-  await supabase.from('perfiles').update({ acepta_ticket_descuento: activo }).eq('id', ud.user.id)
+  await supabase.from('perfiles').update({ acepta_ticket_descuento: nuevoEstado }).eq('id', ud.user.id)
 }
 
 /* ── COMPARTIR LINK DE REFERIDOS ── */
