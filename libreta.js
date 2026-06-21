@@ -2,8 +2,7 @@
    LIBRETA DE CLIENTES — Trabajos Cerca
 ══════════════════════════════════════════════ */
 
-const { createClient } = supabase
-const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+import { supabase as _supabase } from './supabase.js'
 
 let userId = null
 let clientes = []

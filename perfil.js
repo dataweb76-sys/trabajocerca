@@ -561,6 +561,9 @@ async function init(){
       <a href="/perfil_publico.html?id=${userId}" class="btn btn-outline" target="_blank" rel="noopener">
         <i class="fa-solid fa-eye"></i> Ver mi perfil público
       </a>
+      <a href="/libreta.html" class="btn" style="background:#f59e0b;color:#1e293b;border:none;font-weight:800;">
+        <i class="fa-solid fa-book"></i> Mis Clientes
+      </a>
       <button class="btn" onclick="togglePanelCompartir()"
         style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:white;border:none;">
         <i class="fa-solid fa-share-nodes"></i> Compartir en redes
@@ -640,7 +643,27 @@ async function init(){
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
     <button class="btn btn-outline" onclick="cerrarSesion()" style="color:#ef4444;border-color:#ef4444;">
       <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
-    </button>`
+    </button>
+
+    <!-- Prode Mundial -->
+    <div id="prodeCard" style="margin:28px 0 0;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%);border:1.5px solid rgba(250,204,21,.35);border-radius:18px;padding:20px;overflow:hidden;position:relative;">
+      <div style="position:absolute;top:-20px;right:-20px;font-size:90px;opacity:.06;pointer-events:none;">⚽</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+        <div style="font-size:36px;flex-shrink:0;">⚽🏆</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:15px;font-weight:900;color:white;line-height:1.2;">Prode Mundial 2026</div>
+          <div id="prodeStatus" style="font-size:12px;color:rgba(255,255,255,.55);margin-top:3px;">Verificando...</div>
+        </div>
+        <button onclick="window._abrirReglasMundial()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.9);font-size:12px;font-weight:700;padding:7px 13px;border-radius:9px;cursor:pointer;flex-shrink:0;">📋 Reglas</button>
+      </div>
+      <div id="prodePartidosHoy" style="margin-bottom:14px;">
+        <div style="font-size:9px;font-weight:800;letter-spacing:2px;color:#fbbf24;text-transform:uppercase;margin-bottom:10px;">📅 Partidos de hoy</div>
+        <div id="prodeListaPartidos" style="display:flex;flex-direction:column;gap:8px;"><div style="color:rgba(255,255,255,.35);font-size:12px;text-align:center;padding:10px 0;">Cargando...</div></div>
+      </div>
+      <a href="/mundial.html" style="display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#facc15,#f59e0b,#d97706);color:#1c1917;font-weight:900;font-size:15px;padding:14px;border-radius:13px;text-decoration:none;box-shadow:0 4px 20px rgba(250,204,21,.4);">
+        ⚽ Entrar y participar →
+      </a>
+    </div>`
 
     cargarProdeCard(userId)
     cargarPartidoProde(userId)
