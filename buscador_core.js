@@ -23,6 +23,50 @@ const styleDisp = document.createElement("style")
 styleDisp.textContent = `@keyframes pulse-green { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)} 50%{box-shadow:0 0 0 6px rgba(34,197,94,0)} }`
 document.head.appendChild(styleDisp)
 
+/* ── POPUP REGISTRO (para acciones que requieren cuenta) ── */
+function mostrarPopupRegistro(motivo) {
+  let el = document.getElementById('_tcPopupReg')
+  if(!el){
+    el = document.createElement('div')
+    el.id = '_tcPopupReg'
+    el.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;align-items:center;justify-content:center;padding:16px;'
+    el.onclick = e => { if(e.target===el) el.style.display='none' }
+    el.innerHTML = `
+      <div style="background:white;border-radius:20px;max-width:400px;width:100%;padding:28px 24px;text-align:center;box-shadow:0 28px 90px rgba(0,0,0,.25);animation:slideUp .25s ease;position:relative;">
+        <button onclick="document.getElementById('_tcPopupReg').style.display='none'"
+          style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;color:#94a3b8;cursor:pointer;">×</button>
+        <div style="font-size:42px;margin-bottom:10px;" id="_tcPopupRegIcon">🔐</div>
+        <h3 style="margin:0 0 8px;font-size:20px;color:#0f172a;" id="_tcPopupRegTitulo">Creá tu cuenta gratis</h3>
+        <p style="margin:0 0 20px;font-size:14px;color:#64748b;line-height:1.5;" id="_tcPopupRegDesc">Registrate para contactar profesionales, guardar favoritos y más.</p>
+        <a id="_tcPopupRegBtn" href="/registro.html"
+          style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-weight:800;font-size:16px;border-radius:12px;text-decoration:none;margin-bottom:10px;">
+          <i class="fa-solid fa-user-plus"></i> Registrarme gratis
+        </a>
+        <a href="/login.html"
+          style="display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;background:#f1f5f9;color:#475569;font-weight:700;font-size:14px;border-radius:12px;text-decoration:none;">
+          <i class="fa-solid fa-right-to-bracket"></i> Ya tengo cuenta
+        </a>
+      </div>`
+    document.body.appendChild(el)
+  }
+  const next = encodeURIComponent(location.pathname + location.search)
+  el.querySelector('#_tcPopupRegBtn').href = `/registro.html?next=${next}`
+  el.querySelector('a[href*="login"]').href = `/login.html?next=${next}`
+  if(motivo){
+    const textos = {
+      whatsapp: ['💬','Contactar por WhatsApp','Para ver el número y escribirle directamente, necesitás una cuenta gratuita.'],
+      mensaje:  ['✉️','Enviar mensaje','Para chatear con este profesional necesitás registrarte. Es gratis y tarda 1 minuto.'],
+      favorito: ['❤️','Guardar favoritos','Para guardar profesionales y volver a verlos después, creá tu cuenta gratis.'],
+      compartir:['🔗','Compartir perfil','Compartí el perfil de este profesional con quien lo necesite.'],
+    }
+    const [ico, tit, desc] = textos[motivo] || textos.whatsapp
+    el.querySelector('#_tcPopupRegIcon').textContent = ico
+    el.querySelector('#_tcPopupRegTitulo').textContent = tit
+    el.querySelector('#_tcPopupRegDesc').textContent = desc
+  }
+  el.style.display = 'flex'
+}
+
 /* ── AUTH ── */
 function getAccessToken(){
   try { return JSON.parse(localStorage.getItem("sb-iqeiszkoifxgygoqvbem-auth-token"))?.access_token || null } catch(e){ return null }
@@ -481,15 +525,28 @@ window.buscar = async function(){
           title="${_favoritosSet.has(profileId)?'Quitar de guardados':'Guardar'}">
           ${_favoritosSet.has(profileId)?'❤️':'🤍'}
         </button>`:""}
-        ${wa?`<a href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+        ${wa?getCurrentUserId()
+          ?`<a href="${wa}" target="_blank" rel="noopener" onclick="event.stopPropagation();registrarWAClick('${profileId}')"
           class="btn btn-sm" style="background:#25D366;color:white;display:inline-flex;align-items:center;gap:6px;">
-          <i class="fa-brands fa-whatsapp"></i> WhatsApp</a>`:""}
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp</a>`
+          :`<button onclick="event.stopPropagation();mostrarPopupRegistro('whatsapp')"
+          class="btn btn-sm" style="background:#25D366;color:white;display:inline-flex;align-items:center;gap:6px;">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp</button>`
+        :""}
         ${getCurrentUserId()?`<button class="btn btn-sm" onclick="event.stopPropagation();abrirModal(${JSON.stringify(item).replace(/"/g,"&quot;")},true)"
           style="background:#eff6ff;color:#2563eb;display:inline-flex;align-items:center;gap:5px;">
           <i class="fa-solid fa-star"></i> Calificar</button>`:""}
-        ${p.id && getCurrentUserId() !== p.id ? `<button class="btn btn-sm" onclick="event.stopPropagation();window.iniciarConversacion('${p.id}')"
+        ${p.id && getCurrentUserId() && getCurrentUserId() !== p.id ? `<button class="btn btn-sm" onclick="event.stopPropagation();window.iniciarConversacion('${p.id}')"
           style="background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;display:inline-flex;align-items:center;gap:5px;">
           <i class="fa-solid fa-comment-dots"></i> Mensaje</button>` : ""}
+        ${p.id && !getCurrentUserId() ? `<button class="btn btn-sm" onclick="event.stopPropagation();mostrarPopupRegistro('mensaje')"
+          style="background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;display:inline-flex;align-items:center;gap:5px;">
+          <i class="fa-solid fa-comment-dots"></i> Mensaje</button>` : ""}
+        <button onclick="event.stopPropagation();compartirPerfil('${profileId}','${nombre.replace(/'/g,"\\'")}')"
+          class="btn btn-sm" style="background:#f8fafc;border:1.5px solid #e2e8f0;color:#475569;display:inline-flex;align-items:center;gap:5px;"
+          title="Compartir perfil">
+          <i class="fa-solid fa-share-nodes"></i>
+        </button>
       </div>`
 
     cont.appendChild(card)
@@ -544,9 +601,17 @@ window.abrirModal = function(item, irCalificar=false){
       <p style="font-size:13px;font-weight:600;color:#475569;margin:0 0 6px;">Descripción:</p>
       <p style="font-size:14px;color:#475569;line-height:1.6;margin:0;">${item.descripcion}</p></div>`:""}
     <div id="portfolioModal" style="margin-bottom:4px;"></div>
-    ${wa?`<a href="${wa}" target="_blank" rel="noopener" class="btn-whatsapp" onclick="registrarWAClick('${p.id}')" style="display:flex;justify-content:center;margin-bottom:12px;">
-      <i class="fa-brands fa-whatsapp"></i> Consultar por WhatsApp</a>`:""}
+    ${wa ? getCurrentUserId()
+      ? `<a href="${wa}" target="_blank" rel="noopener" class="btn-whatsapp" onclick="registrarWAClick('${p.id}')" style="display:flex;justify-content:center;margin-bottom:12px;">
+      <i class="fa-brands fa-whatsapp"></i> Consultar por WhatsApp</a>`
+      : `<button onclick="mostrarPopupRegistro('whatsapp')"
+      style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;margin-bottom:12px;background:#25D366;color:white;border:none;border-radius:10px;font-weight:800;font-size:15px;cursor:pointer;">
+      <i class="fa-brands fa-whatsapp"></i> Consultar por WhatsApp</button>`
+    : ""}
     ${getCurrentUserId() && getCurrentUserId() !== p.id ? `<button onclick="window.iniciarConversacion && window.iniciarConversacion('${p.id}')"
+      style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;margin-bottom:12px;border:1.5px solid #2563eb;border-radius:10px;background:white;color:#2563eb;font-weight:700;font-size:15px;cursor:pointer;">
+      <i class="fa-solid fa-comment-dots"></i> Enviar mensaje</button>` : ""}
+    ${!getCurrentUserId() ? `<button onclick="mostrarPopupRegistro('mensaje')"
       style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;margin-bottom:12px;border:1.5px solid #2563eb;border-radius:10px;background:white;color:#2563eb;font-weight:700;font-size:15px;cursor:pointer;">
       <i class="fa-solid fa-comment-dots"></i> Enviar mensaje</button>` : ""}
     ${p.instagram?`<a href="https://instagram.com/${(p.instagram||"").replace("@","")}" target="_blank" rel="noopener"
@@ -849,7 +914,7 @@ window.enviarReview = async function(profileId, nombre){
 /* ── FAVORITOS toggle ── */
 window.toggleFavorito = async function(profesionalId, btn) {
   const userId = getCurrentUserId()
-  if(!userId) { location.href = "/login.html"; return }
+  if(!userId) { mostrarPopupRegistro('favorito'); return }
   const token = getAccessToken()
   const esFav = _favoritosSet.has(profesionalId)
 
@@ -889,7 +954,7 @@ window.registrarWAClick = async function(profesionalId) {
 /* ── INICIAR CONVERSACIÓN ── */
 window.iniciarConversacion = async function(profesionalId){
   const uid = getCurrentUserId()
-  if(!uid){ window.location.href = "/login.html"; return }
+  if(!uid){ mostrarPopupRegistro('mensaje'); return }
   if(uid === profesionalId){ return }
 
   const token = getAccessToken()
@@ -929,6 +994,32 @@ window.iniciarConversacion = async function(profesionalId){
   } catch(e){}
 
   alert("No se pudo iniciar la conversación. Intentá de nuevo.")
+}
+
+/* ── COMPARTIR PERFIL ── */
+window.compartirPerfil = function(profileId, nombre) {
+  const url = `${location.origin}/perfil_publico?id=${profileId}`
+  const texto = `Mirá el perfil de ${nombre} en Trabajos Cerca 👇\n${url}`
+  if(navigator.share){
+    navigator.share({ title: nombre, text: texto, url }).catch(()=>{})
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      // Mini toast
+      let t = document.getElementById('_tcToastCopiado')
+      if(!t){
+        t = document.createElement('div')
+        t.id = '_tcToastCopiado'
+        t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f172a;color:white;padding:10px 20px;border-radius:30px;font-size:14px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3);'
+        document.body.appendChild(t)
+      }
+      t.textContent = '¡Link copiado! Compartilo donde quieras 🔗'
+      t.style.display = 'block'
+      clearTimeout(t._timer)
+      t._timer = setTimeout(() => { t.style.display = 'none' }, 2500)
+    }).catch(() => {
+      window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank')
+    })
+  }
 }
 
 /* ── CERRAR MODAL ── */
