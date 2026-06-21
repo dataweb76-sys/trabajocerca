@@ -612,6 +612,8 @@ async function init(){
     <input id="editMovil" value="${esc(data.movil)}" type="tel" placeholder="Ej: 1123456789">
     <label><i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram</label>
     <input id="editInstagram" value="${esc(data.instagram)}" placeholder="Ej: @tunombre">
+    <label><i class="fa-brands fa-tiktok" style="color:#010101;"></i> TikTok</label>
+    <input id="editTiktok" value="${esc(data.tiktok)}" placeholder="Ej: @tunombre">
     <label>Teléfono fijo</label>
     <input id="editTelefono" value="${esc(data.telefono_fijo)}" type="tel" placeholder="Ej: 02214567890">
     <label>Dirección</label>
@@ -860,6 +862,7 @@ window.guardarDatos = async function(){
     apellido,
     movil:            document.getElementById("editMovil").value.trim(),
     instagram:        document.getElementById("editInstagram").value.trim(),
+    tiktok:           document.getElementById("editTiktok").value.trim(),
     telefono_fijo:    document.getElementById("editTelefono").value.trim(),
     direccion:        document.getElementById("editDireccion").value.trim(),
     codigo_postal:    document.getElementById("editCP").value.trim(),

@@ -428,6 +428,34 @@ async function cargarPerfil(){
         </iframe>
       </div>
     </div>` : ""}
+    ${perfil.tiktok ? `
+    <div class="card" style="padding:0;overflow:hidden;border:1.5px solid rgba(1,1,1,0.15);">
+      <div style="background:linear-gradient(135deg,#010101,#333);padding:14px 18px;display:flex;align-items:center;gap:12px;">
+        <i class="fa-brands fa-tiktok" style="font-size:22px;color:white;"></i>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:800;color:white;">TikTok</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.75);">@${perfil.tiktok.replace('@','')}</div>
+        </div>
+        <a href="https://www.tiktok.com/@${perfil.tiktok.replace('@','')}" target="_blank" rel="noopener"
+          style="background:#fe2c55;color:white;font-weight:700;font-size:13px;padding:7px 14px;border-radius:20px;text-decoration:none;white-space:nowrap;">
+          Ver videos
+        </a>
+      </div>
+      <div style="background:#0a0a0a;padding:20px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:10px;">🎬</div>
+        <p style="color:rgba(255,255,255,.7);font-size:14px;margin:0 0 14px;line-height:1.5;">
+          Seguí a <strong style="color:white;">@${perfil.tiktok.replace('@','')}</strong> en TikTok<br>
+          y mirá sus trabajos en video
+        </p>
+        <a href="https://www.tiktok.com/@${perfil.tiktok.replace('@','')}" target="_blank" rel="noopener"
+          style="display:inline-flex;align-items:center;gap:8px;background:#fe2c55;color:white;font-weight:700;font-size:15px;padding:12px 24px;border-radius:25px;text-decoration:none;">
+          <i class="fa-brands fa-tiktok"></i> Abrir en TikTok
+        </a>
+        <p style="color:rgba(255,255,255,.35);font-size:11px;margin:14px 0 0;">
+          Los videos de TikTok solo se pueden ver directamente en la app
+        </p>
+      </div>
+    </div>` : ""}
     ${impulsarCVHtml}
     ${reviewsHtml}
     ${bannerPubHtml}
