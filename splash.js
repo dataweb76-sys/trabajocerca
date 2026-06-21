@@ -676,6 +676,28 @@ window.addEventListener('beforeinstallprompt', function(e) {
       if(uid){
         actualizarBadgeMsgs(uid)
         setInterval(() => actualizarBadgeMsgs(uid), 30000)
+        // Verificar si es admin y agregar link en nav
+        ;(function chequearAdminNav(){
+          var SB  = 'https://iqeiszkoifxgygoqvbem.supabase.co'
+          var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
+          var tok = getToken()
+          fetch(SB + '/rest/v1/perfiles?id=eq.' + uid + '&select=admin', {
+            headers: { apikey: KEY, Authorization: 'Bearer ' + tok }
+          }).then(function(r){ return r.json() }).then(function(d){
+            if(!d?.[0]?.admin) return
+            if(document.getElementById('tnav-admin-link')) return
+            var a = document.createElement('a')
+            a.id   = 'tnav-admin-link'
+            a.href = '/admin.html'
+            a.title = 'Panel Admin'
+            a.innerHTML = '<i class="fa-solid fa-shield-halved" style="color:#7c3aed;"></i><span style="color:#7c3aed;font-weight:700;"> Admin</span>'
+            a.style.cssText = 'display:inline-flex;align-items:center;gap:5px;text-decoration:none;'
+            var right = document.querySelector('.tnav-right')
+            var salir = right?.querySelector('.btn-salir')
+            if(salir) right.insertBefore(a, salir)
+            else if(right) right.appendChild(a)
+          }).catch(function(){})
+        })()
       }
     }
   }

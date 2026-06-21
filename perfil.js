@@ -658,6 +658,11 @@ async function init(){
     ${referidosHtml}
     ${guardadosHtml}
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
+    <div id="adminBtnPerfil" style="display:none;margin-bottom:10px;">
+      <a href="/admin.html" class="btn" style="background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;border:none;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i class="fa-solid fa-shield-halved"></i> Panel de Administración
+      </a>
+    </div>
     <button class="btn btn-outline" onclick="cerrarSesion()" style="color:#ef4444;border-color:#ef4444;">
       <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
     </button>
@@ -688,6 +693,7 @@ async function init(){
     enviarRecordatorioCompartir(userId)
     mostrarPopupNuevosReferidos(userId)
     if(registrados.length === 0) mostrarBienvenida(userId)
+    if(data.admin) document.getElementById("adminBtnPerfil")?.style.setProperty("display","block")
   }
 
   /* ── Vista simplificada para clientes ── */
