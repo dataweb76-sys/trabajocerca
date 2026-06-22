@@ -680,7 +680,7 @@ window.addEventListener('beforeinstallprompt', function(e) {
         ;(function chequearAdminNav(){
           var SB  = 'https://iqeiszkoifxgygoqvbem.supabase.co'
           var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs'
-          var tok = getToken()
+          var tok = (function(){ try{ return JSON.parse(localStorage.getItem('sb-iqeiszkoifxgygoqvbem-auth-token'))?.access_token || KEY }catch(e){ return KEY } })()
           fetch(SB + '/rest/v1/perfiles?id=eq.' + uid + '&select=admin', {
             headers: { apikey: KEY, Authorization: 'Bearer ' + tok }
           }).then(function(r){ return r.json() }).then(function(d){
