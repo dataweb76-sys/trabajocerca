@@ -212,7 +212,7 @@ async function init(){
     { href:"/buscador_oficios.html",        emoji:"🔧", label:"Buscar oficios",          desc:"Plomeros, electricistas, albañiles, pintores..." },
     { href:"/buscador_profesionales.html",  emoji:"👔", label:"Buscar profesionales",     desc:"Médicos, abogados, contadores, psicólogos..." },
     { href:"/buscador_emprendimientos.html",emoji:"🚀", label:"Buscar emprendimientos",   desc:"Locales, marcas, proyectos y negocios" },
-    { href:"/buscador_cv.html",             emoji:"📄", label:"Ver CVs / buscar empleados",desc:"Encontrá personas en búsqueda de trabajo" },
+    { href:"/buscar-empleo.html",            emoji:"📄", label:"Ver CVs / buscar empleados",desc:"Encontrá personas en búsqueda de trabajo" },
     { href:"/buscador_trabajos.html",       emoji:"💼", label:"Ofertas de trabajo",        desc:"Puestos publicados por empresas y empleadores" },
   ]
 
@@ -774,7 +774,7 @@ async function init(){
       <i class="fa-solid fa-circle-check" style="color:#2563eb;font-size:20px;flex-shrink:0;"></i>
       <div style="flex:1;">
         <div style="font-size:14px;font-weight:800;color:#1e40af;">Tu CV está visible en el buscador</div>
-        <div style="font-size:12px;color:#64748b;margin-top:2px;"><a href="/buscador_cv.html" style="color:#2563eb;">Ver buscador de CVs →</a></div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;"><a href="/buscar-empleo.html" style="color:#2563eb;">Ver buscador de CVs →</a></div>
       </div>
     </div>
     `}
@@ -808,7 +808,11 @@ async function init(){
       if(!cv) { location.href = "/perfil_cv.html"; return }
       const { error } = await supabase.from("curriculum").update({ cv_publico: true }).eq("id", cv.id)
       if(!error) {
-        await supabase.from("perfiles").update({ tipo: "cv" }).eq("id", userId)
+        // Agregar "cv" a los tipos existentes sin borrar los otros (ej. "oficio")
+        const { data: perf } = await supabase.from("perfiles").select("tipo").eq("id", userId).single()
+        const tiposActuales = (perf?.tipo || "").split(",").map(t => t.trim()).filter(Boolean)
+        if(!tiposActuales.includes("cv")) tiposActuales.push("cv")
+        await supabase.from("perfiles").update({ tipo: tiposActuales.join(",") }).eq("id", userId)
         location.reload()
       }
     }
@@ -1298,7 +1302,7 @@ function mostrarPopupVendedorOk() {
           </ul>
         </div>
         <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:14px;margin-bottom:18px;font-size:13px;color:#1e40af;">
-          <i class="fa-solid fa-search"></i> Mientras esperás, podés <a href="/buscador_cv.html" style="color:#2563eb;font-weight:700;">ver el buscador de trabajo</a> para conocer la plataforma.
+          <i class="fa-solid fa-search"></i> Mientras esperás, podés <a href="/buscar-empleo.html" style="color:#2563eb;font-weight:700;">ver el buscador de trabajo</a> para conocer la plataforma.
         </div>
         <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;background:linear-gradient(135deg,#065f46,#1e40af);color:white;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;">
           ¡Perfecto, gracias! 🙌
