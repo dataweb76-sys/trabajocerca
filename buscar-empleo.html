@@ -165,16 +165,18 @@ window.buscar = async function() {
   let data = []
   try {
     const r = await fetch(url, { headers: H })
-    if(r.ok) {
-      const todos = await r.json()
-      /* Filtrar: solo quienes tienen "cv" entre sus tipos elegidos */
-      data = todos.filter(cv => {
-        const tipo = (cv.perfiles?.tipo || "")
-        return tipo.split(",").map(t => t.trim()).includes("cv")
-      })
+    const todos = await r.json()
+    if(!r.ok || !Array.isArray(todos)) {
+      cont.innerHTML = `<div class="alerta alerta-err">Error al cargar datos: ${JSON.stringify(todos?.message||todos).slice(0,120)}</div>`
+      return
     }
+    /* Filtrar client-side: solo quienes tienen "cv" en perfiles.tipo */
+    data = todos.filter(cv => {
+      const tipo = (cv.perfiles?.tipo || "")
+      return tipo.split(",").map(t => t.trim()).includes("cv")
+    })
   } catch(e) {
-    cont.innerHTML = `<div class="alerta alerta-err">Error al cargar. Recargá la página.</div>`
+    cont.innerHTML = `<div class="alerta alerta-err">Error: ${e.message}</div>`
     return
   }
 
