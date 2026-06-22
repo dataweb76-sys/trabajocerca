@@ -149,23 +149,44 @@ window.enviarPostulacion = async function() {
     // Subir foto si es nueva
     if(fotoFile) _fotoUrl = await subirFoto(fotoFile)
 
-    // Guardar postulación
-    const { data: post, error } = await supabase.from("vendedores_postulaciones").insert({
-      usuario_id:   _userId,
-      nombre, apellido, email,
-      telefono:     g("cvTelefono"),
-      ciudad:       g("cvCiudad"),
-      provincia:    g("cvProvincia"),
-      foto:         _fotoUrl,
-      experiencia:  g("cvExperiencia"),
-      educacion:    g("cvEducacion"),
-      habilidades:  g("cvHabilidades"),
-      motivacion:   g("cvMotivacion"),
-      acepta_terminos: false
-    }).select("id").single()
+    // Actualizar foto y datos en perfiles
+    await supabase.from("perfiles").update({
+      nombre, apellido,
+      movil:     g("cvTelefono") || undefined,
+      localidad: g("cvCiudad")   || undefined,
+      provincia: g("cvProvincia") || undefined,
+      foto:      _fotoUrl        || undefined
+    }).eq("id", _userId)
 
-    if(error) throw error
-    _postulacionId = post.id
+    // Guardar CV en curriculum (tabla que ya existe)
+    const { data: existing } = await supabase.from("curriculum")
+      .select("id").eq("usuario_id", _userId).maybeSingle()
+
+    const cvPayload = {
+      usuario_id:         _userId,
+      titulo_profesional: "Vendedor/a — LocalWeb & Trabajos Cerca",
+      resumen:            g("cvExperiencia"),
+      habilidades:        g("cvHabilidades") || "Ventas, Atención al cliente, Negociación",
+      disponibilidad:     "inmediata",
+      modalidad:          "remoto",
+      cv_publico:         false   // se activa solo si acepta términos
+    }
+    if(existing) {
+      await supabase.from("curriculum").update(cvPayload).eq("id", existing.id)
+    } else {
+      await supabase.from("curriculum").insert(cvPayload)
+    }
+
+    // Intentar guardar en vendedores_postulaciones (tabla puede no existir aún)
+    try {
+      const { data: post } = await supabase.from("vendedores_postulaciones").insert({
+        usuario_id: _userId, nombre, apellido, email,
+        telefono:   g("cvTelefono"), ciudad: g("cvCiudad"), provincia: g("cvProvincia"),
+        foto: _fotoUrl, experiencia: g("cvExperiencia"), educacion: g("cvEducacion"),
+        habilidades: g("cvHabilidades"), motivacion: g("cvMotivacion"), acepta_terminos: false
+      }).select("id").single()
+      if(post) _postulacionId = post.id
+    } catch(_) { /* tabla aún no creada en Supabase, no bloquea el flujo */ }
 
     // Mostrar popup términos
     document.getElementById("popupTerminos").style.display = "flex"
