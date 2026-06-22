@@ -83,18 +83,26 @@ function seleccionarChip(rubro, elChip){
 async function cargarCVs(){
   const cont = document.getElementById("resultados")
   try {
+    // Paso 1: traer todos los perfiles con tipo, filtrar client-side los que tienen "cv"
+    const rpRes = await fetch(`${SB_URL}/rest/v1/perfiles?select=id,tipo&limit=1000`, { headers: SB_HEADERS })
+    if(!rpRes.ok) throw new Error("Error al cargar perfiles")
+    const todosPerfiles = await rpRes.json()
+    const idsCV = todosPerfiles
+      .filter(p => (p.tipo || "").split(",").map(t => t.trim()).includes("cv"))
+      .map(p => p.id)
+
+    if(idsCV.length === 0){ cont.innerHTML = `<div style="text-align:center;padding:50px;color:#64748b;">No hay candidatos disponibles aún.</div>`; return }
+
+    // Paso 2: traer curriculum solo de esos usuarios
     const url = `${SB_URL}/rest/v1/curriculum` +
       `?select=usuario_id,titulo_profesional,rubros,disponibilidad,modalidad,edad,habilidades,resumen` +
-      `,perfiles!usuario_id(id,nombre,apellido,foto,localidad,provincia,movil,destacado,verificado,tipo)` +
+      `,perfiles!usuario_id(id,nombre,apellido,foto,localidad,provincia,movil,destacado,verificado)` +
+      `&usuario_id=in.(${idsCV.join(",")})` +
       `&order=created_at.desc`
 
     const res = await fetch(url, { headers: SB_HEADERS })
     if(!res.ok){ const e = await res.json(); throw new Error(e.message || res.statusText) }
-    todosLosCVs = (await res.json()).filter(cv => {
-      if(!cv.perfiles || !cv.titulo_profesional) return false
-      const tipo = (cv.perfiles.tipo || "")
-      return tipo.split(",").map(t => t.trim()).includes("cv")
-    })
+    todosLosCVs = (await res.json()).filter(cv => cv.perfiles && cv.titulo_profesional)
   } catch(e){
     cont.innerHTML = `<div class="alerta alerta-err">Error al cargar candidatos: ${e.message}</div>`
     return
