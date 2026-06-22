@@ -20,7 +20,7 @@ async function cargarPerfiles() {
 
   const { data, error } = await supabase
     .from("perfiles")
-    .select("id, nombre, apellido, nombre_empresa, email, localidad, provincia, verificado, destacado, admin, created_at, servicios(categoria)")
+    .select("id, nombre, apellido, nombre_empresa, email, localidad, provincia, verificado, destacado, admin, created_at, tipo, servicios(categoria)")
     .order("created_at", { ascending: false })
     .limit(200)
 
@@ -84,6 +84,19 @@ function renderTabla() {
         ${p.admin
           ? `<span class="badge-on badge-admin"><i class="fa-solid fa-shield-halved"></i> Admin</span>`
           : ""}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center;">
+        <span style="font-size:11px;color:#64748b;font-weight:600;">Buscadores:</span>
+        ${[
+          {id:"oficio",     label:"Oficios",          color:"#0ea5e9"},
+          {id:"profesional",label:"Profesionales",    color:"#7c3aed"},
+          {id:"cv",         label:"CVs/Empleados",    color:"#16a34a"},
+          {id:"emprendimiento",label:"Emprendimientos",color:"#f59e0b"},
+          {id:"trabajo",    label:"Ofertas trabajo",  color:"#ef4444"},
+        ].map(b => {
+          const activo = (p.tipo||"").split(",").map(t=>t.trim()).includes(b.id)
+          return `<button onclick="toggleTipoAdmin('${p.id}','${b.id}',${activo})" style="font-size:11px;padding:3px 10px;border-radius:20px;cursor:pointer;font-weight:700;border:1.5px solid ${b.color};background:${activo?b.color:"white"};color:${activo?"white":b.color};">${b.label}</button>`
+        }).join("")}
       </div>
       <div class="admin-acciones">
         <button onclick="toggleVerificado('${p.id}', ${!p.verificado})"
@@ -948,6 +961,21 @@ async function cargarVendedores() {
       </div>
     </div>`
   }).join("")
+}
+
+window.toggleTipoAdmin = async function(userId, tipo, estaActivo) {
+  const { data: perf } = await supabase.from("perfiles").select("tipo").eq("id", userId).single()
+  const tipos = (perf?.tipo || "").split(",").map(t => t.trim()).filter(Boolean)
+  const nuevosTipos = estaActivo ? tipos.filter(t => t !== tipo) : [...tipos, tipo]
+  await supabase.from("perfiles").update({ tipo: nuevosTipos.join(",") }).eq("id", userId)
+  // Sincronizar cv_publico si es el buscador de CVs
+  if(tipo === "cv") {
+    await supabase.from("curriculum").update({ cv_publico: !estaActivo }).eq("usuario_id", userId)
+  }
+  // Actualizar en memoria y re-renderizar
+  const idx = _perfiles.findIndex(p => p.id === userId)
+  if(idx >= 0) _perfiles[idx].tipo = nuevosTipos.join(",")
+  renderTabla()
 }
 
 window.cambiarEstadoVendedor = async function(id, estado, btn) {
