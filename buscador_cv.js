@@ -233,8 +233,8 @@ window.buscar = async function(){
     cont.innerHTML=`<div class="alerta alerta-err">Error: ${e.message}</div>`; return
   }
 
-  // Solo mostrar quienes tienen tipo="cv" en su perfil — evita que oficios/profesionales aparezcan acá
-  data = data.filter(item => item.perfiles?.tipo === "cv")
+  // Solo mostrar quienes activaron el buscador de CVs (tipo contiene "cv")
+  data = data.filter(item => (item.perfiles?.tipo || "").split(",").map(t=>t.trim()).includes("cv"))
 
   if(ciudad){
     const c = ciudad.toLowerCase()
