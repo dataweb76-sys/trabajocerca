@@ -83,21 +83,11 @@ function seleccionarChip(rubro, elChip){
 async function cargarCVs(){
   const cont = document.getElementById("resultados")
   try {
-    // Paso 1: traer todos los perfiles con tipo, filtrar client-side los que tienen "cv"
-    const rpRes = await fetch(`${SB_URL}/rest/v1/perfiles?select=id,tipo&limit=1000`, { headers: SB_HEADERS })
-    if(!rpRes.ok) throw new Error("Error al cargar perfiles")
-    const todosPerfiles = await rpRes.json()
-    const idsCV = todosPerfiles
-      .filter(p => (p.tipo || "").split(",").map(t => t.trim()).includes("cv"))
-      .map(p => p.id)
-
-    if(idsCV.length === 0){ cont.innerHTML = `<div style="text-align:center;padding:50px;color:#64748b;">No hay candidatos disponibles aún.</div>`; return }
-
-    // Paso 2: traer curriculum solo de esos usuarios
+    // Filtrar por cv_publico=true — campo en curriculum visible para anon, sincronizado con perfiles.tipo
     const url = `${SB_URL}/rest/v1/curriculum` +
       `?select=usuario_id,titulo_profesional,rubros,disponibilidad,modalidad,edad,habilidades,resumen` +
       `,perfiles!usuario_id(id,nombre,apellido,foto,localidad,provincia,movil,destacado,verificado)` +
-      `&usuario_id=in.(${idsCV.join(",")})` +
+      `&cv_publico=eq.true` +
       `&order=created_at.desc`
 
     const res = await fetch(url, { headers: SB_HEADERS })
