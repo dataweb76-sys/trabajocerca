@@ -85,12 +85,16 @@ async function cargarCVs(){
   try {
     const url = `${SB_URL}/rest/v1/curriculum` +
       `?select=usuario_id,titulo_profesional,rubros,disponibilidad,modalidad,edad,habilidades,resumen` +
-      `,perfiles!usuario_id(id,nombre,apellido,foto,localidad,provincia,movil,destacado,verificado)` +
+      `,perfiles!usuario_id(id,nombre,apellido,foto,localidad,provincia,movil,destacado,verificado,tipo)` +
       `&order=created_at.desc`
 
     const res = await fetch(url, { headers: SB_HEADERS })
     if(!res.ok){ const e = await res.json(); throw new Error(e.message || res.statusText) }
-    todosLosCVs = (await res.json()).filter(cv => cv.perfiles && cv.titulo_profesional)
+    todosLosCVs = (await res.json()).filter(cv => {
+      if(!cv.perfiles || !cv.titulo_profesional) return false
+      const tipo = (cv.perfiles.tipo || "")
+      return tipo.split(",").map(t => t.trim()).includes("cv")
+    })
   } catch(e){
     cont.innerHTML = `<div class="alerta alerta-err">Error al cargar candidatos: ${e.message}</div>`
     return
