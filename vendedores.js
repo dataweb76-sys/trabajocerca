@@ -192,21 +192,10 @@ window.enviarPostulacion = async function() {
     return
   }
 
-  const g = id => document.getElementById(id)?.value?.trim() || ""
   const nombre   = g("cvNombre")
   const apellido = g("cvApellido")
   const email    = g("cvEmail")
-  const fotoFile = document.getElementById("inputFotoCV").files[0]
-
-  const msg = document.getElementById("msgCV")
   const btn = document.getElementById("btnSubmitCV")
-
-  // Validaciones
-  if(!nombre)   { showMsg(msg,"err","El nombre es obligatorio."); return }
-  if(!apellido) { showMsg(msg,"err","El apellido es obligatorio."); return }
-  if(!email)    { showMsg(msg,"err","El email es obligatorio."); return }
-  if(!fotoFile && !_fotoUrl) { showMsg(msg,"err","La foto de perfil es obligatoria."); return }
-  if(!g("cvMotivacion")) { showMsg(msg,"err","Contanos por qué querés vender con nosotros."); return }
 
   btn.disabled = true
   btn.innerHTML = `<i class="fa-solid fa-spinner spin"></i> Enviando...`
