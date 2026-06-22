@@ -166,9 +166,21 @@ async function subirFoto(file) {
 
 /* ── Enviar postulación (builder) ── */
 window.enviarPostulacion = async function() {
+  const g = id => document.getElementById(id)?.value?.trim() || ""
+  const msg = document.getElementById("msgCV")
+
+  // Validaciones obligatorias (para todos, registrados o no)
+  if(!g("cvNombre"))    { showMsg(msg,"err","El nombre es obligatorio."); return }
+  if(!g("cvApellido"))  { showMsg(msg,"err","El apellido es obligatorio."); return }
+  if(!g("cvEmail"))     { showMsg(msg,"err","El email es obligatorio."); return }
+  if(!g("cvCiudad"))    { showMsg(msg,"err","La ciudad/localidad es obligatoria."); return }
+  if(!g("cvProvincia")) { showMsg(msg,"err","Seleccioná tu provincia."); return }
+  const fotoFile = document.getElementById("inputFotoCV").files[0]
+  if(!fotoFile && !_fotoUrl) { showMsg(msg,"err","La foto de perfil es obligatoria."); return }
+  if(!g("cvMotivacion")) { showMsg(msg,"err","Contanos por qué querés vender con nosotros."); return }
+
   if(!_userId) {
     // Guardar datos en localStorage para recuperarlos después del registro
-    const g = id => document.getElementById(id)?.value?.trim() || ""
     localStorage.setItem("tc_vend_form", JSON.stringify({
       nombre: g("cvNombre"), apellido: g("cvApellido"), email: g("cvEmail"),
       telefono: g("cvTelefono"), ciudad: g("cvCiudad"), provincia: g("cvProvincia"),
