@@ -220,8 +220,22 @@ window.buscar = async function(){
   cont.innerHTML = `<div style="text-align:center;padding:40px;color:#64748b;">
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
-  const select = "id,titulo_profesional,resumen,habilidades,disponibilidad,modalidad,cv_archivo,perfiles!usuario_id(id,nombre,apellido,movil,foto,localidad,provincia)"
-  let url = `${SB_URL}/rest/v1/curriculum?select=${encodeURIComponent(select)}&cv_publico=eq.true&order=created_at.desc`
+  // Paso 1: obtener IDs de usuarios que tienen "cv" en su tipo (la elección del usuario)
+  let cvUserIds = []
+  try {
+    const rp = await fetch(`${SB_URL}/rest/v1/perfiles?tipo=like.*cv*&select=id`, { headers: SB_HEADERS })
+    const dp = await rp.json()
+    cvUserIds = Array.isArray(dp) ? dp.map(p => p.id) : []
+  } catch(e) {}
+
+  if(cvUserIds.length === 0){
+    cont.innerHTML = `<div style="text-align:center;padding:40px;color:#64748b;">No hay candidatos disponibles aún.</div>`
+    return
+  }
+
+  // Paso 2: traer curriculum solo de esos usuarios
+  const select = "id,titulo_profesional,resumen,habilidades,disponibilidad,modalidad,cv_archivo,perfiles!usuario_id(id,nombre,apellido,movil,foto,localidad,provincia,tipo)"
+  let url = `${SB_URL}/rest/v1/curriculum?select=${encodeURIComponent(select)}&usuario_id=in.(${cvUserIds.join(",")})&order=created_at.desc`
   if(palabra){ const p=encodeURIComponent(`*${palabra}*`); url+=`&or=(titulo_profesional.ilike.${p},habilidades.ilike.${p},resumen.ilike.${p})` }
 
   let data
@@ -232,9 +246,6 @@ window.buscar = async function(){
   } catch(e){
     cont.innerHTML=`<div class="alerta alerta-err">Error: ${e.message}</div>`; return
   }
-
-  // Solo mostrar quienes activaron el buscador de CVs (tipo contiene "cv")
-  data = data.filter(item => (item.perfiles?.tipo || "").split(",").map(t=>t.trim()).includes("cv"))
 
   if(ciudad){
     const c = ciudad.toLowerCase()
