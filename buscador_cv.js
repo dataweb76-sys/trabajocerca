@@ -220,8 +220,8 @@ window.buscar = async function(){
   cont.innerHTML = `<div style="text-align:center;padding:40px;color:#64748b;">
     <i class="fa-solid fa-spinner fa-spin" style="font-size:28px;"></i><p>Buscando...</p></div>`
 
-  const select = "id,titulo_profesional,resumen,habilidades,disponibilidad,modalidad,cv_archivo,perfiles!inner(id,nombre,apellido,movil,foto,localidad,provincia,tipo)"
-  let url = `${SB_URL}/rest/v1/curriculum?select=${encodeURIComponent(select)}&cv_publico=eq.true&perfiles.tipo=like.*cv*&order=created_at.desc`
+  const select = "id,titulo_profesional,resumen,habilidades,disponibilidad,modalidad,cv_archivo,perfiles!usuario_id(id,nombre,apellido,movil,foto,localidad,provincia)"
+  let url = `${SB_URL}/rest/v1/curriculum?select=${encodeURIComponent(select)}&cv_publico=eq.true&order=created_at.desc`
   if(palabra){ const p=encodeURIComponent(`*${palabra}*`); url+=`&or=(titulo_profesional.ilike.${p},habilidades.ilike.${p},resumen.ilike.${p})` }
 
   let data

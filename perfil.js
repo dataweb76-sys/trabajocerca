@@ -1837,6 +1837,12 @@ window.toggleBuscador = async function(tipoToggle, userId) {
     .from("perfiles").update({ tipo: nuevoTipo }).eq("id", userId)
   if(error){ alert("Error: " + error.message); return }
 
+  // Sincronizar cv_publico en curriculum cuando se activa/desactiva el buscador de CVs
+  if(tipoToggle === "cv") {
+    const cvActivo = nuevosTipos.includes("cv")
+    await supabase.from("curriculum").update({ cv_publico: cvActivo }).eq("usuario_id", userId)
+  }
+
   // Actualizar UI sin recargar
   const checkEl = document.getElementById("check-buscador-" + tipoToggle)
   const labelEl = checkEl?.closest("label")
