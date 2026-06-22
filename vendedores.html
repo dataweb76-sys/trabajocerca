@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendedores — Trabajá con nosotros | LocalWeb & Trabajos Cerca</title>
+<meta name="description" content="Sumate a nuestro equipo de vendedores. Trabajá desde casa con horarios flexibles y ganá comisiones por venta de publicidad y páginas web.">
+<meta name="robots" content="index, follow">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root { --brand: #2563eb; --brand2: #7c3aed; }
+  * { box-sizing: border-box; }
+
+  /* ── Hero ── */
+  .vend-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    color: white; padding: 60px 20px 50px; text-align: center; position: relative; overflow: hidden;
+  }
+  .vend-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(37,99,235,.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(124,58,237,.2) 0%, transparent 60%);
+  }
+  .vend-hero > * { position: relative; }
+  .vend-hero h1 { font-size: clamp(24px,5vw,42px); font-weight: 900; margin: 0 0 14px; line-height: 1.2; }
+  .vend-hero p  { font-size: 17px; color: rgba(255,255,255,.8); max-width: 580px; margin: 0 auto 28px; }
+
+  .marcas-row { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
+  .marca-chip {
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+    border-radius: 30px; padding: 8px 18px; font-size: 14px; font-weight: 700; color: white;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .marca-chip i { opacity: .8; }
+
+  .hero-cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-hero-primary {
+    background: linear-gradient(135deg, #2563eb, #7c3aed); color: white;
+    border: none; border-radius: 14px; padding: 14px 28px; font-size: 16px;
+    font-weight: 800; cursor: pointer; text-decoration: none; display: inline-flex;
+    align-items: center; gap: 8px; transition: transform .15s, box-shadow .15s;
+  }
+  .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(37,99,235,.4); }
+  .btn-hero-outline {
+    background: transparent; color: white; border: 2px solid rgba(255,255,255,.4);
+    border-radius: 14px; padding: 14px 28px; font-size: 16px; font-weight: 700;
+    cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+    transition: border-color .15s;
+  }
+  .btn-hero-outline:hover { border-color: white; }
+
+  /* ── Beneficios ── */
+  .vend-section { max-width: 900px; margin: 0 auto; padding: 48px 20px; }
+  .section-title { font-size: 26px; font-weight: 900; color: #1e293b; margin: 0 0 8px; }
+  .section-sub   { font-size: 15px; color: #64748b; margin: 0 0 32px; }
+
+  .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .benefit-card {
+    background: white; border: 1.5px solid #e2e8f0; border-radius: 18px;
+    padding: 22px 20px; display: flex; gap: 14px; align-items: flex-start;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .benefit-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
+  .benefit-icon {
+    width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center;
+    justify-content: center; font-size: 22px; flex-shrink: 0;
+  }
+  .benefit-card h3 { margin: 0 0 4px; font-size: 15px; font-weight: 800; color: #1e293b; }
+  .benefit-card p  { margin: 0; font-size: 13px; color: #64748b; line-height: 1.5; }
+
+  /* ── CV Builder ── */
+  .cv-container { max-width: 980px; margin: 0 auto; padding: 0 20px 60px; }
+  .cv-tabs { display: flex; gap: 0; background: #f1f5f9; border-radius: 14px; padding: 4px; margin-bottom: 28px; }
+  .cv-tab {
+    flex: 1; padding: 12px; border: none; background: transparent; border-radius: 11px;
+    font-size: 14px; font-weight: 700; cursor: pointer; color: #64748b; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+  .cv-tab.activo { background: white; color: #1e293b; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+  .cv-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  @media(max-width:700px) { .cv-layout { grid-template-columns: 1fr; } }
+
+  /* Form */
+  .cv-form-panel { display: flex; flex-direction: column; gap: 0; }
+  .form-section { margin-bottom: 20px; }
+  .form-section-title {
+    font-size: 13px; font-weight: 800; color: #64748b; text-transform: uppercase;
+    letter-spacing: .06em; margin-bottom: 12px; display: flex; align-items: center; gap: 7px;
+  }
+  .form-section-title i { color: var(--brand); }
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%; padding: 10px 13px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-size: 14px; font-family: inherit; color: #1e293b; transition: border-color .15s;
+    background: white;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus { outline: none; border-color: var(--brand); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Foto upload */
+  .foto-upload-zone {
+    width: 100%; aspect-ratio: 1; max-width: 130px;
+    border: 2.5px dashed #cbd5e1; border-radius: 50%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; cursor: pointer; margin: 0 auto 14px;
+    transition: border-color .2s, background .2s; overflow: hidden; position: relative; background: #f8fafc;
+  }
+  .foto-upload-zone:hover { border-color: var(--brand); background: #eff6ff; }
+  .foto-upload-zone img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .foto-upload-zone .foto-placeholder { text-align: center; color: #94a3b8; pointer-events: none; }
+  .foto-upload-zone .foto-placeholder i { font-size: 28px; display: block; margin-bottom: 5px; }
+  .foto-upload-zone .foto-placeholder span { font-size: 12px; font-weight: 600; }
+
+  /* Preview CV */
+  .cv-preview-panel { position: sticky; top: 80px; align-self: start; }
+  .cv-preview {
+    background: white; border: 1px solid #e2e8f0; border-radius: 16px;
+    overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.08); font-family: 'Georgia', serif;
+  }
+  .cv-preview-header {
+    background: linear-gradient(135deg, #1e293b, #334155); color: white;
+    padding: 24px; display: flex; gap: 16px; align-items: center;
+  }
+  .cv-preview-foto {
+    width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(255,255,255,.3);
+    object-fit: cover; flex-shrink: 0; background: #475569;
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+    overflow: hidden;
+  }
+  .cv-preview-foto img { width: 100%; height: 100%; object-fit: cover; }
+  .cv-preview-nombre { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+  .cv-preview-titulo { font-size: 13px; opacity: .8; font-style: italic; }
+  .cv-preview-contacto { font-size: 11px; opacity: .7; margin-top: 6px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .cv-preview-contacto span { display: flex; align-items: center; gap: 4px; }
+
+  .cv-preview-body { padding: 18px 20px; font-family: inherit; }
+  .cv-sec { margin-bottom: 16px; }
+  .cv-sec-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    color: #2563eb; border-bottom: 1.5px solid #bfdbfe; padding-bottom: 4px; margin-bottom: 10px;
+    font-family: sans-serif;
+  }
+  .cv-sec-text { font-size: 12px; color: #374151; line-height: 1.6; }
+  .cv-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .cv-chip { background: #eff6ff; color: #1d4ed8; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; font-family: sans-serif; }
+  .cv-placeholder { color: #94a3b8; font-style: italic; font-size: 12px; }
+
+  /* Submit */
+  .btn-submit {
+    width: 100%; background: linear-gradient(135deg, #2563eb, #7c3aed); color: white;
+    border: none; border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 800;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-top: 20px; transition: opacity .2s;
+  }
+  .btn-submit:hover { opacity: .9; }
+  .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* Upload panel */
+  .upload-zone {
+    border: 3px dashed #cbd5e1; border-radius: 18px; padding: 50px 30px;
+    text-align: center; cursor: pointer; transition: all .2s; background: #f8fafc;
+  }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--brand); background: #eff6ff; }
+  .upload-zone i { font-size: 48px; color: #cbd5e1; display: block; margin-bottom: 14px; }
+  .upload-zone.drag i { color: var(--brand); }
+
+  /* Alerta msg */
+  .form-msg { margin-top: 12px; padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: 600; display: none; }
+  .form-msg.ok  { background: #f0fdf4; color: #15803d; border: 1.5px solid #86efac; display: block; }
+  .form-msg.err { background: #fef2f2; color: #dc2626; border: 1.5px solid #fca5a5; display: block; }
+
+  /* Loading */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { display: inline-block; animation: spin .8s linear infinite; }
+
+  /* Responsive */
+  @media(max-width:480px) {
+    .form-row { grid-template-columns: 1fr; }
+    .marcas-row { gap: 8px; }
+  }
+
+  /* Sección "cómo funciona" */
+  .steps-row { display: flex; flex-direction: column; gap: 0; }
+  .step-item { display: flex; gap: 18px; align-items: flex-start; padding-bottom: 28px; position: relative; }
+  .step-item:not(:last-child)::after {
+    content: ''; position: absolute; left: 20px; top: 46px; bottom: 0;
+    width: 2px; background: linear-gradient(to bottom, #e2e8f0, transparent);
+  }
+  .step-num {
+    width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: white; font-size: 16px; font-weight: 900; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+  .step-item h3 { margin: 0 0 4px; font-size: 16px; font-weight: 800; color: #1e293b; }
+  .step-item p  { margin: 0; font-size: 14px; color: #64748b; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-logo logo">
+    <a href="/index.html"><img src="/logo.png" alt="Trabajos Cerca" style="height:36px;"></a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="vend-hero">
+  <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:30px;padding:6px 16px;font-size:13px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:20px;">
+    <i class="fa-solid fa-briefcase"></i> Oportunidad laboral — Vendedores & Vendedoras
+  </div>
+  <h1>Ganá dinero vendiendo publicidad<br>y páginas web desde donde estés</h1>
+  <p>Sumate al equipo de ventas de nuestras marcas propias. Horarios flexibles, sin jefe, y comisiones reales por cada venta cerrada.</p>
+  <div class="marcas-row">
+    <div class="marca-chip"><i class="fa-solid fa-globe"></i> localweb.ar</div>
+    <div class="marca-chip"><i class="fa-solid fa-briefcase"></i> trabajoscerca.com.ar</div>
+    <div class="marca-chip"><i class="fa-solid fa-star"></i> + otras marcas propias</div>
+  </div>
+  <div class="hero-cta-row">
+    <a href="#cv-section" class="btn-hero-primary"><i class="fa-solid fa-file-lines"></i> Postularme ahora</a>
+    <a href="#como-funciona" class="btn-hero-outline"><i class="fa-solid fa-circle-info"></i> ¿Cómo funciona?</a>
+  </div>
+</div>
+
+<!-- BENEFICIOS -->
+<div class="vend-section">
+  <div style="text-align:center;margin-bottom:40px;">
+    <h2 class="section-title" style="text-align:center;">¿Por qué ser vendedor con nosotros?</h2>
+    <p class="section-sub" style="text-align:center;">Sin horarios fijos, sin oficina, sin límite de ganancias</p>
+  </div>
+  <div class="benefits-grid">
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:#eff6ff;"><span style="font-size:22px;">💰</span></div>
+      <div>
+        <h3>Comisiones reales</h3>
+        <p>Ganás un porcentaje por cada venta cerrada. Cuanto más vendés, más cobrás — sin techo.</p>
+      </div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:#f0fdf4;"><span style="font-size:22px;">🏠</span></div>
+      <div>
+        <h3>Trabajá desde casa</h3>
+        <p>Todo se hace de forma remota. Solo necesitás teléfono, internet y ganas de vender.</p>
+      </div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:#fef3c7;"><span style="font-size:22px;">🕐</span></div>
+      <div>
+        <h3>Horarios flexibles</h3>
+        <p>Manejás tus propios tiempos. Podés hacerlo como actividad principal o complementaria.</p>
+      </div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:#fdf4ff;"><span style="font-size:22px;">📱</span></div>
+      <div>
+        <h3>Productos que se venden solos</h3>
+        <p>Vendés publicidad digital y páginas web para negocios locales — productos con demanda real.</p>
+      </div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:#f0fdf4;"><span style="font-size:22px;">📈</span></div>
+      <div>
+        <h3>Crecé con nosotros</h3>
+        <p>Los mejores vendedores pueden convertirse en líderes de equipo y ganar comisiones de su grupo.</p>
+      </div>
+    </div>
+    <div class="benefit-card">
+      <div class="benefit-icon" style="background:#eff6ff;"><span style="font-size:22px;">🤝</span></div>
+      <div>
+        <h3>Soporte y capacitación</h3>
+        <p>Te damos materiales, guiones de venta y acompañamiento del equipo para que arranques rápido.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CÓMO FUNCIONA -->
+<div id="como-funciona" style="background:#f8fafc;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;">
+  <div class="vend-section">
+    <h2 class="section-title">¿Cómo funciona?</h2>
+    <p class="section-sub">En 4 pasos estás listo para empezar a vender</p>
+    <div class="steps-row">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div>
+          <h3>Completá tu CV</h3>
+          <p>Usá nuestro creador de CV o subí el tuyo en PDF o Word. Incluí una foto, tu experiencia y por qué querés vender con nosotros.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div>
+          <h3>Lo revisamos</h3>
+          <p>El equipo de RRHH de LocalWeb.ar revisa tu postulación y se contacta con vos por WhatsApp o email en las próximas 48hs.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div>
+          <h3>Capacitación exprés</h3>
+          <p>Te explicamos los productos, precios, zonas disponibles y te damos el material de ventas. Es rápido y online.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div>
+          <h3>¡Empezás a vender y cobrar!</h3>
+          <p>Cada venta que cerrás genera tu comisión. Los pagos se liquidan mensualmente. Sin burocracia.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CV SECTION -->
+<div id="cv-section" style="background:white;">
+  <div class="cv-container">
+    <div style="text-align:center;padding:48px 0 28px;">
+      <h2 class="section-title" style="text-align:center;">Postularse es gratis y tarda 5 minutos</h2>
+      <p class="section-sub" style="text-align:center;">Creá tu CV profesional o subí el que ya tenés</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="cv-tabs" id="cvTabs">
+      <button class="cv-tab activo" onclick="cambiarTab('builder')">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Crear mi CV aquí
+      </button>
+      <button class="cv-tab" onclick="cambiarTab('upload')">
+        <i class="fa-solid fa-upload"></i> Subir PDF / Word
+      </button>
+    </div>
+
+    <!-- BUILDER -->
+    <div id="panelBuilder">
+      <div id="loginRequerido" style="display:none;background:#eff6ff;border:2px solid #bfdbfe;border-radius:18px;padding:30px;text-align:center;margin-bottom:24px;">
+        <div style="font-size:42px;margin-bottom:12px;">🔐</div>
+        <h3 style="margin:0 0 8px;color:#1e293b;">Necesitás estar registrado</h3>
+        <p style="color:#64748b;margin:0 0 18px;font-size:14px;">Creá una cuenta gratis para guardar tu CV y postularte. Te lleva menos de 1 minuto.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <a href="/registro.html?redirect=/vendedores.html" class="btn-hero-primary" style="font-size:14px;padding:12px 22px;">
+            <i class="fa-solid fa-user-plus"></i> Crear cuenta gratis
+          </a>
+          <a href="/login.html?redirect=/vendedores.html" class="btn-hero-outline" style="font-size:14px;padding:12px 22px;color:#1e293b;border-color:#e2e8f0;">
+            <i class="fa-solid fa-right-to-bracket"></i> Ya tengo cuenta
+          </a>
+        </div>
+      </div>
+
+      <div id="formCV" class="cv-layout">
+        <!-- FORMULARIO -->
+        <div class="cv-form-panel">
+
+          <!-- Foto -->
+          <div class="form-section">
+            <div class="form-section-title"><i class="fa-solid fa-camera"></i> Foto de perfil (obligatoria)</div>
+            <div class="foto-upload-zone" id="fotoZone" onclick="document.getElementById('inputFotoCV').click()">
+              <div class="foto-placeholder" id="fotoPlaceholder">
+                <i class="fa-solid fa-camera"></i>
+                <span>Subir foto</span>
+              </div>
+              <img id="fotoPreview" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;">
+            </div>
+            <input type="file" id="inputFotoCV" accept="image/*" style="display:none;" onchange="previewFoto(this)">
+            <p style="text-align:center;font-size:12px;color:#94a3b8;margin:0;">Foto clara, de frente. Es obligatoria.</p>
+          </div>
+
+          <!-- Datos personales -->
+          <div class="form-section">
+            <div class="form-section-title"><i class="fa-solid fa-user"></i> Datos personales</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nombre *</label>
+                <input id="cvNombre" placeholder="Juan" oninput="actualizarPreview()">
+              </div>
+              <div class="form-group">
+                <label>Apellido *</label>
+                <input id="cvApellido" placeholder="García" oninput="actualizarPreview()">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input id="cvEmail" type="email" placeholder="tu@email.com" oninput="actualizarPreview()">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>WhatsApp / Teléfono</label>
+                <input id="cvTelefono" placeholder="+54 9 11 1234-5678" oninput="actualizarPreview()">
+              </div>
+              <div class="form-group">
+                <label>Ciudad / Localidad</label>
+                <input id="cvCiudad" placeholder="Ej: Córdoba" oninput="actualizarPreview()">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Provincia</label>
+              <select id="cvProvincia" onchange="actualizarPreview()">
+                <option value="">Seleccioná tu provincia</option>
+                <option>Buenos Aires</option><option>CABA</option><option>Córdoba</option>
+                <option>Santa Fe</option><option>Mendoza</option><option>Tucumán</option>
+                <option>Entre Ríos</option><option>Salta</option><option>Misiones</option>
+                <option>Chaco</option><option>Corrientes</option><option>Santiago del Estero</option>
+                <option>San Juan</option><option>Jujuy</option><option>Río Negro</option>
+                <option>Neuquén</option><option>Formosa</option><option>Chubut</option>
+                <option>San Luis</option><option>Catamarca</option><option>La Rioja</option>
+                <option>La Pampa</option><option>Santa Cruz</option><option>Tierra del Fuego</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Experiencia -->
+          <div class="form-section">
+            <div class="form-section-title"><i class="fa-solid fa-briefcase"></i> Experiencia laboral</div>
+            <div class="form-group">
+              <label>Experiencia relevante</label>
+              <textarea id="cvExperiencia" placeholder="Ej: 2 años en ventas de seguros en Mapfre (2022-2024). Vendedora en tienda de ropa (2019-2021)." oninput="actualizarPreview()"></textarea>
+            </div>
+          </div>
+
+          <!-- Educación -->
+          <div class="form-section">
+            <div class="form-section-title"><i class="fa-solid fa-graduation-cap"></i> Educación</div>
+            <div class="form-group">
+              <label>Formación</label>
+              <textarea id="cvEducacion" placeholder="Ej: Bachiller en Comercio (2018). Curso de Marketing Digital — Google Actívate (2021)." rows="3" oninput="actualizarPreview()"></textarea>
+            </div>
+          </div>
+
+          <!-- Habilidades -->
+          <div class="form-section">
+            <div class="form-section-title"><i class="fa-solid fa-star"></i> Habilidades</div>
+            <div class="form-group">
+              <label>Habilidades clave (separadas por coma)</label>
+              <input id="cvHabilidades" placeholder="Ej: Ventas, WhatsApp Business, Negociación, Atención al cliente" oninput="actualizarPreview()">
+            </div>
+          </div>
+
+          <!-- Motivación -->
+          <div class="form-section">
+            <div class="form-section-title"><i class="fa-solid fa-fire"></i> ¿Por qué querés vender con nosotros?</div>
+            <div class="form-group">
+              <textarea id="cvMotivacion" placeholder="Contanos brevemente por qué te interesa esta oportunidad y qué te diferencia de otros vendedores." rows="4" oninput="actualizarPreview()"></textarea>
+            </div>
+          </div>
+
+          <div id="msgCV" class="form-msg"></div>
+
+          <button class="btn-submit" id="btnSubmitCV" onclick="enviarPostulacion()">
+            <i class="fa-solid fa-paper-plane"></i> Enviar mi postulación
+          </button>
+          <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:10px;">
+            Al enviar aceptás que revisemos tu información para contactarte.
+          </p>
+        </div>
+
+        <!-- PREVIEW -->
+        <div class="cv-preview-panel">
+          <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;text-align:center;font-family:sans-serif;">
+            Vista previa de tu CV
+          </div>
+          <div class="cv-preview">
+            <div class="cv-preview-header">
+              <div class="cv-preview-foto" id="prevFoto">
+                <span style="font-size:28px;">👤</span>
+              </div>
+              <div>
+                <div class="cv-preview-nombre" id="prevNombre">Tu nombre aquí</div>
+                <div class="cv-preview-titulo" id="prevTitulo">Vendedor/a · LocalWeb & Trabajos Cerca</div>
+                <div class="cv-preview-contacto" id="prevContacto">
+                  <span><i class="fa-solid fa-location-dot" style="font-size:10px;"></i> <span id="prevCiudad">Ciudad</span></span>
+                  <span><i class="fa-brands fa-whatsapp" style="font-size:10px;color:#25d366;"></i> <span id="prevTel">Teléfono</span></span>
+                </div>
+              </div>
+            </div>
+            <div class="cv-preview-body">
+              <div class="cv-sec" id="prevSecExp">
+                <div class="cv-sec-title">Experiencia</div>
+                <div class="cv-sec-text cv-placeholder" id="prevExp">Tu experiencia aparecerá aquí...</div>
+              </div>
+              <div class="cv-sec" id="prevSecEdu">
+                <div class="cv-sec-title">Educación</div>
+                <div class="cv-sec-text cv-placeholder" id="prevEdu">Tu formación aparecerá aquí...</div>
+              </div>
+              <div class="cv-sec" id="prevSecHab">
+                <div class="cv-sec-title">Habilidades</div>
+                <div class="cv-chips" id="prevHabs"></div>
+              </div>
+              <div class="cv-sec" id="prevSecMot">
+                <div class="cv-sec-title">Motivación</div>
+                <div class="cv-sec-text cv-placeholder" id="prevMot">Tu motivación aparecerá aquí...</div>
+              </div>
+              <div style="margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0;text-align:center;">
+                <div style="display:inline-flex;align-items:center;gap:6px;background:#eff6ff;padding:5px 12px;border-radius:20px;">
+                  <i class="fa-solid fa-briefcase" style="color:#2563eb;font-size:10px;font-family:sans-serif;"></i>
+                  <span style="font-size:10px;font-weight:700;color:#1d4ed8;font-family:sans-serif;">Candidato/a a Vendedor/a · LocalWeb.ar</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style="text-align:center;font-size:11px;color:#94a3b8;margin-top:10px;font-family:sans-serif;">
+            Así verán tu perfil en RRHH
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div id="panelUpload" style="display:none;">
+      <div id="loginRequeridoUpload" style="display:none;background:#eff6ff;border:2px solid #bfdbfe;border-radius:18px;padding:30px;text-align:center;margin-bottom:24px;">
+        <div style="font-size:42px;margin-bottom:12px;">🔐</div>
+        <h3 style="margin:0 0 8px;color:#1e293b;">Necesitás estar registrado</h3>
+        <p style="color:#64748b;margin:0 0 18px;font-size:14px;">Creá tu cuenta gratuita para subir tu CV.</p>
+        <a href="/registro.html?redirect=/vendedores.html" class="btn-hero-primary" style="font-size:14px;padding:12px 22px;display:inline-flex;">
+          <i class="fa-solid fa-user-plus"></i> Crear cuenta gratis
+        </a>
+      </div>
+      <div id="uploadContent">
+        <div class="upload-zone" id="uploadZone"
+          onclick="document.getElementById('inputArchivoCV').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleDrop(event)">
+          <i class="fa-solid fa-file-arrow-up"></i>
+          <div style="font-size:18px;font-weight:800;color:#1e293b;margin-bottom:8px;">Arrastrá tu CV aquí</div>
+          <div style="font-size:14px;color:#64748b;margin-bottom:14px;">o hacé clic para seleccionar</div>
+          <div style="display:inline-flex;gap:8px;">
+            <span style="background:#fee2e2;color:#dc2626;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;">PDF</span>
+            <span style="background:#dbeafe;color:#1d4ed8;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;">WORD</span>
+          </div>
+        </div>
+        <input type="file" id="inputArchivoCV" accept=".pdf,.doc,.docx" style="display:none;" onchange="handleArchivoSelect(this)">
+        <div id="archivoSeleccionado" style="display:none;margin-top:16px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+          <i class="fa-solid fa-file-circle-check" style="color:#16a34a;font-size:22px;"></i>
+          <div style="flex:1;">
+            <div id="archivoNombre" style="font-weight:700;color:#1e293b;font-size:14px;"></div>
+            <div style="font-size:12px;color:#64748b;">Listo para enviar</div>
+          </div>
+        </div>
+        <div id="msgUpload" class="form-msg"></div>
+        <button class="btn-submit" id="btnSubmitUpload" onclick="enviarPostulacionUpload()" style="display:none;">
+          <i class="fa-solid fa-paper-plane"></i> Enviar mi CV
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP TÉRMINOS Y CONDICIONES -->
+<div id="popupTerminos" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:white;border-radius:22px;max-width:480px;width:100%;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);max-height:90vh;display:flex;flex-direction:column;">
+    <div style="background:linear-gradient(135deg,#065f46,#1e40af);padding:24px;color:white;flex-shrink:0;">
+      <div style="font-size:40px;margin-bottom:8px;text-align:center;">🎉</div>
+      <h2 style="margin:0 0 4px;text-align:center;font-size:20px;">¡CV enviado a RRHH de LocalWeb.ar!</h2>
+      <p style="margin:0;text-align:center;opacity:.85;font-size:14px;">Te contactaremos en las próximas 48hs</p>
+    </div>
+    <div style="padding:24px;overflow-y:auto;flex:1;">
+      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:14px;font-weight:800;color:#15803d;margin-bottom:4px;">✅ Postulación recibida</div>
+        <div style="font-size:13px;color:#374151;">Tu CV fue enviado correctamente al equipo de RRHH de LocalWeb.ar. Revisamos cada postulación y te contactamos por WhatsApp o email.</div>
+      </div>
+
+      <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:15px;font-weight:900;color:#1e293b;margin-bottom:8px;">¿Querés aparecer también en el buscador de trabajo de trabajoscerca.com.ar?</div>
+        <div style="font-size:13px;color:#64748b;margin-bottom:14px;">Tu perfil quedará visible para empresas y negocios que buscan vendedores en tu zona.</div>
+
+        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#92400e;">
+          <strong>⚠️ Términos y condiciones importantes:</strong><br><br>
+          Al aceptar, entendés y confirmás que:<br>
+          • La relación con LocalWeb.ar es de <strong>vendedor/a independiente a comisión</strong>, no existe relación laboral de dependencia.<br>
+          • No tenés derecho a beneficios laborales como vacaciones pagas, obra social, aguinaldo o indemnización.<br>
+          • Trabajás de forma autónoma, fijando tus propios horarios y metodología de venta.<br>
+          • Tus ganancias dependen exclusivamente de tus ventas cerradas.<br>
+          • Podés dejar de vender cuando quieras, sin preaviso.
+        </div>
+
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#374151;">
+          <input type="checkbox" id="checkTerminos" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;">
+          <span>Leí y acepto los términos y condiciones. Entiendo que soy un/a <strong>vendedor/a independiente a comisión</strong>, sin relación laboral de dependencia.</span>
+        </label>
+      </div>
+
+      <button onclick="aceptarTerminos()" id="btnAceptarTerminos" style="width:100%;background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:10px;">
+        ✅ Acepto y quiero aparecer en el buscador
+      </button>
+      <button onclick="rechazarTerminos()" style="width:100%;background:#f1f5f9;color:#475569;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">
+        No por ahora — Solo enviar a RRHH
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="/splash.js"></script>
+<script type="module" src="/vendedores.js"></script>
+</body>
+</html>

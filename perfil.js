@@ -706,6 +706,7 @@ async function init(){
     enviarRecordatorioCompartir(userId)
     mostrarPopupNuevosReferidos(userId)
     if(registrados.length === 0) mostrarBienvenida(userId)
+    if(localStorage.getItem("tc_vendedor_ok")) { localStorage.removeItem("tc_vendedor_ok"); mostrarPopupVendedorOk() }
     if(data.admin) document.getElementById("adminBtnPerfil")?.style.setProperty("display","block")
   }
 
@@ -808,6 +809,7 @@ async function init(){
     }
     cargarProdeCard(userId)
     cargarPartidoProde(userId)
+    if(localStorage.getItem("tc_vendedor_ok")) { localStorage.removeItem("tc_vendedor_ok"); mostrarPopupVendedorOk() }
     return
   }
 
@@ -1163,6 +1165,38 @@ window.compartirInvitacionIG = async function(userId) {
 /* ══════════════════════════════════════════════════════════
    GUÍA DE USO — popup diferenciado por tipo de perfil
 ══════════════════════════════════════════════════════════ */
+/* ── POPUP POSTULACIÓN VENDEDOR OK ── */
+function mostrarPopupVendedorOk() {
+  const overlay = document.createElement('div')
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9400;display:flex;align-items:center;justify-content:center;padding:20px;'
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:22px;max-width:400px;width:100%;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:slideUp .3s ease;">
+      <div style="background:linear-gradient(135deg,#065f46,#1e40af);padding:28px;text-align:center;color:white;">
+        <div style="font-size:52px;margin-bottom:10px;">🎉</div>
+        <h2 style="margin:0 0 6px;font-size:22px;font-weight:900;">¡Postulación enviada!</h2>
+        <p style="margin:0;opacity:.85;font-size:14px;">Tu CV llegó a RRHH de LocalWeb.ar</p>
+      </div>
+      <div style="padding:24px;text-align:center;">
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:16px;margin-bottom:18px;text-align:left;">
+          <div style="font-size:14px;font-weight:800;color:#15803d;margin-bottom:6px;">✅ ¿Qué pasa ahora?</div>
+          <ul style="margin:0;padding:0 0 0 18px;font-size:13px;color:#374151;line-height:1.8;">
+            <li>Revisamos tu CV en las próximas <strong>48hs</strong></li>
+            <li>Te contactamos por <strong>WhatsApp o email</strong></li>
+            <li>Capacitación exprés y ¡empezás a vender!</li>
+          </ul>
+        </div>
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:14px;margin-bottom:18px;font-size:13px;color:#1e40af;">
+          <i class="fa-solid fa-briefcase"></i> Mientras esperás, podés <a href="/buscador_cv.html" style="color:#2563eb;font-weight:700;">ver el buscador de trabajo</a> para conocer la plataforma.
+        </div>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;background:linear-gradient(135deg,#065f46,#1e40af);color:white;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;">
+          ¡Perfecto, gracias! 🙌
+        </button>
+      </div>
+    </div>`
+  document.body.appendChild(overlay)
+  overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove() })
+}
+
 window.abrirGuiaUso = function(tipo) {
   const esPro = tipo === 'profesional'
 
