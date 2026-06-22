@@ -245,6 +245,44 @@ window.enviarPostulacion = async function() {
       if(post) _postulacionId = post.id
     } catch(_) { /* tabla aún no creada en Supabase, no bloquea el flujo */ }
 
+    // Notificar al admin por mensaje interno + campanita
+    try {
+      const ADMIN_ID = "fd46288e-b703-4bba-87c3-dc48f1b97ebb"
+      const tipoPost = document.getElementById("tipoPostulacion")?.value || "vendedor"
+      const tipoLabel = tipoPost === "jefe_ventas" ? "Jefe/a de Ventas" : "Vendedor/a"
+      const textoMsg = `📋 Nueva postulación como ${tipoLabel}\n👤 ${nombre} ${apellido}\n📍 ${g("cvCiudad")}, ${g("cvProvincia")}\n📧 ${email}\nVer CV: https://www.trabajoscerca.com.ar/buscador_trabajos`
+
+      // Buscar o crear conversación entre el postulante y el admin
+      let convId = null
+      if(_userId) {
+        const u1 = [_userId, ADMIN_ID].sort()[0]
+        const u2 = [_userId, ADMIN_ID].sort()[1]
+        const { data: convExist } = await supabase.from("conversaciones")
+          .select("id").eq("usuario1_id", u1).eq("usuario2_id", u2).maybeSingle()
+        if(convExist) {
+          convId = convExist.id
+        } else {
+          const { data: convNew } = await supabase.from("conversaciones")
+            .insert({ usuario1_id: u1, usuario2_id: u2, ultimo_mensaje: textoMsg.slice(0,80), ultimo_mensaje_at: new Date().toISOString(), no_leidos_u1: 0, no_leidos_u2: 0 })
+            .select("id").single()
+          convId = convNew?.id
+        }
+        if(convId) {
+          await supabase.from("mensajes").insert({ conversacion_id: convId, emisor_id: _userId, texto: textoMsg })
+          const esU1 = [_userId, ADMIN_ID].sort()[0] === _userId
+          await supabase.from("conversaciones").update({ ultimo_mensaje: textoMsg.slice(0,80), ultimo_mensaje_at: new Date().toISOString(), [esU1 ? "no_leidos_u2" : "no_leidos_u1"]: 1 }).eq("id", convId)
+        }
+      }
+      // Campanita siempre
+      await supabase.from("notificaciones").insert({
+        usuario_id: ADMIN_ID,
+        tipo: "postulacion",
+        titulo: `Nueva postulación — ${nombre} ${apellido}`,
+        cuerpo: `Se postula como ${tipoLabel} desde ${g("cvCiudad")}, ${g("cvProvincia")}`,
+        url: convId ? `/mensajes.html?conv=${convId}` : "/buscador_trabajos"
+      })
+    } catch(_) { /* no bloquea el flujo */ }
+
     // Mostrar popup términos
     document.getElementById("popupTerminos").style.display = "flex"
 
