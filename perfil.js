@@ -710,6 +710,115 @@ async function init(){
     if(data.admin) document.getElementById("adminBtnPerfil")?.style.setProperty("display","block")
   }
 
+  /* ── Vista para postulantes CV / vendedores ── */
+  if(_tipo === "cv") {
+    // Verificar si ya tiene cv_publico activo
+    const { data: cvData } = await supabase.from("curriculum")
+      .select("cv_publico,titulo_profesional").eq("usuario_id", userId).maybeSingle()
+
+    document.getElementById("dash").innerHTML = `
+    <div class="dash-header">
+      <div style="text-align:center;">
+        ${fotoHtml}
+        <div style="margin-top:8px;">
+          <label for="inputFoto" style="cursor:pointer;color:#2563eb;font-size:12px;font-weight:600;">
+            <i class="fa-solid fa-camera"></i> Cambiar foto
+          </label>
+          <input type="file" id="inputFoto" accept="image/*" style="display:none" onchange="subirFoto(this)">
+        </div>
+      </div>
+      <div class="dash-info" style="flex:1;">
+        <h3>${data.nombre || ""} ${data.apellido || ""}</h3>
+        <p><i class="fa-solid fa-location-dot"></i> ${data.localidad || "Sin localidad"}${data.provincia ? ", " + data.provincia : ""}</p>
+        <p><i class="fa-brands fa-whatsapp" style="color:#25D366"></i> ${data.movil || "Sin móvil"}</p>
+        ${badgeHtml}
+      </div>
+    </div>
+
+    <!-- Estado CV -->
+    <div style="background:linear-gradient(135deg,#065f46,#1e40af);border-radius:18px;padding:20px 22px;margin-bottom:16px;color:white;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:40px;flex-shrink:0;">📋</div>
+        <div style="flex:1;">
+          <div style="font-size:16px;font-weight:900;margin-bottom:4px;">Tu CV fue enviado a RRHH</div>
+          <div style="font-size:13px;opacity:.85;line-height:1.5;">
+            Estamos revisando tu postulación y te contactamos en las próximas <strong>48hs</strong> por WhatsApp o email.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones CV -->
+    <a href="/perfil_cv.html" style="display:flex;align-items:center;gap:14px;padding:16px 18px;margin-bottom:10px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;text-decoration:none;transition:box-shadow .2s;"
+      onmouseover="this.style.boxShadow='0 4px 16px rgba(34,197,94,.15)'" onmouseout="this.style.boxShadow=''">
+      <div style="width:44px;height:44px;border-radius:12px;background:#16a34a;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">✏️</div>
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:800;color:#15803d;">Editar mi CV</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;">Actualizá tu información, experiencia y habilidades</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="color:#86efac;"></i>
+    </a>
+
+    ${!cvData?.cv_publico ? `
+    <button onclick="window._activarBuscadorCV()" style="display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;margin-bottom:10px;background:#eff6ff;border:2px dashed #93c5fd;border-radius:14px;cursor:pointer;font-family:inherit;text-align:left;transition:box-shadow .2s;"
+      onmouseover="this.style.boxShadow='0 4px 16px rgba(37,99,235,.15)'" onmouseout="this.style.boxShadow=''">
+      <div style="width:44px;height:44px;border-radius:12px;background:#2563eb;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔍</div>
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:800;color:#1e40af;">Aparecer en el buscador de CVs</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;">Activá tu CV para que empresas y empleadores te encuentren</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="color:#93c5fd;"></i>
+    </button>
+    ` : `
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;margin-bottom:10px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;">
+      <i class="fa-solid fa-circle-check" style="color:#2563eb;font-size:20px;flex-shrink:0;"></i>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:800;color:#1e40af;">Tu CV está visible en el buscador</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;"><a href="/buscador_cv.html" style="color:#2563eb;">Ver buscador de CVs →</a></div>
+      </div>
+    </div>
+    `}
+
+    <!-- Agregar otro tipo de perfil -->
+    <button onclick="window._expandirPerfilCompleto()" style="display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;margin-bottom:20px;background:linear-gradient(135deg,#faf5ff,#eff6ff);border:1.5px solid #c4b5fd;border-radius:14px;cursor:pointer;font-family:inherit;text-align:left;transition:box-shadow .2s;"
+      onmouseover="this.style.boxShadow='0 4px 16px rgba(124,58,237,.15)'" onmouseout="this.style.boxShadow=''">
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#2563eb);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🚀</div>
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:800;color:#5b21b6;">Agregar oficio, profesión o emprendimiento</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px;">También podés publicar tus servicios y llegar a más clientes</div>
+      </div>
+      <i class="fa-solid fa-chevron-right" style="color:#c4b5fd;"></i>
+    </button>
+
+    ${guardadosHtml}
+
+    <hr style="margin:20px 0;border:none;border-top:1px solid #e2e8f0;">
+    <div id="adminBtnPerfil" style="display:none;margin-bottom:10px;">
+      <a href="/admin.html" class="btn" style="background:linear-gradient(135deg,#7c3aed,#2563eb);color:white;border:none;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i class="fa-solid fa-shield-halved"></i> Panel de Administración
+      </a>
+    </div>
+    <button class="btn btn-outline" onclick="cerrarSesion()" style="color:#ef4444;border-color:#ef4444;">
+      <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+    </button>`
+
+    window._expandirPerfilCompleto = function() { renderPerfilCompleto() }
+    window._activarBuscadorCV = async function() {
+      const { data: cv } = await supabase.from("curriculum").select("id").eq("usuario_id", userId).maybeSingle()
+      if(!cv) { location.href = "/perfil_cv.html"; return }
+      const { error } = await supabase.from("curriculum").update({ cv_publico: true }).eq("id", cv.id)
+      if(!error) {
+        await supabase.from("perfiles").update({ tipo: "cv" }).eq("id", userId)
+        location.reload()
+      }
+    }
+    cargarProdeCard(userId)
+    cargarPartidoProde(userId)
+    if(localStorage.getItem("tc_vendedor_ok")) { localStorage.removeItem("tc_vendedor_ok"); mostrarPopupVendedorOk() }
+    if(data.admin) document.getElementById("adminBtnPerfil")?.style.setProperty("display","block")
+    return
+  }
+
   /* ── Vista simplificada para clientes ── */
   if(_tipo === "cliente") {
     document.getElementById("dash").innerHTML = `
