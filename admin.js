@@ -968,11 +968,23 @@ window.toggleTipoAdmin = async function(userId, tipo, estaActivo) {
   const tipos = (perf?.tipo || "").split(",").map(t => t.trim()).filter(Boolean)
   const nuevosTipos = estaActivo ? tipos.filter(t => t !== tipo) : [...tipos, tipo]
   await supabase.from("perfiles").update({ tipo: nuevosTipos.join(",") }).eq("id", userId)
-  // Sincronizar cv_publico si es el buscador de CVs
+
   if(tipo === "cv") {
-    await supabase.from("curriculum").update({ cv_publico: !estaActivo }).eq("usuario_id", userId)
+    const cvActivo = !estaActivo
+    // Buscar curriculum existente
+    const { data: cv } = await supabase.from("curriculum").select("id").eq("usuario_id", userId).maybeSingle()
+    if(cv) {
+      await supabase.from("curriculum").update({ cv_publico: cvActivo }).eq("id", cv.id)
+    } else if(cvActivo) {
+      // No tiene curriculum — crear entrada mínima para que aparezca en el buscador
+      await supabase.from("curriculum").insert({
+        usuario_id: userId,
+        cv_publico: true,
+        titulo_profesional: "CV en construcción"
+      })
+    }
   }
-  // Actualizar en memoria y re-renderizar
+
   const idx = _perfiles.findIndex(p => p.id === userId)
   if(idx >= 0) _perfiles[idx].tipo = nuevosTipos.join(",")
   renderTabla()
