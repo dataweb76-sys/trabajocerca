@@ -2316,18 +2316,81 @@ function mostrarBienvenida(userId) {
 
   window._bvContinuar = async function() {
     if(sel.size === 0) return
+
+    // Verificar si ya tiene los datos obligatorios
+    const { data: datosActuales } = await supabase.from("perfiles")
+      .select("nombre,apellido,localidad,provincia,movil").eq("id", userId).single()
+
+    const faltanDatos = !datosActuales?.nombre || !datosActuales?.apellido ||
+                        !datosActuales?.localidad || !datosActuales?.provincia || !datosActuales?.movil
+
+    if(faltanDatos) {
+      // Mostrar formulario de datos obligatorios antes de continuar
+      document.getElementById("bv-body").innerHTML = `
+        <p style="font-size:13px;color:#64748b;margin:0 0 14px;">Completá tus datos para aparecer en los buscadores:</p>
+        <div style="display:grid;gap:10px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <input id="bv-nombre" placeholder="Nombre *" value="${datosActuales?.nombre||''}" style="padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;">
+            <input id="bv-apellido" placeholder="Apellido *" value="${datosActuales?.apellido||''}" style="padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;">
+          </div>
+          <input id="bv-tel" placeholder="Teléfono / WhatsApp *" value="${datosActuales?.movil||''}" style="padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;">
+          <input id="bv-cp" placeholder="Código Postal (para autocompletar ciudad)" style="padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;" oninput="window._bvAutoCP(this.value)">
+          <input id="bv-ciudad" placeholder="Ciudad *" value="${datosActuales?.localidad||''}" style="padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;">
+          <select id="bv-provincia" style="padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;color:#374151;">
+            <option value="">Provincia *</option>
+            ${["Buenos Aires","CABA","Catamarca","Chaco","Chubut","Córdoba","Corrientes","Entre Ríos","Formosa","Jujuy","La Pampa","La Rioja","Mendoza","Misiones","Neuquén","Río Negro","Salta","San Juan","San Luis","Santa Cruz","Santa Fe","Santiago del Estero","Tierra del Fuego","Tucumán"]
+              .map(pv => `<option value="${pv}"${datosActuales?.provincia===pv?" selected":""}>${pv}</option>`).join("")}
+          </select>
+        </div>`
+      document.getElementById("bv-btn").disabled = false
+      document.getElementById("bv-btn").innerHTML = 'Guardar y continuar →'
+      document.getElementById("bv-btn").onclick = window._bvGuardarDatos
+      return
+    }
+
+    await window._bvFinalizar()
+  }
+
+  window._bvAutoCP = async function(cp) {
+    if(cp.length < 4) return
+    try {
+      const r = await fetch(`https://iqeiszkoifxgygoqvbem.supabase.co/rest/v1/codigos_postales?cp=eq.${cp}&select=localidad,provincia&limit=1`,
+        { headers: { apikey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs" } })
+      const d = await r.json()
+      if(d?.[0]) {
+        const ci = document.getElementById("bv-ciudad"); if(ci) ci.value = d[0].localidad
+        const pr = document.getElementById("bv-provincia"); if(pr) { for(let o of pr.options) { if(o.value===d[0].provincia){o.selected=true;break} } }
+      }
+    } catch(_) {}
+  }
+
+  window._bvGuardarDatos = async function() {
+    const nombre   = document.getElementById("bv-nombre")?.value.trim()
+    const apellido = document.getElementById("bv-apellido")?.value.trim()
+    const movil    = document.getElementById("bv-tel")?.value.trim()
+    const localidad= document.getElementById("bv-ciudad")?.value.trim()
+    const provincia= document.getElementById("bv-provincia")?.value.trim()
     const btn = document.getElementById("bv-btn")
     const msg = document.getElementById("bv-msg")
+
+    if(!nombre || !apellido || !movil || !localidad || !provincia) {
+      msg.innerHTML = '<p style="color:#dc2626;font-size:13px;margin:8px 0 0;">Todos los campos son obligatorios.</p>'
+      return
+    }
     btn.disabled = true
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
+    await supabase.from("perfiles").update({ nombre, apellido, movil, localidad, provincia }).eq("id", userId)
+    await window._bvFinalizar()
+  }
+
+  window._bvFinalizar = async function() {
+    const btn = document.getElementById("bv-btn")
+    if(btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...' }
 
     if(sel.has("cliente")) {
-      // Solo cliente: guardar en DB y mostrar éxito
       await supabase.from("perfiles").update({ tipo: "cliente" }).eq("id", userId)
       document.getElementById("bv-overlay").remove()
       document.body.style.overflow = ""
-
-      // Toast de bienvenida
       const toast = document.createElement("div")
       toast.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#14532d;color:white;padding:14px 22px;border-radius:14px;font-size:14px;font-weight:600;z-index:9999;max-width:90vw;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.25);transition:transform .35s ease,opacity .35s ease;opacity:0;line-height:1.5;"
       toast.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#4ade80;margin-right:8px;"></i>¡Registro completado! Ya podés buscar profesionales.'
@@ -2337,13 +2400,9 @@ function mostrarBienvenida(userId) {
       return
     }
 
-    // Guardar tipos seleccionados en localStorage para que perfil_servicio los muestre todos
     const tipos = [...sel]
     localStorage.setItem("tc_pending_tipos", JSON.stringify(tipos))
-
-    // Ir al primero
-    const primero = tipos[0]
-    window.location.href = `/perfil_servicio.html?tipo=${primero}&bv=1`
+    window.location.href = `/perfil_servicio.html?tipo=${tipos[0]}&bv=1`
   }
 }
 
