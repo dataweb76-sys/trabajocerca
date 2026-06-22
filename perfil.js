@@ -1063,6 +1063,14 @@ window.guardarDatos = async function(){
     return
   }
 
+  const localidad = document.getElementById("editLocalidad").value.trim()
+  const provincia = document.getElementById("editProvincia").value.trim()
+  if(!localidad || !provincia){
+    msg.innerHTML = '<div class="alerta alerta-err">Ciudad y provincia son obligatorias para aparecer en los buscadores</div>'
+    document.getElementById("editLocalidad")?.scrollIntoView({ behavior:"smooth", block:"center" })
+    return
+  }
+
   const mostrarComo = document.querySelector('input[name="editMostrarComo"]:checked')?.value || "personal"
   const mostrarTel  = document.getElementById("editMostrarTel")?.checked ?? true
   const empresa     = (document.getElementById("editEmpresa")?.value || document.getElementById("editEmpresaNombre")?.value || "").trim()

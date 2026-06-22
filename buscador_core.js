@@ -381,8 +381,8 @@ window.buscar = async function(){
   } else if(palabra){
     const p=encodeURIComponent(`*${palabra}*`); url+=`&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p},servicios_lista.ilike.${p})`
   }
-  if(ciudad)       url+=`&localidad=ilike.*${encodeURIComponent(ciudad)}*`
-  if(_PROV_FILTRO) url+=`&provincia=ilike.*${encodeURIComponent(_PROV_FILTRO)}*`
+  if(ciudad)       url+=`&or=(localidad.ilike.*${encodeURIComponent(ciudad)}*,localidad.is.null)`
+  if(_PROV_FILTRO) url+=`&or=(provincia.ilike.*${encodeURIComponent(_PROV_FILTRO)}*,provincia.is.null)`
 
   let data
   try {

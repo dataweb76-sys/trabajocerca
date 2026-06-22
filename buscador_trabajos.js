@@ -166,7 +166,8 @@ window.aplicarFiltros = function(){
     if(ciudad){
       const loc = (p.localidad || "").toLowerCase()
       const prov = (p.provincia || "").toLowerCase()
-      if(!loc.includes(ciudad) && !prov.includes(ciudad)) return false
+      // Si no tiene ciudad/provincia cargada, aparece en todas las búsquedas
+      if((loc || prov) && !loc.includes(ciudad) && !prov.includes(ciudad)) return false
     }
 
     return true
