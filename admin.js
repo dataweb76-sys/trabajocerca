@@ -905,11 +905,62 @@ function mostrarPubMsg(txt, tipo) {
     : 'display:block;background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;'
 }
 
+/* ── Postulantes a Vendedor ── */
+async function cargarVendedores() {
+  const cont = document.getElementById("listaVendedores")
+  const { data, error } = await supabase
+    .from("vendedores_postulaciones")
+    .select("*")
+    .order("created_at", { ascending: false })
+
+  if(error || !data?.length) {
+    cont.innerHTML = `<p style="color:#94a3b8;font-size:13px;text-align:center;padding:20px;">Sin postulaciones aún.</p>`
+    return
+  }
+
+  document.getElementById("contadorVendedores").textContent = `(${data.length})`
+
+  cont.innerHTML = data.map(p => {
+    const wa = p.telefono ? `https://wa.me/${p.telefono.replace(/\D/g,"")}?text=${encodeURIComponent(`Hola ${p.nombre}, vi tu postulación en Trabajos Cerca y me interesa hablar con vos. 👋`)}` : null
+    const fecha = new Date(p.created_at).toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"})
+    const tipoLabel = p.tipo_postulacion === "jefe_ventas" ? "Jefe/a de Ventas" : "Vendedor/a"
+    const estadoColor = p.estado === "aprobado" ? "#16a34a" : p.estado === "rechazado" ? "#dc2626" : "#d97706"
+
+    return `<div style="border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 18px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+      ${p.foto ? `<img src="${p.foto}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : `<div style="width:56px;height:56px;border-radius:50%;background:#ede9fe;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-user" style="color:#7c3aed;font-size:22px;"></i></div>`}
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+          <strong style="font-size:15px;">${p.nombre} ${p.apellido}</strong>
+          <span style="background:#ede9fe;color:#7c3aed;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">${tipoLabel}</span>
+          <span style="color:${estadoColor};font-size:11px;font-weight:700;text-transform:uppercase;">${p.estado || "pendiente"}</span>
+        </div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:6px;">
+          📍 ${p.ciudad || ""}${p.provincia ? ", " + p.provincia : ""} ${p.cp ? "· CP "+p.cp : ""} · ${fecha}
+          ${p.email ? `· <a href="mailto:${p.email}" style="color:#2563eb;">${p.email}</a>` : ""}
+        </div>
+        ${p.motivacion ? `<p style="font-size:13px;color:#374151;margin:0 0 10px;line-height:1.5;">${p.motivacion.slice(0,200)}${p.motivacion.length>200?"…":""}</p>` : ""}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${p.usuario_id ? `<a href="/perfil_publico.html?id=${p.usuario_id}" target="_blank" class="btn btn-outline btn-sm"><i class="fa-solid fa-id-card"></i> Ver CV</a>` : ""}
+          ${wa ? `<a href="${wa}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#25d366;color:white;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>` : ""}
+          <button onclick="cambiarEstadoVendedor('${p.id}','aprobado',this)" style="background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;">✓ Aprobar</button>
+          <button onclick="cambiarEstadoVendedor('${p.id}','rechazado',this)" style="background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;">✗ Rechazar</button>
+        </div>
+      </div>
+    </div>`
+  }).join("")
+}
+
+window.cambiarEstadoVendedor = async function(id, estado, btn) {
+  btn.disabled = true
+  await supabase.from("vendedores_postulaciones").update({ estado }).eq("id", id)
+  cargarVendedores()
+}
+
 /* ── Init ── */
 async function init() {
   const ok = await verificarAdmin()
   if (!ok) return
-  await Promise.all([cargarStats(), cargarPerfiles(), cargarSolicitudes()])
+  await Promise.all([cargarStats(), cargarPerfiles(), cargarSolicitudes(), cargarVendedores()])
 }
 
 init()
