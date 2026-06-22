@@ -1173,20 +1173,23 @@ function mostrarPopupVendedorOk() {
     <div style="background:white;border-radius:22px;max-width:400px;width:100%;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:slideUp .3s ease;">
       <div style="background:linear-gradient(135deg,#065f46,#1e40af);padding:28px;text-align:center;color:white;">
         <div style="font-size:52px;margin-bottom:10px;">🎉</div>
-        <h2 style="margin:0 0 6px;font-size:22px;font-weight:900;">¡Postulación enviada!</h2>
-        <p style="margin:0;opacity:.85;font-size:14px;">Tu CV llegó a RRHH de LocalWeb.ar</p>
+        <h2 style="margin:0 0 6px;font-size:22px;font-weight:900;">¡Bienvenido/a a Trabajos Cerca!</h2>
+        <p style="margin:0;opacity:.85;font-size:14px;">Gracias por postularte a LocalWeb.ar</p>
       </div>
       <div style="padding:24px;text-align:center;">
         <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:16px;margin-bottom:18px;text-align:left;">
-          <div style="font-size:14px;font-weight:800;color:#15803d;margin-bottom:6px;">✅ ¿Qué pasa ahora?</div>
+          <div style="font-size:14px;font-weight:800;color:#15803d;margin-bottom:6px;">📋 ¿Qué pasa ahora?</div>
+          <p style="margin:0 0 10px;font-size:13px;color:#374151;line-height:1.7;">
+            Estaremos mirando tu CV y, si aceptás, quedarás también en el <strong>buscador de CV de la página</strong> para que más empresas y empleadores te encuentren.
+          </p>
           <ul style="margin:0;padding:0 0 0 18px;font-size:13px;color:#374151;line-height:1.8;">
-            <li>Revisamos tu CV en las próximas <strong>48hs</strong></li>
+            <li>Revisamos tu postulación en las próximas <strong>48hs</strong></li>
             <li>Te contactamos por <strong>WhatsApp o email</strong></li>
-            <li>Capacitación exprés y ¡empezás a vender!</li>
+            <li>¡Bienvenido/a al equipo!</li>
           </ul>
         </div>
         <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:14px;padding:14px;margin-bottom:18px;font-size:13px;color:#1e40af;">
-          <i class="fa-solid fa-briefcase"></i> Mientras esperás, podés <a href="/buscador_cv.html" style="color:#2563eb;font-weight:700;">ver el buscador de trabajo</a> para conocer la plataforma.
+          <i class="fa-solid fa-search"></i> Mientras esperás, podés <a href="/buscador_cv.html" style="color:#2563eb;font-weight:700;">ver el buscador de trabajo</a> para conocer la plataforma.
         </div>
         <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;background:linear-gradient(135deg,#065f46,#1e40af);color:white;border:none;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;">
           ¡Perfecto, gracias! 🙌

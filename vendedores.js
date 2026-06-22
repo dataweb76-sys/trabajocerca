@@ -13,12 +13,27 @@ async function init() {
   const { data: { user } } = await supabase.auth.getUser()
   _userId = user?.id || null
 
-  if(!_userId) {
-    document.getElementById("loginRequerido")?.style.setProperty("display","block")
-    document.getElementById("formCV")?.style.setProperty("display","none")
-    document.getElementById("loginRequeridoUpload")?.style.setProperty("display","block")
-    document.getElementById("uploadContent")?.style.setProperty("display","none")
-  } else {
+  // Recuperar datos guardados antes del registro (si existen)
+  const savedForm = localStorage.getItem("tc_vend_form")
+  if(savedForm) {
+    try {
+      const d = JSON.parse(savedForm)
+      const setVal = (id, v) => { const el = document.getElementById(id); if(el && v) el.value = v }
+      setVal("cvNombre", d.nombre); setVal("cvApellido", d.apellido)
+      setVal("cvEmail", d.email); setVal("cvTelefono", d.telefono)
+      setVal("cvCiudad", d.ciudad); setVal("cvCP", d.cp)
+      setVal("cvExperiencia", d.experiencia); setVal("cvEducacion", d.educacion)
+      setVal("cvHabilidades", d.habilidades); setVal("cvMotivacion", d.motivacion)
+      if(d.tipo_postulacion) { const sel = document.getElementById("tipoPostulacion"); if(sel) sel.value = d.tipo_postulacion }
+      const selProv = document.getElementById("cvProvincia")
+      if(selProv && d.provincia) for(let o of selProv.options) { if(o.value === d.provincia){ o.selected=true; break } }
+      actualizarPreview()
+    } catch(_) {}
+    localStorage.removeItem("tc_vend_form")
+  }
+
+  // Intentar prefill con datos del perfil si está logueado
+  if(_userId) {
     // Pre-llenar datos si ya tiene perfil
     const { data: p } = await supabase.from("perfiles")
       .select("nombre,apellido,movil,localidad,provincia,foto,email")
@@ -44,6 +59,33 @@ async function init() {
       }
       actualizarPreview()
     }
+  }
+}
+
+/* ── Verificar Jefe de Ventas por zona ── */
+window.verificarJefeZona = async function() {
+  const tipo = document.getElementById("tipoPostulacion")?.value
+  const prov = document.getElementById("cvProvincia")?.value
+  const info = document.getElementById("jefeVentasInfo")
+  const desc = document.getElementById("jefeVentasDesc")
+  if(!desc) return
+  if(tipo !== "jefe_ventas") { if(info) info.style.display="none"; desc.style.display="none"; return }
+  desc.style.display = "block"
+  if(!prov) { if(info) info.style.display="none"; return }
+  if(info) { info.style.display="block"; info.style.background="#f1f5f9"; info.style.border="1.5px solid #cbd5e1"; info.innerHTML=`<i class="fa-solid fa-spinner fa-spin"></i> Verificando disponibilidad en ${prov}...` }
+  try {
+    const { data } = await supabase.rpc("hay_jefe_ventas", { p_provincia: prov, p_ciudad: document.getElementById("cvCiudad")?.value?.trim() || "" })
+    if(data === true) {
+      info.style.background = "#fff7ed"; info.style.border = "1.5px solid #fed7aa"
+      info.innerHTML = `<span style="color:#c2410c;font-weight:800;">⚠️ En ${prov} ya hay un Jefe/a de Ventas asignado.</span><br><span style="color:#374151;">Podés postularte igualmente como <strong>Vendedor/a</strong> — tenés chances de crecer al puesto en el futuro.</span>`
+      document.getElementById("tipoPostulacion").value = "vendedor"
+      setTimeout(() => verificarJefeZona(), 100)
+    } else {
+      info.style.background = "#f0fdf4"; info.style.border = "1.5px solid #86efac"
+      info.innerHTML = `<span style="color:#15803d;font-weight:800;">✅ ¡Hay lugar en ${prov}!</span> Podés postularte como Jefe/a de Ventas para esta zona. Es una posición exclusiva.`
+    }
+  } catch(e) {
+    if(info) { info.style.background="#fff7ed"; info.style.border="1.5px solid #fed7aa"; info.innerHTML=`<span style="color:#92400e;">No se pudo verificar disponibilidad. Podés enviar igual y lo revisamos.</span>` }
   }
 }
 
@@ -124,7 +166,19 @@ async function subirFoto(file) {
 
 /* ── Enviar postulación (builder) ── */
 window.enviarPostulacion = async function() {
-  if(!_userId) { location.href = "/registro.html?redirect=/vendedores.html"; return }
+  if(!_userId) {
+    // Guardar datos en localStorage para recuperarlos después del registro
+    const g = id => document.getElementById(id)?.value?.trim() || ""
+    localStorage.setItem("tc_vend_form", JSON.stringify({
+      nombre: g("cvNombre"), apellido: g("cvApellido"), email: g("cvEmail"),
+      telefono: g("cvTelefono"), ciudad: g("cvCiudad"), provincia: g("cvProvincia"),
+      cp: g("cvCP"), experiencia: g("cvExperiencia"), educacion: g("cvEducacion"),
+      habilidades: g("cvHabilidades"), motivacion: g("cvMotivacion"),
+      tipo_postulacion: document.getElementById("tipoPostulacion")?.value || "vendedor"
+    }))
+    document.getElementById("popupRegistroCV").style.display = "flex"
+    return
+  }
 
   const g = id => document.getElementById(id)?.value?.trim() || ""
   const nombre   = g("cvNombre")
@@ -182,8 +236,10 @@ window.enviarPostulacion = async function() {
       const { data: post } = await supabase.from("vendedores_postulaciones").insert({
         usuario_id: _userId, nombre, apellido, email,
         telefono:   g("cvTelefono"), ciudad: g("cvCiudad"), provincia: g("cvProvincia"),
-        foto: _fotoUrl, experiencia: g("cvExperiencia"), educacion: g("cvEducacion"),
-        habilidades: g("cvHabilidades"), motivacion: g("cvMotivacion"), acepta_terminos: false
+        cp: g("cvCP"), foto: _fotoUrl, experiencia: g("cvExperiencia"), educacion: g("cvEducacion"),
+        habilidades: g("cvHabilidades"), motivacion: g("cvMotivacion"),
+        tipo_postulacion: document.getElementById("tipoPostulacion")?.value || "vendedor",
+        acepta_terminos: false
       }).select("id").single()
       if(post) _postulacionId = post.id
     } catch(_) { /* tabla aún no creada en Supabase, no bloquea el flujo */ }
@@ -226,8 +282,11 @@ function procesarArchivo(file) {
 }
 
 window.enviarPostulacionUpload = async function() {
-  if(!_userId) { location.href = "/registro.html?redirect=/vendedores.html"; return }
   if(!_archivoFile) return
+  if(!_userId) {
+    document.getElementById("popupRegistroCV").style.display = "flex"
+    return
+  }
 
   const msg = document.getElementById("msgUpload")
   const btn = document.getElementById("btnSubmitUpload")
