@@ -970,49 +970,147 @@ cargarOficioSemana()
 </script>
 
 
-<!-- BANNER PRODE MUNDIAL 2026 -->
-<div style="max-width:900px;margin:0 auto 16px;padding:0 24px;">
-  <a href="/mundial.html" style="
-    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
-    background:linear-gradient(135deg,#d97706 0%,#f59e0b 50%,#facc15 100%);
-    color:#1c1917;text-decoration:none;border-radius:18px;padding:18px 24px;
-    box-shadow:0 6px 28px rgba(250,204,21,0.40);transition:transform .2s,box-shadow .2s;"
-    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(250,204,21,0.55)'"
-    onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(250,204,21,0.40)'">
-    <div style="display:flex;align-items:center;gap:14px;">
-      <span style="font-size:36px;">⚽</span>
-      <div>
-        <div style="font-weight:900;font-size:16px;line-height:1.3;">¡Prode del Mundial 2026!</div>
-        <div style="font-size:13px;opacity:.80;margin-top:2px;">Compartí, seguinos y predecí los resultados · ¡100% gratis!</div>
-      </div>
-    </div>
-    <span style="background:rgba(28,25,23,0.12);border:1.5px solid rgba(28,25,23,0.25);border-radius:10px;padding:9px 18px;font-weight:700;font-size:14px;white-space:nowrap;">
-      ¡Jugar! <i class="fa-solid fa-arrow-right" style="margin-left:6px;font-size:12px;"></i>
-    </span>
-  </a>
+<!-- CÍRCULOS PUBLICIDAD + VENDEDORES -->
+<style>
+  .tc-circle-wrap { display:flex; justify-content:center; gap:24px; flex-wrap:wrap; padding:8px 24px 4px; max-width:900px; margin:0 auto; }
+  .tc-circle {
+    width:160px; height:160px; border-radius:50%; overflow:hidden; cursor:pointer;
+    box-shadow:0 6px 28px rgba(0,0,0,.22);
+    transition:transform .25s, box-shadow .25s;
+    position:relative; flex-shrink:0;
+    animation:tcPulse 2.8s ease-in-out infinite;
+  }
+  .tc-circle:nth-child(2){ animation-delay:.5s; }
+  .tc-circle:hover { transform:scale(1.07); box-shadow:0 14px 40px rgba(0,0,0,.32); animation:none; }
+  .tc-circle img { width:100%; height:100%; object-fit:cover; display:block; }
+  @keyframes tcPulse {
+    0%,100%{ transform:scale(1); box-shadow:0 6px 28px rgba(0,0,0,.22); }
+    50%{ transform:scale(1.04); box-shadow:0 10px 36px rgba(0,0,0,.32); }
+  }
+  @media(max-width:420px){
+    .tc-circle{ width:140px; height:140px; }
+    .tc-circle-wrap{ gap:16px; }
+  }
+
+  /* Popup publicidad */
+  #popupPublicidad {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.75);
+    z-index:9999; align-items:center; justify-content:center; padding:16px; overflow-y:auto;
+  }
+  #popupPublicidad.open { display:flex; }
+  .popup-pub-box {
+    background:white; border-radius:22px; max-width:480px; width:100%;
+    overflow:hidden; box-shadow:0 24px 80px rgba(0,0,0,.4); position:relative;
+  }
+  .popup-pub-header {
+    background:linear-gradient(135deg,#1e40af,#2563eb,#0ea5e9);
+    padding:24px 22px 18px; color:white; text-align:center;
+  }
+  .popup-pub-header h2 { margin:0 0 6px; font-size:20px; font-weight:900; }
+  .popup-pub-header p { margin:0; font-size:13px; opacity:.85; }
+  .popup-pub-body { padding:20px 22px; }
+  .pub-opciones { display:grid; gap:10px; margin-bottom:18px; }
+  .pub-opcion {
+    display:flex; align-items:center; gap:12px;
+    background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px 14px;
+  }
+  .pub-opcion-ico { font-size:26px; flex-shrink:0; }
+  .pub-opcion-txt strong { display:block; font-size:14px; font-weight:700; color:#1e293b; }
+  .pub-opcion-txt span { font-size:12px; color:#64748b; }
+  .pub-form input, .pub-form textarea {
+    width:100%; box-sizing:border-box; padding:10px 12px;
+    border:1.5px solid #e2e8f0; border-radius:10px; font-size:14px;
+    font-family:inherit; margin-bottom:10px; outline:none;
+  }
+  .pub-form input:focus, .pub-form textarea:focus { border-color:#2563eb; }
+  .btn-wa-pub {
+    width:100%; padding:13px; background:linear-gradient(135deg,#16a34a,#15803d);
+    color:white; border:none; border-radius:12px; font-size:15px; font-weight:800;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px;
+    transition:opacity .2s;
+  }
+  .btn-wa-pub:hover { opacity:.9; }
+  .btn-cerrar-pub {
+    position:absolute; top:12px; right:14px; background:rgba(255,255,255,.2);
+    border:none; color:white; border-radius:50%; width:30px; height:30px;
+    font-size:20px; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center;
+  }
+</style>
+
+<div class="tc-circle-wrap">
+  <!-- Círculo publicitar -->
+  <div class="tc-circle" onclick="document.getElementById('popupPublicidad').classList.add('open')" title="Publicitar en TC">
+    <img src="/publicar en tc.png" alt="¿Querés publicitar en TC?">
+  </div>
+  <!-- Círculo vendedor -->
+  <div class="tc-circle" onclick="location.href='/vendedores'" title="Ser vendedor de TC">
+    <img src="/vendedores.png" alt="¿Querés ser vendedor/a de TC?">
+  </div>
 </div>
 
-<!-- BANNER SORTEO -->
-<div style="max-width:900px;margin:0 auto;padding:0 24px;">
-  <a href="/sorteo.html" style="
-    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
-    background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#a855f7 100%);
-    color:white;text-decoration:none;border-radius:18px;padding:18px 24px;
-    box-shadow:0 6px 28px rgba(79,70,229,0.35);transition:transform .2s,box-shadow .2s;"
-    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 36px rgba(79,70,229,0.45)'"
-    onmouseout="this.style.transform='';this.style.boxShadow='0 6px 28px rgba(79,70,229,0.35)'">
-    <div style="display:flex;align-items:center;gap:14px;">
-      <span style="font-size:36px;">🏆</span>
-      <div>
-        <div style="font-weight:900;font-size:16px;line-height:1.3;">¡Sorteo especial — 30 de junio!</div>
-        <div style="font-size:13px;opacity:.88;margin-top:2px;">Compartí en Instagram y ganá 5 trabajos realizados gratis · 2 ganadores</div>
-      </div>
+<!-- POPUP PUBLICIDAD -->
+<div id="popupPublicidad" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="popup-pub-box">
+    <div class="popup-pub-header">
+      <button class="btn-cerrar-pub" onclick="document.getElementById('popupPublicidad').classList.remove('open')">×</button>
+      <div style="font-size:40px;margin-bottom:8px;">📣</div>
+      <h2>Publicitate en Trabajos Cerca</h2>
+      <p>Llegá a miles de personas que buscan servicios en tu zona</p>
     </div>
-    <span style="background:rgba(255,255,255,0.22);border:1.5px solid rgba(255,255,255,0.4);border-radius:10px;padding:9px 18px;font-weight:700;font-size:14px;white-space:nowrap;">
-      ¡Participar! <i class="fa-solid fa-arrow-right" style="margin-left:6px;font-size:12px;"></i>
-    </span>
-  </a>
+    <div class="popup-pub-body">
+      <div class="pub-opciones">
+        <div class="pub-opcion">
+          <div class="pub-opcion-ico">🖼️</div>
+          <div class="pub-opcion-txt">
+            <strong>Banners</strong>
+            <span>Tu imagen en la página principal y en los buscadores</span>
+          </div>
+        </div>
+        <div class="pub-opcion">
+          <div class="pub-opcion-ico">🎞️</div>
+          <div class="pub-opcion-txt">
+            <strong>GIF Animado</strong>
+            <span>Publicidad que llama la atención con movimiento</span>
+          </div>
+        </div>
+        <div class="pub-opcion">
+          <div class="pub-opcion-ico">🏷️</div>
+          <div class="pub-opcion-txt">
+            <strong>Ofertas destacadas</strong>
+            <span>Tu oferta o promoción visible en toda la plataforma</span>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:13px;font-weight:700;color:#475569;margin:0 0 10px;">Completá tus datos y te contactamos:</p>
+      <div class="pub-form">
+        <input type="text" id="pub-comercio" placeholder="Nombre de tu comercio o negocio *">
+        <input type="text" id="pub-nombre" placeholder="Tu nombre *">
+        <textarea id="pub-consulta" rows="3" placeholder="¿Qué tipo de publicidad te interesa? ¿Alguna pregunta?"></textarea>
+      </div>
+      <button class="btn-wa-pub" onclick="enviarConsultaPublicidad()">
+        <i class="fa-brands fa-whatsapp" style="font-size:20px;"></i> Enviar consulta por WhatsApp
+      </button>
+    </div>
+  </div>
 </div>
+
+<script>
+function enviarConsultaPublicidad() {
+  const comercio = document.getElementById("pub-comercio").value.trim()
+  const nombre   = document.getElementById("pub-nombre").value.trim()
+  const consulta = document.getElementById("pub-consulta").value.trim()
+  if(!comercio || !nombre) {
+    alert("Completá al menos el nombre del comercio y tu nombre.")
+    return
+  }
+  let msg = `Hola! Me interesa publicitar en Trabajos Cerca.\n\n`
+  msg += `🏪 *Comercio:* ${comercio}\n`
+  msg += `👤 *Nombre:* ${nombre}\n`
+  if(consulta) msg += `💬 *Consulta:* ${consulta}`
+  const url = `https://wa.me/5492954368999?text=${encodeURIComponent(msg)}`
+  window.open(url, "_blank")
+}
+</script>
 
 
 <!-- ══ OFICIO DE LA SEMANA ══ -->

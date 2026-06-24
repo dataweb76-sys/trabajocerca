@@ -635,6 +635,17 @@ async function init(){
     ${disponibleHtml}
     ${trabajosHtml}
 
+    <div id="editarPerfilSection" style="background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:2px solid #bfdbfe;border-radius:16px;padding:16px 18px;margin-bottom:20px;display:flex;align-items:center;gap:14px;">
+      <div style="font-size:36px;">✏️</div>
+      <div style="flex:1;">
+        <div style="font-weight:800;font-size:15px;color:#1e40af;margin-bottom:3px;">Completá tu perfil</div>
+        <div style="font-size:13px;color:#475569;line-height:1.4;">Agregá tu Instagram, TikTok, descripción y más datos para que te encuentren más fácil.</div>
+      </div>
+      <button onclick="document.getElementById('secDatosPerfil').scrollIntoView({behavior:'smooth'})" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">
+        Editar perfil
+      </button>
+    </div>
+    <div id="secDatosPerfil"></div>
     <h3 style="margin:0 0 16px;font-size:17px;">Mis datos</h3>
     <div class="grid-2col">
       <div><label>Nombre *</label><input id="editNombre" value="${esc(data.nombre)}"></div>
@@ -2319,7 +2330,7 @@ function mostrarBienvenida(userId) {
 
     // Verificar si ya tiene los datos obligatorios
     const { data: datosActuales } = await supabase.from("perfiles")
-      .select("nombre,apellido,localidad,provincia,movil").eq("id", userId).single()
+      .select("nombre,apellido,localidad,provincia,movil,foto").eq("id", userId).single()
 
     const faltanDatos = !datosActuales?.nombre || !datosActuales?.apellido ||
                         !datosActuales?.localidad || !datosActuales?.provincia || !datosActuales?.movil
@@ -2348,7 +2359,8 @@ function mostrarBienvenida(userId) {
       return
     }
 
-    await window._bvFinalizar()
+    // Siempre pedir foto — paso obligatorio
+    window._bvMostrarFoto(datosActuales?.foto || null)
   }
 
   window._bvAutoCP = async function(cp) {
@@ -2380,6 +2392,140 @@ function mostrarBienvenida(userId) {
     btn.disabled = true
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
     await supabase.from("perfiles").update({ nombre, apellido, movil, localidad, provincia }).eq("id", userId)
+    window._bvMostrarFoto()
+  }
+
+  window._bvMostrarFoto = function(fotoActual) {
+    const tipos = [...sel]
+    const tieneCV = tipos.includes("cv")
+    const tieneEmp = tipos.includes("emprendimiento")
+    const tienePro = tipos.includes("profesional")
+
+    let hint = "Subí una foto de perfil para que te reconozcan fácilmente."
+    if(tieneCV) hint = "Subí una foto tuya — es lo primero que ven los empleadores."
+    else if(tieneEmp) hint = "Subí el logo o imagen de tu emprendimiento."
+    else if(tienePro) hint = "Subí una foto tuya, de tu consultorio o tu oficina."
+    else hint = "Subí una foto tuya o una imagen que represente tu oficio."
+
+    const previewInner = fotoActual
+      ? `<img src="${fotoActual}" style="width:110px;height:110px;object-fit:cover;border-radius:50%;">`
+      : `<div style="color:#94a3b8;font-size:13px;text-align:center;line-height:1.4;padding:10px;"><i class="fa-solid fa-camera" style="font-size:28px;display:block;margin-bottom:6px;"></i>Tocar para subir</div>`
+
+    document.getElementById("bv-body").innerHTML = `
+      <div style="text-align:center;padding:10px 0 4px;">
+        <div id="bv-foto-preview" style="width:110px;height:110px;border-radius:50%;background:#f1f5f9;border:3px dashed #cbd5e1;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;overflow:hidden;cursor:pointer;" onclick="document.getElementById('bv-foto-input').click()">
+          ${previewInner}
+        </div>
+        <p style="font-size:12px;color:#94a3b8;margin:0 0 4px;">Tocá el círculo para cambiar la foto</p>
+        <p style="font-size:13px;color:#64748b;margin:0 0 4px;">${hint}</p>
+        <p style="font-size:11px;color:#94a3b8;margin:0;">JPG o PNG, máx. 5MB</p>
+        <input type="file" id="bv-foto-input" accept="image/*" style="display:none;" onchange="window._bvPrevisualizarFoto(this)">
+      </div>`
+    document.getElementById("bv-btn").disabled = false
+    document.getElementById("bv-btn").innerHTML = fotoActual ? 'Usar esta foto y continuar →' : 'Continuar con foto →'
+    document.getElementById("bv-btn").onclick = () => window._bvGuardarFoto(fotoActual)
+  }
+
+  window._bvPrevisualizarFoto = function(input) {
+    const file = input.files[0]; if(!file) return
+    const reader = new FileReader()
+    reader.onload = e => {
+      document.getElementById("bv-foto-preview").innerHTML =
+        `<img src="${e.target.result}" style="width:110px;height:110px;object-fit:cover;border-radius:50%;">`
+      document.getElementById("bv-btn").innerHTML = 'Continuar con foto →'
+    }
+    reader.readAsDataURL(file)
+  }
+
+  window._bvGuardarFoto = async function(fotoActual) {
+    const input = document.getElementById("bv-foto-input")
+    const btn = document.getElementById("bv-btn")
+    const msg = document.getElementById("bv-msg")
+    const file = input?.files?.[0]
+
+    if(!file && !fotoActual) {
+      msg.innerHTML = '<p style="color:#dc2626;font-size:13px;margin:8px 0 0;">La foto es obligatoria. Tocá el círculo para subir una imagen.</p>'
+      return
+    }
+    msg.innerHTML = ''
+
+    if(file) {
+      if(file.size > 5 * 1024 * 1024) {
+        msg.innerHTML = '<p style="color:#dc2626;font-size:13px;margin:8px 0 0;">La imagen es demasiado grande. Máximo 5MB.</p>'
+        return
+      }
+      btn.disabled = true
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Subiendo foto...'
+      const name = `perfil_${userId}_${Date.now()}`
+      const { error } = await supabase.storage.from("trabajos").upload(name, file, { upsert: true })
+      if(error) {
+        msg.innerHTML = `<p style="color:#dc2626;font-size:13px;margin:8px 0 0;">Error al subir: ${error.message}</p>`
+        btn.disabled = false
+        btn.innerHTML = 'Continuar con foto →'
+        return
+      }
+      const { data: urlData } = supabase.storage.from("trabajos").getPublicUrl(name)
+      await supabase.from("perfiles").update({ foto: urlData.publicUrl }).eq("id", userId)
+    }
+
+    window._bvMostrarDatosExtra()
+  }
+
+  window._bvMostrarDatosExtra = function() {
+    const tipos = [...sel]
+    const tieneEmp = tipos.includes("emprendimiento")
+    const tienePro = tipos.includes("profesional")
+    const tieneCV  = tipos.includes("cv")
+
+    let descPlaceholder = "Contá brevemente qué hacés y cómo trabajás..."
+    if(tieneCV)  descPlaceholder = "Resumí tu experiencia y lo que buscás laboralmente..."
+    if(tieneEmp) descPlaceholder = "Describí tu emprendimiento, qué ofrecés y a quién va dirigido..."
+    if(tienePro) descPlaceholder = "Describí tu especialidad, experiencia y cómo atendés..."
+
+    const empFields = tieneEmp ? `
+      <input id="bv-empresa" placeholder="Nombre de tu emprendimiento *" style="padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
+    ` : ''
+
+    document.getElementById("bv-body").innerHTML = `
+      <p style="font-size:13px;color:#64748b;margin:0 0 14px;text-align:center;">Completá tu perfil para que te encuentren más fácil:</p>
+      <div style="display:grid;gap:10px;">
+        ${empFields}
+        <div style="position:relative;">
+          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#e1306c;font-size:16px;pointer-events:none;"><i class="fa-brands fa-instagram"></i></span>
+          <input id="bv-instagram" placeholder="Instagram (ej: @tunombre)" style="padding:10px 12px 10px 36px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
+        </div>
+        <div style="position:relative;">
+          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#010101;font-size:16px;pointer-events:none;"><i class="fa-brands fa-tiktok"></i></span>
+          <input id="bv-tiktok" placeholder="TikTok (ej: @tunombre)" style="padding:10px 12px 10px 36px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;width:100%;box-sizing:border-box;">
+        </div>
+        <textarea id="bv-descripcion" placeholder="${descPlaceholder}" rows="3" style="padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;resize:vertical;width:100%;box-sizing:border-box;"></textarea>
+        <p style="font-size:11px;color:#94a3b8;margin:0;text-align:center;">Estos datos se muestran en tu perfil público. Podés completarlos ahora o después.</p>
+      </div>`
+    document.getElementById("bv-btn").disabled = false
+    document.getElementById("bv-btn").innerHTML = 'Guardar y finalizar →'
+    document.getElementById("bv-btn").onclick = window._bvGuardarDatosExtra
+  }
+
+  window._bvGuardarDatosExtra = async function() {
+    const btn = document.getElementById("bv-btn")
+    btn.disabled = true
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...'
+
+    const instagram = document.getElementById("bv-instagram")?.value.trim() || null
+    const tiktok    = document.getElementById("bv-tiktok")?.value.trim() || null
+    const bio       = document.getElementById("bv-descripcion")?.value.trim() || null
+    const empresa   = document.getElementById("bv-empresa")?.value.trim() || null
+
+    const payload = {}
+    if(instagram) payload.instagram = instagram
+    if(tiktok)    payload.tiktok = tiktok
+    if(bio)       payload.descripcion = bio
+    if(empresa)   payload.nombre_empresa = empresa
+
+    if(Object.keys(payload).length) {
+      await supabase.from("perfiles").update(payload).eq("id", userId)
+    }
+
     await window._bvFinalizar()
   }
 

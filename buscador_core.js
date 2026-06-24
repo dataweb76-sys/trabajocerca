@@ -398,8 +398,8 @@ window.buscar = async function(){
   if(TIPO === "profesional"){
     data = data.filter(d => {
       const tipos = (d.perfiles?.tipo || "").split(",").map(t => t.trim())
-      // CSV multi-tipo: si tiene "profesional" explícito en su lista
-      if(tipos.length > 1 && tipos.includes("profesional")) return true
+      // Si tiene "profesional" en su tipo → siempre aparece
+      if(tipos.includes("profesional")) return true
       // Lógica original por categoría (backwards compatible)
       return esProfesionalUni(d)
     })
@@ -411,7 +411,8 @@ window.buscar = async function(){
       // CSV multi-tipo: si tiene "oficio" explícito en su lista adicional
       if(tipos.length > 1 && tipos.includes("oficio")) return true
       // Excluir empresa/emprendimiento/cv y profesionales
-      if(tipoPrimario === "empresa" || tipoPrimario === "emprendimiento" || tipoPrimario === "cv") return false
+      if(tipoPrimario === "empresa" || tipoPrimario === "emprendimiento" || tipoPrimario === "cv" || tipoPrimario === "profesional") return false
+      if(tipos.includes("profesional") && !tipos.includes("oficio")) return false
       return !esProfesionalUni(d)
     })
   }
