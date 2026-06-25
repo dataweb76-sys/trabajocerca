@@ -221,18 +221,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1923;color:#1e293
 
 <!-- PORTADA -->
 <div class="portada">
-  <img src="/fixturemundial.png" alt="Fixture Mundial 2026 — trabajoscerca.com.ar">
-  <div class="portada-btns">
-    <button class="btn-portada btn-imprimir" onclick="window.print()">
-      <i class="fa-solid fa-print"></i> Imprimir
-    </button>
-    <button class="btn-portada btn-descargar" onclick="descargarFixture()">
-      <i class="fa-solid fa-download"></i> Descargar PDF
-    </button>
-    <a href="/mundial.html" class="btn-portada btn-mundial">
-      <i class="fa-solid fa-trophy"></i> Jugar al Prode
-    </a>
-  </div>
+  <img src="/fixturemundial.png" alt="Fixture Mundial 2026 — trabajoscerca.com.ar" onerror="this.parentElement.style.minHeight='0'">
 </div>
 
 <div class="contenedor">
@@ -245,6 +234,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1923;color:#1e293
     <button class="fase-tab" onclick="setFase('cuartos')">Cuartos</button>
     <button class="fase-tab" onclick="setFase('semis')">Semis</button>
     <button class="fase-tab" onclick="setFase('final')">⭐ Final</button>
+  </div>
+
+  <!-- BOTONES ACCION -->
+  <div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:10px 16px;background:#0f1923;">
+    <button class="btn-portada btn-imprimir" onclick="window.print()" style="font-size:13px;padding:8px 16px;">
+      <i class="fa-solid fa-print"></i> Imprimir
+    </button>
+    <button class="btn-portada btn-descargar" onclick="descargarFixture()" style="font-size:13px;padding:8px 16px;">
+      <i class="fa-solid fa-download"></i> Descargar PDF
+    </button>
+    <a href="/mundial.html" class="btn-portada btn-mundial" style="font-size:13px;padding:8px 16px;">
+      <i class="fa-solid fa-trophy"></i> Jugar al Prode
+    </a>
   </div>
 
   <!-- HOY -->
@@ -446,29 +448,113 @@ function renderHoy(){
 }
 
 // ── GRUPO ──
+// Busca en _datos.partidos el resultado real para un partido de Supabase
+function buscarResultadoAPI(p){
+  if(!_datos?.partidos) return null
+  const nom1 = (_equipos[p.equipo_local_id]?.nombre || p.desc_local || "").toLowerCase().slice(0,5)
+  const nom2 = (_equipos[p.equipo_visitante_id]?.nombre || p.desc_visitante || "").toLowerCase().slice(0,5)
+  if(!nom1 || !nom2) return null
+  return _datos.partidos.find(ap => {
+    const l = (ap.localNombre||"").toLowerCase()
+    const v = (ap.visitanteNombre||"").toLowerCase()
+    return (l.includes(nom1) && v.includes(nom2)) || (v.includes(nom1) && l.includes(nom2))
+  }) || null
+}
+
 function renderGrupo(g){
   const el = document.getElementById("contenidoGrupo")
 
-  // Priorizar datos del API (tienen resultados reales)
-  if(_datos?.partidos){
-    const pts = _datos.partidos.filter(p => (p.grupo||"").toUpperCase() === g)
-    if(pts.length){
-      const tablaHtml = renderTablaGrupoAPI(pts, g)
-      el.innerHTML = `<div class="match-grid">${pts.map(p => cardPartidoAPI(p)).join("")}</div>${tablaHtml}`
-      return
-    }
-  }
-
-  // Fallback: datos de Supabase
+  // Partidos de Supabase (tienen el campo grupo)
   const pts = _partidos.filter(p => p.grupo === g && p.fase === "grupo")
+
   if(!pts.length){
-    el.innerHTML = `<div style="color:rgba(255,255,255,.4);text-align:center;padding:30px;">
-      No hay datos para el Grupo ${g}.
-    </div>`
+    el.innerHTML = `<div style="color:rgba(255,255,255,.4);text-align:center;padding:30px;">No hay datos para el Grupo ${g}.</div>`
     return
   }
-  const tabla = calcularTabla(pts, g)
-  el.innerHTML = `<div class="match-grid">${pts.map(p => cardPartidoDB(p)).join("")}</div>${renderTablaGrupo(tabla,g)}`
+
+  // Tabla: si API tiene grupos ya calculados, usarlos directo
+  let tablaHtml = ""
+  if(_datos?.grupos?.[g]){
+    tablaHtml = renderTablaGrupoDesdeAPI(g)
+  } else {
+    const tabla = calcularTabla(pts, g)
+    tablaHtml = renderTablaGrupo(tabla, g)
+  }
+
+  // Cards: Supabase + resultado real del API cruzado por nombre
+  el.innerHTML = `<div class="match-grid">${pts.map(p => cardPartidoEnriquecido(p)).join("")}</div>${tablaHtml}`
+}
+
+// Card que mezcla estructura Supabase (grupo/jornada) con resultado real del API
+function cardPartidoEnriquecido(p){
+  const ap = buscarResultadoAPI(p)
+  const eq1 = _equipos[p.equipo_local_id] || null
+  const eq2 = _equipos[p.equipo_visitante_id] || null
+  const nom1 = eq1?.nombre || p.desc_local || "Por definir"
+  const nom2 = eq2?.nombre || p.desc_visitante || "Por definir"
+
+  const terminado = ap?.estado === "FT" || p.completado || (p.goles_local !== null && p.goles_visitante !== null)
+  const enVivo    = ap?.estado === "LIVE"
+  const gl = ap?.estado === "FT" || ap?.estado === "LIVE" ? ap.golesL : (p.goles_local ?? null)
+  const gv = ap?.estado === "FT" || ap?.estado === "LIVE" ? ap.golesV : (p.goles_visitante ?? null)
+  const ganL = terminado && gl > gv
+  const ganV = terminado && gv > gl
+
+  const badge = terminado ? `<span class="badge-cerrado">Final</span>`
+              : enVivo   ? `<span class="badge-cerrado" style="background:#dc2626;">🔴 EN VIVO</span>`
+              : `<span class="badge-abierto">⏱ ${ap?.hora || p.hora || "Próximo"}</span>`
+
+  const scoreHtml = terminado || enVivo
+    ? `<div class="match-score">${gl} — ${gv}</div>`
+    : `<div class="match-score pending">vs</div>`
+
+  // Logo: preferir del API si tiene, sino bandera del equipo
+  const logoL = ap?.localNombre?.toLowerCase() === nom1.toLowerCase() ? ap?.localLogo : ap?.visitanteLogo
+  const logoV = ap?.localNombre?.toLowerCase() === nom1.toLowerCase() ? ap?.visitanteLogo : ap?.localLogo
+  const imgL = logoL ? `<img src="${logoL}" style="width:30px;height:22px;object-fit:contain;" onerror="this.style.display='none'">` : flagHtml(eq1,28)
+  const imgV = logoV ? `<img src="${logoV}" style="width:30px;height:22px;object-fit:contain;" onerror="this.style.display='none'">` : flagHtml(eq2,28)
+
+  return `<div class="match-card ${terminado?'terminado':enVivo?'vivo':''}">
+    <div class="match-meta">
+      <span class="match-jornada">Grupo ${p.grupo} · J${p.jornada||""}</span>
+      ${badge}
+    </div>
+    <div class="match-equipos">
+      <div class="match-equipo" style="${ganL?'color:#22c55e;font-weight:900;':''}">
+        ${imgL}<span>${nom1}</span>
+      </div>
+      ${scoreHtml}
+      <div class="match-equipo" style="${ganV?'color:#22c55e;font-weight:900;':''}">
+        ${imgV}<span>${nom2}</span>
+      </div>
+    </div>
+    <div class="match-sede" style="font-size:11px;color:#64748b;">${p.sede||p.estadio||""}</div>
+  </div>`
+}
+
+// Tabla usando _datos.grupos (ya calculado por el API de canchallena)
+function renderTablaGrupoDesdeAPI(g){
+  const tabla = _datos.grupos[g]
+  if(!tabla?.length) return ""
+  return `<div class="tabla-grupo" style="margin:10px 0;">
+    <table><thead><tr>
+      <th>#</th><th>Pts</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th>
+    </tr></thead><tbody>
+      ${tabla.map((t,i)=>{
+        const pos = i===0?`<span class="pos-badge pos-1">1</span>`:i===1?`<span class="pos-badge pos-2">2</span>`:i===2?`<span class="pos-badge pos-3">3</span>`:`<span class="pos-badge pos-4">4</span>`
+        const logo = t.logo ? `<img src="${t.logo}" style="width:18px;height:14px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.style.display='none'">` : ""
+        return `<tr><td>${pos} ${logo}${t.equipo}</td>
+          <td><strong>${t.pts}</strong></td><td>${t.pj}</td><td>${t.pg}</td>
+          <td>${t.pe}</td><td>${t.pp}</td><td>${t.gf}</td><td>${t.gc}</td>
+          <td>${t.dg}</td></tr>`
+      }).join("")}
+    </tbody></table>
+    <div style="padding:8px 12px;font-size:10px;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;">
+      <span><span class="pos-badge pos-1" style="width:14px;height:14px;font-size:8px;">1</span> Clasifica</span>
+      <span><span class="pos-badge pos-2" style="width:14px;height:14px;font-size:8px;">2</span> Clasifica</span>
+      <span><span class="pos-badge pos-3" style="width:14px;height:14px;font-size:8px;">3</span> Mejor 3ro</span>
+    </div>
+  </div>`
 }
 
 // ── CARD con datos del API (resultados en tiempo real) ──
@@ -751,7 +837,7 @@ function cardKnockout(p){
   const eq2 = _equipos[p.equipo_visitante_id] || null
   const nom1 = eq1?.nombre || p.desc_local || "Por definir"
   const nom2 = eq2?.nombre || p.desc_visitante || "Por definir"
-  const terminado = p.completado || (p.goles_local !== null && p.goles_visitante !== null)
+  const terminado = p.completado === true
   const score = terminado ? `${p.goles_local} — ${p.goles_visitante}` : "vs"
   const ganador = terminado ? (p.goles_local > p.goles_visitante ? p.equipo_local_id : p.goles_visitante > p.goles_local ? p.equipo_visitante_id : null) : null
   let scoreKO
