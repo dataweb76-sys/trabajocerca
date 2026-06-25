@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fixture Mundial 2026 — trabajoscerca.com.ar</title>
 <link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -12,7 +13,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1923;color:#1e293
 
 /* ── PORTADA ── */
 .portada{
-  position:relative;width:100%;max-height:340px;overflow:hidden;cursor:pointer;
+  position:relative;width:100%;max-height:400px;min-height:120px;overflow:hidden;cursor:pointer;
   display:block;
 }
 .portada img{width:100%;display:block;object-fit:cover;max-height:340px;}
@@ -193,16 +194,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1923;color:#1e293
 /* ── PRINT ── */
 @media print{
   body{background:white;color:#000;}
-  .fase-tabs,.grupo-tabs,.portada-btns,.btn-portada,
+  .topbar,.fase-tabs,.grupo-tabs,.portada-btns,.btn-portada,
   .no-print{display:none!important;}
+  .portada{display:block!important;max-height:none;page-break-after:always;}
+  .portada img{display:block!important;width:100%;max-height:320px;object-fit:contain;}
   .hoy-wrap{background:#f8fafc;border-radius:8px;}
   .bracket-fase-titulo{background:#f1f5f9;color:#1e293b;}
   .seccion-titulo{color:#374151;}
   .pie-marca{background:#f1f5f9;color:#374151;}
   .pie-marca strong{color:#1e293b;}
   .match-card,.tabla-grupo,.bracket-match{break-inside:avoid;}
+  .match-card{background:#f8fafc!important;border:1px solid #e2e8f0;}
+  .match-score,.match-equipo,.match-jornada,.match-sede{color:#0f172a!important;}
+  .badge-cerrado{background:#15803d!important;}
   .bracket{min-width:100%;}
-  @page{margin:15mm;size:A4 landscape;}
+  @page{margin:12mm;size:A4 landscape;}
 }
 
 /* ── LOADING ── */
@@ -219,9 +225,24 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1923;color:#1e293
 </head>
 <body>
 
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo"></div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="/" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:white;text-decoration:none;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:800;white-space:nowrap;">
+      🏠 Inicio
+    </a>
+    <a href="/mundial.html" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:white;text-decoration:none;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:800;white-space:nowrap;">
+      🏆 Prode
+    </a>
+  </div>
+</header>
+
 <!-- PORTADA -->
 <div class="portada">
-  <img src="/fixturemundial.png" alt="Fixture Mundial 2026 — trabajoscerca.com.ar" onerror="this.parentElement.style.minHeight='0'">
+  <img src="/fixturemundial.png" alt="Fixture Mundial 2026 — trabajoscerca.com.ar"
+    style="width:100%;display:block;object-fit:cover;max-height:400px;"
+    onerror="this.parentElement.style.display='none'">
 </div>
 
 <div class="contenedor">

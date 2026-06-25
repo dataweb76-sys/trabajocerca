@@ -21,7 +21,13 @@ export default async function handler(req, res) {
       fetch(`${BASE}/goleadores/`, { headers: HDR }).then(r => r.text()),
     ])
 
-    const partidos   = extraerPartidos(htmlFix)
+    const partidosFix = extraerPartidos(htmlFix)
+    const partidosGrupos = extraerPartidosDeGrupos(htmlGrupos)
+    // Combinar: preferir fixture (más actualizado), complementar con grupos
+    const vistos = new Set(partidosFix.map(p => `${p.local}|${p.visitante}`))
+    const extra  = partidosGrupos.filter(p => !vistos.has(`${p.local}|${p.visitante}`))
+    const partidos = [...partidosFix, ...extra]
+
     const grupos     = extraerGrupos(htmlGrupos)
     const goleadores = extraerGoleadores(htmlGol)
 
@@ -91,6 +97,49 @@ function extraerPartidos(html) {
     })
   })
 
+  return partidos
+}
+
+/* ── Partidos desde página de grupos (tiene resultados históricos) ─────── */
+function extraerPartidosDeGrupos(html) {
+  const state = getPreloadedState(html)
+  const partidos = []
+
+  // Buscar en diferentes lugares posibles del state de canchallena
+  const fuentes = [
+    state?.fixtureReducer?.fixtureData?.fixture?.dayMatchesData,
+    state?.matchesReducer?.matchesData?.dayMatchesData,
+    state?.groupsReducer?.matchesData?.dayMatchesData,
+  ].filter(Boolean)
+
+  for (const days of fuentes) {
+    days.forEach(day => {
+      const fecha = day.dataHeader?.text || day.dataHeader?.title || ''
+      ;(day.tableBody || []).forEach(m => {
+        const home = m.homeTeam || {}
+        const away = m.awayTeam || {}
+        const status = m.matchStatus
+        const terminado = status === '1' || m.postGameText === 'Final' ||
+          (m.score?.homeTeam?.goals != null && m.score?.awayTeam?.goals != null && status !== '0' && status !== '3')
+        const enVivo = status === '3' || status === '2'
+        partidos.push({
+          fecha,
+          local: home.code || home.name || '?',
+          localNombre: home.name || '',
+          localLogo: home.imgProps?.src || '',
+          golesL: terminado || enVivo ? parseInt(m.score?.homeTeam?.goals ?? home.score ?? '') : null,
+          golesV: terminado || enVivo ? parseInt(m.score?.awayTeam?.goals ?? away.score ?? '') : null,
+          visitante: away.code || away.name || '?',
+          visitanteNombre: away.name || '',
+          visitanteLogo: away.imgProps?.src || '',
+          hora: m.matchDateUTC ? new Date(m.matchDateUTC).toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit', timeZone:'America/Argentina/Buenos_Aires' }) : '',
+          fechaISO: m.matchDateUTC || '',
+          estado: terminado ? 'FT' : enVivo ? 'LIVE' : 'PRG',
+          matchId: m.matchId || '',
+        })
+      })
+    })
+  }
   return partidos
 }
 
