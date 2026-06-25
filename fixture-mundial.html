@@ -809,6 +809,20 @@ const BRACKET_16AVOS = [
   ["Mej.3ro","Mej.3ro"],["Mej.3ro","Mej.3ro"],
 ]
 
+// Convierte "1A" → equipo real del grupo A posición 1 (si ya se calcularon standings)
+function resolverPlaceholder(placeholder){
+  const m = placeholder.match(/^([12])([A-L])$/)
+  if(m && _datos?.grupos){
+    const pos = parseInt(m[1]) - 1
+    const grupo = m[2]
+    const lista = _datos.grupos[grupo]
+    if(lista && lista[pos]){
+      return { nombre: lista[pos].equipo, logo: lista[pos].logo || "", resuelto: true }
+    }
+  }
+  return { nombre: placeholder, logo: "", resuelto: false }
+}
+
 // ── KNOCKOUT ──
 function renderKnockout(fase, elId){
   const el = document.getElementById(elId)
@@ -832,20 +846,27 @@ function renderKnockout(fase, elId){
     }
   }
 
-  // Sin datos del API: mostrar estructura según fase, sin inventar nada
+  // Sin datos del API: mostrar estructura con equipos reales si los grupos están listos
   if(fase === "octavos"){
-    el.innerHTML = BRACKET_16AVOS.map(([l,v], i) => `
-      <div class="match-card">
+    el.innerHTML = BRACKET_16AVOS.map(([lPlaceholder, vPlaceholder], i) => {
+      const eqL = resolverPlaceholder(lPlaceholder)
+      const eqV = resolverPlaceholder(vPlaceholder)
+      const imgL = eqL.logo ? `<img src="${eqL.logo}" style="width:26px;height:20px;object-fit:contain;" onerror="this.style.display='none'">` : ""
+      const imgV = eqV.logo ? `<img src="${eqV.logo}" style="width:26px;height:20px;object-fit:contain;" onerror="this.style.display='none'">` : ""
+      const colorL = eqL.resuelto ? "color:#1e293b;font-weight:800;" : "color:#94a3b8;font-weight:700;"
+      const colorV = eqV.resuelto ? "color:#1e293b;font-weight:800;" : "color:#94a3b8;font-weight:700;"
+      return `<div class="match-card">
         <div class="match-meta">
           <span class="match-jornada">16avos de Final · Partido ${i+1}</span>
           <span class="badge-abierto">Por definir</span>
         </div>
         <div class="match-equipos">
-          <div class="match-equipo"><span style="font-size:13px;color:#94a3b8;font-weight:700;">${l}</span></div>
+          <div class="match-equipo">${imgL}<span style="${colorL}">${eqL.nombre}</span></div>
           <div class="match-score pending">vs</div>
-          <div class="match-equipo"><span style="font-size:13px;color:#94a3b8;font-weight:700;">${v}</span></div>
+          <div class="match-equipo">${imgV}<span style="${colorV}">${eqV.nombre}</span></div>
         </div>
-      </div>`).join("")
+      </div>`
+    }).join("")
     return
   }
 
