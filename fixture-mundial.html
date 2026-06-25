@@ -448,29 +448,105 @@ function renderHoy(){
 // ── GRUPO ──
 function renderGrupo(g){
   const el = document.getElementById("contenidoGrupo")
-  // Buscar partidos del grupo en la DB y en _datos
-  let pts = _partidos.filter(p => p.grupo === g && p.fase === "grupo")
 
-  // Si no hay en DB, buscar en _datos.partidos
-  if(!pts.length && _datos?.partidos){
-    pts = _datos.partidos.filter(p => (p.grupo||"").toUpperCase() === g)
+  // Priorizar datos del API (tienen resultados reales)
+  if(_datos?.partidos){
+    const pts = _datos.partidos.filter(p => (p.grupo||"").toUpperCase() === g)
+    if(pts.length){
+      const tablaHtml = renderTablaGrupoAPI(pts, g)
+      el.innerHTML = `<div class="match-grid">${pts.map(p => cardPartidoAPI(p)).join("")}</div>${tablaHtml}`
+      return
+    }
   }
 
+  // Fallback: datos de Supabase
+  const pts = _partidos.filter(p => p.grupo === g && p.fase === "grupo")
   if(!pts.length){
     el.innerHTML = `<div style="color:rgba(255,255,255,.4);text-align:center;padding:30px;">
-      No hay datos para el Grupo ${g}.<br><a href="/mundial.html" style="color:#22c55e;font-size:13px;margin-top:8px;display:inline-block;">Ir al Prode para ver el fixture completo →</a>
+      No hay datos para el Grupo ${g}.
     </div>`
     return
   }
-
-  // Calcular tabla del grupo
   const tabla = calcularTabla(pts, g)
-  const tablaHtml = renderTablaGrupo(tabla, g)
+  el.innerHTML = `<div class="match-grid">${pts.map(p => cardPartidoDB(p)).join("")}</div>${renderTablaGrupo(tabla,g)}`
+}
 
-  el.innerHTML = `
-    <div class="match-grid">${pts.map(p => cardPartidoDB(p)).join("")}</div>
-    ${tablaHtml}
-  `
+// ── CARD con datos del API (resultados en tiempo real) ──
+function cardPartidoAPI(p){
+  const terminado = p.estado === "FT"
+  const enVivo    = p.estado === "LIVE"
+  const score     = terminado||enVivo ? `${p.golesL} — ${p.golesV}` : (p.hora ? `${p.hora}hs` : "vs")
+  const badge     = terminado ? `<span class="badge-cerrado">Final</span>`
+                  : enVivo   ? `<span class="badge-cerrado" style="background:#dc2626;">🔴 EN VIVO</span>`
+                  :            `<span class="badge-abierto">⏱ ${p.hora||"Próximo"}hs</span>`
+  const clase     = terminado?"terminado":enVivo?"vivo":""
+
+  const imgL = p.localLogo
+    ? `<img src="${p.localLogo}" style="width:30px;height:22px;object-fit:contain;" onerror="this.style.display='none'">`
+    : `<span style="font-size:22px;">🏳️</span>`
+  const imgV = p.visitanteLogo
+    ? `<img src="${p.visitanteLogo}" style="width:30px;height:22px;object-fit:contain;" onerror="this.style.display='none'">`
+    : `<span style="font-size:22px;">🏳️</span>`
+
+  const nomL = p.localNombre || p.local || "–"
+  const nomV = p.visitanteNombre || p.visitante || "–"
+  const scoreClass = terminado||enVivo ? "match-score" : "match-score pending"
+  const ganL = terminado && p.golesL > p.golesV
+  const ganV = terminado && p.golesV > p.golesL
+
+  return `<div class="match-card ${clase}">
+    <div class="match-meta">
+      <span class="match-jornada">Grupo ${p.grupo||""} · ${p.fecha||""}</span>
+      ${badge}
+    </div>
+    <div class="match-equipos">
+      <div class="match-equipo" style="${ganL?'color:#22c55e;font-weight:900;':''}">
+        ${imgL}<span>${nomL}</span>
+      </div>
+      <div class="${scoreClass}">${score}</div>
+      <div class="match-equipo" style="${ganV?'color:#22c55e;font-weight:900;':''}">
+        ${imgV}<span>${nomV}</span>
+      </div>
+    </div>
+    <div class="match-sede" style="font-size:11px;color:#64748b;">${p.ciudad||p.sede||""}</div>
+  </div>`
+}
+
+// ── TABLA usando datos del API ──
+function renderTablaGrupoAPI(pts, grupo){
+  const equipos = {}
+  pts.forEach(p => {
+    const nomL = p.localNombre||p.local, nomV = p.visitanteNombre||p.visitante
+    const logoL = p.localLogo, logoV = p.visitanteLogo
+    if(nomL && !equipos[nomL]) equipos[nomL] = { nombre:nomL, logo:logoL, pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0 }
+    if(nomV && !equipos[nomV]) equipos[nomV] = { nombre:nomV, logo:logoV, pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0 }
+    if(p.estado !== "FT") return
+    const gl = parseInt(p.golesL), gv = parseInt(p.golesV)
+    if(isNaN(gl)||isNaN(gv)) return
+    if(equipos[nomL]){ const t=equipos[nomL]; t.pj++;t.gf+=gl;t.gc+=gv; if(gl>gv){t.pg++;t.pts+=3}else if(gl===gv){t.pe++;t.pts++}else t.pp++ }
+    if(equipos[nomV]){ const t=equipos[nomV]; t.pj++;t.gf+=gv;t.gc+=gl; if(gv>gl){t.pg++;t.pts+=3}else if(gl===gv){t.pe++;t.pts++}else t.pp++ }
+  })
+  const tabla = Object.values(equipos).sort((a,b)=>b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf)
+  if(!tabla.length) return ""
+  return `<div class="tabla-grupo" style="margin:10px 0;">
+    <table><thead><tr>
+      <th>#</th><th>Pts</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th>
+    </tr></thead><tbody>
+      ${tabla.map((t,i)=>{
+        const pos=i===0?`<span class="pos-badge pos-1">1</span>`:i===1?`<span class="pos-badge pos-2">2</span>`:i===2?`<span class="pos-badge pos-3">3</span>`:`<span class="pos-badge pos-4">4</span>`
+        const logo = t.logo ? `<img src="${t.logo}" style="width:18px;height:14px;object-fit:contain;margin-right:4px;vertical-align:middle;" onerror="this.style.display='none'">` : ""
+        return `<tr><td>${pos} ${logo}${t.nombre}</td>
+          <td><strong>${t.pts}</strong></td><td>${t.pj}</td><td>${t.pg}</td>
+          <td>${t.pe}</td><td>${t.pp}</td><td>${t.gf}</td><td>${t.gc}</td>
+          <td>${t.gf-t.gc>0?"+":""}${t.gf-t.gc}</td></tr>`
+      }).join("")}
+    </tbody></table>
+    <div style="padding:8px 12px;font-size:10px;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;">
+      <span><span class="pos-badge pos-1" style="width:14px;height:14px;font-size:8px;">1</span> Clasifica</span>
+      <span><span class="pos-badge pos-2" style="width:14px;height:14px;font-size:8px;">2</span> Clasifica</span>
+      <span><span class="pos-badge pos-3" style="width:14px;height:14px;font-size:8px;">3</span> Mejor 3ro</span>
+    </div>
+  </div>`
 }
 
 const FIFA_ISO = {
@@ -615,9 +691,20 @@ function renderTablaGrupo(tabla, grupo){
 // ── KNOCKOUT ──
 function renderKnockout(fase, elId){
   const el = document.getElementById(elId)
-  const mapa = { octavos:"octavos", cuartos:"cuartos", semis:"semis", final:"final", tercero:"tercero" }
-  const pts = _partidos.filter(p => p.fase === mapa[fase])
 
+  // Intentar con datos del API primero
+  if(_datos?.partidos){
+    const fasesAPI = { octavos:["octavos","16avos","16","R16"], cuartos:["cuartos","QF"], semis:["semis","semi","SF"], final:["final","F"], tercero:["tercero","3P"] }
+    const claves = fasesAPI[fase] || [fase]
+    const pts = _datos.partidos.filter(p => claves.some(c => (p.fase||p.ronda||"").toLowerCase().includes(c.toLowerCase())))
+    if(pts.length){
+      el.innerHTML = pts.map(p => cardKnockoutAPI(p)).join("")
+      return
+    }
+  }
+
+  // Fallback: Supabase
+  const pts = _partidos.filter(p => p.fase === fase)
   if(!pts.length){
     el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:rgba(255,255,255,.4);">
       <i class="fa-solid fa-lock" style="font-size:28px;display:block;margin-bottom:10px;opacity:.4;"></i>
@@ -626,6 +713,37 @@ function renderKnockout(fase, elId){
     return
   }
   el.innerHTML = pts.map(p => cardKnockout(p)).join("")
+}
+
+function cardKnockoutAPI(p){
+  const terminado = p.estado === "FT"
+  const enVivo    = p.estado === "LIVE"
+  const score     = terminado||enVivo ? `${p.golesL} — ${p.golesV}` : "vs"
+  const ganL = terminado && p.golesL > p.golesV
+  const ganV = terminado && p.golesV > p.golesL
+  const badge = terminado ? `<span class="badge-cerrado">Final</span>`
+              : enVivo   ? `<span class="badge-cerrado" style="background:#dc2626;">🔴 EN VIVO</span>`
+              :            `<span class="badge-abierto">Próximo</span>`
+
+  const imgL = p.localLogo ? `<img src="${p.localLogo}" style="width:30px;height:22px;object-fit:contain;" onerror="this.style.display='none'">` : `<span style="font-size:22px;">🏳️</span>`
+  const imgV = p.visitanteLogo ? `<img src="${p.visitanteLogo}" style="width:30px;height:22px;object-fit:contain;" onerror="this.style.display='none'">` : `<span style="font-size:22px;">🏳️</span>`
+
+  return `<div class="match-card ${terminado?'terminado':enVivo?'vivo':''}">
+    <div class="match-meta">
+      <span class="match-jornada">${faseLegible(p.fase||p.ronda||fase)}</span>
+      ${badge}
+    </div>
+    <div class="match-equipos">
+      <div class="match-equipo" style="${ganL?'color:#22c55e;font-weight:900;':''}">
+        ${imgL}<span>${p.localNombre||p.local||"Por definir"}</span>
+      </div>
+      <div class="match-score ${!terminado&&!enVivo?'pending':''}">${score}</div>
+      <div class="match-equipo" style="${ganV?'color:#22c55e;font-weight:900;':''}">
+        ${imgV}<span>${p.visitanteNombre||p.visitante||"Por definir"}</span>
+      </div>
+    </div>
+    <div class="match-sede" style="font-size:11px;color:#64748b;">${p.ciudad||p.sede||""}</div>
+  </div>`
 }
 
 function cardKnockout(p){
