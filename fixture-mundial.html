@@ -448,16 +448,21 @@ function renderHoy(){
 }
 
 // ── GRUPO ──
-// Busca en _datos.partidos el resultado real para un partido de Supabase
+function sinAcentos(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim() }
+
+// Busca resultado real del API cruzando por nombre sin acentos
 function buscarResultadoAPI(p){
   if(!_datos?.partidos) return null
-  const nom1 = (_equipos[p.equipo_local_id]?.nombre || p.desc_local || "").toLowerCase().slice(0,5)
-  const nom2 = (_equipos[p.equipo_visitante_id]?.nombre || p.desc_visitante || "").toLowerCase().slice(0,5)
-  if(!nom1 || !nom2) return null
+  const n1 = sinAcentos(_equipos[p.equipo_local_id]?.nombre || p.desc_local)
+  const n2 = sinAcentos(_equipos[p.equipo_visitante_id]?.nombre || p.desc_visitante)
+  if(!n1||!n2) return null
+  // Usar primeras 4 letras (sin acentos) para comparar
+  const k1 = n1.replace(/[^a-z]/g,"").slice(0,4)
+  const k2 = n2.replace(/[^a-z]/g,"").slice(0,4)
   return _datos.partidos.find(ap => {
-    const l = (ap.localNombre||"").toLowerCase()
-    const v = (ap.visitanteNombre||"").toLowerCase()
-    return (l.includes(nom1) && v.includes(nom2)) || (v.includes(nom1) && l.includes(nom2))
+    const l = sinAcentos(ap.localNombre).replace(/[^a-z]/g,"")
+    const v = sinAcentos(ap.visitanteNombre).replace(/[^a-z]/g,"")
+    return (l.includes(k1) && v.includes(k2)) || (v.includes(k1) && l.includes(k2))
   }) || null
 }
 
@@ -789,7 +794,7 @@ function renderKnockout(fase, elId){
     }
   }
 
-  // Fallback: Supabase
+  // Fallback: Supabase — mostrar estructura SIN resultados (evitar datos falsos)
   const pts = _partidos.filter(p => p.fase === fase)
   if(!pts.length){
     el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:rgba(255,255,255,.4);">
@@ -798,7 +803,24 @@ function renderKnockout(fase, elId){
     </div>`
     return
   }
-  el.innerHTML = pts.map(p => cardKnockout(p)).join("")
+  // Mostrar estructura pero forzar "Próximo" — resultados solo vienen del API
+  el.innerHTML = pts.map(p => {
+    const eq1 = _equipos[p.equipo_local_id] || null
+    const eq2 = _equipos[p.equipo_visitante_id] || null
+    const nom1 = eq1?.nombre || p.desc_local || "Por definir"
+    const nom2 = eq2?.nombre || p.desc_visitante || "Por definir"
+    return `<div class="match-card">
+      <div class="match-meta">
+        <span class="match-jornada">${faseLegible(fase)}</span>
+        <span class="badge-abierto">Próximo</span>
+      </div>
+      <div class="match-equipos">
+        <div class="match-equipo">${flagHtml(eq1,30)}<span>${nom1}</span></div>
+        <div class="match-score pending">vs</div>
+        <div class="match-equipo">${flagHtml(eq2,30)}<span>${nom2}</span></div>
+      </div>
+    </div>`
+  }).join("")
 }
 
 function cardKnockoutAPI(p){
