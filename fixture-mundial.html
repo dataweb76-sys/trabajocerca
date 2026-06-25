@@ -389,7 +389,48 @@ async function cargarDatos(){
     if(ptRes.ok){ _partidos = await ptRes.json() }
   } catch(e){}
 
+  // Si grupos del API vienen vacíos, computarlos desde los partidos directamente
+  if(_datos && (!_datos.grupos || Object.keys(_datos.grupos).length === 0)){
+    _datos.grupos = computarGruposDesdePartidos()
+  }
+  // Complementar grupos que estén vacíos
+  if(_datos?.partidos?.length){
+    const local = computarGruposDesdePartidos()
+    for(const g of Object.keys(local)){
+      if(!_datos.grupos[g] || _datos.grupos[g].length === 0){
+        _datos.grupos[g] = local[g]
+      }
+    }
+  }
+
   renderFase(_faseActual)
+}
+
+// Computa standings directamente de _datos.partidos (tiene localNombre, golesL, grupo)
+function computarGruposDesdePartidos(){
+  const grupos = {}
+  const partidos = _datos?.partidos || []
+  for(const p of partidos){
+    if(!p.grupo || p.fase !== "grupo") continue
+    const g = p.grupo
+    if(!grupos[g]) grupos[g] = {}
+    const nom1 = p.localNombre || p.local, nom2 = p.visitanteNombre || p.visitante
+    if(!nom1 || !nom2) continue
+    if(!grupos[g][nom1]) grupos[g][nom1] = { equipo:nom1, logo:p.localLogo||"", pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0 }
+    if(!grupos[g][nom2]) grupos[g][nom2] = { equipo:nom2, logo:p.visitanteLogo||"", pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0 }
+    const gl = p.golesL, gv = p.golesV
+    if(gl === null || gv === null) continue
+    const t1 = grupos[g][nom1], t2 = grupos[g][nom2]
+    t1.pj++; t2.pj++; t1.gf+=gl; t1.gc+=gv; t2.gf+=gv; t2.gc+=gl
+    if(gl > gv){t1.pg++;t1.pts+=3;t2.pp++}
+    else if(gv > gl){t2.pg++;t2.pts+=3;t1.pp++}
+    else{t1.pe++;t1.pts++;t2.pe++;t2.pts++}
+  }
+  const res = {}
+  for(const [g, teams] of Object.entries(grupos)){
+    res[g] = Object.values(teams).sort((a,b)=>b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf).map((t,i)=>({...t,pos:i+1,dg:t.gf-t.gc}))
+  }
+  return res
 }
 
 // ── Navegación ──
