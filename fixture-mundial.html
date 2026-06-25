@@ -473,19 +473,38 @@ function renderGrupo(g){
   `
 }
 
+const FIFA_ISO = {
+  USA:"us",MEX:"mx",CAN:"ca",ARG:"ar",BRA:"br",URU:"uy",COL:"co",CHI:"cl",PAR:"py",ECU:"ec",BOL:"bo",VEN:"ve",PER:"pe",
+  FRA:"fr",ESP:"es",ALE:"de",ING:"gb-eng",POR:"pt",ITA:"it",HOL:"nl",BEL:"be",CRO:"hr",SUI:"ch",DIN:"dk",SWE:"se",NOR:"no",
+  AUT:"at",SCO:"gb-sct",POL:"pl",CZE:"cz",SRB:"rs",UKR:"ua",TUR:"tr",GRE:"gr",HUN:"hu",SVN:"si",ESL:"sk",
+  MAR:"ma",SEN:"sn",GHA:"gh",TUN:"tn",CMR:"cm",EGI:"eg",ALG:"dz",NGR:"ng",MAL:"ml",GUI:"gn",BUR:"bf",COD:"cd",RSA:"za",
+  JPN:"jp",COR:"kr",AUS:"au",IRN:"ir",ARA:"sa",JAP:"jp",CHN:"cn",UZB:"uz",IRQ:"iq",JOR:"jo",IND:"in",THA:"th",VIE:"vn",
+  NZL:"nz",KSA:"sa",UAE:"ae",QAT:"qa",BHR:"bh",KUW:"kw",
+}
+function flagUrl(e){
+  if(!e||!e.codigo) return ""
+  const iso = FIFA_ISO[e.codigo]
+  return iso ? `https://flagcdn.com/w40/${iso}.png` : ""
+}
+function flagHtml(e, size=28){
+  const url = flagUrl(e)
+  if(url) return `<img src="${url}" style="width:${size}px;height:${Math.round(size*0.75)}px;object-fit:contain;" onerror="this.replaceWith(document.createTextNode('${e?.bandera||'🏳️'}'))">`
+  return `<span style="font-size:${size}px;line-height:1;">${e?.bandera||"🏳️"}</span>`
+}
+
 function cardPartidoDB(p){
-  const eq1 = _equipos[p.equipo1_id] || {}
-  const eq2 = _equipos[p.equipo2_id] || {}
-  const terminado = p.resultado_1 !== null && p.resultado_2 !== null
+  const eq1 = _equipos[p.equipo_local_id] || null
+  const eq2 = _equipos[p.equipo_visitante_id] || null
+  const nom1 = eq1?.nombre || p.desc_local || "Por definir"
+  const nom2 = eq2?.nombre || p.desc_visitante || "Por definir"
+  const terminado = p.completado || (p.goles_local !== null && p.goles_visitante !== null)
   const score = terminado
-    ? `<div class="match-score">${p.resultado_1} — ${p.resultado_2}</div>`
+    ? `<div class="match-score">${p.goles_local} — ${p.goles_visitante}</div>`
     : `<div class="match-score pending">vs</div>`
   const badge = terminado ? `<span class="badge-cerrado">Final</span>` :
-                p.abierto === false ? `<span class="badge-cerrado">Cerrado</span>` :
                 `<span class="badge-abierto">⏱ ${p.hora||"Próximo"}</span>`
-
-  const adminBtn = _esAdmin ? `<button onclick="abrirEditorResultado(${p.id},${p.resultado_1||'null'},${p.resultado_2||'null'})"
-    style="font-size:10px;background:#2563eb;color:white;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;margin-top:4px;">✏️ Editar</button>` : ""
+  const adminBtn = _esAdmin ? `<button onclick="abrirEditorResultado(${p.id},${p.goles_local??''},${p.goles_visitante??''})"
+    style="font-size:10px;background:#2563eb;color:white;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;margin-top:4px;">✏️ Editar resultado</button>` : ""
 
   return `<div class="match-card ${terminado?'terminado':''}">
     <div class="match-meta">
@@ -493,31 +512,25 @@ function cardPartidoDB(p){
       ${badge}
     </div>
     <div class="match-equipos">
-      <div class="match-equipo">
-        ${eq1.bandera_url ? `<img src="${eq1.bandera_url}" onerror="this.style.display='none'">` : `<span style="font-size:24px;">${eq1.bandera_emoji||"🏳️"}</span>`}
-        <span>${eq1.nombre||"–"}</span>
-      </div>
+      <div class="match-equipo">${flagHtml(eq1,30)}<span>${nom1}</span></div>
       ${score}
-      <div class="match-equipo">
-        ${eq2.bandera_url ? `<img src="${eq2.bandera_url}" onerror="this.style.display='none'">` : `<span style="font-size:24px;">${eq2.bandera_emoji||"🏳️"}</span>`}
-        <span>${eq2.nombre||"–"}</span>
-      </div>
+      <div class="match-equipo">${flagHtml(eq2,30)}<span>${nom2}</span></div>
     </div>
-    <div class="match-sede">${p.sede||""} ${adminBtn}</div>
+    <div class="match-sede">${p.sede||p.estadio||""} ${adminBtn}</div>
   </div>`
 }
 
 function cardPartidoSimple(p){
-  const terminado = p.resultado_1 !== null && p.resultado_2 !== null
-  const eq1 = _equipos[p.equipo1_id] || {}
-  const eq2 = _equipos[p.equipo2_id] || {}
+  const terminado = p.completado || (p.goles_local !== null && p.goles_visitante !== null)
+  const eq1 = _equipos[p.equipo_local_id] || null
+  const eq2 = _equipos[p.equipo_visitante_id] || null
   return `<div class="partido-hoy-card ${terminado?'terminado':''}">
-    <div class="eq-lado"><span style="font-size:26px;">${eq1.bandera_emoji||"🏳️"}</span><div class="eq-nombre">${eq1.nombre||"–"}</div></div>
+    <div class="eq-lado">${flagHtml(eq1,26)}<div class="eq-nombre">${eq1?.nombre||p.desc_local||"–"}</div></div>
     <div class="partido-centro">
-      <div class="partido-score">${terminado?`${p.resultado_1} — ${p.resultado_2}`:"vs"}</div>
+      <div class="partido-score">${terminado?`${p.goles_local} — ${p.goles_visitante}`:"vs"}</div>
       <div class="partido-hora">${p.hora||""}</div>
     </div>
-    <div class="eq-lado derecha"><div class="eq-nombre">${eq2.nombre||"–"}</div><span style="font-size:26px;">${eq2.bandera_emoji||"🏳️"}</span></div>
+    <div class="eq-lado derecha"><div class="eq-nombre">${eq2?.nombre||p.desc_visitante||"–"}</div>${flagHtml(eq2,26)}</div>
   </div>`
 }
 
@@ -525,19 +538,19 @@ function cardPartidoSimple(p){
 function calcularTabla(pts, grupo){
   const equiposGrupo = {}
   pts.forEach(p => {
-    const e1 = _equipos[p.equipo1_id]
-    const e2 = _equipos[p.equipo2_id]
+    const e1 = _equipos[p.equipo_local_id]
+    const e2 = _equipos[p.equipo_visitante_id]
     if(e1 && !equiposGrupo[e1.id]) equiposGrupo[e1.id] = { eq: e1, pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts:0 }
     if(e2 && !equiposGrupo[e2.id]) equiposGrupo[e2.id] = { eq: e2, pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts:0 }
-    if(p.resultado_1 === null || p.resultado_2 === null) return
-    const r1 = p.resultado_1, r2 = p.resultado_2
-    if(equiposGrupo[p.equipo1_id]){
-      const t = equiposGrupo[p.equipo1_id]
+    if(!p.completado && (p.goles_local === null || p.goles_visitante === null)) return
+    const r1 = p.goles_local, r2 = p.goles_visitante
+    if(equiposGrupo[p.equipo_local_id]){
+      const t = equiposGrupo[p.equipo_local_id]
       t.pj++; t.gf+=r1; t.gc+=r2
       if(r1>r2){ t.pg++; t.pts+=3 } else if(r1===r2){ t.pe++; t.pts+=1 } else { t.pp++ }
     }
-    if(equiposGrupo[p.equipo2_id]){
-      const t = equiposGrupo[p.equipo2_id]
+    if(equiposGrupo[p.equipo_visitante_id]){
+      const t = equiposGrupo[p.equipo_visitante_id]
       t.pj++; t.gf+=r2; t.gc+=r1
       if(r2>r1){ t.pg++; t.pts+=3 } else if(r1===r2){ t.pe++; t.pts+=1 } else { t.pp++ }
     }
@@ -557,7 +570,7 @@ function renderTablaGrupo(tabla, grupo){
           const posClass = i===0?"clasificado":i===1?"clasificado":i===2?"clasificado-3ro":""
           const posBadge = i===0?`<span class="pos-badge pos-1">1</span>`:i===1?`<span class="pos-badge pos-2">2</span>`:i===2?`<span class="pos-badge pos-3">3</span>`:`<span class="pos-badge pos-4">4</span>`
           return `<tr class="${posClass}">
-            <td>${posBadge} ${t.eq.bandera_emoji||""} ${t.eq.nombre||"–"}</td>
+            <td>${posBadge} ${t.eq.bandera||""} ${t.eq.nombre||"–"}</td>
             <td><strong>${t.pts}</strong></td><td>${t.pj}</td><td>${t.pg}</td>
             <td>${t.pe}</td><td>${t.pp}</td><td>${t.gf}</td><td>${t.gc}</td>
             <td>${t.gf-t.gc>0?"+":""}${t.gf-t.gc}</td>
@@ -590,18 +603,15 @@ function renderKnockout(fase, elId){
 }
 
 function cardKnockout(p){
-  const eq1 = _equipos[p.equipo1_id] || null
-  const eq2 = _equipos[p.equipo2_id] || null
-  const terminado = p.resultado_1 !== null && p.resultado_2 !== null
-  const score = terminado ? `${p.resultado_1} — ${p.resultado_2}` : "vs"
-  const nomL = eq1?.nombre || "Por definir"
-  const nomV = eq2?.nombre || "Por definir"
-  const flagL = eq1?.bandera_emoji || "🏳️"
-  const flagV = eq2?.bandera_emoji || "🏳️"
-  const adminBtn = _esAdmin ? `<button onclick="abrirEditorResultado(${p.id},${p.resultado_1||'null'},${p.resultado_2||'null'})"
-    style="font-size:10px;background:#2563eb;color:white;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;margin-top:4px;">✏️ Editar</button>` : ""
-
-  const ganador = terminado ? (p.resultado_1 > p.resultado_2 ? p.equipo1_id : p.resultado_2 > p.resultado_1 ? p.equipo2_id : null) : null
+  const eq1 = _equipos[p.equipo_local_id] || null
+  const eq2 = _equipos[p.equipo_visitante_id] || null
+  const nom1 = eq1?.nombre || p.desc_local || "Por definir"
+  const nom2 = eq2?.nombre || p.desc_visitante || "Por definir"
+  const terminado = p.completado || (p.goles_local !== null && p.goles_visitante !== null)
+  const score = terminado ? `${p.goles_local} — ${p.goles_visitante}` : "vs"
+  const ganador = terminado ? (p.goles_local > p.goles_visitante ? p.equipo_local_id : p.goles_visitante > p.goles_local ? p.equipo_visitante_id : null) : null
+  const adminBtn = _esAdmin ? `<button onclick="abrirEditorResultado(${p.id},${p.goles_local??''},${p.goles_visitante??''})"
+    style="font-size:10px;background:#2563eb;color:white;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;margin-top:4px;">✏️ Editar resultado</button>` : ""
 
   return `<div class="match-card ${terminado?'terminado':''}">
     <div class="match-meta">
@@ -609,17 +619,17 @@ function cardKnockout(p){
       ${terminado?'<span class="badge-cerrado">Final</span>':'<span class="badge-abierto">Próximo</span>'}
     </div>
     <div class="match-equipos">
-      <div class="match-equipo" style="${ganador===p.equipo1_id?'font-weight:900;':''}">
-        <span style="font-size:24px;">${flagL}</span>
-        <span style="${ganador===p.equipo1_id?'color:#15803d;':''}">${nomL}</span>
+      <div class="match-equipo" style="${ganador===p.equipo_local_id?'color:#15803d;font-weight:900;':''}">
+        ${flagHtml(eq1,30)}
+        <span>${nom1}</span>
       </div>
       <div class="match-score ${!terminado?'pending':''}">${score}</div>
-      <div class="match-equipo" style="${ganador===p.equipo2_id?'font-weight:900;':''}">
-        <span style="font-size:24px;">${flagV}</span>
-        <span style="${ganador===p.equipo2_id?'color:#15803d;':''}">${nomV}</span>
+      <div class="match-equipo" style="${ganador===p.equipo_visitante_id?'color:#15803d;font-weight:900;':''}">
+        ${flagHtml(eq2,30)}
+        <span>${nom2}</span>
       </div>
     </div>
-    <div class="match-sede">${p.sede||""} ${adminBtn}</div>
+    <div class="match-sede">${p.sede||p.estadio||""} ${adminBtn}</div>
   </div>`
 }
 
@@ -644,7 +654,7 @@ async function guardarResultado(id, r1, r2){
     const r = await fetch(`${SB_URL}/rest/v1/mundial_partidos?id=eq.${id}`, {
       method: "PATCH",
       headers: { ...HDR, "Content-Type":"application/json", "Authorization": `Bearer ${tk?.access_token}`, "Prefer":"return=minimal" },
-      body: JSON.stringify({ resultado_1: r1, resultado_2: r2 })
+      body: JSON.stringify({ goles_local: r1, goles_visitante: r2 })
     })
     if(r.ok){ alert("✅ Resultado guardado"); location.reload() }
     else { const e = await r.json(); alert("Error: " + JSON.stringify(e)) }
