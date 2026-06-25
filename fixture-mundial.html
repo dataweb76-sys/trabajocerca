@@ -987,6 +987,13 @@ function descargarFixture(){
 
 // ── INIT ──
 cargarDatos()
+// Actualizar cada 5 minutos automáticamente
+setInterval(async () => {
+  try {
+    const r = await fetch("/api/mundial-datos")
+    if(r.ok){ const j = await r.json(); if(j.ok){ _datos = j; renderFase(_faseActual) } }
+  } catch(e){}
+}, 5 * 60 * 1000)
 </script>
 </body>
 </html>
