@@ -474,12 +474,22 @@ function renderGrupo(g){
 }
 
 const FIFA_ISO = {
-  USA:"us",MEX:"mx",CAN:"ca",ARG:"ar",BRA:"br",URU:"uy",COL:"co",CHI:"cl",PAR:"py",ECU:"ec",BOL:"bo",VEN:"ve",PER:"pe",
-  FRA:"fr",ESP:"es",ALE:"de",ING:"gb-eng",POR:"pt",ITA:"it",HOL:"nl",BEL:"be",CRO:"hr",SUI:"ch",DIN:"dk",SWE:"se",NOR:"no",
-  AUT:"at",SCO:"gb-sct",POL:"pl",CZE:"cz",SRB:"rs",UKR:"ua",TUR:"tr",GRE:"gr",HUN:"hu",SVN:"si",ESL:"sk",
-  MAR:"ma",SEN:"sn",GHA:"gh",TUN:"tn",CMR:"cm",EGI:"eg",ALG:"dz",NGR:"ng",MAL:"ml",GUI:"gn",BUR:"bf",COD:"cd",RSA:"za",
-  JPN:"jp",COR:"kr",AUS:"au",IRN:"ir",ARA:"sa",JAP:"jp",CHN:"cn",UZB:"uz",IRQ:"iq",JOR:"jo",IND:"in",THA:"th",VIE:"vn",
-  NZL:"nz",KSA:"sa",UAE:"ae",QAT:"qa",BHR:"bh",KUW:"kw",
+  // Américas
+  USA:"us",MEX:"mx",CAN:"ca",ARG:"ar",BRA:"br",URU:"uy",COL:"co",
+  CHI:"cl",PAR:"py",ECU:"ec",BOL:"bo",VEN:"ve",PER:"pe",PAN:"pa",HAI:"ht",CUW:"cw",
+  // Europa
+  FRA:"fr",ESP:"es",GER:"de",ENG:"gb-eng",POR:"pt",ITA:"it",NED:"nl",BEL:"be",
+  CRO:"hr",SUI:"ch",DEN:"dk",SWE:"se",NOR:"no",AUT:"at",SCO:"gb-sct",
+  POL:"pl",CZE:"cz",SRB:"rs",UKR:"ua",TUR:"tr",GRE:"gr",HUN:"hu",SVN:"si",SVK:"sk",
+  BIH:"ba",ROU:"ro",ALB:"al",WAL:"gb-wls",GEO:"ge",IRL:"ie",FIN:"fi",
+  // África
+  MAR:"ma",SEN:"sn",GHA:"gh",TUN:"tn",CMR:"cm",EGY:"eg",ALG:"dz",
+  NGR:"ng",CIV:"ci",COD:"cd",RSA:"za",
+  // Asia/Oceanía
+  JPN:"jp",KOR:"kr",AUS:"au",IRN:"ir",KSA:"sa",QAT:"qa",UAE:"ae",
+  CHN:"cn",UZB:"uz",IRQ:"iq",JOR:"jo",NZL:"nz",CPV:"cv",
+  // alias alternativos por si el DB usa estos
+  ALE:"de",ING:"gb-eng",HOL:"nl",DIN:"dk",COR:"kr",ARA:"sa",ESL:"sk",
 }
 function flagUrl(e){
   if(!e||!e.codigo) return ""
@@ -498,13 +508,29 @@ function cardPartidoDB(p){
   const nom1 = eq1?.nombre || p.desc_local || "Por definir"
   const nom2 = eq2?.nombre || p.desc_visitante || "Por definir"
   const terminado = p.completado || (p.goles_local !== null && p.goles_visitante !== null)
-  const score = terminado
-    ? `<div class="match-score">${p.goles_local} — ${p.goles_visitante}</div>`
-    : `<div class="match-score pending">vs</div>`
   const badge = terminado ? `<span class="badge-cerrado">Final</span>` :
                 `<span class="badge-abierto">⏱ ${p.hora||"Próximo"}</span>`
-  const adminBtn = _esAdmin ? `<button onclick="abrirEditorResultado(${p.id},${p.goles_local??''},${p.goles_visitante??''})"
-    style="font-size:10px;background:#2563eb;color:white;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;margin-top:4px;">✏️ Editar resultado</button>` : ""
+
+  let scoreHtml
+  if(terminado){
+    scoreHtml = `<div class="match-score">${p.goles_local} — ${p.goles_visitante}</div>` +
+      (_esAdmin ? `<button onclick="abrirEditorResultado(${p.id},${p.goles_local},${p.goles_visitante})"
+        style="font-size:9px;background:#475569;color:white;border:none;border-radius:4px;padding:2px 6px;cursor:pointer;margin-top:2px;display:block;">✏️</button>` : "")
+  } else if(_esAdmin){
+    scoreHtml = `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="number" id="gl_${p.id}" min="0" max="20" placeholder="–"
+          style="width:38px;height:32px;text-align:center;font-size:16px;font-weight:900;border:2px solid #22c55e;border-radius:6px;background:#0f1923;color:white;">
+        <span style="color:rgba(255,255,255,.4);font-size:13px;">—</span>
+        <input type="number" id="gv_${p.id}" min="0" max="20" placeholder="–"
+          style="width:38px;height:32px;text-align:center;font-size:16px;font-weight:900;border:2px solid #22c55e;border-radius:6px;background:#0f1923;color:white;">
+      </div>
+      <button onclick="guardarDesdeCard(${p.id})"
+        style="font-size:10px;background:#22c55e;color:#0f1923;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:800;">✓ Guardar</button>
+    </div>`
+  } else {
+    scoreHtml = `<div class="match-score pending">vs</div>`
+  }
 
   return `<div class="match-card ${terminado?'terminado':''}">
     <div class="match-meta">
@@ -513,10 +539,10 @@ function cardPartidoDB(p){
     </div>
     <div class="match-equipos">
       <div class="match-equipo">${flagHtml(eq1,30)}<span>${nom1}</span></div>
-      ${score}
+      ${scoreHtml}
       <div class="match-equipo">${flagHtml(eq2,30)}<span>${nom2}</span></div>
     </div>
-    <div class="match-sede">${p.sede||p.estadio||""} ${adminBtn}</div>
+    <div class="match-sede" style="font-size:11px;color:#64748b;">${p.sede||p.estadio||""}</div>
   </div>`
 }
 
@@ -610,8 +636,26 @@ function cardKnockout(p){
   const terminado = p.completado || (p.goles_local !== null && p.goles_visitante !== null)
   const score = terminado ? `${p.goles_local} — ${p.goles_visitante}` : "vs"
   const ganador = terminado ? (p.goles_local > p.goles_visitante ? p.equipo_local_id : p.goles_visitante > p.goles_local ? p.equipo_visitante_id : null) : null
-  const adminBtn = _esAdmin ? `<button onclick="abrirEditorResultado(${p.id},${p.goles_local??''},${p.goles_visitante??''})"
-    style="font-size:10px;background:#2563eb;color:white;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;margin-top:4px;">✏️ Editar resultado</button>` : ""
+  let scoreKO
+  if(terminado){
+    scoreKO = `<div class="match-score">${p.goles_local} — ${p.goles_visitante}</div>` +
+      (_esAdmin ? `<button onclick="abrirEditorResultado(${p.id},${p.goles_local},${p.goles_visitante})"
+        style="font-size:9px;background:#475569;color:white;border:none;border-radius:4px;padding:2px 6px;cursor:pointer;margin-top:2px;display:block;">✏️</button>` : "")
+  } else if(_esAdmin){
+    scoreKO = `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="number" id="gl_${p.id}" min="0" max="20" placeholder="–"
+          style="width:38px;height:32px;text-align:center;font-size:16px;font-weight:900;border:2px solid #f59e0b;border-radius:6px;background:#0f1923;color:white;">
+        <span style="color:rgba(255,255,255,.4);font-size:13px;">—</span>
+        <input type="number" id="gv_${p.id}" min="0" max="20" placeholder="–"
+          style="width:38px;height:32px;text-align:center;font-size:16px;font-weight:900;border:2px solid #f59e0b;border-radius:6px;background:#0f1923;color:white;">
+      </div>
+      <button onclick="guardarDesdeCard(${p.id})"
+        style="font-size:10px;background:#f59e0b;color:#0f1923;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:800;">✓ Guardar</button>
+    </div>`
+  } else {
+    scoreKO = `<div class="match-score pending">vs</div>`
+  }
 
   return `<div class="match-card ${terminado?'terminado':''}">
     <div class="match-meta">
@@ -620,16 +664,14 @@ function cardKnockout(p){
     </div>
     <div class="match-equipos">
       <div class="match-equipo" style="${ganador===p.equipo_local_id?'color:#15803d;font-weight:900;':''}">
-        ${flagHtml(eq1,30)}
-        <span>${nom1}</span>
+        ${flagHtml(eq1,30)}<span>${nom1}</span>
       </div>
-      <div class="match-score ${!terminado?'pending':''}">${score}</div>
+      ${scoreKO}
       <div class="match-equipo" style="${ganador===p.equipo_visitante_id?'color:#15803d;font-weight:900;':''}">
-        ${flagHtml(eq2,30)}
-        <span>${nom2}</span>
+        ${flagHtml(eq2,30)}<span>${nom2}</span>
       </div>
     </div>
-    <div class="match-sede">${p.sede||p.estadio||""} ${adminBtn}</div>
+    <div class="match-sede" style="font-size:11px;color:#64748b;">${p.sede||p.estadio||""}</div>
   </div>`
 }
 
@@ -639,10 +681,16 @@ function faseLegible(f){
 }
 
 // ── ADMIN: EDITAR RESULTADO ──
+function guardarDesdeCard(id){
+  const gl = parseInt(document.getElementById("gl_"+id)?.value)
+  const gv = parseInt(document.getElementById("gv_"+id)?.value)
+  if(isNaN(gl)||isNaN(gv)){ alert("Ingresá los dos goles"); return }
+  guardarResultado(id, gl, gv)
+}
 function abrirEditorResultado(id, r1, r2){
-  const g1 = prompt(`Goles Equipo 1 (actual: ${r1??'–'}):`, r1 ?? "")
+  const g1 = prompt(`Goles local (actual: ${r1??'–'}):`, r1 ?? "")
   if(g1 === null) return
-  const g2 = prompt(`Goles Equipo 2 (actual: ${r2??'–'}):`, r2 ?? "")
+  const g2 = prompt(`Goles visitante (actual: ${r2??'–'}):`, r2 ?? "")
   if(g2 === null) return
   guardarResultado(id, parseInt(g1), parseInt(g2))
 }
