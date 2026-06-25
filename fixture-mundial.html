@@ -531,24 +531,29 @@ function buscarResultadoAPI(p){
 function renderGrupo(g){
   const el = document.getElementById("contenidoGrupo")
 
-  // Partidos de Supabase (tienen el campo grupo)
-  const pts = _partidos.filter(p => p.grupo === g && p.fase === "grupo")
+  // Primero: usar datos del API (canchallena) si están disponibles
+  const equiposGrupo = (_datos?.grupos?.[g] || []).map(t => sinAcentos(t.equipo))
+  if(equiposGrupo.length){
+    // Filtrar partidos del API que pertenezcan a este grupo
+    const ptosAPI = (_datos?.partidos || []).filter(p => {
+      const l = sinAcentos(p.localNombre||p.local||"")
+      const v = sinAcentos(p.visitanteNombre||p.visitante||"")
+      return equiposGrupo.includes(l) && equiposGrupo.includes(v)
+    })
+    const cardsHtml = ptosAPI.length
+      ? ptosAPI.map(p => cardPartidoAPI(p)).join("")
+      : "<div style='color:rgba(255,255,255,.4);padding:20px;text-align:center;'>Partidos próximamente.</div>"
+    el.innerHTML = `<div class="match-grid">${cardsHtml}</div>${renderTablaGrupoDesdeAPI(g)}`
+    return
+  }
 
+  // Fallback: Supabase
+  const pts = _partidos.filter(p => p.grupo === g && p.fase === "grupo")
   if(!pts.length){
     el.innerHTML = `<div style="color:rgba(255,255,255,.4);text-align:center;padding:30px;">No hay datos para el Grupo ${g}.</div>`
     return
   }
-
-  // Tabla: si API tiene grupos ya calculados, usarlos directo
-  let tablaHtml = ""
-  if(_datos?.grupos?.[g]){
-    tablaHtml = renderTablaGrupoDesdeAPI(g)
-  } else {
-    const tabla = calcularTabla(pts, g)
-    tablaHtml = renderTablaGrupo(tabla, g)
-  }
-
-  // Cards: Supabase + resultado real del API cruzado por nombre
+  const tablaHtml = _datos?.grupos?.[g] ? renderTablaGrupoDesdeAPI(g) : renderTablaGrupo(calcularTabla(pts,g),g)
   el.innerHTML = `<div class="match-grid">${pts.map(p => cardPartidoEnriquecido(p)).join("")}</div>${tablaHtml}`
 }
 
