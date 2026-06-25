@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/actualizar-resultados",
+      "schedule": "*/5 * * * *"
+    }
+  ],
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
