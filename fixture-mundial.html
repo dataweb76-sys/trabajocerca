@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fixture Mundial 2026 — trabajoscerca.com.ar</title>
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1923;color:#1e293b;min-height:100vh;}
+
+/* ── PORTADA ── */
+.portada{
+  position:relative;width:100%;max-height:340px;overflow:hidden;cursor:pointer;
+  display:block;
+}
+.portada img{width:100%;display:block;object-fit:cover;max-height:340px;}
+.portada-btns{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(to top,rgba(0,0,0,.7),transparent);
+  padding:20px 20px 16px;
+  display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
+}
+.btn-portada{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 20px;border-radius:12px;font-size:14px;font-weight:800;
+  cursor:pointer;border:none;text-decoration:none;
+  transition:opacity .2s,transform .15s;
+}
+.btn-portada:hover{opacity:.9;transform:translateY(-1px);}
+.btn-imprimir{background:#22c55e;color:white;}
+.btn-descargar{background:#2563eb;color:white;}
+.btn-mundial{background:rgba(255,255,255,.18);color:white;border:1.5px solid rgba(255,255,255,.4);}
+
+/* ── CONTENEDOR ── */
+.contenedor{max-width:960px;margin:0 auto;padding:0 0 40px;}
+
+/* ── TABS FASE ── */
+.fase-tabs{
+  display:flex;overflow-x:auto;gap:6px;padding:14px 16px;
+  background:#1e293b;position:sticky;top:0;z-index:100;
+  scrollbar-width:none;
+}
+.fase-tabs::-webkit-scrollbar{display:none;}
+.fase-tab{
+  flex-shrink:0;padding:8px 16px;border-radius:20px;border:1.5px solid rgba(255,255,255,.2);
+  background:transparent;color:rgba(255,255,255,.7);font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.fase-tab.active{background:#22c55e;border-color:#22c55e;color:white;}
+.fase-tab:hover:not(.active){background:rgba(255,255,255,.1);}
+
+/* ── GRUPO TABS ── */
+.grupo-tabs{
+  display:flex;gap:6px;padding:10px 16px;background:#0f1923;
+  overflow-x:auto;scrollbar-width:none;flex-wrap:wrap;
+}
+.grupo-tab{
+  width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(255,255,255,.2);
+  background:transparent;color:rgba(255,255,255,.6);font-size:13px;font-weight:800;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;
+}
+.grupo-tab.active{background:#f59e0b;border-color:#f59e0b;color:#1c1917;}
+
+/* ── SECCION ── */
+.seccion{padding:0 12px;}
+.seccion-titulo{
+  font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;
+  color:#64748b;padding:14px 4px 8px;
+}
+
+/* ── PARTIDOS HOY ── */
+.hoy-wrap{background:#1e293b;border-radius:0;padding:14px 16px;}
+.hoy-titulo{
+  font-size:15px;font-weight:900;color:white;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.hoy-titulo .dot-vivo{
+  width:9px;height:9px;border-radius:50%;background:#22c55e;
+  animation:pulse-dot 1.4s infinite;
+}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+
+.partidos-hoy-lista{display:flex;flex-direction:column;gap:8px;}
+.partido-hoy-card{
+  background:#0f1923;border-radius:12px;padding:12px 14px;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;
+}
+.partido-hoy-card.terminado{opacity:.75;}
+.partido-hoy-card.vivo{border:1.5px solid #22c55e;}
+.eq-lado{display:flex;align-items:center;gap:8px;}
+.eq-lado.derecha{flex-direction:row-reverse;text-align:right;}
+.eq-flag{font-size:28px;line-height:1;}
+.eq-flag img{width:36px;height:26px;object-fit:contain;}
+.eq-nombre{font-size:13px;font-weight:700;color:white;line-height:1.2;}
+.partido-centro{text-align:center;}
+.partido-score{font-size:20px;font-weight:900;color:white;letter-spacing:2px;}
+.partido-hora{font-size:12px;color:#64748b;font-weight:600;}
+.partido-badge-vivo{
+  font-size:11px;font-weight:800;color:#22c55e;
+  animation:pulse-dot 1s infinite;
+}
+.partido-info{font-size:11px;color:#64748b;margin-top:4px;}
+
+/* ── GRID PARTIDOS GRUPO ── */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px 0;}
+@media(max-width:520px){.match-grid{grid-template-columns:1fr;}}
+
+.match-card{
+  background:white;border-radius:14px;padding:12px 14px;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);
+}
+.match-card.terminado{background:#f8fafc;}
+.match-card.vivo{border:2px solid #22c55e;}
+.match-meta{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:8px;
+}
+.match-jornada{font-size:10px;font-weight:800;color:#22c55e;letter-spacing:.05em;text-transform:uppercase;}
+.match-fecha{font-size:10px;color:#94a3b8;}
+.match-equipos{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.match-equipo{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.match-equipo span{font-size:11px;font-weight:700;text-align:center;color:#1e293b;line-height:1.2;}
+.match-equipo img{width:32px;height:24px;object-fit:contain;}
+.match-score{
+  font-size:22px;font-weight:900;color:#0f172a;
+  min-width:50px;text-align:center;
+}
+.match-score.pending{font-size:15px;color:#94a3b8;font-weight:600;}
+.match-sede{font-size:10px;color:#94a3b8;margin-top:6px;text-align:center;}
+.badge-cerrado{font-size:10px;color:#64748b;font-weight:700;}
+.badge-vivo-sm{font-size:10px;color:#22c55e;font-weight:800;animation:pulse-dot 1s infinite;}
+.badge-abierto{font-size:10px;color:#f59e0b;font-weight:700;}
+
+/* ── TABLA GRUPO ── */
+.tabla-grupo{
+  background:white;border-radius:14px;overflow:hidden;
+  margin-top:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);
+}
+.tabla-grupo table{width:100%;border-collapse:collapse;font-size:13px;}
+.tabla-grupo th{
+  background:#0f172a;color:white;font-size:10px;font-weight:800;
+  letter-spacing:.05em;text-transform:uppercase;padding:8px 10px;text-align:center;
+}
+.tabla-grupo th:first-child{text-align:left;}
+.tabla-grupo td{padding:8px 10px;text-align:center;border-bottom:1px solid #f1f5f9;color:#1e293b;}
+.tabla-grupo td:first-child{text-align:left;font-weight:700;display:flex;align-items:center;gap:6px;}
+.tabla-grupo tr:last-child td{border-bottom:none;}
+.tabla-grupo tr.clasificado td{background:#f0fdf4;}
+.tabla-grupo tr.clasificado-3ro td{background:#fffbeb;}
+.pos-badge{
+  width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;
+  justify-content:center;font-size:10px;font-weight:900;flex-shrink:0;
+}
+.pos-1{background:#22c55e;color:white;}
+.pos-2{background:#3b82f6;color:white;}
+.pos-3{background:#f59e0b;color:#1c1917;}
+.pos-4{background:#e2e8f0;color:#64748b;}
+
+/* ── BRACKET KNOCKOUT ── */
+.bracket-wrap{overflow-x:auto;padding:8px 0;}
+.bracket{display:flex;gap:0;min-width:700px;}
+.bracket-fase{flex:1;display:flex;flex-direction:column;gap:0;padding:0 6px;}
+.bracket-fase-titulo{
+  text-align:center;font-size:11px;font-weight:900;letter-spacing:.08em;
+  text-transform:uppercase;color:#64748b;padding:10px 0;background:#0f1923;
+  position:sticky;top:0;
+}
+.bracket-match{
+  background:white;border-radius:10px;margin:4px 2px;
+  overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08);
+  flex:1;display:flex;flex-direction:column;
+}
+.bracket-equipo{
+  display:flex;align-items:center;gap:8px;padding:8px 10px;
+  font-size:12px;font-weight:700;color:#1e293b;border-bottom:1px solid #f1f5f9;
+}
+.bracket-equipo:last-child{border-bottom:none;}
+.bracket-equipo.ganador{background:#f0fdf4;color:#15803d;}
+.bracket-equipo img{width:24px;height:18px;object-fit:contain;}
+.bracket-equipo .score{margin-left:auto;font-weight:900;color:#0f172a;}
+.bracket-equipo.tbd{color:#94a3b8;font-style:italic;}
+.bracket-spacer{flex:0.5;}
+
+/* ── PIE ── */
+.pie-marca{
+  background:#0f172a;text-align:center;padding:18px;
+  font-size:13px;color:rgba(255,255,255,.5);
+}
+.pie-marca strong{color:white;}
+
+/* ── PRINT ── */
+@media print{
+  body{background:white;color:#000;}
+  .fase-tabs,.grupo-tabs,.portada-btns,.btn-portada,
+  .no-print{display:none!important;}
+  .hoy-wrap{background:#f8fafc;border-radius:8px;}
+  .bracket-fase-titulo{background:#f1f5f9;color:#1e293b;}
+  .seccion-titulo{color:#374151;}
+  .pie-marca{background:#f1f5f9;color:#374151;}
+  .pie-marca strong{color:#1e293b;}
+  .match-card,.tabla-grupo,.bracket-match{break-inside:avoid;}
+  .bracket{min-width:100%;}
+  @page{margin:15mm;size:A4 landscape;}
+}
+
+/* ── LOADING ── */
+.spinner-tc{
+  text-align:center;padding:40px;color:rgba(255,255,255,.4);
+  font-size:14px;
+}
+.spinner-tc i{font-size:32px;display:block;margin-bottom:10px;}
+
+/* ── ADMIN RESULT EDIT ── */
+.match-card.admin-mode{cursor:pointer;}
+.match-card.admin-mode:hover{box-shadow:0 4px 16px rgba(37,99,235,.2);border:1.5px solid #2563eb;}
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="portada">
+  <img src="/fixturemundial.png" alt="Fixture Mundial 2026 — trabajoscerca.com.ar">
+  <div class="portada-btns">
+    <button class="btn-portada btn-imprimir" onclick="window.print()">
+      <i class="fa-solid fa-print"></i> Imprimir
+    </button>
+    <button class="btn-portada btn-descargar" onclick="descargarFixture()">
+      <i class="fa-solid fa-download"></i> Descargar PDF
+    </button>
+    <a href="/mundial.html" class="btn-portada btn-mundial">
+      <i class="fa-solid fa-trophy"></i> Jugar al Prode
+    </a>
+  </div>
+</div>
+
+<div class="contenedor">
+
+  <!-- TABS FASE -->
+  <div class="fase-tabs no-print" id="faseTabs">
+    <button class="fase-tab active" onclick="setFase('hoy')">📅 Hoy</button>
+    <button class="fase-tab" onclick="setFase('grupos')">Grupos</button>
+    <button class="fase-tab" onclick="setFase('octavos')">16avos</button>
+    <button class="fase-tab" onclick="setFase('cuartos')">Cuartos</button>
+    <button class="fase-tab" onclick="setFase('semis')">Semis</button>
+    <button class="fase-tab" onclick="setFase('final')">⭐ Final</button>
+  </div>
+
+  <!-- HOY -->
+  <div id="secHoy" class="seccion">
+    <div class="hoy-wrap">
+      <div class="hoy-titulo">
+        <span class="dot-vivo"></span>
+        <span id="tituloHoy">Cargando partidos...</span>
+      </div>
+      <div class="partidos-hoy-lista" id="listaHoy">
+        <div class="spinner-tc"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRUPOS -->
+  <div id="secGrupos" class="seccion" style="display:none;">
+    <div class="grupo-tabs no-print" id="grupoTabs">
+      <button class="grupo-tab active" onclick="setGrupo('A')">A</button>
+      <button class="grupo-tab" onclick="setGrupo('B')">B</button>
+      <button class="grupo-tab" onclick="setGrupo('C')">C</button>
+      <button class="grupo-tab" onclick="setGrupo('D')">D</button>
+      <button class="grupo-tab" onclick="setGrupo('E')">E</button>
+      <button class="grupo-tab" onclick="setGrupo('F')">F</button>
+      <button class="grupo-tab" onclick="setGrupo('G')">G</button>
+      <button class="grupo-tab" onclick="setGrupo('H')">H</button>
+      <button class="grupo-tab" onclick="setGrupo('I')">I</button>
+      <button class="grupo-tab" onclick="setGrupo('J')">J</button>
+      <button class="grupo-tab" onclick="setGrupo('K')">K</button>
+      <button class="grupo-tab" onclick="setGrupo('L')">L</button>
+    </div>
+    <div id="contenidoGrupo">
+      <div class="spinner-tc"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</div>
+    </div>
+  </div>
+
+  <!-- OCTAVOS -->
+  <div id="secOctavos" class="seccion" style="display:none;">
+    <div class="seccion-titulo" style="color:#94a3b8;padding:14px 4px 8px;">16avos de Final</div>
+    <div id="contenidoOctavos" class="match-grid">
+      <div class="spinner-tc" style="grid-column:1/-1"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</div>
+    </div>
+  </div>
+
+  <!-- CUARTOS -->
+  <div id="secCuartos" class="seccion" style="display:none;">
+    <div class="seccion-titulo" style="color:#94a3b8;padding:14px 4px 8px;">Cuartos de Final</div>
+    <div id="contenidoCuartos" class="match-grid">
+      <div class="spinner-tc" style="grid-column:1/-1"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</div>
+    </div>
+  </div>
+
+  <!-- SEMIS -->
+  <div id="secSemis" class="seccion" style="display:none;">
+    <div class="seccion-titulo" style="color:#94a3b8;padding:14px 4px 8px;">Semifinales</div>
+    <div id="contenidoSemis" class="match-grid">
+      <div class="spinner-tc" style="grid-column:1/-1"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</div>
+    </div>
+  </div>
+
+  <!-- FINAL -->
+  <div id="secFinal" class="seccion" style="display:none;">
+    <div class="seccion-titulo" style="color:#94a3b8;padding:14px 4px 8px;">Final · Mundial 2026</div>
+    <div id="contenidoFinal">
+      <div class="spinner-tc"><i class="fa-solid fa-spinner fa-spin"></i>Cargando...</div>
+    </div>
+  </div>
+
+</div><!-- /contenedor -->
+
+<!-- PIE -->
+<div class="pie-marca">
+  ⚽ Fixture Mundial 2026 · <strong>trabajoscerca.com.ar</strong> · Siempre con la gente
+</div>
+
+<script>
+const SB_URL = "https://iqeiszkoifxgygoqvbem.supabase.co"
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs"
+const HDR = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+
+let _datos = null   // datos de /api/mundial-datos
+let _partidos = []  // de mundial_partidos (supabase)
+let _equipos = {}   // id → equipo
+let _faseActual = "hoy"
+let _grupoActual = "A"
+let _esAdmin = false
+
+// ── Detectar admin ──
+async function detectarAdmin(){
+  try {
+    const tk = JSON.parse(localStorage.getItem("sb-iqeiszkoifxgygoqvbem-auth-token"))
+    const uid = tk?.user?.id || null
+    if(!uid) return
+    const r = await fetch(`${SB_URL}/rest/v1/perfiles?id=eq.${uid}&select=admin`, { headers: HDR })
+    const d = await r.json()
+    _esAdmin = d?.[0]?.admin === true
+  } catch(e){}
+}
+
+async function cargarDatos(){
+  await detectarAdmin()
+
+  // Cargar desde /api/mundial-datos (resultados reales)
+  try {
+    const r = await fetch("/api/mundial-datos")
+    if(r.ok){
+      const j = await r.json()
+      if(j.ok) _datos = j
+    }
+  } catch(e){}
+
+  // Cargar desde Supabase (datos del prode + fases eliminatorias)
+  try {
+    const [eqRes, ptRes] = await Promise.all([
+      fetch(`${SB_URL}/rest/v1/mundial_equipos?select=*`, { headers: HDR }),
+      fetch(`${SB_URL}/rest/v1/mundial_partidos?select=*&order=numero_partido`, { headers: HDR })
+    ])
+    if(eqRes.ok){ const d = await eqRes.json(); d.forEach(e => _equipos[e.id] = e) }
+    if(ptRes.ok){ _partidos = await ptRes.json() }
+  } catch(e){}
+
+  renderFase(_faseActual)
+}
+
+// ── Navegación ──
+function setFase(f){
+  _faseActual = f
+  document.querySelectorAll(".fase-tab").forEach(b => b.classList.toggle("active", b.textContent.toLowerCase().includes(f === "hoy" ? "hoy" : f === "grupos" ? "grupo" : f === "octavos" ? "16" : f)))
+  // Más simple: toggle por index
+  const orden = ["hoy","grupos","octavos","cuartos","semis","final"]
+  document.querySelectorAll(".fase-tab").forEach((b,i) => b.classList.toggle("active", orden[i] === f))
+  renderFase(f)
+}
+
+function setGrupo(g){
+  _grupoActual = g
+  document.querySelectorAll(".grupo-tab").forEach(b => b.classList.toggle("active", b.textContent.trim() === g))
+  renderGrupo(g)
+}
+
+function renderFase(f){
+  const secs = ["hoy","grupos","octavos","cuartos","semis","final"]
+  secs.forEach(s => {
+    const el = document.getElementById("sec" + s.charAt(0).toUpperCase() + s.slice(1))
+    if(el) el.style.display = s === f ? "" : "none"
+  })
+  if(f === "hoy")     renderHoy()
+  if(f === "grupos")  renderGrupo(_grupoActual)
+  if(f === "octavos") renderKnockout("octavos","contenidoOctavos")
+  if(f === "cuartos") renderKnockout("cuartos","contenidoCuartos")
+  if(f === "semis")   renderKnockout("semis","contenidoSemis")
+  if(f === "final")   renderKnockout("final","contenidoFinal")
+}
+
+// ── HOY ──
+function renderHoy(){
+  const el = document.getElementById("listaHoy")
+  const tit = document.getElementById("tituloHoy")
+  if(!_datos){
+    // fallback con partidos de la DB
+    const hoy = new Date(); hoy.setHours(hoy.getHours() - 3)
+    const hoyStr = hoy.toISOString().slice(0,10)
+    const pts = _partidos.filter(p => (p.fecha_iso||"").slice(0,10) === hoyStr || (p.fecha||"").includes(hoy.getDate()))
+    if(!pts.length){ el.innerHTML = "<div style='color:rgba(255,255,255,.4);text-align:center;padding:20px;'>No hay partidos hoy.</div>"; tit.textContent = "Partidos de hoy"; return }
+    tit.textContent = "Partidos de hoy"
+    el.innerHTML = pts.map(p => cardPartidoSimple(p)).join("")
+    return
+  }
+
+  const todos = _datos.partidos || []
+  const ahora = new Date()
+  const hoyAR = new Date(ahora.getTime() - 3*3600000)
+  const hoyStr = hoyAR.toISOString().slice(0,10)
+  let hoy = todos.filter(p => (p.fechaISO||"").slice(0,10) === hoyStr)
+  if(!hoy.length) hoy = todos.slice(0,6)
+
+  if(!hoy.length){ el.innerHTML = "<div style='color:rgba(255,255,255,.4);text-align:center;padding:20px;'>No hay partidos hoy.</div>"; tit.textContent = "Partidos del Mundial"; return }
+
+  const hayVivo = hoy.some(p => p.estado === "LIVE")
+  tit.textContent = hoyStr === hoyAR.toISOString().slice(0,10) ? "Partidos de hoy" : "Partidos del Mundial"
+
+  el.innerHTML = hoy.map(p => {
+    const terminado = p.estado === "FT"
+    const vivo = p.estado === "LIVE"
+    const score = terminado||vivo ? `<div class="partido-score">${p.golesL} — ${p.golesV}</div>` :
+                  `<div class="partido-hora">${p.hora||"–"}hs</div>`
+    const badge = vivo ? `<div class="partido-badge-vivo">🔴 EN VIVO</div>` :
+                  terminado ? `<div style="font-size:11px;color:#64748b;">Final</div>` : ""
+
+    const flagL = p.localLogo ? `<img src="${p.localLogo}" style="width:36px;height:26px;object-fit:contain;" onerror="this.style.display='none'">` : `<span style="font-size:28px;">🏳️</span>`
+    const flagV = p.visitanteLogo ? `<img src="${p.visitanteLogo}" style="width:36px;height:26px;object-fit:contain;" onerror="this.style.display='none'">` : `<span style="font-size:28px;">🏳️</span>`
+
+    return `<div class="partido-hoy-card ${terminado?'terminado':vivo?'vivo':''}">
+      <div class="eq-lado"><div class="eq-flag">${flagL}</div><div class="eq-nombre">${p.localNombre||p.local||"–"}</div></div>
+      <div class="partido-centro">${score}${badge}<div class="partido-info">${p.sede||""}</div></div>
+      <div class="eq-lado derecha"><div class="eq-nombre">${p.visitanteNombre||p.visitante||"–"}</div><div class="eq-flag">${flagV}</div></div>
+    </div>`
+  }).join("")
+}
+
+// ── GRUPO ──
+function renderGrupo(g){
+  const el = document.getElementById("contenidoGrupo")
+  // Buscar partidos del grupo en la DB y en _datos
+  let pts = _partidos.filter(p => p.grupo === g && p.fase === "grupo")
+
+  // Si no hay en DB, buscar en _datos.partidos
+  if(!pts.length && _datos?.partidos){
+    pts = _datos.partidos.filter(p => (p.grupo||"").toUpperCase() === g)
+  }
+
+  if(!pts.length){
+    el.innerHTML = `<div style="color:rgba(255,255,255,.4);text-align:center;padding:30px;">
+      No hay datos para el Grupo ${g}.<br><a href="/mundial.html" style="color:#22c55e;font-size:13px;margin-top:8px;display:inline-block;">Ir al Prode para ver el fixture completo →</a>
+    </div>`
+    return
+  }
+
+  // Calcular tabla del grupo
+  const tabla = calcularTabla(pts, g)
+  const tablaHtml = renderTablaGrupo(tabla, g)
+
+  el.innerHTML = `
+    <div class="match-grid">${pts.map(p => cardPartidoDB(p)).join("")}</div>
+    ${tablaHtml}
+  `
+}
+
+function cardPartidoDB(p){
+  const eq1 = _equipos[p.equipo1_id] || {}
+  const eq2 = _equipos[p.equipo2_id] || {}
+  const terminado = p.resultado_1 !== null && p.resultado_2 !== null
+  const score = terminado
+    ? `<div class="match-score">${p.resultado_1} — ${p.resultado_2}</div>`
+    : `<div class="match-score pending">vs</div>`
+  const badge = terminado ? `<span class="badge-cerrado">Final</span>` :
+                p.abierto === false ? `<span class="badge-cerrado">Cerrado</span>` :
+                `<span class="badge-abierto">⏱ ${p.hora||"Próximo"}</span>`
+
+  const adminBtn = _esAdmin ? `<button onclick="abrirEditorResultado(${p.id},${p.resultado_1||'null'},${p.resultado_2||'null'})"
+    style="font-size:10px;background:#2563eb;color:white;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;margin-top:4px;">✏️ Editar</button>` : ""
+
+  return `<div class="match-card ${terminado?'terminado':''}">
+    <div class="match-meta">
+      <span class="match-jornada">Grupo ${p.grupo} · J${p.jornada||""}</span>
+      ${badge}
+    </div>
+    <div class="match-equipos">
+      <div class="match-equipo">
+        ${eq1.bandera_url ? `<img src="${eq1.bandera_url}" onerror="this.style.display='none'">` : `<span style="font-size:24px;">${eq1.bandera_emoji||"🏳️"}</span>`}
+        <span>${eq1.nombre||"–"}</span>
+      </div>
+      ${score}
+      <div class="match-equipo">
+        ${eq2.bandera_url ? `<img src="${eq2.bandera_url}" onerror="this.style.display='none'">` : `<span style="font-size:24px;">${eq2.bandera_emoji||"🏳️"}</span>`}
+        <span>${eq2.nombre||"–"}</span>
+      </div>
+    </div>
+    <div class="match-sede">${p.sede||""} ${adminBtn}</div>
+  </div>`
+}
+
+function cardPartidoSimple(p){
+  const terminado = p.resultado_1 !== null && p.resultado_2 !== null
+  const eq1 = _equipos[p.equipo1_id] || {}
+  const eq2 = _equipos[p.equipo2_id] || {}
+  return `<div class="partido-hoy-card ${terminado?'terminado':''}">
+    <div class="eq-lado"><span style="font-size:26px;">${eq1.bandera_emoji||"🏳️"}</span><div class="eq-nombre">${eq1.nombre||"–"}</div></div>
+    <div class="partido-centro">
+      <div class="partido-score">${terminado?`${p.resultado_1} — ${p.resultado_2}`:"vs"}</div>
+      <div class="partido-hora">${p.hora||""}</div>
+    </div>
+    <div class="eq-lado derecha"><div class="eq-nombre">${eq2.nombre||"–"}</div><span style="font-size:26px;">${eq2.bandera_emoji||"🏳️"}</span></div>
+  </div>`
+}
+
+// ── TABLA GRUPO ──
+function calcularTabla(pts, grupo){
+  const equiposGrupo = {}
+  pts.forEach(p => {
+    const e1 = _equipos[p.equipo1_id]
+    const e2 = _equipos[p.equipo2_id]
+    if(e1 && !equiposGrupo[e1.id]) equiposGrupo[e1.id] = { eq: e1, pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts:0 }
+    if(e2 && !equiposGrupo[e2.id]) equiposGrupo[e2.id] = { eq: e2, pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts:0 }
+    if(p.resultado_1 === null || p.resultado_2 === null) return
+    const r1 = p.resultado_1, r2 = p.resultado_2
+    if(equiposGrupo[p.equipo1_id]){
+      const t = equiposGrupo[p.equipo1_id]
+      t.pj++; t.gf+=r1; t.gc+=r2
+      if(r1>r2){ t.pg++; t.pts+=3 } else if(r1===r2){ t.pe++; t.pts+=1 } else { t.pp++ }
+    }
+    if(equiposGrupo[p.equipo2_id]){
+      const t = equiposGrupo[p.equipo2_id]
+      t.pj++; t.gf+=r2; t.gc+=r1
+      if(r2>r1){ t.pg++; t.pts+=3 } else if(r1===r2){ t.pe++; t.pts+=1 } else { t.pp++ }
+    }
+  })
+  return Object.values(equiposGrupo).sort((a,b) => b.pts-a.pts || (b.gf-b.gc)-(a.gf-a.gc) || b.gf-a.gf)
+}
+
+function renderTablaGrupo(tabla, grupo){
+  if(!tabla.length) return ""
+  return `<div class="tabla-grupo" style="margin:10px 0;">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Pts</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th>
+      </tr></thead>
+      <tbody>
+        ${tabla.map((t,i) => {
+          const posClass = i===0?"clasificado":i===1?"clasificado":i===2?"clasificado-3ro":""
+          const posBadge = i===0?`<span class="pos-badge pos-1">1</span>`:i===1?`<span class="pos-badge pos-2">2</span>`:i===2?`<span class="pos-badge pos-3">3</span>`:`<span class="pos-badge pos-4">4</span>`
+          return `<tr class="${posClass}">
+            <td>${posBadge} ${t.eq.bandera_emoji||""} ${t.eq.nombre||"–"}</td>
+            <td><strong>${t.pts}</strong></td><td>${t.pj}</td><td>${t.pg}</td>
+            <td>${t.pe}</td><td>${t.pp}</td><td>${t.gf}</td><td>${t.gc}</td>
+            <td>${t.gf-t.gc>0?"+":""}${t.gf-t.gc}</td>
+          </tr>`
+        }).join("")}
+      </tbody>
+    </table>
+    <div style="padding:8px 12px;font-size:10px;color:#64748b;display:flex;gap:12px;flex-wrap:wrap;">
+      <span><span class="pos-badge pos-1" style="width:14px;height:14px;font-size:8px;">1</span> Clasifica</span>
+      <span><span class="pos-badge pos-2" style="width:14px;height:14px;font-size:8px;">2</span> Clasifica</span>
+      <span><span class="pos-badge pos-3" style="width:14px;height:14px;font-size:8px;">3</span> Mejor 3ro</span>
+    </div>
+  </div>`
+}
+
+// ── KNOCKOUT ──
+function renderKnockout(fase, elId){
+  const el = document.getElementById(elId)
+  const mapa = { octavos:"octavos", cuartos:"cuartos", semis:"semis", final:"final", tercero:"tercero" }
+  const pts = _partidos.filter(p => p.fase === mapa[fase])
+
+  if(!pts.length){
+    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:rgba(255,255,255,.4);">
+      <i class="fa-solid fa-lock" style="font-size:28px;display:block;margin-bottom:10px;opacity:.4;"></i>
+      Los partidos de esta fase se definirán a medida que avance el torneo.
+    </div>`
+    return
+  }
+  el.innerHTML = pts.map(p => cardKnockout(p)).join("")
+}
+
+function cardKnockout(p){
+  const eq1 = _equipos[p.equipo1_id] || null
+  const eq2 = _equipos[p.equipo2_id] || null
+  const terminado = p.resultado_1 !== null && p.resultado_2 !== null
+  const score = terminado ? `${p.resultado_1} — ${p.resultado_2}` : "vs"
+  const nomL = eq1?.nombre || "Por definir"
+  const nomV = eq2?.nombre || "Por definir"
+  const flagL = eq1?.bandera_emoji || "🏳️"
+  const flagV = eq2?.bandera_emoji || "🏳️"
+  const adminBtn = _esAdmin ? `<button onclick="abrirEditorResultado(${p.id},${p.resultado_1||'null'},${p.resultado_2||'null'})"
+    style="font-size:10px;background:#2563eb;color:white;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;margin-top:4px;">✏️ Editar</button>` : ""
+
+  const ganador = terminado ? (p.resultado_1 > p.resultado_2 ? p.equipo1_id : p.resultado_2 > p.resultado_1 ? p.equipo2_id : null) : null
+
+  return `<div class="match-card ${terminado?'terminado':''}">
+    <div class="match-meta">
+      <span class="match-jornada">${faseLegible(p.fase)}</span>
+      ${terminado?'<span class="badge-cerrado">Final</span>':'<span class="badge-abierto">Próximo</span>'}
+    </div>
+    <div class="match-equipos">
+      <div class="match-equipo" style="${ganador===p.equipo1_id?'font-weight:900;':''}">
+        <span style="font-size:24px;">${flagL}</span>
+        <span style="${ganador===p.equipo1_id?'color:#15803d;':''}">${nomL}</span>
+      </div>
+      <div class="match-score ${!terminado?'pending':''}">${score}</div>
+      <div class="match-equipo" style="${ganador===p.equipo2_id?'font-weight:900;':''}">
+        <span style="font-size:24px;">${flagV}</span>
+        <span style="${ganador===p.equipo2_id?'color:#15803d;':''}">${nomV}</span>
+      </div>
+    </div>
+    <div class="match-sede">${p.sede||""} ${adminBtn}</div>
+  </div>`
+}
+
+function faseLegible(f){
+  const m = { octavos:"16avos de Final", cuartos:"Cuartos de Final", semis:"Semifinal", final:"Final", tercero:"3° Puesto" }
+  return m[f] || f
+}
+
+// ── ADMIN: EDITAR RESULTADO ──
+function abrirEditorResultado(id, r1, r2){
+  const g1 = prompt(`Goles Equipo 1 (actual: ${r1??'–'}):`, r1 ?? "")
+  if(g1 === null) return
+  const g2 = prompt(`Goles Equipo 2 (actual: ${r2??'–'}):`, r2 ?? "")
+  if(g2 === null) return
+  guardarResultado(id, parseInt(g1), parseInt(g2))
+}
+
+async function guardarResultado(id, r1, r2){
+  if(isNaN(r1)||isNaN(r2)) { alert("Ingresá números válidos"); return }
+  try {
+    const tk = JSON.parse(localStorage.getItem("sb-iqeiszkoifxgygoqvbem-auth-token"))
+    const r = await fetch(`${SB_URL}/rest/v1/mundial_partidos?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...HDR, "Content-Type":"application/json", "Authorization": `Bearer ${tk?.access_token}`, "Prefer":"return=minimal" },
+      body: JSON.stringify({ resultado_1: r1, resultado_2: r2 })
+    })
+    if(r.ok){ alert("✅ Resultado guardado"); location.reload() }
+    else { const e = await r.json(); alert("Error: " + JSON.stringify(e)) }
+  } catch(e){ alert("Error de red: " + e.message) }
+}
+
+// ── DESCARGAR PDF ──
+function descargarFixture(){
+  const style = document.createElement("style")
+  style.id = "_print_override"
+  style.textContent = `.no-print{display:none!important;}.fase-tabs,.grupo-tabs{display:none!important;}.seccion{display:block!important;}`
+  document.head.appendChild(style)
+
+  // Mostrar todas las secciones para el PDF
+  document.querySelectorAll("[id^='sec']").forEach(el => el.style.display = "")
+
+  window.print()
+
+  setTimeout(() => {
+    document.getElementById("_print_override")?.remove()
+    renderFase(_faseActual)
+  }, 1500)
+}
+
+// ── INIT ──
+cargarDatos()
+</script>
+</body>
+</html>
