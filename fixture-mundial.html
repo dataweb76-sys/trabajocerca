@@ -13,10 +13,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1923;color:#1e293
 
 /* ── PORTADA ── */
 .portada{
-  position:relative;width:100%;max-height:400px;min-height:120px;overflow:hidden;cursor:pointer;
+  position:relative;width:100%;overflow:visible;cursor:pointer;
   display:block;
 }
-.portada img{width:100%;display:block;object-fit:cover;max-height:340px;}
+.portada img{width:100%;display:block;height:auto;}
 .portada-btns{
   position:absolute;bottom:0;left:0;right:0;
   background:linear-gradient(to top,rgba(0,0,0,.7),transparent);
@@ -197,7 +197,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1923;color:#1e293
   .topbar,.fase-tabs,.grupo-tabs,.portada-btns,.btn-portada,
   .no-print{display:none!important;}
   .portada{display:block!important;max-height:none;page-break-after:always;}
-  .portada img{display:block!important;width:100%;max-height:320px;object-fit:contain;}
+  .portada img{display:block!important;width:100%;height:auto;}
   .hoy-wrap{background:#f8fafc;border-radius:8px;}
   .bracket-fase-titulo{background:#f1f5f9;color:#1e293b;}
   .seccion-titulo{color:#374151;}
@@ -240,7 +240,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1923;color:#1e293
 
 <!-- PORTADA -->
 <div class="portada">
-  <img src="/fixturemundial.png" alt="Fixture Mundial 2026 — trabajoscerca.com.ar"
+  <img src="/fixture.png" alt="Fixture Mundial 2026 — trabajoscerca.com.ar"
     style="width:100%;display:block;object-fit:cover;max-height:400px;"
     onerror="this.parentElement.style.display='none'">
 </div>
