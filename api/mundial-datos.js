@@ -1,39 +1,95 @@
 /**
- * Vercel Serverless Function — /api/mundial-datos
- * Raspa canchallena.lanacion.com.ar para obtener resultados del Mundial 2026
+ * /api/mundial-datos
+ * Usa ESPN public API — sin key, sin scraping, datos reales
  */
+
+const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Cache-Control', 's-maxage=90, stale-while-revalidate=300')
-
-  const BASE = 'https://canchallena.lanacion.com.ar/futbol/mundial'
-  const HDR  = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Language': 'es-AR,es;q=0.9',
-    'Cache-Control': 'no-cache',
-  }
+  res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=600')
 
   try {
-    // Buscar en fixture (tiene todas las fechas paginadas) y grupos (tiene standings)
-    const [htmlFix, htmlGrupos] = await Promise.all([
-      fetch(`${BASE}/fixture/`, { headers: HDR }).then(r => r.text()),
-      fetch(`${BASE}/grupos/`,  { headers: HDR }).then(r => r.text()),
+    // Buscar partidos en todas las fechas del mundial (11 jun - 19 jul 2026)
+    const fechas = generarFechas('2026-06-11', '2026-07-19')
+
+    // Traer standings y partidos en paralelo
+    const [standingsRes, ...scoreboards] = await Promise.all([
+      fetch(`${ESPN}/standings`, { headers: { 'User-Agent': 'Mozilla/5.0' } }),
+      ...fechas.map(f =>
+        fetch(`${ESPN}/scoreboard?dates=${f}&limit=50`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null)
+      )
     ])
 
-    const partidos = extraerPartidos(htmlFix)
-    const grupos   = extraerGrupos(htmlGrupos)
+    // Partidos
+    const partidos = []
+    for (const data of scoreboards) {
+      if (!data?.events) continue
+      for (const ev of data.events) {
+        const comp = ev.competitions?.[0]
+        if (!comp) continue
+        const home = comp.competitors?.find(c => c.homeAway === 'home')
+        const away = comp.competitors?.find(c => c.homeAway === 'away')
+        if (!home || !away) continue
 
-    // Si el fixture solo trajo partidos próximos, complementar con resultados
-    // buscando en el state de grupos (tiene los últimos partidos también)
-    const terminados = partidos.filter(p => p.estado === 'FT').length
-    if (terminados < 10) {
-      const ptGrupos = extraerPartidosDeGrupos(htmlGrupos)
-      const vistos = new Set(partidos.map(p => norm(p.localNombre) + '|' + norm(p.visitanteNombre)))
-      for (const p of ptGrupos) {
-        const key = norm(p.localNombre) + '|' + norm(p.visitanteNombre)
-        if (!vistos.has(key)) { partidos.push(p); vistos.add(key) }
+        const status  = ev.status?.type?.name  // 'STATUS_FINAL', 'STATUS_IN_PROGRESS', 'STATUS_SCHEDULED'
+        const terminado = status === 'STATUS_FINAL'
+        const enVivo    = status === 'STATUS_IN_PROGRESS'
+
+        const grupoBruto = comp.groups?.name || comp.series?.summary || ev.season?.slug || ''
+        const grupoLetra = (grupoBruto.match(/Group\s*([A-L])/i) || grupoBruto.match(/Grupo\s*([A-L])/i) || [])[1] || ''
+
+        partidos.push({
+          matchId:          ev.id,
+          fecha:            ev.date ? new Date(ev.date).toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long', timeZone:'America/Argentina/Buenos_Aires' }) : '',
+          fechaISO:         ev.date || '',
+          hora:             ev.date ? new Date(ev.date).toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit', timeZone:'America/Argentina/Buenos_Aires' }) : '',
+          local:            home.team?.abbreviation || '',
+          localNombre:      home.team?.displayName || home.team?.name || '',
+          localLogo:        home.team?.logo || '',
+          golesL:           terminado || enVivo ? parseInt(home.score) || 0 : null,
+          golesV:           terminado || enVivo ? parseInt(away.score) || 0 : null,
+          visitante:        away.team?.abbreviation || '',
+          visitanteNombre:  away.team?.displayName || away.team?.name || '',
+          visitanteLogo:    away.team?.logo || '',
+          estado:           terminado ? 'FT' : enVivo ? 'LIVE' : 'PRG',
+          grupo:            grupoLetra,
+          fase:             comp.type?.abbreviation || '',
+          sede:             comp.venue?.fullName || '',
+        })
+      }
+    }
+
+    // Standings por grupo desde ESPN
+    const grupos = {}
+    if (standingsRes.ok) {
+      const sd = await standingsRes.json()
+      const tablas = sd.children || sd.standings?.entries ? [sd] : (sd.children || [])
+      for (const tabla of tablas) {
+        const nombre = tabla.name || tabla.abbreviation || ''
+        const m = nombre.match(/Group\s*([A-L])/i)
+        if (!m) continue
+        const letra = m[1].toUpperCase()
+        const rows  = tabla.standings?.entries || []
+        grupos[letra] = rows.map(e => {
+          const stats = {}
+          ;(e.stats || []).forEach(s => { stats[s.name] = s.value })
+          return {
+            equipo: e.team?.displayName || e.team?.name || '',
+            logo:   e.team?.logo || '',
+            pos:    stats.rank || 0,
+            pts:    stats.points || 0,
+            pj:     stats.gamesPlayed || 0,
+            pg:     stats.wins || 0,
+            pe:     stats.ties || 0,
+            pp:     stats.losses || 0,
+            gf:     stats.pointsFor || 0,
+            gc:     stats.pointsAgainst || 0,
+            dg:     stats.pointDifferential || 0,
+          }
+        })
       }
     }
 
@@ -43,140 +99,13 @@ export default async function handler(req, res) {
   }
 }
 
-const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim()
-
-/* ── Helpers ─────────────────────────────────────────────────────────── */
-function getPreloadedState(html) {
-  const idx   = html.indexOf('window.__PRELOADED_STATE__')
-  if (idx < 0) return null
-  const start = html.indexOf('{', idx)
-  if (start < 0) return null
-
-  let depth = 0, inStr = false, escape = false
-  for (let i = start; i < html.length; i++) {
-    const c = html[i]
-    if (escape)              { escape = false; continue }
-    if (c === '\\' && inStr) { escape = true;  continue }
-    if (c === '"')           { inStr = !inStr;  continue }
-    if (inStr)               continue
-    if (c === '{') depth++
-    else if (c === '}') {
-      depth--
-      if (depth === 0) {
-        try { return JSON.parse(html.slice(start, i + 1)) }
-        catch { return null }
-      }
-    }
+function generarFechas(desde, hasta) {
+  const fechas = []
+  const d = new Date(desde)
+  const h = new Date(hasta)
+  while (d <= h) {
+    fechas.push(d.toISOString().slice(0, 10).replace(/-/g, ''))
+    d.setDate(d.getDate() + 1)
   }
-  return null
-}
-
-function parsearPartido(m, fecha) {
-  const home   = m.homeTeam || {}
-  const away   = m.awayTeam || {}
-  // matchStatus puede ser número o string: 1=Final, 0=Programado, 3=EnVivo
-  const status = m.matchStatus
-  const terminado = status == 1 || status === '1' || m.postGameText === 'Final'
-  const enVivo    = status == 3 || status === '3' || status == 2 || status === '2'
-
-  const golesL = terminado || enVivo
-    ? (parseInt(m.score?.homeTeam?.goals ?? m.homeScore ?? home.score ?? '') ?? null)
-    : null
-  const golesV = terminado || enVivo
-    ? (parseInt(m.score?.awayTeam?.goals ?? m.awayScore ?? away.score ?? '') ?? null)
-    : null
-
-  return {
-    fecha,
-    local:            home.code || home.name || '?',
-    localNombre:      home.name || home.shortName || '',
-    localLogo:        home.imgProps?.src || home.logo || '',
-    golesL:           isNaN(golesL) ? null : golesL,
-    golesV:           isNaN(golesV) ? null : golesV,
-    visitante:        away.code || away.name || '?',
-    visitanteNombre:  away.name || away.shortName || '',
-    visitanteLogo:    away.imgProps?.src || away.logo || '',
-    hora:             m.matchDateUTC
-      ? new Date(m.matchDateUTC).toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit', timeZone:'America/Argentina/Buenos_Aires' })
-      : (m.matchHour || ''),
-    fechaISO:         m.matchDateUTC || m.dateISO || '',
-    estado:           terminado ? 'FT' : enVivo ? 'LIVE' : 'PRG',
-    grupo:            m.group || m.groupName || '',
-    fase:             m.round || m.phase || '',
-    matchId:          m.matchId || m.id || '',
-  }
-}
-
-/* ── Partidos desde fixture ────────────────────────────────────────────── */
-function extraerPartidos(html) {
-  const state    = getPreloadedState(html)
-  const partidos = []
-
-  // Múltiples keys posibles donde canchallena guarda los partidos
-  const days = state?.fixtureReducer?.fixtureData?.fixture?.dayMatchesData
-    || state?.fixtureReducer?.fixture?.dayMatchesData
-    || state?.matchesReducer?.fixture?.dayMatchesData
-    || []
-
-  days.forEach(day => {
-    const fecha = day.dataHeader?.text || day.dataHeader?.title || ''
-    ;(day.tableBody || []).forEach(m => partidos.push(parsearPartido(m, fecha)))
-  })
-
-  return partidos
-}
-
-/* ── Partidos adicionales desde página de grupos ─────────────────────── */
-function extraerPartidosDeGrupos(html) {
-  const state    = getPreloadedState(html)
-  const partidos = []
-
-  const fuentes = [
-    state?.fixtureReducer?.fixtureData?.fixture?.dayMatchesData,
-    state?.fixtureReducer?.fixture?.dayMatchesData,
-    state?.matchesReducer?.fixture?.dayMatchesData,
-    state?.groupsReducer?.matches,
-  ].filter(Array.isArray)
-
-  for (const days of fuentes) {
-    days.forEach(item => {
-      const fecha = item.dataHeader?.text || item.dataHeader?.title || item.date || ''
-      const rows  = item.tableBody || (item.matchId ? [item] : [])
-      rows.forEach(m => partidos.push(parsearPartido(m, fecha)))
-    })
-  }
-
-  return partidos
-}
-
-/* ── Grupos / Standings ────────────────────────────────────────────────── */
-function extraerGrupos(html) {
-  const state  = getPreloadedState(html)
-  const tables = state?.standingsReducer?.groupsLeaderboards?.tables
-    || state?.standingsReducer?.tables
-    || []
-  const grupos = {}
-
-  tables.forEach(tabla => {
-    const nombre     = tabla.name || tabla.groupName || ''
-    const letraMatch = nombre.match(/Grupo\s*([A-L])/i)
-    if (!letraMatch) return
-    const letra = letraMatch[1].toUpperCase()
-
-    grupos[letra] = (tabla.dataBody || tabla.rows || []).map(e => ({
-      equipo: e.team?.name || e.teamName || '?',
-      logo:   e.team?.imgProps?.src || e.teamLogo || '',
-      pos:    e.position || 0,
-      pts:    e.points   || 0,
-      pj:     e.playedST || e.played || 0,
-      pg:     e.wonST    || e.won    || 0,
-      pe:     e.tiedST   || e.drawn  || 0,
-      pp:     e.lostST   || e.lost   || 0,
-      gf:     e.goalsMade    || e.goalsFor     || 0,
-      gc:     e.goalsAgainst || e.goalsAgainst || 0,
-      dg:     e.difference   || 0,
-    }))
-  })
-
-  return grupos
+  return fechas
 }

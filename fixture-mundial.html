@@ -800,48 +800,59 @@ function renderTablaGrupo(tabla, grupo){
   </div>`
 }
 
+// Estructura fija de 16avos del Mundial 2026 (se completa cuando avance el torneo)
+const BRACKET_16AVOS = [
+  ["1A","2B"],["1C","2D"],["1E","2F"],["1G","2H"],
+  ["1I","2J"],["1K","2L"],["1B","2A"],["1D","2C"],
+  ["1F","2E"],["1H","2G"],["1J","2I"],["1L","2K"],
+  ["Mej.3ro","Mej.3ro"],["Mej.3ro","Mej.3ro"],
+  ["Mej.3ro","Mej.3ro"],["Mej.3ro","Mej.3ro"],
+]
+
 // ── KNOCKOUT ──
 function renderKnockout(fase, elId){
   const el = document.getElementById(elId)
 
-  // Intentar con datos del API primero
-  if(_datos?.partidos){
-    const fasesAPI = { octavos:["octavos","16avos","16","R16"], cuartos:["cuartos","QF"], semis:["semis","semi","SF"], final:["final","F"], tercero:["tercero","3P"] }
-    const claves = fasesAPI[fase] || [fase]
-    const pts = _datos.partidos.filter(p => claves.some(c => (p.fase||p.ronda||"").toLowerCase().includes(c.toLowerCase())))
+  // Solo usar datos del API — nunca Supabase para evitar datos falsos
+  if(_datos?.partidos?.length){
+    const claves = {
+      octavos: ["round of 32","16","r32","octavos"],
+      cuartos: ["quarter","cuartos","qf"],
+      semis:   ["semi","sf"],
+      final:   ["final","f"],
+    }
+    const ks = claves[fase] || [fase]
+    const pts = _datos.partidos.filter(p => {
+      const f = (p.fase||p.ronda||"").toLowerCase()
+      return ks.some(k => f.includes(k))
+    })
     if(pts.length){
       el.innerHTML = pts.map(p => cardKnockoutAPI(p)).join("")
       return
     }
   }
 
-  // Fallback: Supabase — mostrar estructura SIN resultados (evitar datos falsos)
-  const pts = _partidos.filter(p => p.fase === fase)
-  if(!pts.length){
-    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:rgba(255,255,255,.4);">
-      <i class="fa-solid fa-lock" style="font-size:28px;display:block;margin-bottom:10px;opacity:.4;"></i>
-      Los partidos de esta fase se definirán a medida que avance el torneo.
-    </div>`
+  // Sin datos del API: mostrar estructura según fase, sin inventar nada
+  if(fase === "octavos"){
+    el.innerHTML = BRACKET_16AVOS.map(([l,v], i) => `
+      <div class="match-card">
+        <div class="match-meta">
+          <span class="match-jornada">16avos de Final · Partido ${i+1}</span>
+          <span class="badge-abierto">Por definir</span>
+        </div>
+        <div class="match-equipos">
+          <div class="match-equipo"><span style="font-size:13px;color:#94a3b8;font-weight:700;">${l}</span></div>
+          <div class="match-score pending">vs</div>
+          <div class="match-equipo"><span style="font-size:13px;color:#94a3b8;font-weight:700;">${v}</span></div>
+        </div>
+      </div>`).join("")
     return
   }
-  // Mostrar estructura pero forzar "Próximo" — resultados solo vienen del API
-  el.innerHTML = pts.map(p => {
-    const eq1 = _equipos[p.equipo_local_id] || null
-    const eq2 = _equipos[p.equipo_visitante_id] || null
-    const nom1 = eq1?.nombre || p.desc_local || "Por definir"
-    const nom2 = eq2?.nombre || p.desc_visitante || "Por definir"
-    return `<div class="match-card">
-      <div class="match-meta">
-        <span class="match-jornada">${faseLegible(fase)}</span>
-        <span class="badge-abierto">Próximo</span>
-      </div>
-      <div class="match-equipos">
-        <div class="match-equipo">${flagHtml(eq1,30)}<span>${nom1}</span></div>
-        <div class="match-score pending">vs</div>
-        <div class="match-equipo">${flagHtml(eq2,30)}<span>${nom2}</span></div>
-      </div>
-    </div>`
-  }).join("")
+
+  el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,.35);">
+    <i class="fa-solid fa-lock" style="font-size:32px;display:block;margin-bottom:12px;"></i>
+    Los partidos de ${faseLegible(fase)} se definirán a medida que avance el torneo.
+  </div>`
 }
 
 function cardKnockoutAPI(p){
