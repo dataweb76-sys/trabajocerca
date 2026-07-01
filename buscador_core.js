@@ -7,6 +7,69 @@ const SB_URL = "https://iqeiszkoifxgygoqvbem.supabase.co"
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZWlzemtvaWZ4Z3lnb3F2YmVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMTEzODIsImV4cCI6MjA5NDc4NzM4Mn0.qxt70TPbARPcMc8HhHx2A2QnfBvJLCrnrH4m36IcENs"
 const SB_HEADERS = { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
 
+// ── Publicidades LocalWeb (Supabase externo) ───────────────────
+const PUB_URL = "https://qzwphmnxirsgqtotnzzq.supabase.co"
+const PUB_KEY = "sb_publishable_Dnl6EKbpOJnZtVS0miYwjQ_xtOSikME"
+const PUB_HEADERS = { "apikey": PUB_KEY, "Authorization": `Bearer ${PUB_KEY}` }
+let _publicidadesTC = []   // cache de banners cargados
+let _pubIdx = 0            // índice rotativo para mostrar siguiente banner
+
+async function cargarPublicidadesTC() {
+  try {
+    const r = await fetch(
+      `${PUB_URL}/rest/v1/publicidades?select=id,nombre,imagen_data,imagen_data_2,con_link,formato,ciudad,provincia&order=created_at.asc`,
+      { headers: PUB_HEADERS }
+    )
+    if (!r.ok) return
+    const data = await r.json()
+    _publicidadesTC = (data || []).filter(p => p.imagen_data)
+    _pubIdx = 0
+  } catch(e) {}
+}
+
+function crearBannerTC(pub) {
+  const wrap = document.createElement("div")
+  wrap.style.cssText = "margin:12px 0;border-radius:14px;overflow:hidden;position:relative;cursor:pointer;background:#f8fafc;border:1px solid #e2e8f0;"
+
+  const label = document.createElement("div")
+  label.style.cssText = "position:absolute;top:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.5px;z-index:2;"
+  label.textContent = "PUBLICIDAD"
+
+  // Si es GIF (formato gif) y tiene segunda imagen, alternar con CSS animation
+  if (pub.formato === "gif" && pub.imagen_data_2) {
+    wrap.innerHTML = `
+      <div style="position:relative;width:100%;overflow:hidden;border-radius:14px;">
+        <img src="${pub.imagen_data}" style="width:100%;display:block;border-radius:14px;animation:tcBannerGif 4s infinite;" alt="${pub.nombre}">
+        <img src="${pub.imagen_data_2}" style="width:100%;display:block;border-radius:14px;position:absolute;top:0;left:0;animation:tcBannerGif2 4s infinite;" alt="${pub.nombre}">
+      </div>`
+    if (!document.getElementById("tc-banner-style")) {
+      const st = document.createElement("style")
+      st.id = "tc-banner-style"
+      st.textContent = `
+        @keyframes tcBannerGif  { 0%,45%{opacity:1} 50%,95%{opacity:0} 100%{opacity:1} }
+        @keyframes tcBannerGif2 { 0%,45%{opacity:0} 50%,95%{opacity:1} 100%{opacity:0} }`
+      document.head.appendChild(st)
+    }
+  } else {
+    const img = document.createElement("img")
+    img.src = pub.imagen_data
+    img.alt = pub.nombre
+    img.style.cssText = "width:100%;display:block;border-radius:14px;"
+    wrap.appendChild(img)
+  }
+
+  wrap.appendChild(label)
+
+  if (pub.con_link) {
+    wrap.style.cursor = "pointer"
+    wrap.title = pub.nombre
+  } else {
+    wrap.style.cursor = "default"
+  }
+
+  return wrap
+}
+
 // TIPO FIJO — definido por el HTML que carga este script
 const TIPO = window._TC_TIPO  // "oficio" o "profesional"
 
@@ -351,6 +414,9 @@ window.filtrarCategoria = function(cat){
    BUSCAR
 ═══════════════════════════════════════════ */
 window.buscar = async function(){
+  // Cargar publicidades (solo si no están cacheadas aún)
+  if (_publicidadesTC.length === 0) await cargarPublicidadesTC()
+
   // Cargar categorías (solo la primera vez que se ejecuta buscar)
   const chipsAntes = CHIPS_OFICIOS.length
   await cargarChipsOficio()
@@ -381,8 +447,8 @@ window.buscar = async function(){
   } else if(palabra){
     const p=encodeURIComponent(`*${palabra}*`); url+=`&or=(titulo.ilike.${p},categoria.ilike.${p},descripcion.ilike.${p},servicios_lista.ilike.${p})`
   }
-  if(ciudad)       url+=`&or=(localidad.ilike.*${encodeURIComponent(ciudad)}*,localidad.is.null)`
-  if(_PROV_FILTRO) url+=`&or=(provincia.ilike.*${encodeURIComponent(_PROV_FILTRO)}*,provincia.is.null)`
+  if(ciudad)       url+=`&localidad=ilike.*${encodeURIComponent(ciudad)}*`
+  if(_PROV_FILTRO) url+=`&provincia=ilike.*${encodeURIComponent(_PROV_FILTRO)}*`
 
   let data
   try {
@@ -490,7 +556,14 @@ window.buscar = async function(){
       ${data.length} resultado${data.length!==1?"s":""} · ordenados por puntaje${_PROV_FILTRO ? ` · ${_PROV_FILTRO}` : ""}
     </p>`
 
-  data.forEach(item => {
+  data.forEach((item, idx) => {
+    // Insertar banner publicitario cada 4 resultados
+    if (idx > 0 && idx % 4 === 0 && _publicidadesTC.length > 0) {
+      const pub = _publicidadesTC[_pubIdx % _publicidadesTC.length]
+      _pubIdx++
+      cont.appendChild(crearBannerTC(pub))
+    }
+
     const p      = item.perfiles || {}
     const nombre = displayName(p)
     const wa     = puedeVerTel(p) ? waLink(p.movil, nombre, item.categoria) : null
