@@ -996,11 +996,131 @@ window.cambiarEstadoVendedor = async function(id, estado, btn) {
   cargarVendedores()
 }
 
+/* ══════════════════════════════════════════
+   USUARIOS SIN UBICACIÓN
+══════════════════════════════════════════ */
+
+const PROVINCIAS_AR = [
+  "Buenos Aires","CABA","Catamarca","Chaco","Chubut","Córdoba","Corrientes",
+  "Entre Ríos","Formosa","Jujuy","La Pampa","La Rioja","Mendoza","Misiones",
+  "Neuquén","Río Negro","Salta","San Juan","San Luis","Santa Cruz","Santa Fe",
+  "Santiago del Estero","Tierra del Fuego","Tucumán"
+]
+
+async function cargarSinUbicacion() {
+  const { data, error } = await supabase
+    .from("perfiles")
+    .select("id, nombre, apellido, nombre_empresa, email, provincia, localidad, created_at")
+    .or("provincia.is.null,provincia.eq.")
+    .order("created_at", { ascending: false })
+    .limit(100)
+
+  const cont = document.getElementById("tablaSinUbic")
+  const ctr  = document.getElementById("contadorSinUbic")
+
+  if (error || !data?.length) {
+    cont.innerHTML = `<p style="color:#94a3b8;text-align:center;padding:16px;">Sin usuarios pendientes.</p>`
+    if (ctr) ctr.textContent = "(0)"
+    return
+  }
+
+  if (ctr) ctr.textContent = `(${data.length})`
+
+  cont.innerHTML = data.map(p => {
+    const nombre = (p.nombre_empresa?.trim()) || `${p.nombre||""} ${p.apellido||""}`.trim() || "(sin nombre)"
+    return `
+    <div id="sinubic-${p.id}" style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 0;border-bottom:1px solid #f1f5f9;">
+      <div style="flex:1;min-width:160px;">
+        <strong style="font-size:13px;">${nombre}</strong>
+        <span style="font-size:12px;color:#94a3b8;display:block;">${p.email||"(sin email)"}</span>
+      </div>
+      <select id="prov-${p.id}" onchange="window.cargarLocalidadesAdmin('${p.id}')"
+        style="font-size:13px;padding:5px 8px;border:1.5px solid #cbd5e1;border-radius:8px;min-width:150px;">
+        <option value="">— Provincia —</option>
+        ${PROVINCIAS_AR.map(pr => `<option value="${pr}">${pr}</option>`).join("")}
+      </select>
+      <select id="loc-${p.id}"
+        style="font-size:13px;padding:5px 8px;border:1.5px solid #cbd5e1;border-radius:8px;min-width:160px;">
+        <option value="">— Localidad —</option>
+      </select>
+      <button onclick="window.guardarUbicAdmin('${p.id}')"
+        style="font-size:12px;padding:5px 14px;background:#2563eb;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:700;">
+        Guardar
+      </button>
+      <button onclick="window.enviarEmailUno('${p.id}','${p.email||""}')"
+        style="font-size:12px;padding:5px 12px;background:white;color:#f59e0b;border:1.5px solid #f59e0b;border-radius:8px;cursor:pointer;font-weight:700;">
+        <i class="fa-solid fa-envelope"></i>
+      </button>
+    </div>`
+  }).join("")
+}
+
+window.cargarLocalidadesAdmin = async function(id) {
+  const prov = document.getElementById(`prov-${id}`)?.value
+  const locSel = document.getElementById(`loc-${id}`)
+  if (!prov || !locSel) return
+  locSel.innerHTML = `<option>Cargando...</option>`
+  try {
+    const url = `https://apis.datos.gob.ar/georef/api/municipios?provincia=${encodeURIComponent(prov)}&campos=nombre&max=500&orden=nombre`
+    const r = await fetch(url)
+    const d = await r.json()
+    const lista = (d.municipios || []).map(m => m.nombre).sort()
+    locSel.innerHTML = `<option value="">— Localidad —</option>` + lista.map(l => `<option value="${l}">${l}</option>`).join("")
+  } catch {
+    locSel.innerHTML = `<option value="">— Localidad —</option>`
+  }
+}
+
+window.guardarUbicAdmin = async function(id) {
+  const prov = document.getElementById(`prov-${id}`)?.value
+  const loc  = document.getElementById(`loc-${id}`)?.value
+  if (!prov) { alert("Elegí una provincia"); return }
+  const { error } = await supabase.from("perfiles").update({ provincia: prov, localidad: loc || null }).eq("id", id)
+  if (error) { alert("Error: " + error.message); return }
+  const row = document.getElementById(`sinubic-${id}`)
+  if (row) row.style.opacity = "0.3"
+  const ctr = document.getElementById("contadorSinUbic")
+  if (ctr) {
+    const n = parseInt(ctr.textContent.replace(/\D/g,"")) - 1
+    ctr.textContent = `(${Math.max(0, n)})`
+  }
+}
+
+window.enviarEmailUno = async function(id, email) {
+  if (!email) { alert("Este usuario no tiene email"); return }
+  const btn = event.currentTarget
+  btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`
+  const r = await fetch("/api/enviar-notificacion", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tipo: "test_ubicacion", email_destino: email })
+  })
+  const d = await r.json()
+  btn.innerHTML = d.ok ? `<i class="fa-solid fa-check"></i>` : `<i class="fa-solid fa-xmark"></i>`
+  btn.style.background = d.ok ? "#dcfce7" : "#fee2e2"
+  btn.style.color = d.ok ? "#16a34a" : "#dc2626"
+}
+
+window.enviarEmailMasivo = async function() {
+  if (!confirm("¿Enviar email a TODOS los usuarios sin provincia/ciudad?")) return
+  const btn = event.currentTarget
+  btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Enviando...`
+  const r = await fetch("/api/enviar-notificacion", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tipo: "masivo_ubicacion" })
+  })
+  const d = await r.json()
+  btn.disabled = false
+  btn.innerHTML = `<i class="fa-solid fa-envelope"></i> Enviar email a todos`
+  alert(d.ok ? `Enviados: ${d.enviados} / Errores: ${d.errores}` : "Error: " + JSON.stringify(d))
+}
+
 /* ── Init ── */
 async function init() {
   const ok = await verificarAdmin()
   if (!ok) return
-  await Promise.all([cargarStats(), cargarPerfiles(), cargarSolicitudes(), cargarVendedores()])
+  await Promise.all([cargarStats(), cargarPerfiles(), cargarSolicitudes(), cargarVendedores(), cargarSinUbicacion()])
 }
 
 init()

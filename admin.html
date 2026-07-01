@@ -326,6 +326,22 @@
     </div>
   </div>
 
+  <!-- ══ Usuarios sin ubicación ══ -->
+  <div style="background:white;border:1.5px solid #fde68a;border-radius:14px;padding:20px 22px;margin-bottom:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <h2 style="margin:0;font-size:17px;font-weight:800;">
+        <i class="fa-solid fa-location-dot" style="color:#f59e0b;"></i> Usuarios sin provincia/ciudad
+        <span id="contadorSinUbic" style="font-size:13px;font-weight:400;color:#64748b;margin-left:8px;"></span>
+      </h2>
+      <button onclick="window.enviarEmailMasivo()" class="btn btn-sm" style="background:#f59e0b;color:white;font-weight:700;">
+        <i class="fa-solid fa-envelope"></i> Enviar email a todos
+      </button>
+    </div>
+    <div id="tablaSinUbic">
+      <div style="text-align:center;padding:20px;color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin"></i></div>
+    </div>
+  </div>
+
   <!-- Perfiles -->
   <div style="background:white;border:1.5px solid #e2e8f0;border-radius:14px;padding:20px 22px;">
 
