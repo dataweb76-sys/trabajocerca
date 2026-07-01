@@ -74,7 +74,7 @@ async function enviarEmail(apiKey, { to, subject, html }) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Trabajos Cerca <noreply@trabajoscerca.com.ar>',
+        from: process.env.RESEND_FROM || 'Trabajos Cerca <noreply@trabajoscerca.com.ar>',
         to: [to],
         subject,
         html,
