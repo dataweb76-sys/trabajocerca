@@ -108,30 +108,30 @@ function templateUbicacion({ nombre }) {
         <!-- ALERTA -->
         <tr>
           <td style="background:#fef3c7;padding:14px 32px;border-left:4px solid #f59e0b;text-align:center;">
-            <span style="font-size:20px;">⚠️</span>
-            <span style="font-size:14px;font-weight:700;color:#92400e;margin-left:8px;">Tu perfil está incompleto</span>
+            <span style="font-size:20px;">&#9888;</span>
+            <span style="font-size:14px;font-weight:700;color:#92400e;margin-left:8px;">Tu perfil est&#225; incompleto</span>
           </td>
         </tr>
 
         <!-- CUERPO -->
         <tr>
           <td style="padding:32px;">
-            <p style="font-size:16px;font-weight:700;color:#1e293b;margin:0 0 12px;">Hola, ${nombre} 👋</p>
+            <p style="font-size:16px;font-weight:700;color:#1e293b;margin:0 0 12px;">Hola, ${nombre}!</p>
             <p style="font-size:14px;color:#475569;line-height:1.7;margin:0 0 20px;">
               Notamos que tu perfil en <strong>Trabajos Cerca</strong> no tiene
               <strong>provincia</strong> ni <strong>ciudad/localidad</strong> cargadas.
             </p>
             <p style="font-size:14px;color:#475569;line-height:1.7;margin:0 0 24px;">
-              Esto hace que <strong style="color:#dc2626;">no aparezcas en los resultados de búsqueda</strong>
+              Esto hace que <strong style="color:#dc2626;">no aparezcas en los resultados de b&#250;squeda</strong>
               cuando alguien busca un profesional u oficio en tu zona.
-              ¡Completalo ahora y empezá a recibir consultas!
+              &#161;Completalo ahora y empez&#225; a recibir consultas!
             </p>
 
             <!-- BENEFICIOS -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0fdf4;border-radius:12px;padding:16px;margin-bottom:28px;">
-              <tr><td style="padding:6px 0;font-size:13px;color:#15803d;">✅ &nbsp;Aparecés en búsquedas por provincia y ciudad</td></tr>
-              <tr><td style="padding:6px 0;font-size:13px;color:#15803d;">✅ &nbsp;Los clientes de tu zona te encuentran fácil</td></tr>
-              <tr><td style="padding:6px 0;font-size:13px;color:#15803d;">✅ &nbsp;Más consultas directas por WhatsApp</td></tr>
+              <tr><td style="padding:6px 0;font-size:13px;color:#15803d;">&#10003; &nbsp;Aparec&#233;s en b&#250;squedas por provincia y ciudad</td></tr>
+              <tr><td style="padding:6px 0;font-size:13px;color:#15803d;">&#10003; &nbsp;Los clientes de tu zona te encuentran f&#225;cil</td></tr>
+              <tr><td style="padding:6px 0;font-size:13px;color:#15803d;">&#10003; &nbsp;M&#225;s consultas directas por WhatsApp</td></tr>
             </table>
 
             <!-- BOTÓN -->
@@ -139,7 +139,7 @@ function templateUbicacion({ nombre }) {
               <a href="https://trabajoscerca.com.ar/perfil.html"
                  style="display:inline-block;background:#2563eb;color:white;font-weight:800;font-size:15px;
                         padding:14px 32px;border-radius:12px;text-decoration:none;letter-spacing:.3px;">
-                📍 Completar mi provincia y ciudad
+                Completar mi provincia y ciudad
               </a>
             </div>
 
