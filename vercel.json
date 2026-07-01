@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/actualizar-resultados",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     }
   ],
   "cleanUrls": true,
