@@ -57,6 +57,32 @@
 .sin-resultados i{font-size:36px;margin-bottom:10px;display:block;}
 .spinner{text-align:center;padding:40px;color:#059669;}
 
+/* ── Botón Rifa TC ── */
+.btn-rifa{display:flex;align-items:center;gap:8px;width:100%;margin-top:12px;padding:11px 16px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:800;justify-content:center;letter-spacing:.3px;transition:opacity .15s,transform .15s;}
+.btn-rifa:hover{opacity:.92;transform:translateY(-1px);}
+.btn-rifa-participando{background:linear-gradient(135deg,#059669,#047857);}
+.btn-rifa-num{background:#fef3c7;color:#92400e;border-radius:20px;padding:2px 10px;font-size:13px;font-weight:900;}
+
+/* ── Modal Rifa ── */
+#modalRifa{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;align-items:center;justify-content:center;}
+#modalRifa.open{display:flex;}
+#modalRifaBox{background:white;border-radius:20px;overflow:hidden;width:min(520px,96vw);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+#modalRifaHead{background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:16px 20px;display:flex;align-items:center;gap:10px;}
+#modalRifaHead h3{margin:0;color:white;font-size:16px;font-weight:800;flex:1;}
+#modalRifaHead button{background:rgba(255,255,255,.2);border:none;color:white;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;line-height:1;}
+#modalRifaFrame{flex:1;border:none;min-height:480px;}
+#modalRifaFoot{padding:14px 20px;border-top:1px solid #e2e8f0;background:#f8fafc;}
+#modalRifaFoot p{margin:0 0 10px;font-size:13px;color:#475569;font-weight:600;}
+#modalRifaNumWrap{display:flex;gap:8px;}
+#modalRifaNumInput{flex:1;padding:9px 12px;border:1.5px solid #7c3aed;border-radius:10px;font-size:15px;font-weight:800;text-align:center;}
+#modalRifaNumInput:focus{outline:none;}
+#modalRifaGuardar{padding:9px 18px;background:#7c3aed;color:white;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px;}
+
+/* ── Cartel ya participando ── */
+#modalYaParticipa{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;align-items:center;justify-content:center;}
+#modalYaParticipa.open{display:flex;}
+#modalYaParticipaBox{background:white;border-radius:20px;padding:32px;width:min(400px,92vw);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+
 /* ── Banners entre cards ── */
 .banner-emp{
   display:block;
@@ -284,6 +310,7 @@ function renderEmprendimientos(lista) {
         tags.slice(0,5).map(function(t){ return '<span class="emp-tag">'+t+'</span>' }).join('') +
       '</div>' : '') +
       (btns ? '<div class="emp-acciones">'+btns+'</div>' : '') +
+      '<button class="btn-rifa" onclick="abrirRifa(event,\''+p.id+'\')">'+rifaBtnHTML(p.id)+'</button>' +
     '</div>'
   })
 
@@ -352,6 +379,119 @@ async function init() {
 }
 
 init()
+</script>
+
+<!-- ══════════════ MODAL RIFA TC ══════════════ -->
+<div id="modalRifa" onclick="if(event.target===this)cerrarRifa()">
+  <div id="modalRifaBox">
+    <div id="modalRifaHead">
+      <span style="font-size:22px;">🎟️</span>
+      <h3>Rifa TC — Página Web Gratis</h3>
+      <button onclick="cerrarRifa()">×</button>
+    </div>
+    <iframe id="modalRifaFrame" src="" loading="lazy" title="Rifa TC"></iframe>
+    <div id="modalRifaFoot">
+      <p>¿Ya reservaste tu número? Ingresalo para guardarlo en tu perfil:</p>
+      <div id="modalRifaNumWrap">
+        <input id="modalRifaNumInput" type="number" min="1" max="100" placeholder="Nº elegido">
+        <button id="modalRifaGuardar" onclick="guardarNumeroRifa()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL YA PARTICIPANDO ══ -->
+<div id="modalYaParticipa" onclick="if(event.target===this)cerrarYaParticipa()">
+  <div id="modalYaParticipaBox">
+    <div style="font-size:48px;margin-bottom:12px;">🏆</div>
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:900;color:#1e293b;">¡Ya estás participando!</h2>
+    <p style="color:#475569;font-size:14px;margin:0 0 20px;">Tu número de la Rifa TC es:</p>
+    <div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;font-size:48px;font-weight:900;border-radius:20px;padding:20px 40px;display:inline-block;margin-bottom:20px;letter-spacing:2px;" id="yaParticipaNum">—</div>
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:20px;">
+      <p style="margin:0;font-size:13px;color:#15803d;font-weight:700;">📢 ¿Cuándo se sortea?</p>
+      <p style="margin:6px 0 0;font-size:13px;color:#475569;line-height:1.6;">El sorteo se realizará cuando todos los números estén entregados. Ese día a la noche se sorteará el número ganador según <strong>Lotería Nacional</strong>.</p>
+      <p style="margin:8px 0 0;font-size:13px;color:#475569;">¡Te avisaremos cuando llegue ese momento! 🎉</p>
+    </div>
+    <button onclick="cerrarYaParticipa()" style="padding:12px 28px;background:#7c3aed;color:white;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;width:100%;">Entendido</button>
+  </div>
+</div>
+
+<script>
+/* ══ LÓGICA RIFA TC ══ */
+var RIFA_URL    = 'https://rifaslocal.vercel.app/rifa/pagina-web-gratis-ko303'
+var RIFA_KEY    = 'tc_rifa_pagina-web-gratis-ko303'
+var _rifaUserId = null  // perfil ID del usuario logueado
+
+// Cargar ID del usuario logueado (para asociar en Supabase si está disponible)
+;(async function() {
+  try {
+    var mod = await import('/supabase.js')
+    var sb  = mod.supabase
+    var { data: { user } } = await sb.auth.getUser()
+    if (user) _rifaUserId = user.id
+  } catch(e) {}
+})()
+
+function getRifaGuardada() {
+  try { return JSON.parse(localStorage.getItem(RIFA_KEY) || 'null') } catch(e) { return null }
+}
+
+function setRifaGuardada(num) {
+  localStorage.setItem(RIFA_KEY, JSON.stringify({ numero: num, fecha: new Date().toISOString() }))
+}
+
+function rifaBtnHTML(perfId) {
+  var guardada = getRifaGuardada()
+  if (guardada) {
+    return '🏆 Rifa TC — Ya participás con el <span class="btn-rifa-num">' + guardada.numero + '</span>'
+  }
+  return '🎟️ Participá en la Rifa TC — ¡Ganás una Web Gratis!'
+}
+
+window.abrirRifa = function(e, perfId) {
+  e.stopPropagation()
+  var guardada = getRifaGuardada()
+  if (guardada) {
+    document.getElementById('yaParticipaNum').textContent = guardada.numero
+    document.getElementById('modalYaParticipa').classList.add('open')
+    return
+  }
+  document.getElementById('modalRifaFrame').src = RIFA_URL
+  document.getElementById('modalRifa').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+
+window.cerrarRifa = function() {
+  document.getElementById('modalRifa').classList.remove('open')
+  document.getElementById('modalRifaFrame').src = ''
+  document.body.style.overflow = ''
+}
+
+window.cerrarYaParticipa = function() {
+  document.getElementById('modalYaParticipa').classList.remove('open')
+}
+
+window.guardarNumeroRifa = async function() {
+  var num = parseInt(document.getElementById('modalRifaNumInput').value)
+  if (!num || num < 1) { alert('Ingresá un número válido'); return }
+  setRifaGuardada(num)
+
+  // Guardar en Supabase si el usuario está logueado
+  if (_rifaUserId) {
+    try {
+      var mod = await import('/supabase.js')
+      await mod.supabase.from('perfiles').update({ rifa_tc_numero: num }).eq('id', _rifaUserId)
+    } catch(e) {}
+  }
+
+  cerrarRifa()
+
+  // Refrescar todos los botones de rifa en la página
+  document.querySelectorAll('.btn-rifa').forEach(function(btn) {
+    btn.classList.add('btn-rifa-participando')
+    btn.innerHTML = '🏆 Rifa TC — Ya participás con el <span class="btn-rifa-num">' + num + '</span>'
+  })
+}
 </script>
 </body>
 </html>

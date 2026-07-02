@@ -558,6 +558,83 @@ function copiarLink() {
 }
 </script>
 
+<!-- ══ MODAL RIFA TC (perfil) ══ -->
+<div id="pRifaModal" onclick="if(event.target===this)window._cerrarModalRifaPerfil()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;overflow:hidden;width:min(520px,96vw);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:16px 20px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:22px;">🎟️</span>
+      <h3 style="margin:0;color:white;font-size:16px;font-weight:800;flex:1;">Rifa TC — Página Web Gratis</h3>
+      <button onclick="window._cerrarModalRifaPerfil()" style="background:rgba(255,255,255,.2);border:none;color:white;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;">×</button>
+    </div>
+    <iframe id="pRifaFrame" src="" loading="lazy" style="flex:1;border:none;min-height:480px;" title="Rifa TC"></iframe>
+    <div style="padding:14px 20px;border-top:1px solid #e2e8f0;background:#f8fafc;">
+      <p style="margin:0 0 10px;font-size:13px;color:#475569;font-weight:600;">¿Ya reservaste tu número? Ingresalo para guardarlo:</p>
+      <div style="display:flex;gap:8px;">
+        <input id="pRifaNumInput" type="number" min="1" max="100" placeholder="Nº elegido"
+          style="flex:1;padding:9px 12px;border:1.5px solid #7c3aed;border-radius:10px;font-size:15px;font-weight:800;text-align:center;outline:none;">
+        <button onclick="window._guardarNumRifaPerfil()"
+          style="padding:9px 18px;background:#7c3aed;color:white;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px;">
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL YA PARTICIPANDO (perfil) ══ -->
+<div id="pRifaYaModal" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;padding:32px;width:min(400px,92vw);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="font-size:48px;margin-bottom:12px;">🏆</div>
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:900;color:#1e293b;">¡Ya estás participando!</h2>
+    <p style="color:#475569;font-size:14px;margin:0 0 20px;">Tu número de la Rifa TC es:</p>
+    <div id="pRifaNumDisplay" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;font-size:48px;font-weight:900;border-radius:20px;padding:20px 40px;display:inline-block;margin-bottom:20px;letter-spacing:2px;">—</div>
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:20px;text-align:left;">
+      <p style="margin:0;font-size:13px;color:#15803d;font-weight:700;">📢 ¿Cuándo se sortea?</p>
+      <p style="margin:6px 0 0;font-size:13px;color:#475569;line-height:1.6;">El sorteo se realizará cuando todos los números estén entregados. Ese día a la noche se sorteará el número ganador según <strong>Lotería Nacional</strong>.</p>
+      <p style="margin:8px 0 0;font-size:13px;color:#475569;">¡Te avisaremos cuando llegue ese momento! 🎉</p>
+    </div>
+    <button onclick="document.getElementById('pRifaYaModal').style.display='none'"
+      style="padding:12px 28px;background:#7c3aed;color:white;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;width:100%;">
+      Entendido
+    </button>
+  </div>
+</div>
+
+<script>
+var _RIFA_KEY = 'tc_rifa_pagina-web-gratis-ko303'
+var _RIFA_URL = 'https://rifaslocal.vercel.app/rifa/pagina-web-gratis-ko303'
+
+window._abrirModalRifaPerfil = function() {
+  document.getElementById('pRifaFrame').src = _RIFA_URL
+  var m = document.getElementById('pRifaModal')
+  m.style.display = 'flex'
+  document.body.style.overflow = 'hidden'
+}
+window._cerrarModalRifaPerfil = function() {
+  document.getElementById('pRifaModal').style.display = 'none'
+  document.getElementById('pRifaFrame').src = ''
+  document.body.style.overflow = ''
+}
+window._abrirYaParticipaRifa = function(num) {
+  document.getElementById('pRifaNumDisplay').textContent = num
+  var m = document.getElementById('pRifaYaModal')
+  m.style.display = 'flex'
+}
+window._guardarNumRifaPerfil = async function() {
+  var num = parseInt(document.getElementById('pRifaNumInput').value)
+  if (!num || num < 1) { alert('Ingresá un número válido'); return }
+  localStorage.setItem(_RIFA_KEY, JSON.stringify({ numero: num, fecha: new Date().toISOString() }))
+  // Guardar en Supabase
+  try {
+    var mod = await import('/supabase.js')
+    var { data: { user } } = await mod.supabase.auth.getUser()
+    if (user) await mod.supabase.from('perfiles').update({ rifa_tc_numero: num }).eq('id', user.id)
+  } catch(e) {}
+  window._cerrarModalRifaPerfil()
+  location.reload()
+}
+</script>
+
 <script type="module" src="/perfil.js?v=8"></script>
 <script type="module" src="/consultas_bell.js?v=1"></script>
 <script src="/notif_widget.js"></script>

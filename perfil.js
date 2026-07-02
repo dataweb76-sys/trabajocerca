@@ -482,6 +482,50 @@ async function init(){
       </div>
     </div>`
 
+  /* ── Rifa TC (solo emprendimientos) ── */
+  let rifaHtml = ""
+  if(tiposActivos.includes("emprendimiento")) {
+    const RIFA_KEY = 'tc_rifa_pagina-web-gratis-ko303'
+    let rifaGuardada = null
+    try { rifaGuardada = JSON.parse(localStorage.getItem(RIFA_KEY) || 'null') } catch(e) {}
+
+    // Si no está en localStorage, verificar en Supabase
+    if (!rifaGuardada && data.rifa_tc_numero) {
+      rifaGuardada = { numero: data.rifa_tc_numero }
+      localStorage.setItem(RIFA_KEY, JSON.stringify(rifaGuardada))
+    }
+
+    if (rifaGuardada) {
+      rifaHtml = `
+      <div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:16px;padding:20px;margin-bottom:16px;color:white;cursor:pointer;"
+        onclick="window._abrirYaParticipaRifa(${rifaGuardada.numero})">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="background:rgba(255,255,255,.18);border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">🏆</div>
+          <div style="flex:1;">
+            <p style="margin:0 0 3px;font-size:16px;font-weight:900;">¡Ya estás en la Rifa TC!</p>
+            <p style="margin:0;font-size:13px;color:rgba(255,255,255,.85);">Tu número: <strong style="font-size:20px;background:rgba(255,255,255,.2);border-radius:8px;padding:1px 12px;">${rifaGuardada.numero}</strong></p>
+          </div>
+          <i class="fa-solid fa-chevron-right" style="opacity:.6;"></i>
+        </div>
+      </div>`
+    } else {
+      rifaHtml = `
+      <button onclick="window._abrirModalRifaPerfil()" style="
+        display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+        background:linear-gradient(135deg,#7c3aed,#4f46e5);
+        border:none;border-radius:16px;padding:20px;margin-bottom:16px;
+        color:white;cursor:pointer;transition:opacity .15s;"
+        onmouseover="this.style.opacity='.92'" onmouseout="this.style.opacity='1'">
+        <div style="background:rgba(255,255,255,.18);border-radius:14px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">🎟️</div>
+        <div style="flex:1;">
+          <p style="margin:0 0 3px;font-size:16px;font-weight:900;">Participá en la Rifa TC</p>
+          <p style="margin:0;font-size:13px;color:rgba(255,255,255,.85);">Ganás una página web gratis. Elegí tu número ahora.</p>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="opacity:.6;"></i>
+      </button>`
+    }
+  }
+
   /* ── Favoritos guardados (todos los usuarios) ── */
   let guardadosHtml = ""
   const { data: favs } = await supabase
@@ -680,6 +724,7 @@ async function init(){
 
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
     ${referidosHtml}
+    ${rifaHtml}
     ${guardadosHtml}
     <hr style="margin:28px 0;border:none;border-top:1px solid #e2e8f0;">
     <div id="adminBtnPerfil" style="display:none;margin-bottom:10px;">
