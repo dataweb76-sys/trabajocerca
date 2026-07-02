@@ -618,6 +618,30 @@ async function init(){
       </div>
     </button>
 
+    ${tiposActivos.includes("emprendimiento") ? (() => {
+      const _rk = 'tc_rifa_pagina-web-gratis-ko303'
+      let _rg = null
+      try { _rg = JSON.parse(localStorage.getItem(_rk) || 'null') } catch(e) {}
+      if (!_rg && data.rifa_tc_numero) { _rg = { numero: data.rifa_tc_numero }; localStorage.setItem(_rk, JSON.stringify(_rg)) }
+      return _rg
+        ? `<button onclick="window._abrirYaParticipaRifa(${_rg.numero})" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:14px;cursor:pointer;text-align:left;font-family:inherit;margin-top:10px;">
+            <div style="width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🏆</div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:900;color:white;">¡Ya estás en la Rifa TC!</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:2px;">Tu número: <strong style="font-size:16px;background:rgba(255,255,255,.25);border-radius:6px;padding:0 8px;">${_rg.numero}</strong></div>
+            </div>
+          </button>`
+        : `<button onclick="window._abrirModalRifaPerfil()" style="width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border:none;border-radius:14px;cursor:pointer;text-align:left;font-family:inherit;transition:box-shadow .2s;margin-top:10px;"
+            onmouseover="this.style.boxShadow='0 4px 20px rgba(124,58,237,.4)'"
+            onmouseout="this.style.boxShadow=''">
+            <div style="width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🎟️</div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:900;color:white;">Participá en la Rifa TC</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:2px;">Elegí tu número y ganá una página web gratis →</div>
+            </div>
+          </button>`
+    })() : ""}
+
     <div class="dash-actions">
       <a href="/perfil_publico.html?id=${userId}" class="btn btn-outline" target="_blank" rel="noopener">
         <i class="fa-solid fa-eye"></i> Ver mi perfil público
