@@ -1058,6 +1058,10 @@ cargarOficioSemana()
   <div class="tc-circle" onclick="location.href='/vendedores'" title="Ser vendedor de TC">
     <img src="/vendedores.png" alt="¿Querés ser vendedor/a de TC?">
   </div>
+  <!-- Círculo Rifa TC -->
+  <div class="tc-circle" onclick="window._abrirPopupRifa()" title="Participá en la Rifa TC">
+    <img src="/rifa.png" alt="Rifa TC — Ganá una web gratis">
+  </div>
 </div>
 
 <!-- POPUP PUBLICIDAD -->
@@ -2045,6 +2049,103 @@ function compartirRegistro(){
 </script>
 
 <!-- ══ POPUP VIDEO BUSCADORES (no logueados) ══ -->
+
+<!-- ══ POPUP RIFA TC ══ -->
+<div id="popupRifaTC" onclick="if(event.target===this)window._cerrarPopupRifa()"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9500;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:white;border-radius:24px;overflow:hidden;width:min(480px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.4);">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:20px 24px;position:relative;">
+      <button onclick="window._cerrarPopupRifa()"
+        style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,.2);border:none;color:white;border-radius:50%;width:32px;height:32px;font-size:20px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:40px;line-height:1;">🎟️</div>
+        <div>
+          <h2 style="margin:0 0 4px;font-size:20px;font-weight:900;color:white;">Rifa TC</h2>
+          <p style="margin:0;font-size:13px;color:rgba(255,255,255,.85);">¡Ganá una Página Web Gratis!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video -->
+    <div style="background:#000;line-height:0;">
+      <video id="rifaTCVideo" controls playsinline preload="metadata"
+        style="width:100%;max-height:280px;object-fit:contain;display:block;">
+        <source src="/tiendaonlinegratis.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <!-- Descripción -->
+    <div style="padding:20px 24px;">
+      <h3 style="margin:0 0 12px;font-size:17px;font-weight:900;color:#1e293b;">¿De qué se trata?</h3>
+      <p style="margin:0 0 14px;font-size:14px;color:#475569;line-height:1.7;">
+        Sorteamos una <strong style="color:#7c3aed;">página web profesional gratis</strong> entre todos los emprendimientos registrados en Trabajos Cerca.
+      </p>
+      <div style="background:#f5f3ff;border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+        <p style="margin:0 0 8px;font-size:13px;font-weight:800;color:#6d28d9;">📋 ¿Cómo funciona?</p>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#475569;line-height:1.8;">
+          <li>Registrá tu emprendimiento en Trabajos Cerca</li>
+          <li>Elegí tu número de rifa entre los disponibles</li>
+          <li>Cuando todos los números estén entregados, se realiza el sorteo</li>
+          <li>El número ganador se saca por <strong>Lotería Nacional</strong></li>
+          <li>El ganador recibe su web profesional <strong>completamente gratis</strong> 🎉</li>
+        </ul>
+      </div>
+
+      <!-- Botones según estado login -->
+      <div id="rifaTCBtns"></div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from '/supabase.js'
+
+window._abrirPopupRifa = async function() {
+  document.getElementById('popupRifaTC').style.display = 'flex'
+  document.body.style.overflow = 'hidden'
+  // Intentar reproducir video
+  try { document.getElementById('rifaTCVideo').play() } catch(e) {}
+
+  // Verificar si está logueado
+  const { data: { user } } = await supabase.auth.getUser()
+  const btns = document.getElementById('rifaTCBtns')
+  if (user) {
+    btns.innerHTML = `
+      <a href="/perfil.html" onclick="window._cerrarPopupRifa()"
+        style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;
+          background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:14px;
+          font-size:16px;font-weight:900;text-decoration:none;cursor:pointer;margin-bottom:10px;">
+        🚀 Ir a mi perfil y elegir número
+      </a>
+      <p style="text-align:center;font-size:12px;color:#94a3b8;margin:0;">
+        El botón de la rifa aparece en tu perfil si tenés un emprendimiento registrado.
+      </p>`
+  } else {
+    btns.innerHTML = `
+      <a href="/registro.html"
+        style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;
+          background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:14px;
+          font-size:16px;font-weight:900;text-decoration:none;cursor:pointer;margin-bottom:10px;">
+        🎟️ Registrarme y participar gratis
+      </a>
+      <a href="/login.html"
+        style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;
+          background:white;color:#7c3aed;border:2px solid #7c3aed;border-radius:14px;
+          font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;">
+        Ya tengo cuenta — Iniciar sesión
+      </a>`
+  }
+}
+
+window._cerrarPopupRifa = function() {
+  document.getElementById('popupRifaTC').style.display = 'none'
+  document.body.style.overflow = ''
+  try { const v = document.getElementById('rifaTCVideo'); v.pause(); v.currentTime = 0 } catch(e) {}
+}
+</script>
 
 </body>
 </html>
